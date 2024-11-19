@@ -1,4 +1,5 @@
 #include <iostream>
+#include <grid.hpp>
 
 enum class TetriminoType {I, O, T, S, Z, L, J}
 

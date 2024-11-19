@@ -1,4 +1,7 @@
 #include <iostream>
+#include <grid.hpp>
+#include <tetrimino.hpp>
+#include <game.hpp>
 
 class Game{
     private:
