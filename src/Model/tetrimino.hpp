@@ -1,7 +1,6 @@
 #include <iostream>
-#include <grid.hpp>
 
-enum class TetriminoType {I, O, T, S, Z, L, J}
+enum class TetriminoType {I, O, T, S, Z, L, J};
 
 class Tetrimino{
     private:
@@ -13,5 +12,5 @@ class Tetrimino{
     public:
     Tetrimino();
     void rotate(bool clockwise);
-    bool move(int x, int y, Grid &grid)
+    bool move(int x, int y, Grid &grid);
 };
