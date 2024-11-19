@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <game.hpp>
 #include <grid.hpp>
