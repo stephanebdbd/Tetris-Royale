@@ -6,7 +6,6 @@ class Grid{
     private:
     static constexpr int width=10;
     static constexpr int height=20;
-    int cells[width][height];
 
     public:
     Grid();
