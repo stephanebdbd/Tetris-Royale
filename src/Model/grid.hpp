@@ -14,5 +14,4 @@ class Grid{
     void removeFullLines();
     bool isGameOver();
     void display();
-
 };
