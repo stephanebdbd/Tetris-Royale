@@ -1,3 +1,5 @@
+#include <iostream>
+
 enum class TetriminoType {I, O, T, S, Z, L, J}
 
 class Tetrimino{

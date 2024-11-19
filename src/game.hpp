@@ -1,3 +1,5 @@
+#include <iostream>
+
 class Game{
     private:
     Grid grid;

@@ -1,3 +1,6 @@
+#include <iostream>
+
+
 class Grid{
     private:
     static constexpr int width=10;
