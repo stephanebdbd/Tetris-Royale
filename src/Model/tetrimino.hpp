@@ -1,16 +1,16 @@
 #include <iostream>
+#include <vector>
+#include "grid.hpp"
 
 enum class TetriminoType {I, O, T, S, Z, L, J};
 
 class Tetrimino{
-    private:
     TetriminoType type;
-    int positionX;
-    int positionY;
+    Position blocks = new Position[4];
     int rotation;
-
-    public:
+public:
     Tetrimino();
     void rotate(bool clockwise);
     bool move(int x, int y, Grid &grid);
+    ~Tetrimino();
 };

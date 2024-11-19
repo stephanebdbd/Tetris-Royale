@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
 
 class FriendList {
     string list[];
@@ -27,7 +28,7 @@ public:
     int getMatricule();
 };
 
-class Player : public User {}
+class Player : public User {};
 
 class Server {
     User users[];
