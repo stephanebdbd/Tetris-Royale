@@ -3,9 +3,5 @@ class LeadBoard{
     int score;
     public:
     void UpdateScore(int score);
-    
-
-
-
-    
+   
 }
