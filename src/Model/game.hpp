@@ -3,7 +3,6 @@
 #include "tetrimino.hpp"
 
 class Game{
-    private:
     Grid grid;
     Tetrimino currentTetrimino;
     Tetrimino nextTetrimino;
