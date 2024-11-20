@@ -1,5 +1,5 @@
 #include <iostream>
-#include "grid.hpp"
+#include "Grid.hpp"
 
 using namespace std;
 

@@ -1,19 +1,25 @@
+#ifndef GRID_HPP
+#define GRID_HPP
+
+
 #include <iostream>
-#include "tetrimino.hpp"
+#include "Tetrimino.hpp"
 #include <vector>
+#include <string>
 
 
 class Grid{
     static constexpr int width=10;
     static constexpr int height=20;
-    vector<vector<Cell*>> grid;
-    string outlineCharacters = "│└─┘│"
+    std::string outlineCharacters = "│└─┘│";
 public:
     Grid();
     bool addTetramino(Tetrimino& piece);
     void display();
     ~Grid();
 };
+
+#endif // GRID_HPP
 
 enum class Colour{
     BLACK = '⬛',

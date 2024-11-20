@@ -1,6 +1,6 @@
 #include <iostream>
-#include "grid.hpp"
-#include "tetrimino.hpp"
+#include "Grid.hpp"
+#include "Tetrimino.hpp"
 
 class Game{
     Grid grid;

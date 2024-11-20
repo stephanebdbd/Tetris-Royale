@@ -1,6 +1,6 @@
-
+#include "Game.hpp"
 #include <iostream>
-#include <game.hpp>
-#include <grid.hpp>
-#include <tetrimino.hpp>
+#include <Game.hpp>
+#include <Grid.hpp>
+#include <Tetrimino.hpp>
 //test

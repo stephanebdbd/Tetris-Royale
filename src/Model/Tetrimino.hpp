@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "grid.hpp"
+#include "Grid.hpp"
 
 enum class TetriminoType {I, O, T, S, Z, L, J};
 
