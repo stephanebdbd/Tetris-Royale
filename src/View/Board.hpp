@@ -4,7 +4,6 @@
 
 
 class LeadBoard{
-    private:
     int score;
     public:
     void UpdateScore(int score);
@@ -12,7 +11,6 @@ class LeadBoard{
 };
 
 class PlayerBoard{
-    private:
     bool gridState;
     Tetrimino activeTetrimino;
     Tetrimino nextTetrimino;
