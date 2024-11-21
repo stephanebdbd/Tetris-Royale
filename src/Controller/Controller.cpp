@@ -22,4 +22,16 @@ void Controller::rotate(bool clockWise){
 
 bool Controller::canMove(Direction direction){}
 
-void keybordInput(int keyInput){}
+void keybordInput(int keyInput){
+    switch (keyInput){
+        case 'd':
+            move(Direction::Right);
+            break;
+        case 'q':
+            move(Direction::Left);
+            break;
+        case 's':
+            move(Direction::Down);
+            break;
+    }
+}
