@@ -4,6 +4,6 @@
 using namespace std;
 
 int main() {
-    Grind grid;
+    Grid grid;
     return 0;
 }
