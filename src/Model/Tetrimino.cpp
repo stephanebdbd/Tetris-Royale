@@ -1,7 +1,7 @@
 #include <iostream>
 #include <Grid.hpp>
 
-Tetrimino::Tetrimino(TetriminoType type, Position upperLeft, vector<vector<Cell*>>* grid) : type(type), upperLeft(upperLeft), grid(grid) {
+Tetrimino::Tetrimino(TetriminoType type, Position upperLeft, Grid* grid) : type(type), upperLeft(upperLeft), grid(grid), gridMatrix(grid->getGrid()) { 
     array<Position, 4> blocks = setTetriminoBlocks(type);
     setColour(type, blocks);
 }
@@ -52,7 +52,7 @@ Colour Tetrimino::setColour(TetriminoType type, array<Position, 4> blocks) {
             break;
     }
     for (Position blockPosition : blocks) {
-        (*grid)[blockPosition.y + upperLeft.y][blockPosition.x + upperLeft.x]->setColour(colour);
+        (*gridMatrix)[blockPosition.y + upperLeft.y][blockPosition.x + upperLeft.x]->setColour(colour);
     }
 }
 
@@ -74,16 +74,24 @@ void Tetrimino::setPosition(Position position1, Position position2) {
     int y1 = position1.y + upperLeft.y;
     int x2 = position2.x + upperLeft.x;
     int y2 = position2.y + upperLeft.y;
-    (*grid)[y1][x1]->setPosition(x2, y2);
-    (*grid)[y2][x2]->setPosition(x1, y1);
-    Cell* tmp = (*grid)[y1][x1];
-    (*grid)[y1][x1] = (*grid)[y2][x2];
-    (*grid)[y2][x2] = tmp;
+    (*gridMatrix)[y1][x1]->setPosition(x2, y2);
+    (*gridMatrix)[y2][x2]->setPosition(x1, y1);
+    grid->setPositions(position1, position2);
 }
-
 
 Colour Tetrimino::getColour() {
     return colour;
 }
-    
-    
+
+void Tetrimino::move(Direction direction) {
+    switch (direction) {
+        case Direction::LEFT:
+            moveBlocks(direction);
+            upperLeft.x--;
+            break;
+        case Direction::RIGHT:
+            moveBlocks(direction);
+            upperLeft.x++;
+            break;
+    }
+}

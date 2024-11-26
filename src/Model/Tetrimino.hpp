@@ -20,16 +20,18 @@ enum class Direction {
 };
 
 class Tetrimino{
-    vector<vector<Cell*>>* grid;
+    Grid* grid;
+    vector<vector<Cell*>>* gridMatrix;
     Position upperLeft;
     TetriminoType type;
     Colour colour;
     array<Position, 4> setTetriminoBlocks(TetriminoType type);
     Colour setColour(TetriminoType type, array<Position, 4> blocks);
 public:
-    Tetrimino(TetriminoType type, Position upperLeft, vector<vector<Cell*>>* grid);
+    Tetrimino(TetriminoType type, Position upperLeft, Grid* grid);
     void rotate(bool clockwise);
     void setPosition(Position position1, Position position2);
     Colour getColour();
-    bool move(int x, int y);
+    void move(Direction direction);
+    void moveBlocks(Direction direction);
 };

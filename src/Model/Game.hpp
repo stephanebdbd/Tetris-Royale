@@ -3,7 +3,7 @@
 #include "Tetrimino.hpp"
 
 class Game{
-    Grid grid;
+    Grid gridMatrix;
     Tetrimino currentTetrimino;
     Tetrimino nextTetrimino;
     int score;

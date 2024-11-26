@@ -1,6 +1,6 @@
 #include "Controller.hpp"
 
-Controller::Controller(Tetrimino *tetrimino, Grid *grid) : tetramino_{tetrimino}, grid_{grid} {}
+Controller::Controller(Tetrimino *tetrimino, Grid *gridMatrix) : tetramino_{tetrimino}, grid_{gridMatrix} {}
 
 void Controller::move(Direction direction){
     switch (direction) {

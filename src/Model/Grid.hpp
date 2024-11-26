@@ -11,17 +11,16 @@
 class Grid{
     static constexpr int width=12;
     static constexpr int height=25;
-    std::string outlineCharacters = "│└─┘│";
-    vector<vector<Cell*>> grid;
+    Grid* grid;
+    vector<vector<Cell*>> gridMatrix;
 public:
     Grid();
-    bool addTetramino(Tetrimino& piece);
+    bool addTetramino(TetriminoType type, Position upperLeft);
+    void setPositions(Position position1, Position position2);
     vector<vector<Cell*>>* getGrid();
-    void display();
     ~Grid();
 };
 
-#endif // GRID_HPP
 
 enum class Colour{
     BLACK = '⬛',
@@ -67,3 +66,5 @@ public:
     int getPositionX();
     int getPositionY();
 };
+
+#endif GRID_HPP
