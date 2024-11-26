@@ -16,6 +16,7 @@ class Grid{
 public:
     Grid();
     bool addTetramino(Tetrimino& piece);
+    vector<vector<Cell*>>* getGrid();
     void display();
     ~Grid();
 };
@@ -55,11 +56,12 @@ class Cell{
     Outline outline;
     Colour colour = Colour::BLACK;
     Position position;
+    void setOutline();
 public:
     Cell(int x, int y);
     void setColour(Colour colour);
-    void setOutline();
     void setdefaultColour();
+    void setPosition(int x, int y);
     bool getIsColoured();
     bool getIsOutline();
     int getPositionX();

@@ -13,21 +13,21 @@ Grid::Grid(){
 Cell::Cell(int x, int y){
     position.x = x;
     position.y = y;
-    if (x==0 || x==width-1 || y > tetriminoSpace-1){ // A améliorer
+    if (((x==0 || x==width-1) && y > tetriminoSpace-1) || y==height-1){
         isOutline = true;
         setOutline();
     }
 }
 
-void Cell::setOutline(){ // A améliorer
-    if ((position.x == 0) || (position.x == width-1))
+void Cell::setOutline(){
+    if (((position.x == 0) || (position.x == width-1)) && (position.y < height-1))
             outline = Outline::SIDES;
-    else
-        switch (position.y){
-            case height-1:
-                outline = Outline::BOTTOM;
-                break;
-            default:
-                break;
-        }
+    else {
+        if (position.y == height-1)
+            outline = Outline::BOTTOM;
+        else if (position.x == 0)
+                outline = Outline::ANGLE_DOWN_LEFT;
+        else
+            outline = Outline::ANGLE_DOWN_RIGHT;
+    }
 }
