@@ -9,9 +9,10 @@
 
 
 class Grid{
-    static constexpr int width=10;
-    static constexpr int height=20;
+    static constexpr int width=12;
+    static constexpr int height=25;
     std::string outlineCharacters = "│└─┘│";
+    vector<vector<Cell*>> grid;
 public:
     Grid();
     bool addTetramino(Tetrimino& piece);
@@ -32,6 +33,13 @@ enum class Colour{
     BROWN = '🟫',
 };
 
+enum class Outline{
+    SIDES = '│',
+    BOTTOM = '─',
+    ANGLE_DOWN_LEFT = '└',
+    ANGLE_DOWN_RIGHT = '┘',
+};
+
 
 struct Position{
     int x;
@@ -39,14 +47,21 @@ struct Position{
 };
 
 class Cell{
-    bool isColoured;
-    Colour colour;
+    static constexpr int width=12;
+    static constexpr int height=25;
+    static constexpr int tetriminoSpace = 5;
+    bool isColoured = false;
+    bool isOutline = false;
+    Outline outline;
+    Colour colour = Colour::BLACK;
     Position position;
 public:
-    Cell(int x, int y, Colour colour=Colour::BLACK, bool isColoured=false);
+    Cell(int x, int y);
     void setColour(Colour colour);
+    void setOutline();
     void setdefaultColour();
-    bool isColoured();
+    bool getIsColoured();
+    bool getIsOutline();
     int getPositionX();
     int getPositionY();
 };

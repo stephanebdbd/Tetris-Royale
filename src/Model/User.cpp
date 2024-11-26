@@ -1,11 +1,12 @@
 #include <User.hpp>
 
-User::User(string userName, string password) {
+User::User(string userName, string password, int matricule) {
     this->userName = userName;
     this->password = password;
+    this->matricule = matricule;
 }
 
-User::addFriend(string friendName) {
+void User::addFriend(string friendName) {
     friendList.addFriend(friendName);
 }
 
