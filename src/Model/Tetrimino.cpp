@@ -2,11 +2,12 @@
 #include <Grid.hpp>
 
 Tetrimino::Tetrimino(TetriminoType type, Position upperLeft, Grid* grid) : type(type), upperLeft(upperLeft), grid(grid), gridMatrix(grid->getGrid()) { 
-    array<Position, 4> blocks = setTetriminoBlocks(type);
+    vector<Position> blocks = setTetriminoBlocks(type);
     setColour(type, blocks);
+
 }
 
-array<Position, 4> Tetrimino::setTetriminoBlocks(TetriminoType type) {
+vector<Position> Tetrimino::setTetriminoBlocks(TetriminoType type) {
     switch (type) {
         case TetriminoType::I:
             return {Position{0,1}, Position{1,1}, Position{2,1}, Position{3,1}};
@@ -21,12 +22,12 @@ array<Position, 4> Tetrimino::setTetriminoBlocks(TetriminoType type) {
         case TetriminoType::L:
             return {Position{0, 2}, Position{1, 2}, Position{2,2}, Position{2,1}};
         case TetriminoType::J:
-            return {Position{0, 1}, Position{0,2}, Position{1,2}, Position{3, 2}};
     }
-    
+    return {};
 }
 
-Colour Tetrimino::setColour(TetriminoType type, array<Position, 4> blocks) {
+
+Colour Tetrimino::setColour(TetriminoType type, vector<Position> blocks) {
     Colour colour;
     switch (type) {
         case TetriminoType::I:
@@ -57,26 +58,48 @@ Colour Tetrimino::setColour(TetriminoType type, array<Position, 4> blocks) {
 }
 
 void Tetrimino::rotate(bool clockwise) {
-    if (type != TetriminoType::O) { // Si ce n'est pas un carré
-        for (int y = 0; y < 4; y++) {
-            for (int x = 0; x < 4; x++) {
-                if (clockwise)
-                    setPosition(Position{x, 3-y}, Position{y, x}); // trouver un moyen d'expliquer "3"
-                else
-                    setPosition(Position{3-x, y}, Position{y, x}); // trouver un moyen d'expliquer "3"
-            }     
+    vector<Position> blocksPositions;
+    int count = 0, x = 0, y = 0;
+    Position position = upperLeft, position2 = Position{0, 0};
+
+    while ((x < amountBlocks) && (count < amountBlocks)) {
+        position = upperLeft; y = 0;
+        while ((y < amountBlocks) && (count < amountBlocks)) {
+            position.x+=x; position.y+=y;
+            if (clockwise) 
+                position2 = Position{upperLeft.x + boxDimension - y, upperLeft.y + x};
+            else
+                position2 = Position{upperLeft.x + boxDimension - y, upperLeft.y + x};    
+            count += checkColoration(position, position2, (&blocksPositions));
+            y++;
+        }
+        if (count != amountBlocks) x++;
+    }
+
+    for (x; x < amountBlocks; x++){
+        for (y; y < amountBlocks; y++){
+            (*gridMatrix)[y + upperLeft.y][x + upperLeft.x]->setdefaultColour();
         }
     }
+
+    colorate(blocksPositions);
 }
 
-void Tetrimino::setPosition(Position position1, Position position2) {
-    int x1 = position1.x + upperLeft.x;
-    int y1 = position1.y + upperLeft.y;
-    int x2 = position2.x + upperLeft.x;
-    int y2 = position2.y + upperLeft.y;
-    (*gridMatrix)[y1][x1]->setPosition(x2, y2);
-    (*gridMatrix)[y2][x2]->setPosition(x1, y1);
-    grid->setPositions(position1, position2);
+
+int Tetrimino::checkColoration(Position position, Position position2, vector<Position>* blocksPositions) {
+    if ((*gridMatrix)[position.y][position.x]->getIsColoured()) {
+        (*gridMatrix)[position.y][position.x]->setdefaultColour();
+        if (!(*gridMatrix)[position2.y][position2.x]->getIsColoured())
+            blocksPositions->push_back(position2);
+        return 1;
+    }
+    return 0;
+}
+
+void Tetrimino::colorate(vector<Position> blocks){
+    for (auto block : blocks) {
+        (*gridMatrix)[block.y + upperLeft.y][block.x + upperLeft.x]->setColour(colour);
+    }
 }
 
 Colour Tetrimino::getColour() {
@@ -95,3 +118,5 @@ void Tetrimino::move(Direction direction) {
             break;
     }
 }
+
+// Implémenter moveBlocks

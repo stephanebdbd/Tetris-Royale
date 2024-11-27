@@ -16,7 +16,6 @@ class Grid{
 public:
     Grid();
     bool addTetramino(TetriminoType type, Position upperLeft);
-    void setPositions(Position position1, Position position2);
     vector<vector<Cell*>>* getGrid();
     ~Grid();
 };
@@ -58,13 +57,14 @@ class Cell{
     void setOutline();
 public:
     Cell(int x, int y);
-    void setColour(Colour colour);
+    void setColour(Colour newColour);
     void setdefaultColour();
-    void setPosition(int x, int y);
+    void setPosition(Position newPosition);
     bool getIsColoured();
     bool getIsOutline();
     int getPositionX();
     int getPositionY();
+    Colour getColour();
 };
 
 #endif GRID_HPP

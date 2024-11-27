@@ -10,16 +10,6 @@ Grid::Grid(){
     }
 }
 
-void Grid::setPositions(Position position1, Position position2){
-    int x1 = position1.x;
-    int y1 = position1.y;
-    int x2 = position2.x;
-    int y2 = position2.y;
-    Cell* tmp = gridMatrix[y1][x1];
-    gridMatrix[y1][x1] = gridMatrix[y2][x2];
-    gridMatrix[y2][x2] = tmp;
-}
-
 Grid::~Grid(){
     for(int y=0; y<height; y++){
         for (int x=0; x<width; x++){
@@ -41,7 +31,7 @@ void Cell::setOutline(){
     }
 }
 
-Cell::Cell(int x, int y){
+Cell::Cell(int x, int y) {
     position.x = x;
     position.y = y;
     if (((x==0 || x==width-1) && y > tetriminoSpace-1) || y==height-1){
@@ -50,8 +40,8 @@ Cell::Cell(int x, int y){
     }
 }
 
-void Cell::setColour(Colour colour){
-    this->colour = colour;
+void Cell::setColour(Colour newColour){
+    this->colour = newColour;
     isColoured = true;
 }
 
@@ -60,9 +50,9 @@ void Cell::setdefaultColour(){
     isColoured = false;
 }
 
-void Cell::setPosition(int x, int y){
-    position.x = x;
-    position.y = y;
+void Cell::setPosition(Position newPosition){
+    position.x = newPosition.x;
+    position.y = newPosition.y;
 }
 
 bool Cell::getIsColoured(){
@@ -79,4 +69,8 @@ int Cell::getPositionX(){
 
 int Cell::getPositionY(){
     return position.y;
+}
+
+Colour Cell::getColour(){
+    return colour;
 }
