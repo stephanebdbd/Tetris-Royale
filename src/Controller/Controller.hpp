@@ -1,5 +1,5 @@
+#pragma once
 #include <iostream>
-
 #include "../Model/Tetrimino.hpp"
 #include "../Model/Grid.hpp"
 
