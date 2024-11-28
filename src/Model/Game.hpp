@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include "Grid.hpp"
 #include "Tetrimino.hpp"

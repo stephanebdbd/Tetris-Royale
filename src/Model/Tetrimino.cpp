@@ -105,18 +105,3 @@ void Tetrimino::colorate(vector<Position> blocks){
 Colour Tetrimino::getColour() {
     return colour;
 }
-
-void Tetrimino::move(Direction direction) {
-    switch (direction) {
-        case Direction::LEFT:
-            moveBlocks(direction);
-            upperLeft.x--;
-            break;
-        case Direction::RIGHT:
-            moveBlocks(direction);
-            upperLeft.x++;
-            break;
-    }
-}
-
-// Implémenter moveBlocks

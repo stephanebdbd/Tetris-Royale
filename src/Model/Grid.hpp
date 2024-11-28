@@ -1,7 +1,4 @@
-#ifndef GRID_HPP
-#define GRID_HPP
-
-
+#pragma once
 #include <iostream>
 #include "Tetrimino.hpp"
 #include <vector>
@@ -11,18 +8,25 @@
 class Grid{
     static constexpr int width=12;
     static constexpr int height=25;
-    Grid* grid;
     vector<vector<Cell*>> gridMatrix;
+    Tetrimino* CurrentTetrimino;
 public:
     Grid();
-    bool addTetramino(TetriminoType type, Position upperLeft);
+    void addTetrimino(TetriminoType type, Position upperLeft);
     vector<vector<Cell*>>* getGrid();
+    void moveTetrimino(Direction direction);
+    void rotateTetrimino(bool clockwise);
+    void checkLines();                          // A implémenter
+    void moveTetrimino(Direction direction);    // A implémenter
+    void moveToTheSides(Direction direction);   // A implémenter
+    void makeFall();                            // A implémenter
     ~Grid();
 };
 
 
 enum class Colour{
-    BLACK = '⬛',
+    BLACK = '⬛',    // Outline colour
+    WHITE = '⬜',    // Default colour
     ORANGE = '🟧',
     BLUE = '🟦',
     YELLOW = '🟨',
@@ -30,13 +34,6 @@ enum class Colour{
     RED = '🟥',
     PURPLE = '🟪',
     BROWN = '🟫',
-};
-
-enum class Outline{
-    SIDES = '│',
-    BOTTOM = '─',
-    ANGLE_DOWN_LEFT = '└',
-    ANGLE_DOWN_RIGHT = '┘',
 };
 
 
@@ -51,8 +48,7 @@ class Cell{
     static constexpr int tetriminoSpace = 5;
     bool isColoured = false;
     bool isOutline = false;
-    Outline outline;
-    Colour colour = Colour::BLACK;
+    Colour colour = Colour::WHITE;
     Position position;
     void setOutline();
 public:
@@ -61,10 +57,6 @@ public:
     void setdefaultColour();
     void setPosition(Position newPosition);
     bool getIsColoured();
-    bool getIsOutline();
-    int getPositionX();
-    int getPositionY();
+    Position getPosition();
     Colour getColour();
 };
-
-#endif GRID_HPP

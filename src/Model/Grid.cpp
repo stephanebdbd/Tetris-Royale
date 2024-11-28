@@ -10,25 +10,32 @@ Grid::Grid(){
     }
 }
 
+void Grid::addTetrimino(TetriminoType type, Position upperLeft){
+    CurrentTetrimino = new Tetrimino(type, upperLeft, this);
+}
+
+vector<vector<Cell*>>* Grid::getGrid(){
+    return &gridMatrix;
+}
+
+void Grid::moveTetrimino(Direction direction){
+    if (direction == Direction::DOWN)
+        makeFall();
+    else
+        moveToTheSides(direction);
+}
+
+void Grid::rotateTetrimino(bool clockwise){
+    CurrentTetrimino->rotate(clockwise);
+}
+
 Grid::~Grid(){
     for(int y=0; y<height; y++){
         for (int x=0; x<width; x++){
             delete gridMatrix[y][x];
         }
     }
-}
-
-void Cell::setOutline(){
-    if (((position.x == 0) || (position.x == width-1)) && (position.y < height-1))
-            outline = Outline::SIDES;
-    else {
-        if (position.y == height-1)
-            outline = Outline::BOTTOM;
-        else if (position.x == 0)
-                outline = Outline::ANGLE_DOWN_LEFT;
-        else
-            outline = Outline::ANGLE_DOWN_RIGHT;
-    }
+    delete CurrentTetrimino;
 }
 
 Cell::Cell(int x, int y) {
@@ -36,7 +43,7 @@ Cell::Cell(int x, int y) {
     position.y = y;
     if (((x==0 || x==width-1) && y > tetriminoSpace-1) || y==height-1){
         isOutline = true;
-        setOutline();
+        setColour(Colour::BLACK);
     }
 }
 
@@ -46,7 +53,7 @@ void Cell::setColour(Colour newColour){
 }
 
 void Cell::setdefaultColour(){
-    colour = Colour::BLACK;
+    colour = Colour::WHITE;
     isColoured = false;
 }
 
@@ -59,16 +66,8 @@ bool Cell::getIsColoured(){
     return isColoured;
 }
 
-bool Cell::getIsOutline(){
-    return isOutline;
-}
-
-int Cell::getPositionX(){
-    return position.x;
-}
-
-int Cell::getPositionY(){
-    return position.y;
+Position Cell::getPosition(){
+    return position;
 }
 
 Colour Cell::getColour(){

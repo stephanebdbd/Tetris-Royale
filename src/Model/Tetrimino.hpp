@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include "Grid.hpp"
@@ -18,6 +19,7 @@ enum class TetriminoType {
 enum class Direction {
     LEFT,
     RIGHT,
+    DOWN,
 };
 
 class Tetrimino{
@@ -30,12 +32,10 @@ class Tetrimino{
     Colour colour;
     vector<Position> setTetriminoBlocks(TetriminoType type);
     Colour setColour(TetriminoType type, vector<Position> blocks);
+    int checkColoration(Position position, Position position2, vector<Position>* blocksPositions);
 public:
     Tetrimino(TetriminoType type, Position upperLeft, Grid* grid);
-    int checkColoration(Position position, Position position2, vector<Position>* blocksPositions);
     void colorate(vector<Position> blocs);
     void rotate(bool clockwise);
     Colour getColour();
-    void move(Direction direction);
-    void moveBlocks(Direction direction);
 };

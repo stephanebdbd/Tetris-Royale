@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <tetrimino.hpp>
+#include <./Model/Tetrimino.hpp>
 
 
 class LeadBoard{
