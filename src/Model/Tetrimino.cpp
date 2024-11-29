@@ -7,7 +7,7 @@ Tetrimino::Tetrimino(TetriminoType type, Position upperLeft, Grid* grid) : type(
 
 }
 
-std::vector<Position> Tetrimino::setTetriminoBlocks(TetriminoType type) {
+std::vector<Position> Tetrimino::setTetriminoBlocks() {
     switch (type) {
         case TetriminoType::I:
             return {Position{0,1}, Position{1,1}, Position{2,1}, Position{3,1}};

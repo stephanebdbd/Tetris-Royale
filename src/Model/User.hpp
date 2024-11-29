@@ -4,7 +4,7 @@
 #include "utils.hpp"
 
 class FriendList {
-    vector<std::string> listOfFriends;
+    std::vector<std::string> listOfFriends;
     int numberOfFriends=0;
 public:
     void addFriend(std::string friendName);
@@ -31,7 +31,7 @@ public:
 class Player : public User {};
 
 class Server {
-    vector<User*> users;
+    std::vector<User*> users;
 public:
     void createUser(std::string userName, std::string password);
     void addUser(User user);

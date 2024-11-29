@@ -60,7 +60,8 @@
   "files.associations": {
     "vector": "cpp",
     "array": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "iostream": "cpp"
   },
   "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }
