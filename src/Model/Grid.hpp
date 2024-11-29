@@ -9,18 +9,29 @@
 class Grid{
     static constexpr int width=12;
     static constexpr int height=25;
+    const int amountBlocks = 4;
+    Position upperLeft;
+    int boxDimension = 3;
     std::vector<std::vector<Cell*>> gridMatrix;
-    Tetrimino* CurrentTetrimino;
+    Tetrimino* currentTetrimino;
+    Colour* currentColour;
+    TetriminoType* currentType;
+    std::vector<Position>* currentBlocks;
+    int checkColoration(Position position, Position position2, std::vector<Position>* newBlocks);
 public:
     Grid();
-    void addTetrimino(TetriminoType type, Position upperLeft);
-    std::vector<std::vector<Cell*>>* getGrid();
+    void setBoxDimension();
+    void addTetrimino(TetriminoType type);
     void moveTetrimino(Direction direction);
-    void rotateTetrimino(bool clockwise);
-    void checkLines();                          // A implémenter
-    void moveTetrimino(Direction direction);    // A implémenter
-    void moveToTheSides(Direction direction);   // A implémenter
-    void makeFall();                            // A implémenter
+    void rotateTetrimino();
+    void moveTetrimino(Direction direction); 
+    void moveToTheSides(Direction direction);
+    Colour Grid::setTetriminoColour();
+    void makeFall();                         
+    bool checkCollision();
+    void checkLines();
+    void colorate();
+    bool isInTetrimino(Position position, std::vector<Position>* newBlocks=nullptr);
     ~Grid();
 };
 

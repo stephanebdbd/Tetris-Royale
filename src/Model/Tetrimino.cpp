@@ -1,10 +1,8 @@
 #include "Tetrimino.hpp"
 
-Tetrimino::Tetrimino(TetriminoType type, Position upperLeft, Grid* grid) : type(type), upperLeft(upperLeft), grid(grid), gridMatrix(grid->getGrid()) { 
-    std::vector<Position> blocks = setTetriminoBlocks();
+Tetrimino::Tetrimino(TetriminoType type) : type(type) { 
+    *blocks = setTetriminoBlocks();
     chooseColor();
-    setColour(blocks);
-
 }
 
 std::vector<Position> Tetrimino::setTetriminoBlocks() {
@@ -52,61 +50,10 @@ void Tetrimino::chooseColor() {
     }
 }
 
-Colour Tetrimino::setColour(std::vector<Position> blocks) {
-    for (int i = 0; i < amountBlocks; i++) {
-        Position blockPosition = blocks[i];
-        blockPosition.x += upperLeft.x;
-        blockPosition.y += upperLeft.y;
-        (*gridMatrix)[blockPosition.y][blockPosition.x]->setColour(colour);
-        blocks[i] = blockPosition;
-    }
-}
-
-void Tetrimino::rotate(bool clockwise) {
-    std::vector<Position> blocksPositions;
-    int count = 0, x = 0, y = 0;
-    Position position = upperLeft, position2 = Position{0, 0};
-
-    while ((x < amountBlocks) && (count < amountBlocks)) {
-        position = upperLeft; y = 0;
-        while ((y < amountBlocks) && (count < amountBlocks)) {
-            position.x+=x; position.y+=y;
-            if (clockwise) 
-                position2 = Position{upperLeft.x + boxDimension - y, upperLeft.y + x};
-            else
-                position2 = Position{upperLeft.x + y, upperLeft.y + boxDimension - x};    
-            count += checkColoration(position, position2, (&blocksPositions));
-            y++;
-        }
-        if (count != amountBlocks) x++;
-    }
-
-    for (x; x < amountBlocks; x++){
-        for (y; y < amountBlocks; y++){
-            (*gridMatrix)[y + upperLeft.y][x + upperLeft.x]->setdefaultColour();
-        }
-    }
-
-    colorate(blocksPositions);
-}
-
-
-int Tetrimino::checkColoration(Position position, Position position2, std::vector<Position>* blocksPositions) {
-    if ((*gridMatrix)[position.y][position.x]->getIsColoured()) {
-        (*gridMatrix)[position.y][position.x]->setdefaultColour();
-        if (!(*gridMatrix)[position2.y][position2.x]->getIsColoured())
-            blocksPositions->push_back(position2);
-        return 1;
-    }
-    return 0;
-}
-
-void Tetrimino::colorate(std::vector<Position> blocks){
-    for (auto block : blocks) {
-        (*gridMatrix)[block.y + upperLeft.y][block.x + upperLeft.x]->setColour(colour);
-    }
-}
-
 Colour Tetrimino::getColour() {
     return colour;
+}
+
+std::vector<Position>* Tetrimino::getBlocks() {
+    return blocks;
 }
