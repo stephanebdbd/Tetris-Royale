@@ -1,8 +1,9 @@
 #include "Tetrimino.hpp"
 
 Tetrimino::Tetrimino(TetriminoType type, Position upperLeft, Grid* grid) : type(type), upperLeft(upperLeft), grid(grid), gridMatrix(grid->getGrid()) { 
-    std::vector<Position> blocks = setTetriminoBlocks(type);
-    setColour(type, blocks);
+    std::vector<Position> blocks = setTetriminoBlocks();
+    chooseColor();
+    setColour(blocks);
 
 }
 
@@ -21,13 +22,11 @@ std::vector<Position> Tetrimino::setTetriminoBlocks(TetriminoType type) {
         case TetriminoType::L:
             return {Position{0, 2}, Position{1, 2}, Position{2,2}, Position{2,1}};
         case TetriminoType::J:
+            return {Position{0,1}, Position{0,2}, Position{1,2}, Position{2,2}};
     }
-    return {};
 }
 
-
-Colour Tetrimino::setColour(TetriminoType type, std::vector<Position> blocks) {
-    Colour colour;
+void Tetrimino::chooseColor() {
     switch (type) {
         case TetriminoType::I:
             colour = Colour::BLUE;
@@ -51,8 +50,15 @@ Colour Tetrimino::setColour(TetriminoType type, std::vector<Position> blocks) {
             colour = Colour::BROWN;
             break;
     }
-    for (Position blockPosition : blocks) {
-        (*gridMatrix)[blockPosition.y + upperLeft.y][blockPosition.x + upperLeft.x]->setColour(colour);
+}
+
+Colour Tetrimino::setColour(std::vector<Position> blocks) {
+    for (int i = 0; i < amountBlocks; i++) {
+        Position blockPosition = blocks[i];
+        blockPosition.x += upperLeft.x;
+        blockPosition.y += upperLeft.y;
+        (*gridMatrix)[blockPosition.y][blockPosition.x]->setColour(colour);
+        blocks[i] = blockPosition;
     }
 }
 
@@ -68,7 +74,7 @@ void Tetrimino::rotate(bool clockwise) {
             if (clockwise) 
                 position2 = Position{upperLeft.x + boxDimension - y, upperLeft.y + x};
             else
-                position2 = Position{upperLeft.x + boxDimension - y, upperLeft.y + x};    
+                position2 = Position{upperLeft.x + y, upperLeft.y + boxDimension - x};    
             count += checkColoration(position, position2, (&blocksPositions));
             y++;
         }

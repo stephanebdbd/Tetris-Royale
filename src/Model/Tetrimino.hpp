@@ -12,8 +12,9 @@ class Tetrimino{
     Position upperLeft;
     TetriminoType type;
     Colour colour;
-    std::vector<Position> setTetriminoBlocks(TetriminoType type);
-    Colour setColour(TetriminoType type, std::vector<Position> blocks);
+    void chooseColor();
+    std::vector<Position> setTetriminoBlocks();
+    Colour setColour(std::vector<Position> blocks);
     int checkColoration(Position position, Position position2, std::vector<Position>* blocksPositions);
 public:
     Tetrimino(TetriminoType type, Position upperLeft, Grid* grid);
