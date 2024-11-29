@@ -1,7 +1,7 @@
 #pragma once
-#include <iostream>
-#include <string>
-#include <./Model/Tetrimino.hpp>
+
+#include "../include.hpp"
+#include <../Model/Tetrimino.hpp>
 
 
 class LeadBoard{

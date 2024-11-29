@@ -1,13 +1,12 @@
-#include <iostream>
-#include <Grid.hpp>
+#include "Tetrimino.hpp"
 
 Tetrimino::Tetrimino(TetriminoType type, Position upperLeft, Grid* grid) : type(type), upperLeft(upperLeft), grid(grid), gridMatrix(grid->getGrid()) { 
-    vector<Position> blocks = setTetriminoBlocks(type);
+    std::vector<Position> blocks = setTetriminoBlocks(type);
     setColour(type, blocks);
 
 }
 
-vector<Position> Tetrimino::setTetriminoBlocks(TetriminoType type) {
+std::vector<Position> Tetrimino::setTetriminoBlocks(TetriminoType type) {
     switch (type) {
         case TetriminoType::I:
             return {Position{0,1}, Position{1,1}, Position{2,1}, Position{3,1}};
@@ -27,7 +26,7 @@ vector<Position> Tetrimino::setTetriminoBlocks(TetriminoType type) {
 }
 
 
-Colour Tetrimino::setColour(TetriminoType type, vector<Position> blocks) {
+Colour Tetrimino::setColour(TetriminoType type, std::vector<Position> blocks) {
     Colour colour;
     switch (type) {
         case TetriminoType::I:
@@ -58,7 +57,7 @@ Colour Tetrimino::setColour(TetriminoType type, vector<Position> blocks) {
 }
 
 void Tetrimino::rotate(bool clockwise) {
-    vector<Position> blocksPositions;
+    std::vector<Position> blocksPositions;
     int count = 0, x = 0, y = 0;
     Position position = upperLeft, position2 = Position{0, 0};
 
@@ -86,7 +85,7 @@ void Tetrimino::rotate(bool clockwise) {
 }
 
 
-int Tetrimino::checkColoration(Position position, Position position2, vector<Position>* blocksPositions) {
+int Tetrimino::checkColoration(Position position, Position position2, std::vector<Position>* blocksPositions) {
     if ((*gridMatrix)[position.y][position.x]->getIsColoured()) {
         (*gridMatrix)[position.y][position.x]->setdefaultColour();
         if (!(*gridMatrix)[position2.y][position2.x]->getIsColoured())
@@ -96,7 +95,7 @@ int Tetrimino::checkColoration(Position position, Position position2, vector<Pos
     return 0;
 }
 
-void Tetrimino::colorate(vector<Position> blocks){
+void Tetrimino::colorate(std::vector<Position> blocks){
     for (auto block : blocks) {
         (*gridMatrix)[block.y + upperLeft.y][block.x + upperLeft.x]->setColour(colour);
     }

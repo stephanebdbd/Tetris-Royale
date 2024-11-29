@@ -1,4 +1,3 @@
-#include <iostream>
 #include <Grid.hpp>
 
 
@@ -14,7 +13,7 @@ void Grid::addTetrimino(TetriminoType type, Position upperLeft){
     CurrentTetrimino = new Tetrimino(type, upperLeft, this);
 }
 
-vector<vector<Cell*>>* Grid::getGrid(){
+std::vector<std::vector<Cell*>>* Grid::getGrid(){
     return &gridMatrix;
 }
 

@@ -1,5 +1,7 @@
 #pragma once
-#include <iostream>
+
+#include "../include.hpp"
+#include "utils.hpp"
 #include "Grid.hpp"
 #include "Tetrimino.hpp"
 

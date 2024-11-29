@@ -1,19 +1,20 @@
 #pragma once
-#include <iostream>
+
+#include "../include.hpp"
+#include "utils.hpp"
 #include "Tetrimino.hpp"
-#include <vector>
-#include <string>
+
 
 
 class Grid{
     static constexpr int width=12;
     static constexpr int height=25;
-    vector<vector<Cell*>> gridMatrix;
+    std::vector<std::vector<Cell*>> gridMatrix;
     Tetrimino* CurrentTetrimino;
 public:
     Grid();
     void addTetrimino(TetriminoType type, Position upperLeft);
-    vector<vector<Cell*>>* getGrid();
+    std::vector<std::vector<Cell*>>* getGrid();
     void moveTetrimino(Direction direction);
     void rotateTetrimino(bool clockwise);
     void checkLines();                          // A implémenter
@@ -21,25 +22,6 @@ public:
     void moveToTheSides(Direction direction);   // A implémenter
     void makeFall();                            // A implémenter
     ~Grid();
-};
-
-
-enum class Colour{
-    BLACK = '⬛',    // Outline colour
-    WHITE = '⬜',    // Default colour
-    ORANGE = '🟧',
-    BLUE = '🟦',
-    YELLOW = '🟨',
-    GREEN = '🟩',
-    RED = '🟥',
-    PURPLE = '🟪',
-    BROWN = '🟫',
-};
-
-
-struct Position{
-    int x;
-    int y;
 };
 
 class Cell{
