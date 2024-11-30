@@ -1,37 +1,52 @@
 #include "Controller.hpp"
+#include <cstdlib>  
+#include <ctime>    
 
-Controller::Controller(Tetrimino *tetrimino, Grid *gridMatrix) : tetramino_{tetrimino}, grid_{gridMatrix} {}
 
-void Controller::move(Direction direction){
-    switch (direction) {
-        case Direction::Left :
-            if(canMove(Direction::Left)) tetramino_->move(-1, 0, grid_);
+Controller::Controller(Grid* grid, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_TIMER* timer)
+    : grid_(grid), eventQueue_(queue) {}
+
+Controller::~Controller() {
+    
+}
+
+
+// Méthode pour gérer les événements (entrées clavier)
+void Controller::handleEvents() {
+    ALLEGRO_EVENT event;
+    while (al_get_next_event(eventQueue_, &event)) {
+        switch (event.type) {
+            case ALLEGRO_EVENT_KEY_DOWN: {
+                processKeyInput(event.keyboard.keycode);
+                break;
+            }
+            
+            default:
+                break;
+        }
+    }
+}
+
+// Fonction pour traiter les entrées clavier et réagir en conséquence
+void Controller::processKeyInput(int keyCode) {
+    switch (keyCode) {
+        case ALLEGRO_KEY_LEFT: 
+            grid_->moveTetrimino(Direction::LEFT);  
             break;
-        case Direction::Right :
-            if(canMove(Direction::Right)) tetramino_->move(1, 0, grid_);
+        case ALLEGRO_KEY_RIGHT:
+            grid_->moveTetrimino(Direction::RIGHT);  
             break;
-        case Direction::Down :
-        if(canMove(Direction::Down)) tetramino_->move(0, 1, grid_);
+        case ALLEGRO_KEY_DOWN:
+            grid_->moveTetrimino(Direction::DOWN);  
+            break;
+        case ALLEGRO_KEY_UP: 
+            grid_->rotateTetrimino();  
+            break;
+        case ALLEGRO_KEY_Q:
+            //ici il faut qu'on gere le quitte du jeu apres dans gamer 
+            break;
+        default:
             break;
     }
 }
 
-void Controller::rotate(bool clockWise){
-    tetramino_->rotate(clockWise);
-}
-
-bool Controller::canMove(Direction direction){}
-
-void keybordInput(int keyInput){
-    switch (keyInput){
-        case 'd':
-            move(Direction::Right);
-            break;
-        case 'q':
-            move(Direction::Left);
-            break;
-        case 's':
-            move(Direction::Down);
-            break;
-    }
-}
