@@ -21,6 +21,8 @@ std::vector<Position> Tetrimino::setTetriminoBlocks() {
             return {Position{0, 2}, Position{1, 2}, Position{2,2}, Position{2,1}};
         case TetriminoType::J:
             return {Position{0,1}, Position{0,2}, Position{1,2}, Position{2,2}};
+        default:
+            return {};
     }
 }
 

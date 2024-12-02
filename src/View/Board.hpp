@@ -13,8 +13,7 @@ class LeadBoard{
 
 class PlayerBoard{
     bool gridState;
-    Tetrimino activeTetrimino;
-    Tetrimino nextTetrimino;
+    Tetrimino Tetrimino;
 public:
     void UpdateBoard();
     void RenderBoard();

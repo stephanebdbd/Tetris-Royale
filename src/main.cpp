@@ -1,9 +1,9 @@
 #include "include.hpp"
-#include "Grid.hpp"
-
-using namespace std;
+#include "Model/utils.hpp"
+#include "Model/Grid.hpp"
 
 int main() {
     Grid grid;
+    grid.display();
     return 0;
 }
