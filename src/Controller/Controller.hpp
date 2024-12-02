@@ -3,7 +3,7 @@
 #include "../include.hpp"
 #include "../Model/Grid.hpp"
 #include "../Model/Tetrimino.hpp"
-#include <allegro5/allegro.h>
+
 
 class Controller {
     Grid* grid_;  // Référence à la grille de jeu

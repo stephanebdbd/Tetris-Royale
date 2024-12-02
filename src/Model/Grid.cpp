@@ -1,4 +1,4 @@
-#include <Grid.hpp>
+#include "Grid.hpp"
 
 
 Grid::Grid(){
@@ -122,6 +122,7 @@ void Grid::makeFall() {
         }
         upperLeft.y += movement;
     }
+    delete currentTetrimino;
 }
 
 void Grid::colorate(){
