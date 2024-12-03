@@ -7,11 +7,10 @@
 
 class Controller {
     Grid* grid_;  // Référence à la grille de jeu
-    ALLEGRO_EVENT_QUEUE* eventQueue_; 
-    void processKeyInput(int keyCode);  // Traite les entrées clavier
-
+    
 public:
-    Controller(Grid* grid, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_TIMER* timer);
-    void handleEvents();
+    Controller(Grid* grid);
+    char *getKeyInput();// Récupère les entrées clavier
+    void processKeyInput(const char* keyInput);  // Traite les entrées clavier
     ~Controller();  // Destructeur
 };
