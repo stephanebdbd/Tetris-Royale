@@ -32,6 +32,4 @@ void Controller::processKeyInput(char keyInput) {
     }
 }
 
-int mai
-
 
