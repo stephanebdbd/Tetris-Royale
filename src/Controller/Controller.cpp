@@ -1,31 +1,46 @@
-#include "Controller.hpp"   
+#include "Controller.hpp"
+#include <cstdlib>  
+#include <ctime> 
 
 
-Controller::Controller(Grid* grid)
-    : grid_(grid) {}
+Controller::Controller(Grid* grid, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_TIMER* timer)
+    : grid_(grid), eventQueue_(queue) {}
 
-Controller::~Controller() {
-    //pass
+Controller::~Controller() {};
+
+// Méthode pour gérer les événements (entrées clavier)
+void Controller::handleEvents() {
+    ALLEGRO_EVENT event;
+    while (al_get_next_event(eventQueue_, &event)) {
+        switch (event.type) {
+            case ALLEGRO_EVENT_KEY_DOWN: {
+                processKeyInput(event.keyboard.keycode);
+                break;
+            }
+            
+            default:
+                break;
+        }
+    }
 }
-
-char Controller::getKeyInput(){
-    std::cin >> key;
-    while (key != 'q' && key != 's' && key != 'd');
-    return key;
-}
-
 
 // Fonction pour traiter les entrées clavier et réagir en conséquence
-void Controller::processKeyInput(char keyInput) {
+void Controller::processKeyInput(int keyCode) {
     switch (keyCode) {
-        case 'q': 
+        case ALLEGRO_KEY_LEFT: 
             grid_->moveTetrimino(Direction::LEFT);  
             break;
-        case 'd':
+        case ALLEGRO_KEY_RIGHT:
             grid_->moveTetrimino(Direction::RIGHT);  
             break;
-        case 's':
+        case ALLEGRO_KEY_DOWN:
             grid_->moveTetrimino(Direction::DOWN);  
+            break;
+        case ALLEGRO_KEY_UP: 
+            grid_->rotateTetrimino();  
+            break;
+        case ALLEGRO_KEY_Q:
+            //ici il faut qu'on gere le quitte du jeu apres dans gamer 
             break;
         default:
             break;
