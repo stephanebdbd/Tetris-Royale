@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../include.hpp"
-#include "../Model/Tetrimino.hpp"
+#include "../Model/Game.hpp"
 
 
 class LeadBoard{
@@ -12,9 +12,11 @@ class LeadBoard{
 };
 
 class PlayerBoard{
-    bool gridState;
-    Tetrimino Tetrimino;
+    Game *game_;
+    const float FPS = 1 / 60.f;
+    //bool gridState;
+    //Tetrimino Tetrimino;
 public:
+    PlayerBoard(Game *game);
     void UpdateBoard();
-    void RenderBoard();
 };

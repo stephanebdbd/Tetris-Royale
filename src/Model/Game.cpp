@@ -2,7 +2,7 @@
 
 Game::Game() {
     grid = new Grid();
-    currentTetrimino = new Tetrimino(static_cast<TetriminoType>(rand() % 7)); 
+    currentTetrimino = new Tetrimino(static_cast<TetriminoType>(rand() % 7));
     score = 0;
 }
 
@@ -63,6 +63,7 @@ bool Game::checkCollision() {
 
 void Game::display(){
     grid->display();
+    std::cout << "Score: " << score << std::endl;
 }
 
 Game::~Game(){
