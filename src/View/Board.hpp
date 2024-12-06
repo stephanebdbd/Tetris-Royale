@@ -13,10 +13,8 @@ class LeadBoard{
 
 class PlayerBoard{
     Game *game_;
-    const float FPS = 1 / 60.f;
-    //bool gridState;
-    //Tetrimino Tetrimino;
+
 public:
     PlayerBoard(Game *game);
-    void UpdateBoard();
+    void display();
 };
