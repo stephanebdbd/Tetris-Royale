@@ -180,21 +180,28 @@ bool Grid::isInTetrimino(Position position, std::vector<Position>* newBlocks) {
     return false;
 }
 
-void Grid::checkLines(){
-    int tmp=-1, x=1;
-    for (int y=height-1; y < boxDimension; y--){
-        bool isLine = true;
-        while (x < width-1 and isLine){
-            isLine = !gridMatrix[y][x]->getIsColoured();
-            x++;
-            if (!isLine && tmp==-1)
-                tmp = y;
+void Grid::checkLines(int* lines){
+    int readLines = height-1;
+    while (readLines > 0){
+        int tmp=-1, x=1;
+        for (int y=height-1; y < boxDimension; y--){
+            bool isLine = true;
+            while (x < width-1 and isLine){
+                isLine = !gridMatrix[y][x]->getIsColoured();
+                x++;
+                if (!isLine && tmp==-1)
+                    tmp = y;
+            }
+            if (!isLine && (tmp-y > 1)) {
+                exchangeColors(tmp, y);
+                tmp = -1; lines++;
+            }
+            else
+                readLines--;
+            x = 1;
         }
-        if (!isLine && (tmp-y > 1)) {
-            exchangeColors(tmp, y);
-            tmp = -1;
-        }
-        x = 1;
+        if (readLines > 0)
+            readLines = height-1;
     }
 }
 

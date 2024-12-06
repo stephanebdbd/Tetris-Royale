@@ -48,10 +48,10 @@ public:
     void addTetrimino(TetriminoType type);
     void moveTetrimino(Direction direction);
     void moveToTheSides(Direction direction);
-    void makeFall();                  
+    void makeFall();               
     void rotateTetrimino();
     bool isInTetrimino(Position position, std::vector<Position>* newBlocks=nullptr);
-    void checkLines();
+    void checkLines(int* lines);
     void display();
     ~Grid();
 };
