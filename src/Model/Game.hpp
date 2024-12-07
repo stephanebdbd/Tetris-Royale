@@ -18,6 +18,7 @@ class Game{
     bool stillPlaying = true;
 public:
     Game(Player* player);
+    
     void moveTetrimino(Direction direction);
     void rotateTetrimino();
     void pushDown();
@@ -25,6 +26,7 @@ public:
     bool isRunning();
     bool checkLines();
     bool checkCollision();
+    bool hasMoved(bool moved=false);
     void display();
     ~Game();
 };

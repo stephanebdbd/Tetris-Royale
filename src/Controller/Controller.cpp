@@ -24,7 +24,7 @@ Controller::Controller(Game* game)
 
 // Méthode pour gérer les événements (entrées clavier)
 void Controller::handleEvents() {
-    while (game->isRunning()) {
+    while (true) {
         al_wait_for_event(queue, nullptr);
         while (al_get_next_event(queue, &event)) {
             switch (event.type) {
@@ -54,16 +54,20 @@ void Controller::processKeyInput(int keyCode) {
     switch (keyCode) {
         case ALLEGRO_KEY_LEFT: 
             game->moveTetrimino(Direction::LEFT);  
+            printf("moved\n");
             break;
         case ALLEGRO_KEY_RIGHT:
             game->moveTetrimino(Direction::RIGHT);  
+            printf("moved\n");
             break;
         case ALLEGRO_KEY_DOWN:
             while(keyCode == ALLEGRO_KEY_DOWN)
                 game->pushDown(); 
+            printf("moved\n");
             break;
         case ALLEGRO_KEY_UP: 
             game->rotateTetrimino();  
+            printf("moved\n");
             break;
         default:
             break;

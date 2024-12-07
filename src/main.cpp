@@ -25,10 +25,12 @@ int main(int /* argc */, char ** /* argv */) {
   Controller controller{&game};
   PlayerBoard playerBoard{&game};
 
-  while (game.isRunning()) {
-      controller.handleEvents();
-      playerBoard.display();
+  while (true) {
+    playerBoard.display();
+    while(!game.hasMoved()) {
+        controller.handleEvents();
+    }
   }
-  
+
   return 0;
 }

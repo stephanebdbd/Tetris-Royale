@@ -8,15 +8,18 @@ Game::Game(Player* player) : player{player} {
 
 void Game::moveTetrimino(Direction direction) {
     grid->moveTetrimino(direction);
+    hasMoved(true);
 }
 
 void Game::rotateTetrimino() {
     grid->rotateTetrimino();
+    hasMoved(true);
 }
 
 void Game::pushDown(){
     moveTetrimino(Direction::DOWN);
     updateScore(0, true);
+    hasMoved(true);
 }
 
 void Game::updateScore(int lines, bool downBoost) {
@@ -62,6 +65,10 @@ bool Game::checkCollision() {
 void Game::display(){
     grid->display();
     std::cout << "Score: " << score << std::endl;
+}
+
+bool Game::hasMoved(bool moved){ 
+    return moved;
 }
 
 Game::~Game(){
