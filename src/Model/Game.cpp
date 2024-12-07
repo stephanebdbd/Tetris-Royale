@@ -1,6 +1,6 @@
 #include "Game.hpp"
 
-Game::Game() {
+Game::Game(Player* player) : player{player} {
     grid = new Grid();
     currentTetrimino = new Tetrimino(static_cast<TetriminoType>(rand() % 7));
     score = 0;
@@ -15,10 +15,8 @@ void Game::rotateTetrimino() {
 }
 
 void Game::pushDown(){
-    // if (time)
-    // moveTetrimino(Direction::DOWN);
-    // updateScore(0, true)
-
+    moveTetrimino(Direction::DOWN);
+    updateScore(0, true);
 }
 
 void Game::updateScore(int lines, bool downBoost) {
@@ -53,8 +51,8 @@ bool Game::checkLines() {
 }
 
 bool Game::checkCollision() {
-    std::vector<Position>* blocks = currentTetrimino->getBlocks();
-    for (auto block : *blocks) {
+    std::vector<Position> blocks = currentTetrimino->getBlocks();
+    for (auto block : blocks) {
         if (block.y < tetriminoSpace)
             return true;
     }

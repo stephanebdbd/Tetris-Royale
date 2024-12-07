@@ -16,5 +16,6 @@ class PlayerBoard{
 
 public:
     PlayerBoard(Game *game);
+    void clear();
     void display();
 };

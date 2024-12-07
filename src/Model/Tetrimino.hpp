@@ -7,11 +7,11 @@
 class Tetrimino{
     TetriminoType type;
     Colour colour;
-    std::vector<Position>* blocks;
+    std::vector<Position> blocks;
     void chooseColor();
     std::vector<Position> setTetriminoBlocks();
 public:
     Tetrimino(TetriminoType type);
-    std::vector<Position>* getBlocks();
+    std::vector<Position> getBlocks();
     Colour getColour();
 };

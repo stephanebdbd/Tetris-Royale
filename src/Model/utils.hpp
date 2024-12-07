@@ -15,7 +15,7 @@ enum class Colour {
     BROWN
 };
 
-const char* getColour(Colour colour) {
+inline const char* getColourChar(Colour colour) {
     switch (colour) {
         case Colour::BLACK: return "⬛";
         case Colour::WHITE: return "⬜";

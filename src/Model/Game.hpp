@@ -6,9 +6,10 @@
 #include "Grid.hpp"
 #include "Tetrimino.hpp"
 
+
 class Game{
     Grid* grid;
-    //Player* players = new Player[];
+    Player* player;
     Tetrimino* currentTetrimino;
     const int tetriminoSpace = 4;
     int score=0;
@@ -16,7 +17,7 @@ class Game{
     int comboBis=0;
     bool stillPlaying = true;
 public:
-    Game();
+    Game(Player* player);
     void moveTetrimino(Direction direction);
     void rotateTetrimino();
     void pushDown();
@@ -25,6 +26,5 @@ public:
     bool checkLines();
     bool checkCollision();
     void display();
-    //Timer_CB();
     ~Game();
 };

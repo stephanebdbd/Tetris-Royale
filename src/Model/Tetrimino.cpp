@@ -1,7 +1,7 @@
 #include "Tetrimino.hpp"
 
 Tetrimino::Tetrimino(TetriminoType type) : type(type) { 
-    *blocks = setTetriminoBlocks();
+    blocks = setTetriminoBlocks();
     chooseColor();
 }
 
@@ -56,6 +56,6 @@ Colour Tetrimino::getColour() {
     return colour;
 }
 
-std::vector<Position>* Tetrimino::getBlocks() {
+std::vector<Position> Tetrimino::getBlocks() {
     return blocks;
 }

@@ -35,11 +35,11 @@ class Grid{
     Tetrimino* currentTetrimino;
     Colour* currentColour;
     TetriminoType* currentType;
-    std::vector<Position>* currentBlocks;
+    std::vector<Position> currentBlocks;
 
     void setBoxDimension();
-    Colour setTetriminoColour();
-    int checkColoration(Position position, Position position2, std::vector<Position>* newBlocks);
+    void setTetriminoColour();
+    int checkColoration(Position position, Position position2, std::vector<Position> newBlocks);
     bool checkCollision();
     void colorate();
     void exchangeColors(int tmp, int y);
@@ -50,7 +50,7 @@ public:
     void moveToTheSides(Direction direction);
     void makeFall();               
     void rotateTetrimino();
-    bool isInTetrimino(Position position, std::vector<Position>* newBlocks=nullptr);
+    bool isInTetrimino(Position position, std::vector<Position> newBlocks={});
     void checkLines(int* lines);
     void display();
     ~Grid();

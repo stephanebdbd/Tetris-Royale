@@ -1,13 +1,14 @@
 #include "Board.hpp"
 
 
-void clearScreen() {
-    std::system("clear");
-}
-
 PlayerBoard::PlayerBoard(Game *game) : game_(game){};
 
+void PlayerBoard::clear() {
+    if (std::system("clear") != 0)
+        perror("std::system(\"clear\")");
+}
+
 void PlayerBoard::display(){
-    clearScreen();
-    game_.display();
+    clear();
+    game_->display();
 }
