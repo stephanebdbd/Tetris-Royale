@@ -7,20 +7,20 @@ Tetrimino::Tetrimino(TetriminoType type) : type(type) {
 
 std::vector<Position> Tetrimino::setTetriminoBlocks() {
     switch (type) {
-        case TetriminoType::I:
-            return {Position{0,1}, Position{1,1}, Position{2,1}, Position{3,1}};
-        case TetriminoType::O:
-            return {Position{1,1}, Position{1,2}, Position{2,1}, Position{2,2}};
-        case TetriminoType::T:
-            return {Position{0,1}, Position{1,1}, Position{2,1}, Position{1,2}};
-        case TetriminoType::S:
-            return {Position{0,2}, Position{1,2}, Position{1,1}, Position{2,1}};
         case TetriminoType::Z:
             return {Position{0,1}, Position{1,1}, Position{1,2}, Position{2,2}};
         case TetriminoType::L:
             return {Position{0, 2}, Position{1, 2}, Position{2,2}, Position{2,1}};
+        case TetriminoType::O:
+            return {Position{1,1}, Position{1,2}, Position{2,1}, Position{2,2}};
+        case TetriminoType::S:
+            return {Position{0,2}, Position{1,2}, Position{1,1}, Position{2,1}};
+        case TetriminoType::I:
+            return {Position{0,1}, Position{1,1}, Position{2,1}, Position{3,1}};
         case TetriminoType::J:
             return {Position{0,1}, Position{0,2}, Position{1,2}, Position{2,2}};
+        case TetriminoType::T:
+            return {Position{0,1}, Position{1,1}, Position{2,1}, Position{1,2}};
         default:
             return {};
     }
@@ -58,4 +58,8 @@ Colour Tetrimino::getColour() {
 
 std::vector<Position> Tetrimino::getBlocks() {
     return blocks;
+}
+
+TetriminoType Tetrimino::getType() {
+    return type;
 }

@@ -15,18 +15,19 @@ class Game{
     int score=0;
     int comboCount=0;
     int comboBis=0;
-    bool stillPlaying = true;
+    bool isStillRunning=true;
+    bool moved=true;
+    void setHasMoved();
 public:
     Game(Player* player);
-    
-    void moveTetrimino(Direction direction);
+    void addTetrimino();
+    void moveTetrimino(Direction direction, bool downBoost=false);
     void rotateTetrimino();
-    void pushDown();
-    void updateScore(int lines, bool downBoost=false);
+    void updateScore(int lines, bool downBoost);
     bool isRunning();
-    bool checkLines();
-    bool checkCollision();
-    bool hasMoved(bool moved=false);
+    void checkLines(bool downBoost=false);
+    bool checkCollision(Direction direction);
+    bool getHasMoved();
     void display();
     ~Game();
 };

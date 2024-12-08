@@ -14,4 +14,5 @@ public:
     Tetrimino(TetriminoType type);
     std::vector<Position> getBlocks();
     Colour getColour();
+    TetriminoType getType();
 };

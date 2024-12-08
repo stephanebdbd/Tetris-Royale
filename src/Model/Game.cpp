@@ -1,25 +1,40 @@
 #include "Game.hpp"
 
 Game::Game(Player* player) : player{player} {
+    srand(static_cast<unsigned>(time(nullptr)));
     grid = new Grid();
     currentTetrimino = new Tetrimino(static_cast<TetriminoType>(rand() % 7));
+    grid->addTetrimino(currentTetrimino);
     score = 0;
 }
 
-void Game::moveTetrimino(Direction direction) {
-    grid->moveTetrimino(direction);
-    hasMoved(true);
+void Game::addTetrimino() {
+    srand(static_cast<unsigned>(time(nullptr)));
+    currentTetrimino = new Tetrimino(static_cast<TetriminoType>(rand() % 7));
+    grid->addTetrimino(currentTetrimino);
+}
+
+void Game::moveTetrimino(Direction direction, bool downBoost) {
+    if (!checkCollision(direction)){
+        grid->moveTetrimino(direction);
+        checkLines(downBoost);
+        setHasMoved();
+    }
 }
 
 void Game::rotateTetrimino() {
     grid->rotateTetrimino();
-    hasMoved(true);
+    setHasMoved();
 }
 
-void Game::pushDown(){
-    moveTetrimino(Direction::DOWN);
-    updateScore(0, true);
-    hasMoved(true);
+void Game::checkLines(bool downBoost) {
+    int lines = 0;
+    grid->checkLines(&lines);
+    updateScore(lines, downBoost);
+}
+
+bool Game::checkCollision(Direction direction) {
+    return grid->checkCollision(direction);
 }
 
 void Game::updateScore(int lines, bool downBoost) {
@@ -35,31 +50,22 @@ void Game::updateScore(int lines, bool downBoost) {
         score += (75+comboCount) * lines + combos;
     }
 }
-bool Game::isRunning() {
-    if (!stillPlaying) 
-        return stillPlaying;
-    stillPlaying = checkLines();
-    return stillPlaying;
-}
 
-bool Game::checkLines() {
-    if (checkCollision()) {
-        stillPlaying = false;
+bool Game::isRunning() {
+    if (!isStillRunning)
+        return false;
+    if (grid->isGameOver()){
+        isStillRunning = false;
+        delete currentTetrimino;
         return false;
     }
-    int lines = 0;
-    grid->checkLines(&lines);
-    updateScore(lines);
-    return true;
-}
-
-bool Game::checkCollision() {
-    std::vector<Position> blocks = currentTetrimino->getBlocks();
-    for (auto block : blocks) {
-        if (block.y < tetriminoSpace)
-            return true;
+    else if (grid->isTetriminoPlaced()){
+        delete currentTetrimino;
+        addTetrimino();
+        setHasMoved();
     }
-    return false;
+    return true;
+    
 }
 
 void Game::display(){
@@ -67,8 +73,16 @@ void Game::display(){
     std::cout << "Score: " << score << std::endl;
 }
 
-bool Game::hasMoved(bool moved){ 
-    return moved;
+bool Game::getHasMoved(){ 
+    if (moved){
+        moved = false;
+        return true;
+    }
+    return false;
+}
+
+void Game::setHasMoved(){
+    moved = true;
 }
 
 Game::~Game(){
