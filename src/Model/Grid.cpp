@@ -11,7 +11,9 @@ Cell::Cell(int x, int y) {
 
 void Cell::setColour(Colour newColour){
     this->colour = newColour;
-    isColoured = true;
+    isColoured = (newColour != Colour::WHITE);
+    isOutline = (newColour == Colour::BLACK);
+    if (isOutline) isColoured = false;
 }
 
 void Cell::setdefaultColour(){
@@ -45,13 +47,15 @@ Grid::Grid(){
 }
 
 void Grid::addTetrimino(Tetrimino* tetrimino){
-    currentTetrimino = tetrimino;
-    currentType = currentTetrimino->getType();
-    upperLeft = Position{width/2, 0};
-    setBoxDimension();
-    currentBlocks = currentTetrimino->getBlocks();
-    currentColour = currentTetrimino->getColour();
-    setTetriminoColour();
+        currentTetrimino = tetrimino;
+        if (currentTetrimino != nullptr){
+            currentType = currentTetrimino->getType();
+            upperLeft = Position{width/2, 0};
+            setBoxDimension();
+            currentBlocks = currentTetrimino->getBlocks(currentType);
+            currentColour = currentTetrimino->getColour();
+            setTetriminoColour();
+        }
 }
 
 void Grid::setBoxDimension(){
@@ -79,29 +83,18 @@ void Grid::setTetriminoColour() {
 }
 
 void Grid::moveTetrimino(Direction direction){
-    if (direction == Direction::DOWN)
-        goDown();
-    else
-        moveToTheSides(direction);
-}
-
-void Grid::moveToTheSides(Direction direction) {
     Position movement = getMovement(direction);
+    std::vector<Position> newBlocks;
     for (auto block : currentBlocks) {
         gridMatrix[block.y][block.x]->setdefaultColour();
         block.x += movement.x;
-        gridMatrix[block.y][block.x]->setColour(currentColour);
+        block.y += movement.y;
+        newBlocks.push_back(block);
     }
     upperLeft.x += movement.x;
-}
-
-void Grid::goDown() {
-    int movement = 1;
-    for (auto block : currentBlocks) {
-        block.y += movement;
-        gridMatrix[block.y][block.x]->setColour(currentColour);
-    }
-    upperLeft.y += movement;
+    upperLeft.y += movement.y;
+    currentBlocks = newBlocks;
+    colorate();
 }
 
 Position Grid::getMovement(Direction direction) {
@@ -124,91 +117,108 @@ Position Grid::getMovement(Direction direction) {
 
 bool Grid::checkCollision(Direction direction) {
     Position movement = getMovement(direction);
+    Position newPos = {0, 0};
     for (auto block : currentBlocks) {
-        Position newPos = {block.x + movement.x, block.y + movement.y};
-        bool isNotTetrimino = !gridMatrix[block.y][block.x]->getIsColoured();
-        if (gridMatrix[newPos.y][newPos.x]->getIsColoured() && isNotTetrimino)
+        newPos = {block.x + movement.x, block.y + movement.y};
+        if (getIsInGrid(newPos)) {
+            bool isNotTetrimino = !isInTetrimino(newPos);
+            if (gridMatrix[newPos.y][newPos.x]->getIsColoured() && isNotTetrimino){
+                return true;
+            }
+        }
+        else
             return true;
     }
     return false;
+}
+
+bool Grid::getIsInGrid(Position position){
+    return ((0 < position.x) && (position.x < width-1) && (0 < position.y) && (position.y < height-1));
 }
 
 void Grid::rotateTetrimino(){
-    std::vector<Position> newBlocks = currentBlocks;
+    std::vector<Position> oldBlocks = currentBlocks;
     currentBlocks.clear();
-    int count = 0, x = 0, y = 0;
-    bool canRotate = true;
+    int x = 0, y = 0;
+    bool canRotate = true, isTetrimino = false;
     Position position = upperLeft, position2 = Position{0, 0};
-
-    while ((x < amountBlocks) && (count < amountBlocks) && canRotate) {
-        position = upperLeft; y = 0;
-        while ((y < amountBlocks) && (count < amountBlocks) && canRotate) {
-            position.x+=x; position.y+=y;
-            position2 = Position{upperLeft.x + boxDimension - y, upperLeft.y + x};   
-            count += checkColoration(position, position2, newBlocks);
-            canRotate = count > -1;
-            y++;
+    while ((y < boxDimension) && canRotate) {
+        position.x = upperLeft.x-1; position.y = upperLeft.y + y;
+        while ((x < boxDimension) && canRotate) {
+            position.x++;
+            isTetrimino = isInTetrimino(position, oldBlocks);
+            if (getIsInGrid(position) && isTetrimino) {
+                position2 = Position{upperLeft.x + boxDimension - 1 - y, upperLeft.y + x};   
+                if (getIsInGrid(position2))
+                    canRotate = checkColoration(position2, oldBlocks);
+                else
+                    canRotate = false;
+            }
+            x++;
         }
-        x++;
+        y++; x = 0;
     }
-
-    if (canRotate) 
+    if (canRotate){
+        for (auto block : oldBlocks)
+            gridMatrix[block.y][block.x]->setdefaultColour();
         colorate();
+    }
     else
-        currentBlocks = newBlocks;
+        currentBlocks = oldBlocks;
 }
 
 void Grid::colorate(){
-    for (auto block : currentBlocks) {
-        gridMatrix[block.y + upperLeft.y][block.x + upperLeft.x]->setColour(currentColour);
-    }
+    for (auto block : currentBlocks)
+        gridMatrix[block.y][block.x]->setColour(currentColour);
 }
 
-int Grid::checkColoration(Position position, Position position2, std::vector<Position> newBlocks) {
-    bool isTetrimino = isInTetrimino(position, newBlocks);
-    if (gridMatrix[position.y][position.x]->getIsColoured() && isTetrimino) {
-        bool isNotInTetrimino = !isInTetrimino(position2, newBlocks);
-        if (gridMatrix[position2.y][position2.x]->getIsColoured() && isNotInTetrimino)
-            return -amountBlocks;
-        gridMatrix[position.y][position.x]->setdefaultColour();
-        currentBlocks.push_back(position2);
-        return 1;
-    }
-    return 0;
+bool Grid::checkColoration(Position position, std::vector<Position> oldBlocks) {
+    bool isNotInTetrimino = !isInTetrimino(position, oldBlocks);
+    if (gridMatrix[position.y][position.x]->getIsColoured() && isNotInTetrimino)
+        return false;
+    currentBlocks.push_back(position);
+    return true;
 }
 
-bool Grid::isInTetrimino(Position position, std::vector<Position> newBlocks) {
-    std::vector<Position> blocks = (newBlocks.size() > 0) ? newBlocks : currentBlocks;
+bool Grid::isInTetrimino(Position position, std::vector<Position> otherBlocks) {
+    std::vector<Position> blocks = (otherBlocks.size() > 0) ? otherBlocks : currentBlocks;
     for (auto block : blocks) {
-        if (block.x == position.x && block.y == position.y)
+        if ((block.x == position.x) && (block.y == position.y))
             return true;
     }
     return false;
 }
 
-void Grid::checkLines(int* lines){
-    int readLines = height-1;
-    while (readLines > 0){
-        int tmp=-1, x=1;
-        for (int y=height-1; y < boxDimension; y--){
-            bool isLineUncolored = true;
-            while (x < width-1 and isLineUncolored){
-                isLineUncolored = !gridMatrix[y][x]->getIsColoured();
-                x++;
-                if (!isLineUncolored && tmp==-1)
-                    tmp = y;
-            }
-            if (isLineUncolored && (tmp-y > 1)) {
-                exchangeColors(tmp, y);
-                tmp = -1; lines++;
-            }
-            else
-                readLines--;
-            x = 1;
+int Grid::checkLines(){
+    LinesStatus linesStatus = {0, std::vector<int>()};
+    int x = 1, y = height-2, count=2;
+    while ((count > 1) && (y > tetriminoSpace-1)){
+        count = 1;
+        while ((x < width-1) && ((count==x) || (count==1))){
+            if (gridMatrix[y][x]->getIsColoured()) count++;
+            x++;
         }
-        if (readLines > 0)
-            readLines = height-1;
+        if (count == width-1) linesStatus.full++;
+        else if (count > 1) linesStatus.coloured.push_back(y);
+        x = 1; y--;
     }
+    if (linesStatus.full > 0){
+        int y=height-2;
+        for (auto line : linesStatus.coloured){
+            if (y != line){
+                for (int x=1; x<width-1; x++){
+                    Colour colour = gridMatrix[line][x]->getColour();
+                    gridMatrix[y][x]->setColour(colour);
+                }
+            }
+            y--;
+        }
+        for (int i = 0 ; i < linesStatus.full; i++){
+            for (int x=1; x<width-1; x++)
+                gridMatrix[y-i][x]->setdefaultColour();
+        }
+    }
+    return linesStatus.full;
 }
 
 void Grid::exchangeColors(int tmp, int y){

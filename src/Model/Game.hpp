@@ -20,12 +20,12 @@ class Game{
     void setHasMoved();
 public:
     Game(Player* player);
-    void addTetrimino();
+    void addTetrimino(bool null=false);
     void moveTetrimino(Direction direction, bool downBoost=false);
     void rotateTetrimino();
-    void updateScore(int lines, bool downBoost);
+    void updateScore(int lines, bool downBoost, Direction direction);
     bool isRunning();
-    void checkLines(bool downBoost=false);
+    void checkLines(Direction direction, bool downBoost=false);
     bool checkCollision(Direction direction);
     bool getHasMoved();
     void display();

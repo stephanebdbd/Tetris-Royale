@@ -1,11 +1,10 @@
 #include "Tetrimino.hpp"
 
 Tetrimino::Tetrimino(TetriminoType type) : type(type) { 
-    blocks = setTetriminoBlocks();
     chooseColor();
 }
 
-std::vector<Position> Tetrimino::setTetriminoBlocks() {
+std::vector<Position> Tetrimino::getBlocks(TetriminoType type) {
     switch (type) {
         case TetriminoType::Z:
             return {Position{0,1}, Position{1,1}, Position{1,2}, Position{2,2}};
@@ -54,10 +53,6 @@ void Tetrimino::chooseColor() {
 
 Colour Tetrimino::getColour() {
     return colour;
-}
-
-std::vector<Position> Tetrimino::getBlocks() {
-    return blocks;
 }
 
 TetriminoType Tetrimino::getType() {

@@ -25,35 +25,38 @@ public:
 };
 
 class Grid{
+    struct LinesStatus {
+        int full;
+        std::vector<int> coloured;
+    };
     static constexpr int width=12;
     static constexpr int height=25;
     const int amountBlocks = 4;
     const int tetriminoSpace = 4;
     Position upperLeft;
-    int boxDimension = 3;
+    int boxDimension;
     std::vector<std::vector<Cell*>> gridMatrix;
 
     Tetrimino* currentTetrimino;
-    Colour currentColour; //
-    TetriminoType currentType; //
+    Colour currentColour;
+    TetriminoType currentType;
     std::vector<Position> currentBlocks;
 
     void setBoxDimension();
     void setTetriminoColour();
-    int checkColoration(Position position, Position position2, std::vector<Position> newBlocks);
+    bool checkColoration(Position position, std::vector<Position> newBlocks);
     void colorate();
     void exchangeColors(int tmp, int y);
     Position getMovement(Direction direction);
+    bool getIsInGrid(Position position);
+    bool isInTetrimino(Position position, std::vector<Position> otherBlocks={});
 public:
     Grid();
     void addTetrimino(Tetrimino* tetrimino);
     void moveTetrimino(Direction direction);
-    void moveToTheSides(Direction direction);
-    void goDown();
+    int checkLines();
     void rotateTetrimino();
-    bool isInTetrimino(Position position, std::vector<Position> newBlocks={});
     bool checkCollision(Direction direction);
-    void checkLines(int* lines);
     bool isTetriminoPlaced();
     bool isGameOver();
     void display();
