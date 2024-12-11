@@ -46,7 +46,7 @@ class Grid{
     void setTetriminoColour();
     bool checkColoration(Position position, std::vector<Position> newBlocks);
     void colorate();
-    void exchangeColors(int tmp, int y);
+    void exchangeColors(int tmp, int y, int x=0);
     Position getMovement(Direction direction);
     bool getIsInGrid(Position position);
     bool isInTetrimino(Position position, std::vector<Position> otherBlocks={});

@@ -191,42 +191,59 @@ bool Grid::isInTetrimino(Position position, std::vector<Position> otherBlocks) {
 
 int Grid::checkLines(){
     LinesStatus linesStatus = {0, std::vector<int>()};
-    int x = 1, y = height-2, count=2;
-    while ((count > 1) && (y > tetriminoSpace-1)){
-        count = 1;
-        while ((x < width-1) && ((count==x) || (count==1))){
-            if (gridMatrix[y][x]->getIsColoured()) count++;
-            x++;
-        }
-        if (count == width-1) linesStatus.full++;
-        else if (count > 1) linesStatus.coloured.push_back(y);
-        x = 1; y--;
-    }
-    if (linesStatus.full > 0){
-        int y=height-2;
-        for (auto line : linesStatus.coloured){
-            if (y != line){
-                for (int x=1; x<width-1; x++){
-                    Colour colour = gridMatrix[line][x]->getColour();
-                    gridMatrix[y][x]->setColour(colour);
-                }
+    int x = 1, y = height-2, count=2; bool recursion = true;
+    while (recursion){
+        recursion = false;
+        while ((count > 1) && (y > tetriminoSpace-1)){
+            count = 1;
+            while ((x < width-1) && ((count==x) || (count==1))){
+                if (gridMatrix[y][x]->getIsColoured()) count++;
+                x++;
             }
-            y--;
+            if (count == width-1) linesStatus.full++;
+            else if (count > 1) linesStatus.coloured.push_back(y);
+            x = 1; y--;
         }
-        for (int i = 0 ; i < linesStatus.full; i++){
-            for (int x=1; x<width-1; x++)
-                gridMatrix[y-i][x]->setdefaultColour();
-        }
-    }
+        if (linesStatus.full > 0){
+            int y=height-2;
+            for (auto line : linesStatus.coloured){
+                if (y != line){
+                    for (int x=1; x<width-1; x++){
+                        Colour colour = gridMatrix[line][x]->getColour();
+                        gridMatrix[y][x]->setColour(colour);
+                    }
+                }
+                y--;
+            }
+            for (int i = 0 ; i < linesStatus.full; i++){
+                for (int x=1; x<width-1; x++)
+                    gridMatrix[y-i][x]->setdefaultColour();
+            }
+            for (int y=height-3; y>height-3-linesStatus.full; y--){
+                for (int x=1; x<width-1; x++){
+                    if (gridMatrix[y][x]->getIsColoured()){
+                        int y2 = y;
+                        while ((y2 < height-3) && !gridMatrix[y2+1][x]->getIsColoured()){
+                            exchangeColors(y2, y2+1, x);
+                            y2++; recursion = true;
+                        }}}}}}
     return linesStatus.full;
 }
 
-void Grid::exchangeColors(int tmp, int y){
-    for (int x=1; x<width-1; x++){
+void Grid::exchangeColors(int tmp, int y, int x){
+    if (x!=0){
         Colour tmpColour = gridMatrix[tmp][x]->getColour();
         Colour colour = gridMatrix[y][x]->getColour();
         gridMatrix[y][x]->setColour(tmpColour);
         gridMatrix[tmp][x]->setColour(colour);
+    }
+    else {
+        for (int x=1; x<width-1; x++){
+            Colour tmpColour = gridMatrix[tmp][x]->getColour();
+            Colour colour = gridMatrix[y][x]->getColour();
+            gridMatrix[y][x]->setColour(tmpColour);
+            gridMatrix[tmp][x]->setColour(colour);
+        }
     }
 }
 
