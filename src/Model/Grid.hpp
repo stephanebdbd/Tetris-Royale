@@ -50,6 +50,8 @@ class Grid{
     Position getMovement(Direction direction);
     bool getIsInGrid(Position position);
     bool isInTetrimino(Position position, std::vector<Position> otherBlocks={});
+    void shiftLines(LinesStatus linesStatus);
+    void verifyLines(LinesStatus linesStatus, bool& recursion);
 public:
     Grid();
     void addTetrimino(Tetrimino* tetrimino);

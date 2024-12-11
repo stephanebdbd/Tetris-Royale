@@ -205,30 +205,41 @@ int Grid::checkLines(){
             x = 1; y--;
         }
         if (linesStatus.full > 0){
-            int y=height-2;
-            for (auto line : linesStatus.coloured){
-                if (y != line){
-                    for (int x=1; x<width-1; x++){
-                        Colour colour = gridMatrix[line][x]->getColour();
-                        gridMatrix[y][x]->setColour(colour);
-                    }
-                }
-                y--;
-            }
-            for (int i = 0 ; i < linesStatus.full; i++){
-                for (int x=1; x<width-1; x++)
-                    gridMatrix[y-i][x]->setdefaultColour();
-            }
-            for (int y=height-3; y>height-3-linesStatus.full; y--){
-                for (int x=1; x<width-1; x++){
-                    if (gridMatrix[y][x]->getIsColoured()){
-                        int y2 = y;
-                        while ((y2 < height-3) && !gridMatrix[y2+1][x]->getIsColoured()){
-                            exchangeColors(y2, y2+1, x);
-                            y2++; recursion = true;
-                        }}}}}}
+            shiftLines(linesStatus);
+            verifyLines(linesStatus, recursion);
+        }
+    }
     return linesStatus.full;
 }
+
+void Grid::shiftLines(LinesStatus linesStatus){
+    int y=height-2;
+    for (auto line : linesStatus.coloured){
+        if (y != line){
+            for (int x=1; x<width-1; x++){
+                Colour colour = gridMatrix[line][x]->getColour();
+                gridMatrix[y][x]->setColour(colour);
+            }
+        }
+        y--;
+    }
+    for (int i = 0 ; i < linesStatus.full; i++){
+        for (int x=1; x<width-1; x++)
+            gridMatrix[y-i][x]->setdefaultColour();
+    }
+}
+
+void Grid::verifyLines(LinesStatus linesStatus, bool& recursion){
+    for (int y=height-3; y>height-3-linesStatus.full; y--){
+        for (int x=1; x<width-1; x++){
+            if (gridMatrix[y][x]->getIsColoured()){
+                int y2 = y;
+                while ((y2 < height-3) && !gridMatrix[y2+1][x]->getIsColoured()){
+                    Colour colour = gridMatrix[y2][x]->getColour();
+                    gridMatrix[y2][x]->setdefaultColour();
+                    gridMatrix[y2+1][x]->setColour(colour);
+                    y2++; recursion = true;
+}}}}}
 
 void Grid::exchangeColors(int tmp, int y, int x){
     if (x!=0){
