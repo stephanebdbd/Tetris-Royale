@@ -25,6 +25,7 @@ public:
     void rotateTetrimino();
     void updateScore(int lines, bool downBoost, bool tetriminoPlaced, Direction direction);
     bool isRunning();
+    void setIsRunning(bool running);
     void checkLines(Direction direction, bool downBoost=false);
     bool checkCollision(Direction direction);
     bool getHasMoved();

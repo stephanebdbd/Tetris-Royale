@@ -22,14 +22,14 @@ void Game::moveTetrimino(Direction direction, bool downBoost) {
         if (grid->isTetriminoPlaced()) 
             checkLines(direction, downBoost);
         updateScore(0, downBoost, false, direction);
-        //setHasMoved();
+        setHasMoved();
     }
     isRunning();
 }
 
 void Game::rotateTetrimino() {
     grid->rotateTetrimino();
-    //setHasMoved();
+    setHasMoved();
 }
 
 void Game::checkLines(Direction direction, bool downBoost) {
@@ -65,14 +65,18 @@ bool Game::isRunning() {
     if (grid->isTetriminoPlaced()){
         if (grid->isGameOver()){
             addTetrimino(true);
-            isStillRunning = false;
+            setIsRunning(false);
             return false;
         }
         addTetrimino();
-        //setHasMoved();
+        setHasMoved();
     }
     return true;
     
+}
+
+void Game::setIsRunning(bool running) {
+    isStillRunning = running;
 }
 
 void Game::display(){
