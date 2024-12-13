@@ -28,6 +28,7 @@ Ce projet est un jeu de Tetris réalisé par notre équipe dans le cadre du cour
    - `q` : Déplacer le tétromino vers la gauche.
    - `d` : Déplacer le tétromino vers la droite.
    - `s` : Accélérer la descente du tétromino.
+   - 'z' : Tourner le tétromino de 90 degrés dans le sens des aiguilles d'une montre.
    - `maintenir s` : Faire tomber rapidement le tétromino.
    - `ESC` : Quitter le jeu.
 4. "Game Over" s'affiche  lorsque les tétrominos atteignent le haut du plateau.
