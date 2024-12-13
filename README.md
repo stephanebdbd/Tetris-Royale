@@ -3,7 +3,6 @@
 ## Table des matières
 - [Introduction](#introduction)
 - [Fonctionnalités](#fonctionnalités)
-- [Installation](#installation)
 - [Utilisation](#utilisation)
 - [Membres de l'équipe](#membres-de-léquipe)
 - [Licence](#licence)
