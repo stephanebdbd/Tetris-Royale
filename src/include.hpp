@@ -9,6 +9,13 @@
 #include <string>
 #include <termios.h>
 #include <unistd.h>
+#include <cctype>
+#include <chrono>
+#include <locale.h>
+
+
+// NCURSES
+#include <ncurses.h>
 
 // ALLEGRO
 #include <allegro5/allegro.h>

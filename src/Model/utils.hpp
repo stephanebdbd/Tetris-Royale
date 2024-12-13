@@ -51,9 +51,5 @@ enum class Direction {
     DOWN,
 };
 
-const char ESC = 27;
-const char UP = 'A';
-const char DOWN = 'B';
-const char RIGHT = 'C';
-const char LEFT = 'D';
-const char MOVE = '\x1B';
+const char ERASE = '\x7f';
+const char ESC = '\x1b';

@@ -81,7 +81,7 @@ void Game::setIsRunning(bool running) {
 
 void Game::display(){
     grid->display();
-    std::cout << "Score: " << score << std::endl;
+    printw("Score: %d", score);
 }
 
 bool Game::getHasMoved(){ 
@@ -98,5 +98,5 @@ void Game::setHasMoved(){
 
 Game::~Game(){
     delete currentTetrimino;
-    grid->~Grid();
+    delete grid;
 }

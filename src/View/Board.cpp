@@ -10,6 +10,6 @@ void PlayerBoard::clear() {
 
 void PlayerBoard::display(){
     clear();
-    std::cout << space << "Tetris Royale" << std::endl;
+    printw("%sTetris Royale\n", space);
     game_->display();
 }

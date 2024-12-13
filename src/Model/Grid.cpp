@@ -34,7 +34,7 @@ Colour Cell::getColour(){
 }
 
 void Cell::display(){
-    std::cout << getColourChar(colour);  // Permet d'utiliser la fonction getColourChar de utils.hpp
+    printw("%s", getColourChar(colour));  // Permet d'utiliser la fonction getColourChar de utils.hpp
 }
 
 Grid::Grid(){
@@ -284,7 +284,7 @@ void Grid::display(){
         for (int x=0; x<width; x++){
             gridMatrix[y][x]->display();
         }
-        std::cout << std::endl;
+        printw("\n");
     }
 }
 
@@ -294,5 +294,4 @@ Grid::~Grid(){
             delete gridMatrix[y][x];
         }
     }
-    delete currentTetrimino;
 }
