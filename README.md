@@ -25,11 +25,10 @@ Ce projet est un jeu de Tetris réalisé par notre équipe dans le cadre du cour
 1. compiler le code source avec le Makefile (dans le dossier src) et éxecuter le jeu avec la commande `./tetris`.
 2. Entrez votre nom d'utilisateur et mot de passe pour vous connecter.
 3. Utilisez les commandes clavier suivantes pendant le jeu :
-   - `q` : Déplacer le tétromino vers la gauche.
-   - `d` : Déplacer le tétromino vers la droite.
-   - `s` : Accélérer la descente du tétromino.
-   - 'z' : Tourner le tétromino de 90 degrés dans le sens des aiguilles d'une montre.
-   - `maintenir s` : Faire tomber rapidement le tétromino.
+   - `fleche à gauche` : Déplacer le tétromino vers la gauche.
+   - `fleche à droite` : Déplacer le tétromino vers la droite.
+   - `maintenir la fleche en bas ` : Accélérer la descente du tétromino.
+   - 'fleche en haut' : Tourner le tétromino de 90 degrés dans le sens des aiguilles d'une montre.
    - `ESC` : Quitter le jeu.
 4. "Game Over" s'affiche  lorsque les tétrominos atteignent le haut du plateau.
 5. Votre score est affiché en bas de la grille.
