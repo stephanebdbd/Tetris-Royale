@@ -36,7 +36,7 @@ Ce projet est un jeu de Tetris réalisé par notre équipe dans le cadre du cour
 
 ## Membres de l'équipe
 
-- **Ismail Rhabouqi** : 000584567
+- **Ismail Rhabouqi** : 584567
 - **Chris BADI BUDU** : 569082
 - **Anthony Van Der Wilt** : 569315
 - **ikram BOUTALEB** : 536046
