@@ -20,8 +20,9 @@ void Game::moveTetrimino(Direction direction, bool downBoost) {
     if (!checkCollision(direction)){
         grid->moveTetrimino(direction);
         if (grid->isTetriminoPlaced()) 
-            checkLines(direction, downBoost);
-        updateScore(0, downBoost, false, direction);
+            checkLines(downBoost);
+        if (direction == Direction::DOWN)
+            updateScore(0, downBoost, false);
         setHasMoved();
     }
     isRunning();
@@ -32,30 +33,28 @@ void Game::rotateTetrimino() {
     setHasMoved();
 }
 
-void Game::checkLines(Direction direction, bool downBoost) {
+void Game::checkLines(bool downBoost) {
     int lines = grid->checkLines();
-    updateScore(lines, downBoost, true, direction);
+    updateScore(lines, downBoost, true);
 }
 
 bool Game::checkCollision(Direction direction) {
     return grid->checkCollision(direction);
 }
 
-void Game::updateScore(int lines, bool downBoost, bool tetriminoPlaced, Direction direction) {
-    if (direction == Direction::DOWN){
-        comboCount += (lines == 0) ? 0 : 1;
-        if (downBoost)
-            score += 1 + comboCount;
-        else
-            score += 1;
-        if (tetriminoPlaced && lines == 0)
-            score += 5 + comboCount;
-        else if (tetriminoPlaced && lines > 0){
-            comboBis += 5;
-            comboBis *= (lines-1);
-            int combos = 25 * (lines-1) + comboBis;
-            score += (75+comboCount) * lines + combos;
-        }
+void Game::updateScore(int lines, bool downBoost, bool tetriminoPlaced) {
+    comboCount += (lines == 0) ? 0 : 1;
+    if (downBoost)
+        score += 1 + comboCount;
+    else
+        score += 1;
+    if (tetriminoPlaced && lines == 0)
+        score += 5 + comboCount;
+    else if (tetriminoPlaced && lines > 0){
+        comboBis += 5;
+        comboBis *= (lines-1);
+        int combos = 25 * (lines-1) + comboBis;
+        score += (75+comboCount) * lines + combos;
     }
 }
 

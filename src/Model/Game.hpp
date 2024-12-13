@@ -23,10 +23,10 @@ public:
     void addTetrimino(bool null=false);
     void moveTetrimino(Direction direction, bool downBoost=false);
     void rotateTetrimino();
-    void updateScore(int lines, bool downBoost, bool tetriminoPlaced, Direction direction);
+    void updateScore(int lines, bool downBoost, bool tetriminoPlaced);
     bool isRunning();
     void setIsRunning(bool running);
-    void checkLines(Direction direction, bool downBoost=false);
+    void checkLines(bool downBoost=false);
     bool checkCollision(Direction direction);
     bool getHasMoved();
     void display();

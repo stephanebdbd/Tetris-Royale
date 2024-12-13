@@ -137,6 +137,8 @@ bool Grid::getIsInGrid(Position position){
 }
 
 void Grid::rotateTetrimino(){
+    if (currentType == TetriminoType::O) // pas de rotation pour las carrÃ©s
+        return;
     std::vector<Position> oldBlocks = currentBlocks;
     currentBlocks.clear();
     int x = 0, y = 0;

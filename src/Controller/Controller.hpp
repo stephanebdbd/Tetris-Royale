@@ -9,6 +9,5 @@ class Controller {
 public:
     Controller(Game* game);            //constructeur
     void processKeyInput(int keyCode);
-    void* keyboardListener(void* arg);
     ~Controller()=default;  // Destructeur
 };
