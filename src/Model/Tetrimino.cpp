@@ -27,26 +27,26 @@ std::vector<Position> Tetrimino::getBlocks(TetriminoType type) {
 
 void Tetrimino::chooseColor() {
     switch (type) {
-        case TetriminoType::I:
-            colour = Colour::BLUE;
-            break;
-        case TetriminoType::O:
-            colour = Colour::YELLOW;
-            break;
-        case TetriminoType::T:
-            colour = Colour::PURPLE;
-            break;
-        case TetriminoType::S:
-            colour = Colour::GREEN;
-            break;
         case TetriminoType::Z:
             colour = Colour::RED;
             break;
         case TetriminoType::L:
             colour = Colour::ORANGE;
             break;
+        case TetriminoType::O:
+            colour = Colour::YELLOW;
+            break;
+        case TetriminoType::S:
+            colour = Colour::GREEN;
+            break;
+        case TetriminoType::I:
+            colour = Colour::LIGHT_BLUE;
+            break;
         case TetriminoType::J:
-            colour = Colour::BROWN;
+            colour = Colour::DARK_BLUE;
+            break;
+        case TetriminoType::T:
+            colour = Colour::PURPLE;
             break;
     }
 }

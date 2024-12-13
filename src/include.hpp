@@ -6,9 +6,14 @@
 #include <array>
 #include <cstdio>
 #include <cstdlib>
+#include <cstddef>
 #include <string>
-#include <termios.h>
 #include <unistd.h>
+#include <cctype>
+#include <chrono>
+
+// NCURSES
+#include <ncurses.h>
 
 // ALLEGRO
 #include <allegro5/allegro.h>

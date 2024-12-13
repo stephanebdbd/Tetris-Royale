@@ -8,8 +8,6 @@ class Controller {
     Game* game;  // Référence à la grille de jeu
 public:
     Controller(Game* game);            //constructeur
-    void processKeyInput(char keyCode);                                                   // Traite les entrées clavier
-    //void MouseMove(Position position);                                                  // Traite les entrées souris
-    //void MouseClick(Position position);
-    ~Controller();  // Destructeur
+    void processKeyInput(int keyCode);
+    ~Controller()=default;  // Destructeur
 };

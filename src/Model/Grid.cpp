@@ -34,7 +34,7 @@ Colour Cell::getColour(){
 }
 
 void Cell::display(){
-    std::cout << getColourChar(colour);  // Permet d'utiliser la fonction getColourChar de utils.hpp
+    getColourChar(colour);  // Permet d'utiliser la fonction getColourChar de utils.hpp
 }
 
 Grid::Grid(){
@@ -137,6 +137,8 @@ bool Grid::getIsInGrid(Position position){
 }
 
 void Grid::rotateTetrimino(){
+    if (currentType == TetriminoType::O) // pas de rotation pour las carrÃ©s
+        return;
     std::vector<Position> oldBlocks = currentBlocks;
     currentBlocks.clear();
     int x = 0, y = 0;
@@ -284,7 +286,7 @@ void Grid::display(){
         for (int x=0; x<width; x++){
             gridMatrix[y][x]->display();
         }
-        std::cout << std::endl;
+        printw("\n");
     }
 }
 
@@ -294,5 +296,4 @@ Grid::~Grid(){
             delete gridMatrix[y][x];
         }
     }
-    delete currentTetrimino;
 }

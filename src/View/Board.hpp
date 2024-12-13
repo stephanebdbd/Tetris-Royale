@@ -13,7 +13,7 @@ class LeadBoard{
 
 class PlayerBoard{
     Game *game_;
-    const char space[9] = "      ";
+    const char space[5] = "    ";
 public:
     PlayerBoard(Game *game);
     void clear();
