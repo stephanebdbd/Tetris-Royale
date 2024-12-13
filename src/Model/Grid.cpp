@@ -34,7 +34,7 @@ Colour Cell::getColour(){
 }
 
 void Cell::display(){
-    printw("%s", getColourChar(colour));  // Permet d'utiliser la fonction getColourChar de utils.hpp
+    getColourChar(colour);  // Permet d'utiliser la fonction getColourChar de utils.hpp
 }
 
 Grid::Grid(){

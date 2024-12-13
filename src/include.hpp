@@ -11,8 +11,7 @@
 #include <unistd.h>
 #include <cctype>
 #include <chrono>
-#include <locale.h>
-
+#include <pthread.h>
 
 // NCURSES
 #include <ncurses.h>

@@ -15,7 +15,7 @@ bool getCanGoDown(std::chrono::time_point<std::chrono::system_clock> start){
     return (duration.count() % 1000) == 0;
 }
 
-void getUserData(std::string &str, bool &b, int &buffer) {
+void getUserData(std::string &str, bool &b, int &buffer, int i) {
     while (b) {
         buffer = getch();
         if (buffer == ERR) {
@@ -28,7 +28,8 @@ void getUserData(std::string &str, bool &b, int &buffer) {
         }
         else if (isascii(buffer) && (buffer != '\n') && (buffer != ERASE)) {
             str += buffer;
-            printw("%c", buffer);
+            if (i == 0) printw("%d", buffer);
+            else printw("*");
         }
         b = buffer != '\n';
         if (!b && str.size() == 0) b = true;
@@ -41,48 +42,20 @@ int main() {
         std::string s = "";
     };
 
-
-    //clearScreen();
     initscr();
-    if (stdscr == nullptr) {
-        std::cerr << "Erreur d'initialisation de ncurses." << std::endl;
-        return 1;
-    }
-    noecho();
-    cbreak();
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
+    cbreak();
+    noecho();
 
-    if (setlocale(LC_ALL, "en_US.UTF-8") == nullptr) {
-        std::cerr << "Erreur de configuration de la locale." << std::endl;
-        endwin();
-        return 1;
-    }
-    
-    // Vérifier si le terminal supporte UTF-8
-    if (!has_colors()) {
-        printw("Le terminal ne supporte pas les couleurs.");
-        refresh();
-        getch();
-        endwin();
-        return 1;
-    }
+    enableColors();
 
-    start_color();
-    
-    printw("Emoji 🟫 affiché avec printw.\n");
-    printw("blabla");
-    refresh();
-    getch();
-    endwin();
-    /*
     boolNString userData[2]; int buffer, i = 0;
 
-    
     for (auto &u:userData){
         if (i == 0) printw("Username: ");
         else printw("\nPassword: ");
-        getUserData(u.s, u.b, buffer);
+        getUserData(u.s, u.b, buffer, i);
     }
 
 
@@ -93,18 +66,16 @@ int main() {
 
     auto start = std::chrono::system_clock::now();
 
-    //playerBoard.display();
+    playerBoard.display();
 
     // Bouce principale du jeu
     while (game.isRunning()) {
-        if (getCanGoDown(start))
-            game.moveTetrimino(Direction::DOWN);
-        else {
+        while (getCanGoDown(start)) {
             buffer = getch();
             if (buffer == ERR) {
                 perror("getch");
                 game.setIsRunning(false);
-                //playerBoard.display();
+                playerBoard.display();
                 return 1;
             }
             if (buffer == ESC)
@@ -112,15 +83,16 @@ int main() {
             else
              controller.processKeyInput(buffer);
         }
-        //if (game.getHasMoved())
-            //playerBoard.display();
+        game.moveTetrimino(Direction::DOWN);
+        if (game.getHasMoved())
+            playerBoard.display();
+        refresh();
     }
 
-    //if (game.getHasMoved()) playerBoard.display();
+    if (game.getHasMoved()) playerBoard.display();
     printw("Game Over!\n");
 
-    */
-    //endwin();
+    endwin();
 
     return 0;
 }
