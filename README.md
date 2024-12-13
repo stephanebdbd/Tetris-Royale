@@ -22,7 +22,7 @@ Ce projet est un jeu de Tetris réalisé par notre équipe dans le cadre du cour
 
 ## Utilisation
 
-1. compiler le code source avec le Makefile et éxecuter le jeu avec la commande `./tetris`.
+1. compiler le code source avec le Makefile (dans le dossier src) et éxecuter le jeu avec la commande `./tetris`.
 2. Entrez votre nom d'utilisateur et mot de passe pour vous connecter.
 3. Utilisez les commandes clavier suivantes pendant le jeu :
    - `q` : Déplacer le tétromino vers la gauche.
