@@ -43,12 +43,9 @@ enum class Direction {
     DOWN,
 };
 
-const char ERASE = '\x7f';
 const char ESC = '\x1b';
 
 inline void setColors();
-inline void enableColors();
-void getColourChar(Colour colour);
 
 // Activer les couleurs
 inline void enableColors() {
@@ -60,18 +57,6 @@ inline void enableColors() {
     start_color();
     setColors();
 }
-
-nCurseColor colors[] = {
-        {1, 1000, 0, 0},        // Rouge
-        {2, 1000, 1000, 0},     // Jaune
-        {3, 0, 1000, 0},        // Vert
-        {4, 0, 0, 1000},        // Bleu foncé
-        {5, 0, 1000, 1000},     // Bleu clair
-        {6, 1000, 0, 1000},     // Mauve
-        {7, 1000, 1000, 1000},  // Blanc
-        {8, 0, 0, 0},           // Noir
-        {9, 800, 500, 0}        // Orange (approximée)
-};
 
 // Définir des couleurs personnalisées avec init_color()
 inline void setColors() {
@@ -96,57 +81,54 @@ inline void setColors() {
     init_pair(9, 9, 9);                        // Orange sur orange
 }
 
-void getColourChar(Colour colour) {
+inline void getColourChar(Colour colour) {
     switch (colour) {
         case Colour::BLACK:
             attron(COLOR_PAIR(8));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(8));
             break;
         case Colour::WHITE:
             attron(COLOR_PAIR(7));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(7));
             break;
         case Colour::ORANGE:
             attron(COLOR_PAIR(9));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(9));
             break;
         case Colour::LIGHT_BLUE:
             attron(COLOR_PAIR(5));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(5));
             break;
         case Colour::YELLOW:
             attron(COLOR_PAIR(2));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(2));
             break;
         case Colour::GREEN:
             attron(COLOR_PAIR(3));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(3));
             break;
         case Colour::RED:
             attron(COLOR_PAIR(1));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(1));
             break;
         case Colour::PURPLE:
             attron(COLOR_PAIR(6));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(6));
             break;
         case Colour::DARK_BLUE:
             attron(COLOR_PAIR(4));
-            printw(" ");
+            printw("  ");
             attroff(COLOR_PAIR(4));
             break;
         default:
-            attron(COLOR_PAIR(5));
-            printw(" ");
-            attroff(COLOR_PAIR(5));
             break;
     }
 }
