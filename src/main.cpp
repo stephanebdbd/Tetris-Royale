@@ -18,21 +18,19 @@ bool getCanGoDown(std::chrono::time_point<std::chrono::system_clock> start){
 void getUserData(std::string &str, bool &b, int &buffer, int i) {
     while (b) {
         buffer = getch();
-        if (buffer == ERR) {
-            perror("getch");
-            return;
-        }
-        if (buffer == ERASE && (str.size() > 0)) {
+        if (buffer == KEY_BACKSPACE && (str.size() > 0)) {
             str.pop_back();
             printw("\b \b");
+            refresh();
         }
-        else if (isascii(buffer) && (buffer != '\n') && (buffer != ERASE)) {
-            str += buffer;
-            if (i == 0) printw("%d", buffer);
+        else if (isascii(buffer) && (buffer != '\n') && (buffer != KEY_BACKSPACE)) {
+            str += static_cast<char>(buffer);
+            if (i == 0) printw("%c", buffer);
             else printw("*");
+            refresh();
         }
-        b = buffer != '\n';
-        if (!b && str.size() == 0) b = true;
+        b = (buffer != '\n');
+        if (str.size() == 0 && !b) b = true;
     }
 }
 
@@ -42,8 +40,9 @@ int main() {
         std::string s = "";
     };
 
+    clearScreen();
+
     initscr();
-    nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
     cbreak();
     noecho();
@@ -55,9 +54,12 @@ int main() {
     for (auto &u:userData){
         if (i == 0) printw("Username: ");
         else printw("\nPassword: ");
+        refresh();
         getUserData(u.s, u.b, buffer, i);
+        i++;
     }
 
+    nodelay(stdscr, TRUE);
 
     Player player{userData[0].s, userData[1].s};
     Game game{&player};
@@ -67,31 +69,28 @@ int main() {
     auto start = std::chrono::system_clock::now();
 
     playerBoard.display();
-
+    refresh();
+    buffer = 0;
+    
     // Bouce principale du jeu
     while (game.isRunning()) {
-        while (getCanGoDown(start)) {
-            buffer = getch();
-            if (buffer == ERR) {
-                perror("getch");
-                game.setIsRunning(false);
-                playerBoard.display();
-                return 1;
-            }
-            if (buffer == ESC)
-                game.setIsRunning(false);
-            else
-             controller.processKeyInput(buffer);
-        }
-        game.moveTetrimino(Direction::DOWN);
+        buffer = getch();
+        if (buffer == ESC)
+            game.setIsRunning(false);
+        else if (!getCanGoDown(start))
+            controller.processKeyInput(buffer);
+        else
+            game.moveTetrimino(Direction::DOWN);
         if (game.getHasMoved())
             playerBoard.display();
         refresh();
     }
 
     if (game.getHasMoved()) playerBoard.display();
-    printw("Game Over!\n");
-
+    printw("\nGame Over!\n");
+    refresh();
+    getch();
+    napms(1000);
     endwin();
 
     return 0;
