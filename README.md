@@ -28,7 +28,7 @@ Ce projet est un jeu de Tetris réalisé par notre équipe dans le cadre du cour
    - `fleche à gauche` : Déplacer le tétromino vers la gauche.
    - `fleche à droite` : Déplacer le tétromino vers la droite.
    - `maintenir la fleche en bas ` : Accélérer la descente du tétromino.
-   - 'fleche en haut' : Tourner le tétromino de 90 degrés dans le sens des aiguilles d'une montre.
+   - `fleche en haut` : Tourner le tétromino de 90 degrés dans le sens des aiguilles d'une montre.
    - `ESC` : Quitter le jeu.
 4. "Game Over" s'affiche  lorsque les tétrominos atteignent le haut du plateau.
 5. Votre score est affiché en bas de la grille.
