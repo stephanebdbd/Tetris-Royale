@@ -1,4 +1,21 @@
-# Si des commits ont été faits avec le nom "simon12" et avec l'addresse mail "simon12@gmail.com", ajouter la ligne suivant pour qu'il soit associé à "Simon Renard" et l'addresse "simon.renard@ulb.be"
-Simon Renard <simon.renard@ulb.be> simon12 <simon12@gmail.com>
-Valentin Dias <valentin.dias@ulb.be> Valleo <dias.valentin17@gmail.com>
-TBKNbr1 <stephane.badi.budu@ulb.be> Chris BADI BUDU <stephane.badi.budu@ulb.be>
+# Vous pouvez aussi faire `git config user.email "you.email@ulb.be"` avant de commit
+# https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration
+Alexis_Reynouard	<alexis.reynouard@ulb.be>
+Anthony_Van_Der_Wilt	<anthony.van.der.wilt@ulb.be>
+Ikram_Boutaleb	<ikram.boutaleb@ulb.be>
+Ismail_Rhabouqi	<ismail.rhabouqi@ulb.be>
+Ismail_Rhabouqi	<ismail.rhabouqi@ulb.be>	<irha0001@di-pc67.padi.addi.ulb.ac.be>
+Ismail_Rhabouqi	<ismail.rhabouqi@ulb.be>	<irha0001@di-pc91.padi.addi.ulb.ac.be>
+Mohamed_Boutaleb	<mohamed.boutaleb2@ulb.be>
+Oumaima_Hamdach	<oumaima.hamdach@ulb.be>
+Oumaima_Hamdach	<oumaima.hamdach@ulb.be>	<oumaimahamdach7@gmail.com>
+Rayan_Rabeh	<rayan.rabeh@ulb.be>
+Rayan_Rabeh	<rayan.rabeh@ulb.be>	<rayan@MacBook-Air-de-Rayan.local>
+Rayan_Rabeh	<rayan.rabeh@ulb.be>	<rayan@dhcp-100-64-227-138.guest.ulb.ac.be>
+Simon_Renard	<simon.renard@ulb.be>
+Simon_Renard	<simon.renard@ulb.be>	simon12	<simon12@gmail.com>
+Chris_Badi_Budu	<stephane.badi.budu@ulb.be>
+Chris_Badi_Budu	<stephane.badi.budu@ulb.be>	<stephane.badu.budu@ulb.be>
+Valentin_Dias	<valentin.dias@ulb.be>
+Valentin_Dias	<valentin.dias@ulb.be>	Valleo	<dias.valentin17@gmail.com>
+# vim: ts=36 noexpandtab list listchars=tab\:\ -\  ft=conf
