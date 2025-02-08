@@ -5,12 +5,12 @@
 #include <vector>
 #include <array>
 #include <cstdio>
-#include <cstdlib>
 #include <cstddef>
 #include <string>
 #include <unistd.h>
 #include <cctype>
 #include <chrono>
+#include <memory> 
 
 // NCURSES
 #include <ncurses.h>

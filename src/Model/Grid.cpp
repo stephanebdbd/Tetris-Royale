@@ -46,8 +46,8 @@ Grid::Grid(){
     }
 }
 
-void Grid::addTetrimino(Tetrimino* tetrimino){
-        currentTetrimino = tetrimino;
+void Grid::addTetrimino(std::unique_ptr<Tetrimino> tetrimino){
+        currentTetrimino = std::move(tetrimino);
         if (currentTetrimino != nullptr){
             currentType = currentTetrimino->getType();
             upperLeft = Position{width/2, 0};
@@ -241,7 +241,11 @@ void Grid::verifyLines(LinesStatus linesStatus, bool& recursion){
                     gridMatrix[y2][x]->setdefaultColour();
                     gridMatrix[y2+1][x]->setColour(colour);
                     y2++; recursion = true;
-}}}}}
+                }
+            }
+        }
+    }
+}
 
 void Grid::exchangeColors(int tmp, int y, int x){
     if (x!=0){

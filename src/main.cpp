@@ -5,8 +5,7 @@
 #include "include.hpp"
 
 void clearScreen() {
-    if (std::system("clear") != 0)
-        perror("std::system(\"clear\")");
+    refresh();  
 }
 
 bool getCanGoDown(std::chrono::time_point<std::chrono::system_clock> start){
@@ -21,14 +20,13 @@ void getUserData(std::string &str, bool &b, int &buffer, int i) {
         if (buffer == KEY_BACKSPACE && (str.size() > 0)) {
             str.pop_back();
             printw("\b \b");
-            refresh();
         }
         else if (isascii(buffer) && (buffer != '\n') && (buffer != KEY_BACKSPACE)) {
             str += static_cast<char>(buffer);
             if (i == 0) printw("%c", buffer);
             else printw("*");
-            refresh();
         }
+        clearScreen();
         b = (buffer != '\n');
         if (str.size() == 0 && !b) b = true;
     }

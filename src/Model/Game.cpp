@@ -2,9 +2,8 @@
 
 Game::Game(Player* player) : player{player} {
     srand(static_cast<unsigned>(time(nullptr)));
-    grid = new Grid();
-    currentTetrimino = new Tetrimino(static_cast<TetriminoType>(rand() % 7));
-    grid->addTetrimino(currentTetrimino);
+    currentTetrimino = std::make_unique<Tetrimino>(static_cast<TetriminoType>(rand() % 7));
+    grid.addTetrimino(std::move(currentTetrimino)); // unique ptr ne peut pas être copié
     score = 0;
 }
 
@@ -12,14 +11,14 @@ void Game::addTetrimino(bool null) {
     srand(static_cast<unsigned>(time(nullptr)));
     currentTetrimino = nullptr;
     if (!null)
-        currentTetrimino = new Tetrimino(static_cast<TetriminoType>(rand() % 7));
-    grid->addTetrimino(currentTetrimino);
+        currentTetrimino = std::make_unique<Tetrimino>(static_cast<TetriminoType>(rand() % 7));
+    grid.addTetrimino(std::move(currentTetrimino));
 }
 
 void Game::moveTetrimino(Direction direction, bool downBoost) {
     if (!checkCollision(direction)){
-        grid->moveTetrimino(direction);
-        if (grid->isTetriminoPlaced()) 
+        grid.moveTetrimino(direction);
+        if (grid.isTetriminoPlaced()) 
             checkLines(downBoost);
         if (direction == Direction::DOWN)
             updateScore(0, downBoost, false);
@@ -29,17 +28,17 @@ void Game::moveTetrimino(Direction direction, bool downBoost) {
 }
 
 void Game::rotateTetrimino() {
-    grid->rotateTetrimino();
+    grid.rotateTetrimino();
     setHasMoved();
 }
 
 void Game::checkLines(bool downBoost) {
-    int lines = grid->checkLines();
+    int lines = grid.checkLines();
     updateScore(lines, downBoost, true);
 }
 
 bool Game::checkCollision(Direction direction) {
-    return grid->checkCollision(direction);
+    return grid.checkCollision(direction);
 }
 
 void Game::updateScore(int lines, bool downBoost, bool tetriminoPlaced) {
@@ -61,8 +60,8 @@ void Game::updateScore(int lines, bool downBoost, bool tetriminoPlaced) {
 bool Game::isRunning() {
     if (!isStillRunning)
         return false;
-    if (grid->isTetriminoPlaced()){
-        if (grid->isGameOver()){
+    if (grid.isTetriminoPlaced()){
+        if (grid.isGameOver()){
             addTetrimino(true);
             setIsRunning(false);
             return false;
@@ -79,7 +78,7 @@ void Game::setIsRunning(bool running) {
 }
 
 void Game::display(){
-    grid->display();
+    grid.display();
     printw("Score: %d", score);
 }
 
@@ -96,6 +95,5 @@ void Game::setHasMoved(){
 }
 
 Game::~Game(){
-    delete currentTetrimino;
-    delete grid;
+    // avec unique_ptr, pas besoin de delete currentTetrimino
 }

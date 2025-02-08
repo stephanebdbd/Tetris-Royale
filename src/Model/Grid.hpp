@@ -37,7 +37,7 @@ class Grid{
     int boxDimension;
     std::vector<std::vector<Cell*>> gridMatrix;
 
-    Tetrimino* currentTetrimino;
+    std::unique_ptr<Tetrimino> currentTetrimino;
     Colour currentColour;
     TetriminoType currentType;
     std::vector<Position> currentBlocks;
@@ -54,7 +54,7 @@ class Grid{
     void verifyLines(LinesStatus linesStatus, bool& recursion);
 public:
     Grid();
-    void addTetrimino(Tetrimino* tetrimino);
+    void addTetrimino(std::unique_ptr<Tetrimino> tetrimino);
     void moveTetrimino(Direction direction);
     int checkLines();
     void rotateTetrimino();

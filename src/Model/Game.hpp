@@ -8,9 +8,9 @@
 
 
 class Game{
-    Grid* grid;
+    Grid grid;
     Player* player;
-    Tetrimino* currentTetrimino;
+    std::unique_ptr<Tetrimino> currentTetrimino;
     const int tetriminoSpace = 4;
     int score=0;
     int comboCount=0;
