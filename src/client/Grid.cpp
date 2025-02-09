@@ -39,10 +39,40 @@ void Grid::draw() const {
 bool Grid::isLineComplete(int y) const {
     for (int x = 0; x < width; ++x) {
         if (!cells[y][x].occupied) {
+            // printw("Ligne %d, cellule %d: Vide\n", y, x);
             return false; // Si une cellule est vide, la ligne n'est pas complète
         }
+        // else {
+        //     // Cellule occupée
+        //     printw("Ligne %d, cellule %d: Occupée\n", y, x);
+        // }
     }
     return true; // Si toutes les cellules sont occupées, la ligne est complète
 }
+
+void Grid::clearLine(int y) {
+    // Déplacer toutes les lignes au-dessus de cette ligne d'une case vers le bas
+    for (int i = y; i > 0; --i) {
+        for (int x = 0; x < width; ++x) {
+            cells[i][x] = cells[i - 1][x]; // Copier les données de la ligne du dessus
+        }
+    }
+
+    // Vider la première ligne (celle qui est devenue vide après le décalage)
+    for (int x = 0; x < width; ++x) {
+        cells[0][x].occupied = false;
+        cells[0][x].symbol = ' ';
+    }
+}
+
+void Grid::clearFullLines() {
+    for (int y = 0; y < height; ++y) {
+        if (isLineComplete(y)) {
+            // printw("Ligne %d complète, suppression...\n", y);
+            clearLine(y); // Supprimer la ligne et déplacer les autres
+        }
+    }
+}
+
 
 

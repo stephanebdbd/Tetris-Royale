@@ -169,8 +169,9 @@ void Tetramino::fixToGrid(Grid &grid) {
             }
         }
     }
-    //grid.clearFullLines(); // Vérifier et supprimer les lignes complètes TODO
+    grid.clearFullLines(); // Vérifier et supprimer les lignes complètes TODO
 }
+
 // Générer un nouveau Tetramino
 void Tetramino::reset(int startX, int startY) {
     position = {startX, startY};
