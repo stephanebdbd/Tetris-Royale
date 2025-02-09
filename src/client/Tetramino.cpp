@@ -112,6 +112,45 @@ void Tetramino::draw() const {
         }
     }
 }
+
+bool Tetramino::canRotate(const Grid &grid) {
+    // Créer une copie de la forme actuelle pour vérifier la rotation
+    std::array<std::array<char, 4>, 4> tempShape = currentShape;
+    
+    // Effectuer la rotation sur la copie
+    for (int y = 0; y < 4; ++y) {
+        for (int x = 0; x < 4; ++x) {
+            tempShape[x][3 - y] = currentShape[y][x];
+        }
+    }
+
+    // Vérifier si la nouvelle forme (après rotation) entre en collision
+    for (int y = 0; y < 4; ++y) {
+        for (int x = 0; x < 4; ++x) {
+            if (tempShape[y][x] != ' ' && grid.isCellOccupied(position.x + x, position.y + y)) {
+                return false; // Il y a une collision
+            }
+        }
+    }
+
+    return true; // La rotation est possible
+}
+
+void Tetramino::rotate() {
+    // Créer une nouvelle matrice pour la forme après rotation
+    std::array<std::array<char, 4>, 4> newShape = currentShape;
+
+    // Effectuer la rotation de 90° à droite
+    for (int y = 0; y < 4; ++y) {
+        for (int x = 0; x < 4; ++x) {
+            newShape[x][3 - y] = currentShape[y][x];
+        }
+    }
+
+    // Mettre à jour la forme actuelle après la rotation
+    currentShape = newShape;
+}
+
 void Tetramino::clear() const {
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
@@ -121,7 +160,6 @@ void Tetramino::clear() const {
         }
     }
 }
-// Fixer la pièce à sa position
 // Fixer la pièce à sa position et vérifier les lignes complètes
 void Tetramino::fixToGrid(Grid &grid) {
     for (int y = 0; y < 4; ++y) {

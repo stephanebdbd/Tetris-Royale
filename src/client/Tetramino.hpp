@@ -10,6 +10,8 @@ class Tetramino {
 public:
     Tetramino(int startX, int startY, int gridWidth, int gridHeight);
     void draw() const;
+    bool canRotate(const Grid &grid);
+    void rotate();
     bool canMoveDown(const Grid &grid) const;
     void moveDown(Grid &grid);
     bool canMove(const Grid &grid, int dx, int dy) const;

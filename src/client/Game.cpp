@@ -31,7 +31,10 @@ void Game::run() {
                 ch = getch(); // Lire la touche de direction
                 switch (ch) {
                     case 65: // Flèche haut
-                        break; // Pas de mouvement vers le haut pour l'instant
+                        if (currentPiece.canRotate(grid)) {
+                            currentPiece.rotate();
+                        }
+                        break;
                     case 66: // Flèche bas
                         currentPiece.moveDown(grid); // Déplacer vers le bas
                         break;
