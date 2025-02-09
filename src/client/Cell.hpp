@@ -1,7 +1,7 @@
 #ifndef CELL_HPP
 #define CELL_HPP
 
-#include <ncurses.h>  // Pour utiliser les couleurs si nécessaire
+#include <ncurses.h>
 
 class Cell {
 public:
