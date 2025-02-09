@@ -13,6 +13,7 @@ public:
     bool isLineComplete(int y) const;
     void clearLine(int y);
     int clearFullLines();
+    void applyGravity();
     int getWidth() const;
     int getHeight() const;
 
