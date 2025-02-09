@@ -1,4 +1,5 @@
 #include "Grid.hpp"
+#include <ncurses.h>
 
 Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w)) {}
 
@@ -13,7 +14,7 @@ void Grid::markCell(int x, int y, char symbol) {
 }
 // Vérifier si une cellule est occupée
 bool Grid::isCellOccupied(int x, int y) const {
-    if (cells[y][x].occupied) {
+    if (cells[y][x].occupied || x < 1 || x >= width + 1 || y >= height) {
         return true;
     }
     return false;
