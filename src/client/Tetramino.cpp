@@ -1,4 +1,5 @@
 #include "Tetramino.hpp"
+#include <iostream>
 
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
     : position{startX, startY}, gridWidth(w), gridHeight(h) {
@@ -124,17 +125,22 @@ bool Tetramino::canRotate(const Grid &grid) {
         }
     }
 
-    // Vérifier si la nouvelle forme (après rotation) entre en collision
+    // Vérifier si la nouvelle forme (après rotation) entre en collision ou sort des limites
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
-            if (tempShape[y][x] != ' ' && grid.isCellOccupied(position.x + x, position.y + y)) {
-                return false; // Il y a une collision
+            int newX = position.x + x;
+            int newY = position.y + y;
+
+            if (tempShape[y][x] != ' ') {
+                if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
+                    return false;
+                }
             }
         }
     }
-
     return true; // La rotation est possible
 }
+
 
 void Tetramino::rotate() {
     // Créer une nouvelle matrice pour la forme après rotation

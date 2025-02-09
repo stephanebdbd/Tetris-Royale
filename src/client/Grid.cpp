@@ -7,14 +7,14 @@ int Grid::getWidth() const { return width; }
 int Grid::getHeight() const { return height; }
 // Marquer une cellule comme occupée
 void Grid::markCell(int x, int y, char symbol) {
-    if (y >= 0 && y < height && x >= 0 && x < width) {
+    if (y >= 0 && y < height && x >= 1 && x <= width + 1) {
         cells[y][x].occupied = true;
         cells[y][x].symbol = symbol;
     }
 }
 // Vérifier si une cellule est occupée
 bool Grid::isCellOccupied(int x, int y) const {
-    if (cells[y][x].occupied || x < 1 || x >= width + 1 || y >= height) {
+    if (cells[y][x].occupied || x < 1 || x > width + 1 || y >= height) {
         return true;
     }
     return false;
