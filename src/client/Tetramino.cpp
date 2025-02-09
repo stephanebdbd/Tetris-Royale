@@ -130,7 +130,6 @@ bool Tetramino::canRotate(const Grid &grid) {
         for (int x = 0; x < 4; ++x) {
             int newX = position.x + x;
             int newY = position.y + y;
-
             if (tempShape[y][x] != ' ') {
                 if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
                     return false;

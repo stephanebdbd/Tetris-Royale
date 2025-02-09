@@ -37,15 +37,11 @@ void Grid::draw() const {
 }
     // Vérifier si une ligne est complète
 bool Grid::isLineComplete(int y) const {
-    for (int x = 0; x < width; ++x) {
+    for (int x = 1; x < width; ++x) {
         if (!cells[y][x].occupied) {
             // printw("Ligne %d, cellule %d: Vide\n", y, x);
             return false; // Si une cellule est vide, la ligne n'est pas complète
         }
-        // else {
-        //     // Cellule occupée
-        //     printw("Ligne %d, cellule %d: Occupée\n", y, x);
-        // }
     }
     return true; // Si toutes les cellules sont occupées, la ligne est complète
 }
@@ -68,7 +64,6 @@ void Grid::clearLine(int y) {
 void Grid::clearFullLines() {
     for (int y = 0; y < height; ++y) {
         if (isLineComplete(y)) {
-            // printw("Ligne %d complète, suppression...\n", y);
             clearLine(y); // Supprimer la ligne et déplacer les autres
         }
     }
