@@ -1,7 +1,6 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include "Grid.hpp"
 #include "Tetramino.hpp"
 #include "Timer.hpp"
 
