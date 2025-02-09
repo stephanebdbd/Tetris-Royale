@@ -55,7 +55,7 @@ void Grid::clearLine(int y) {
     }
 
     // Vider la première ligne (celle qui est devenue vide après le décalage)
-    for (int x = 0; x < width; ++x) {
+    for (int x = 1; x < width; ++x) {
         cells[0][x].occupied = false;
         cells[0][x].symbol = ' ';
     }
