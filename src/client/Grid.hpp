@@ -12,7 +12,7 @@ public:
     bool isCellOccupied(int x, int y) const;
     bool isLineComplete(int y) const;
     void clearLine(int y);
-    void clearFullLines();
+    int clearFullLines();
     int getWidth() const;
     int getHeight() const;
 

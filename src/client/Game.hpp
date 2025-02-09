@@ -3,6 +3,7 @@
 
 #include "Tetramino.hpp"
 #include "Timer.hpp"
+#include "Score.hpp"
 
 class Game {
 public:
@@ -13,6 +14,7 @@ private:
     Grid grid;
     Tetramino currentPiece;
     Timer dropTimer;
+    Score score;
     bool running;
 };
 

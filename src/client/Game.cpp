@@ -1,8 +1,11 @@
 #include "Game.hpp"
 
 Game::Game(int gridWidth, int gridHeight) 
-    : grid(gridWidth, gridHeight), currentPiece(gridWidth / 2, 0, gridWidth, gridHeight), 
-      dropTimer(1000), running(true) {}
+    : grid(gridWidth, gridHeight), 
+      currentPiece(gridWidth / 2, 0, gridWidth, gridHeight), 
+      dropTimer(1000), 
+      score(gridWidth + 5, 2), // Position du score à droite de la grille
+      running(true) {}
 
 void Game::run() {
     initscr();
@@ -12,6 +15,7 @@ void Game::run() {
     while (running) {
         grid.draw();
         currentPiece.draw();
+        score.display(); 
         // Si le timer a expiré, tenter de descendre la pièce
         if (dropTimer.hasElapsed()) {
             if (currentPiece.canMoveDown(grid)) {
@@ -19,6 +23,11 @@ void Game::run() {
             } else {
                 // Fixer la pièce sur la grille et générer une nouvelle pièce
                 currentPiece.fixToGrid(grid);
+
+                // Vérifier combien de lignes ont été complétées
+                int linesCleared = grid.clearFullLines();
+                score.addScore(linesCleared); // Mise à jour du score
+                
                 currentPiece.reset(grid.getWidth() / 2, 0); // Réinitialiser la position de la pièce
             }
             dropTimer.reset();
