@@ -62,11 +62,14 @@ void Grid::clearLine(int y) {
 }
 
 int Grid::clearFullLines() {
+    int lines = 0;
     for (int y = 0; y < height; ++y) {
         if (isLineComplete(y)) {
+            lines++;
             clearLine(y); // Supprimer la ligne et déplacer les autres
         }
     }
+    return lines;
 }
 
 

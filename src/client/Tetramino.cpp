@@ -174,7 +174,6 @@ void Tetramino::fixToGrid(Grid &grid) {
             }
         }
     }
-    grid.clearFullLines(); // Vérifier et supprimer les lignes complètes TODO
 }
 
 // Générer un nouveau Tetramino
