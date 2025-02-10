@@ -13,6 +13,7 @@ class Cell {
 public:
     bool occupied;
     char symbol;
+    int color;
     Cell() : occupied(false), symbol(' ') {}
 };
 

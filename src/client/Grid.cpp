@@ -1,15 +1,17 @@
 #include "Grid.hpp"
 #include <ncurses.h>
+#include <iostream>
 
-Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w)) {}
+Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {}
 
 int Grid::getWidth() const { return width; }
 int Grid::getHeight() const { return height; }
 // Marquer une cellule comme occupée
-void Grid::markCell(int x, int y, char symbol) {
+void Grid::markCell(int x, int y, char symbol, int color) {
     if (y >= 0 && y < height && x >= 1 && x <= width + 1) {
         cells[y][x].occupied = true;
         cells[y][x].symbol = symbol;
+        cells[y][x].color = color;
     }
 }
 // Vérifier si une cellule est occupée
@@ -19,10 +21,18 @@ bool Grid::isCellOccupied(int x, int y) const {
     }
     return false;
 }
-void Grid::draw() const {
+void Grid::draw() {
     for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            mvaddch(y, x, cells[y][x].symbol);
+        for (int x = 1; x <= width; ++x) {
+            int color = cells[y][x].color;
+            if (cells[y][x].occupied) {
+                attron(COLOR_PAIR(color));
+                mvaddch(y, x, cells[y][x].symbol);
+                attroff(COLOR_PAIR(color));
+            }
+            else {
+                mvaddch(y, x, ' ');
+            }
         }
     }
     

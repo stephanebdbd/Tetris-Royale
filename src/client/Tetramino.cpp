@@ -4,8 +4,22 @@
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
     : position{startX, startY}, gridWidth(w), gridHeight(h) {
     initializeShapes();
-    selectRandomShape(); // Choisir une forme aléatoire au départ
+    selectRandomShape(); // Choisir une forme aléatoire au départµ
 }
+
+void Tetramino::initializeColors () {
+    start_color();
+    use_default_colors(); // Garde le fond du terminal
+    init_pair(1, COLOR_RED, -1);    // Z - Rouge
+    init_pair(2, COLOR_YELLOW, -1); // O - Jaune
+    init_pair(3, COLOR_GREEN, -1);  // S - Vert
+    init_pair(4, COLOR_CYAN, -1);   // I - Cyan
+    init_pair(5, COLOR_BLUE, -1);   // J - Bleu
+    init_pair(6, COLOR_MAGENTA, -1);// T - Magenta
+    init_pair(7, COLOR_WHITE, -1); // L - Blanc et pas Orange car pas de couleur orange (max 8 couleur dont noir et blanc)
+}
+
+
 
 void Tetramino::initializeShapes() {
     // Définir les formes des Tetraminos
@@ -54,6 +68,17 @@ void Tetramino::selectRandomShape() {
     srand(time(0));
     int index = rand() % shapes.size(); // Sélectionner un index aléatoire parmi les formes disponibles
     currentShape = shapes[index];
+    switch (index) {
+        case 0: shapeSymbols = 'I'; break; // I - Cyan
+        case 1: shapeSymbols = 'L'; break; // L - Orange
+        case 2: shapeSymbols = 'J'; break; // J - Bleu
+        case 3: shapeSymbols = 'T'; break; // T - Magenta
+        case 4: shapeSymbols = 'O'; break; // O - Jaune
+        case 5: shapeSymbols = 'Z'; break; // Z - Rouge
+        case 6: shapeSymbols = 'S'; break; // S - Vert
+        default:shapeSymbols  = ' '; break;
+    }
+    color = chooseColor(shapeSymbols);
 }
 
 // Vérifie si la pièce peut descendre
@@ -93,13 +118,12 @@ bool Tetramino::canMove(const Grid& grid, int dx, int dy) const {
 }
 void Tetramino::moveLeft(Grid &grid) {
     if (canMove(grid, -1, 0)) { // Vérifie si on peut bouger d'une case à gauche
-        clear();
+
         position.x -= 1; // Déplacer la pièce à gauche
     }
 }
 void Tetramino::moveRight(Grid &grid) {
     if (canMove(grid, 1, 0)) { // Vérifie si on peut bouger d'une case à droite
-        clear();
         position.x += 1; // Déplacer la pièce à droite
     }
 }
@@ -108,10 +132,37 @@ void Tetramino::draw() const {
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
             if (currentShape[y][x] != ' ') {
+                int color = chooseColor(shapeSymbols);
+                colorOn(color);
                 mvaddch(position.y + y, position.x + x, currentShape[y][x]);
+                colorOff(color);
             }
         }
     }
+}
+
+
+int Tetramino::chooseColor(char shapeSymbol) const {
+    switch (shapeSymbol) {
+        case 'Z': return 1; // Rouge
+        case 'O': return 2; // Jaune
+        case 'S': return 3; // Vert
+        case 'I': return 4; // Cyan
+        case 'J': return 5; // Bleu
+        case 'T': return 6; // Magenta
+        case 'L': return 7; // Blanc / Orange
+        default: return 0;  // Aucune couleur
+    }
+}
+
+
+void Tetramino::colorOn(int color) const {
+    initializeColors();
+    attron(COLOR_PAIR(color));
+}
+
+void Tetramino::colorOff(int color) const {
+    attroff(COLOR_PAIR(color));
 }
 
 bool Tetramino::canRotate(const Grid &grid) {
@@ -156,15 +207,6 @@ void Tetramino::rotate() {
     currentShape = newShape;
 }
 
-void Tetramino::clear() const {
-    for (int y = 0; y < 4; ++y) {
-        for (int x = 0; x < 4; ++x) {
-            if (currentShape[y][x] != ' ') {
-                mvaddch(position.y + y, position.x + x, ' '); // Efface l'ancienne position
-            }
-        }
-    }
-}
 // Fixer la pièce à sa position et vérifier les lignes complètes
 void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
     for (int y = 0; y < 4; ++y) {
@@ -176,7 +218,7 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
                     gameOver = true; // Déclencher le game over
                     return;
                 }
-                grid.markCell(gridX, gridY, currentShape[y][x]);
+                grid.markCell(gridX, gridY, currentShape[y][x], color); // Marquer la cellule comme occupée
             }
         }
     }
