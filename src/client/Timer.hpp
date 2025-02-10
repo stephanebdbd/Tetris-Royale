@@ -8,6 +8,7 @@ public:
     Timer(int ms);
     bool hasElapsed();
     void reset();
+    void decreaseInterval(int amount);
 
 private:
     std::chrono::steady_clock::time_point lastUpdate;

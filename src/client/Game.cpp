@@ -31,8 +31,11 @@ void Game::run() {
                 if (!gameOver) { 
                     int linesCleared = grid.clearFullLines();
                     score.addScore(linesCleared);
+
+                    dropTimer.decreaseInterval(50); // Diminue le temps d'attente entre chaque chute
                     currentPiece.reset(grid.getWidth() / 2, 0);
-                } else {
+                }
+                else {
                     running = false;
                 }
             }
