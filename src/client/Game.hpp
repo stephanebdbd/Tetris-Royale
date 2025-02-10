@@ -16,6 +16,7 @@ private:
     Timer dropTimer;
     Score score;
     bool running;
+    bool gameOver;
 };
 
 #endif

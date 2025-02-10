@@ -166,15 +166,22 @@ void Tetramino::clear() const {
     }
 }
 // Fixer la pièce à sa position et vérifier les lignes complètes
-void Tetramino::fixToGrid(Grid &grid) {
+void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
             if (currentShape[y][x] != ' ') {
-                grid.markCell(position.x + x, position.y + y, currentShape[y][x]);
+                int gridX = position.x + x;
+                int gridY = position.y + y;
+                if (gridY <= 0) { // Si la pièce est en dehors de la grille
+                    gameOver = true; // Déclencher le game over
+                    return;
+                }
+                grid.markCell(gridX, gridY, currentShape[y][x]);
             }
         }
     }
 }
+
 
 // Générer un nouveau Tetramino
 void Tetramino::reset(int startX, int startY) {

@@ -17,7 +17,7 @@ public:
     bool canMove(const Grid &grid, int dx, int dy) const;
     void moveLeft(Grid &grid);
     void moveRight(Grid &grid);
-    void fixToGrid(Grid &grid);
+    void fixToGrid(Grid &grid, bool &gameOver);
     void reset(int startX, int startY);
 
 private:
