@@ -4,30 +4,30 @@
 
 Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {}
 
-int Grid::getWidth() const { return width; }
-int Grid::getHeight() const { return height; }
 // Marquer une cellule comme occupée
 void Grid::markCell(int x, int y, char symbol, int color) {
     if (y >= 0 && y < height && x >= 1 && x <= width + 1) {
-        cells[y][x].occupied = true;
-        cells[y][x].symbol = symbol;
-        cells[y][x].color = color;
+        cells[y][x].setOccupied(true);
+        cells[y][x].setSymbol(symbol);
+        cells[y][x].setColor(color);
     }
 }
+
 // Vérifier si une cellule est occupée
 bool Grid::isCellOccupied(int x, int y) const {
-    if (cells[y][x].occupied || x < 1 || x > width + 1 || y >= height) {
-        return true;
+    if (x < 1 || x > width + 1 || y >= height) {
+        return true; // Hors des limites de la grille
     }
-    return false;
+    return cells[y][x].isOccupied(); // Vérifier si la cellule est occupée
 }
+
 void Grid::draw() {
     for (int y = 0; y < height; ++y) {
         for (int x = 1; x <= width; ++x) {
-            int color = cells[y][x].color;
-            if (cells[y][x].occupied) {
+            int color = cells[y][x].getColor();
+            if (cells[y][x].isOccupied()) {
                 attron(COLOR_PAIR(color));
-                mvaddch(y, x, cells[y][x].symbol);
+                mvaddch(y, x, cells[y][x].getSymbol());
                 attroff(COLOR_PAIR(color));
             }
             else {
@@ -45,39 +45,52 @@ void Grid::draw() {
         mvaddch(height, x, '-'); // Mur bas
     }
 }
-    // Vérifier si une ligne est complète
+
+// Vérifier si une ligne est complète
 bool Grid::isLineComplete(int y) const {
-    for (int x = 1; x < width + 1; ++x) {
-        if (!cells[y][x].occupied) {
+    for (int x = 1; x <= width; ++x) {
+        if (!cells[y][x].isOccupied()) {
             return false; // Si une cellule est vide, la ligne n'est pas complète
         }
     }
     return true; // Si toutes les cellules sont occupées, la ligne est complète
 }
 
-
 void Grid::clearLine(int y) {
-    // Déplacer toutes les lignes au-dessus de cette ligne d'une case vers le bas
-    for (int i = y; i > 0; --i) {
-        for (int x = 1; x <= width; ++x) {  
-            cells[i][x] = cells[i - 1][x]; // Copier la ligne du dessus
+    for (int x = 1; x <= width; ++x) {
+        cells[y][x].setOccupied(false);
+        cells[y][x].setSymbol(' ');
+        cells[y][x].setColor(0);
+    }
+}
+
+
+void Grid::applyGravity() {
+    for (int y = height - 1; y > 0; --y) {
+        for (int x = 1; x <= width; ++x) {
+            // si la cellule actuelle est vide et la cellule au-dessus est occupée
+            if (!cells[y][x].isOccupied() && cells[y - 1][x].isOccupied()) {
+                // Déplacer la cellule occupée vers le bas (donc dans la cellule actuelle)
+                cells[y][x] = cells[y - 1][x];
+                // Vider la cellule d'origine (donc la cellule au-dessus)
+                cells[y - 1][x].setOccupied(false);
+                cells[y - 1][x].setSymbol(' ');
+                cells[y - 1][x].setColor(0);
+            }
         }
     }
-    for (int x = 1; x <= width; ++x) {
-        mvaddch(y, x, ' '); // Effacer visuellement la ligne supprimée
-    }
-    refresh();
 }
 
 int Grid::clearFullLines() {
-    int lines = 0;
+    int linesCleared = 0;
     for (int y = 0; y < height; ++y) {
         if (isLineComplete(y)) {
-            lines++;
+            linesCleared++;
             clearLine(y); // Supprimer la ligne et déplacer les autres
+            applyGravity();
         }
     }
-    return lines;
+    return linesCleared;
 }
 
 

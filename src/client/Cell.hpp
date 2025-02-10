@@ -9,12 +9,20 @@ struct Coord {
 };
 
 // Classe représentant une cellule de la grille
-class Cell {
-public:
-    bool occupied;
-    char symbol;
-    int color;
-    Cell() : occupied(false), symbol(' ') {}
+class Cell { 
+        bool occupied;
+        int color;
+        char symbol;
+
+    public:
+        bool isOccupied() const { return occupied; }
+        char getSymbol() const { return symbol; }
+        int getColor() const { return color; }
+
+        void setOccupied(bool value) { occupied = value; }
+        void setSymbol(char value) { symbol = value; }
+        void setColor(int value) { color = value; }
+        Cell() : occupied(false), symbol(' ') {}
 };
 
 #endif

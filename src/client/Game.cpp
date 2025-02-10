@@ -17,10 +17,7 @@ void Game::run() {
 
     while (running && !gameOver) { 
         erase(); // Efface uniquement le contenu sans supprimer l'affichage
-
-        grid.draw();
-        currentPiece.draw();
-        score.display(); 
+        showGame();
 
         // Si le timer a expiré, tenter de descendre la pièce
         if (dropTimer.hasElapsed()) {
@@ -42,23 +39,36 @@ void Game::run() {
             dropTimer.reset();
         }
 
-        int ch = getch();
-        if (ch == KEY_UP) { if (currentPiece.canRotate(grid)) currentPiece.rotate(); }
-        if (ch == KEY_DOWN) { currentPiece.moveDown(grid); }
-        if (ch == KEY_RIGHT) { currentPiece.moveRight(grid); }
-        if (ch == KEY_LEFT) { currentPiece.moveLeft(grid); }
-        if (ch == 'q') running = false;
-
+        userInput();
         refresh(); // Rafraîchir l'affichage après toutes les modifications
     }
 
+    showGameOver();
+}
+
+void Game::showGame() {
+    grid.draw();
+    currentPiece.draw();
+    score.display();
+}
+
+void Game::userInput() {
+    int ch = getch();
+    if (ch == KEY_UP) { if (currentPiece.canRotate(grid)) currentPiece.rotate(); }
+    if (ch == KEY_DOWN) { currentPiece.moveDown(grid); }
+    if (ch == KEY_RIGHT) { currentPiece.moveRight(grid); }
+    if (ch == KEY_LEFT) { currentPiece.moveLeft(grid); }
+    if (ch == 'q') running = false;
+}
+
+void Game::showGameOver() {
     // Affichage immédiat du Game Over
     erase();
     mvprintw(grid.getHeight() / 2, grid.getWidth() / 2 - 5, "GAME OVER");
     refresh();
     nodelay(stdscr, FALSE); 
-    getch();
+    getch(); 
 
-    endwin();
+    endwin(); // Restaure le terminal à son état initial
+    
 }
-

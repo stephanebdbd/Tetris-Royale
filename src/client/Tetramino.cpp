@@ -7,7 +7,7 @@ Tetramino::Tetramino(int startX, int startY, int w, int h)
     selectRandomShape(); // Choisir une forme aléatoire au départµ
 }
 
-void Tetramino::initializeColors () {
+void Tetramino::initializeColors() const {
     start_color();
     use_default_colors(); // Garde le fond du terminal
     init_pair(1, COLOR_RED, -1);    // Z - Rouge
@@ -81,6 +81,11 @@ void Tetramino::selectRandomShape() {
     color = chooseColor(shapeSymbols);
 }
 
+void Tetramino::moveDown(Grid &grid) {
+    if (canMoveDown(grid)) {
+        position.y++;
+    }
+}
 // Vérifie si la pièce peut descendre
 bool Tetramino::canMoveDown(const Grid &grid) const {
     for (int y = 0; y < 4; ++y) {
@@ -95,10 +100,15 @@ bool Tetramino::canMoveDown(const Grid &grid) const {
     return true;
 }
 
-void Tetramino::moveDown(Grid &grid) {
-    if (canMoveDown(grid)) {
-        clear();
-        position.y++;
+void Tetramino::moveLeft(Grid &grid) {
+    if (canMove(grid, -1, 0)) { // Vérifie si on peut bouger d'une case à gauche
+        position.x--; // Déplacer la pièce à gauche
+    }
+}
+
+void Tetramino::moveRight(Grid &grid) {
+    if (canMove(grid, 1, 0)) { // Vérifie si on peut bouger d'une case à droite
+        position.x++; // Déplacer la pièce à droite
     }
 }
 
@@ -116,53 +126,19 @@ bool Tetramino::canMove(const Grid& grid, int dx, int dy) const {
     }
     return true; // Aucun obstacle, déplacement possible
 }
-void Tetramino::moveLeft(Grid &grid) {
-    if (canMove(grid, -1, 0)) { // Vérifie si on peut bouger d'une case à gauche
 
-        position.x -= 1; // Déplacer la pièce à gauche
-    }
-}
-void Tetramino::moveRight(Grid &grid) {
-    if (canMove(grid, 1, 0)) { // Vérifie si on peut bouger d'une case à droite
-        position.x += 1; // Déplacer la pièce à droite
-    }
-}
+void Tetramino::rotate() {
+    // Créer une nouvelle matrice pour la forme après rotation
+    std::array<std::array<char, 4>, 4> newShape = currentShape;
 
-void Tetramino::draw() const {
+    // Effectuer la rotation de 90° à droite
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
-            if (currentShape[y][x] != ' ') {
-                int color = chooseColor(shapeSymbols);
-                colorOn(color);
-                mvaddch(position.y + y, position.x + x, currentShape[y][x]);
-                colorOff(color);
-            }
+            newShape[x][3 - y] = currentShape[y][x];
         }
     }
-}
-
-
-int Tetramino::chooseColor(char shapeSymbol) const {
-    switch (shapeSymbol) {
-        case 'Z': return 1; // Rouge
-        case 'O': return 2; // Jaune
-        case 'S': return 3; // Vert
-        case 'I': return 4; // Cyan
-        case 'J': return 5; // Bleu
-        case 'T': return 6; // Magenta
-        case 'L': return 7; // Blanc / Orange
-        default: return 0;  // Aucune couleur
-    }
-}
-
-
-void Tetramino::colorOn(int color) const {
-    initializeColors();
-    attron(COLOR_PAIR(color));
-}
-
-void Tetramino::colorOff(int color) const {
-    attroff(COLOR_PAIR(color));
+    // Mettre à jour la forme actuelle après la rotation
+    currentShape = newShape;
 }
 
 bool Tetramino::canRotate(const Grid &grid) {
@@ -191,21 +167,41 @@ bool Tetramino::canRotate(const Grid &grid) {
     return true; // La rotation est possible
 }
 
-
-void Tetramino::rotate() {
-    // Créer une nouvelle matrice pour la forme après rotation
-    std::array<std::array<char, 4>, 4> newShape = currentShape;
-
-    // Effectuer la rotation de 90° à droite
+void Tetramino::draw() const {
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
-            newShape[x][3 - y] = currentShape[y][x];
+            if (currentShape[y][x] != ' ') {
+                int color = chooseColor(shapeSymbols);
+                colorOn(color);
+                mvaddch(position.y + y, position.x + x, currentShape[y][x]);
+                colorOff(color);
+            }
         }
     }
-
-    // Mettre à jour la forme actuelle après la rotation
-    currentShape = newShape;
 }
+
+int Tetramino::chooseColor(char shapeSymbol) const {
+    switch (shapeSymbol) {
+        case 'Z': return 1; // Rouge
+        case 'O': return 2; // Jaune
+        case 'S': return 3; // Vert
+        case 'I': return 4; // Cyan
+        case 'J': return 5; // Bleu
+        case 'T': return 6; // Magenta
+        case 'L': return 7; // Blanc / Orange
+        default: return 0;  // Aucune couleur
+    }
+}
+
+void Tetramino::colorOn(int color) const {
+    initializeColors();
+    attron(COLOR_PAIR(color));
+}
+
+void Tetramino::colorOff(int color) const {
+    attroff(COLOR_PAIR(color));
+}
+
 
 // Fixer la pièce à sa position et vérifier les lignes complètes
 void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {

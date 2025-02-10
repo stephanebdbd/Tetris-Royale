@@ -6,17 +6,19 @@
 #include "Score.hpp"
 
 class Game {
-public:
-    Game(int gridWidth, int gridHeight);
-    void run();
-
-private:
     Grid grid;
     Tetramino currentPiece;
     Timer dropTimer;
     Score score;
     bool running;
     bool gameOver;
+
+    public:
+        Game(int gridWidth, int gridHeight);
+        void run();
+        void showGame();
+        void userInput();
+        void showGameOver();
 };
 
 #endif
