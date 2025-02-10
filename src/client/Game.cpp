@@ -32,7 +32,7 @@ void Game::run() {
                     int linesCleared = grid.clearFullLines();
                     score.addScore(linesCleared);
 
-                    dropTimer.decreaseInterval(50); // Diminue le temps d'attente entre chaque chute
+                    dropTimer.decreaseInterval(5); // Diminue le temps d'attente entre chaque chute
                     currentPiece.reset(grid.getWidth() / 2, 0);
                 }
                 else {
@@ -55,7 +55,6 @@ void Game::run() {
     // Affichage immédiat du Game Over
     erase();
     mvprintw(grid.getHeight() / 2, grid.getWidth() / 2 - 5, "GAME OVER");
-    mvprintw(grid.getHeight() / 2 + 1, grid.getWidth() / 2 - 8, "Press any key to exit");
     refresh();
     nodelay(stdscr, FALSE); 
     getch();
