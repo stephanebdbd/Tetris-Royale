@@ -19,8 +19,6 @@ void Tetramino::initializeColors() const {
     init_pair(7, COLOR_WHITE, -1); // L - Blanc et pas Orange car pas de couleur orange (max 8 couleur dont noir et blanc)
 }
 
-
-
 void Tetramino::initializeShapes() {
     // Définir les formes des Tetraminos
     shapes = {
@@ -63,6 +61,7 @@ void Tetramino::initializeShapes() {
           {' ', ' ', ' ', ' '}}}
     };
 };
+
 // Sélectionner une forme aléatoire
 void Tetramino::selectRandomShape() {
     srand(time(0));
@@ -86,6 +85,7 @@ void Tetramino::moveDown(Grid &grid) {
         position.y++;
     }
 }
+
 // Vérifie si la pièce peut descendre
 bool Tetramino::canMoveDown(const Grid &grid) const {
     for (int y = 0; y < 4; ++y) {
@@ -113,9 +113,9 @@ void Tetramino::moveRight(Grid &grid) {
 }
 
 bool Tetramino::canMove(const Grid& grid, int dx, int dy) const {
-    for (int y = 0; y < 4; ++y) {
-        for (int x = 0; x < 4; ++x) {
-                int newX = position.x + x + dx;
+    for (int y = 0; y < 4; ++y) { 
+        for (int x = 0; x < 4; ++x) { 
+                int newX = position.x + x + dx; 
                 int newY = position.y + y + dy;
                 if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
                     if (currentShape[y][x] != ' '){
@@ -125,6 +125,12 @@ bool Tetramino::canMove(const Grid& grid, int dx, int dy) const {
         }
     }
     return true; // Aucun obstacle, déplacement possible
+}
+
+void Tetramino::dropTetrimino(Grid &grid) {
+    while (canMoveDown(grid)) {
+        moveDown(grid);
+    }
 }
 
 void Tetramino::rotate() {
@@ -202,8 +208,7 @@ void Tetramino::colorOff(int color) const {
     attroff(COLOR_PAIR(color));
 }
 
-
-// Fixer la pièce à sa position et vérifier les lignes complètes
+// Fixer la pièce à sa position 
 void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
@@ -219,7 +224,6 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
         }
     }
 }
-
 
 // Générer un nouveau Tetramino
 void Tetramino::reset(int startX, int startY) {

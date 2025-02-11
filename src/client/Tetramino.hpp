@@ -5,7 +5,6 @@
 #include <array>
 #include <cstdlib>
 #include <ctime>
-#include "Cell.hpp"
 
 class Tetramino {
     Coord position;
@@ -30,6 +29,7 @@ class Tetramino {
         bool canRotate(const Grid &grid);
         bool canMoveDown(const Grid &grid) const;
         bool canMove(const Grid &grid, int dx, int dy) const;
+        void dropTetrimino(Grid &grid);
         void reset(int startX, int startY);
         void colorOn(int color) const;
         void colorOff(int color) const;

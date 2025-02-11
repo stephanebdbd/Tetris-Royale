@@ -58,6 +58,7 @@ void Game::userInput() {
     if (ch == KEY_DOWN) { currentPiece.moveDown(grid); }
     if (ch == KEY_RIGHT) { currentPiece.moveRight(grid); }
     if (ch == KEY_LEFT) { currentPiece.moveLeft(grid); }
+    if (ch == ' ') { currentPiece.dropTetrimino(grid); }
     if (ch == 'q') running = false;
 }
 

@@ -6,7 +6,7 @@ Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1
 
 // Marquer une cellule comme occupée
 void Grid::markCell(int x, int y, char symbol, int color) {
-    if (y >= 0 && y < height && x >= 1 && x <= width + 1) {
+    if ( !cells[y][x].isOccupied() && y >= 0 && y < height && x >= 1 && x <= width + 1) {
         cells[y][x].setOccupied(true);
         cells[y][x].setSymbol(symbol);
         cells[y][x].setColor(color);
@@ -35,7 +35,6 @@ void Grid::draw() {
             }
         }
     }
-    
     // Dessiner les murs
     for (int y = 0; y <= height; ++y) {
         mvaddch(y, 0, '|'); // Mur gauche
