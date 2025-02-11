@@ -60,18 +60,19 @@ void Client::disconnect() {
 
 void Client::run() {
     initscr();
+    keypad(stdscr, TRUE);
     timeout(0);
     cbreak();
     noecho();
+    curs_set(0);
+    nodelay(stdscr, TRUE);
 
     int ch;
     while (true) {
         ch = getch();
-
         if (ch == ERR) {
             continue;
         }
-
         std::string action;
 
         // Gérer les flèches
