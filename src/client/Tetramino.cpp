@@ -215,7 +215,7 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
             if (currentShape[y][x] != ' ') {
                 int gridX = position.x + x;
                 int gridY = position.y + y;
-                if (gridY <= 0) { // Si la pièce est en dehors de la grille
+                if (gridY <= 1) { // Si la pièce est en dehors de la grille
                     gameOver = true; // Déclencher le game over
                     return;
                 }
