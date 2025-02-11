@@ -5,11 +5,12 @@
 #include <cstring>
 #include <atomic>
 #include <thread>
+#include <fstream>
 #include "../common/json.hpp"
 
 using json = nlohmann::json;
 
-Server::Server(int port) : port(port), serverSocket(-1), clientIdCounter(0) {}
+Server::Server(int port, Game* game) : port(port), serverSocket(-1), clientIdCounter(0), game(game) {}
 
 bool Server::start() {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -77,14 +78,19 @@ void Server::handleClient(int clientSocket, int clientId) {
 
             if (action == "right") {
                 std::cout << "Go à droite pour" << clientId << std::endl;
+                game->getCurrentPiece().moveRight(game->getGrid());
             } else if (action == "left") {
                 std::cout << "Go à gauche pour" << clientId << std::endl;
+                game->getCurrentPiece().moveLeft(game->getGrid());
             } else if (action == "up") {
                 std::cout << "Rotation !" << clientId << std::endl;
+                game->getCurrentPiece().rotate();
             } else if (action == "down") {
                 std::cout << "Go en bas" << clientId << std::endl;
+                game->getCurrentPiece().moveDown(game->getGrid());
             } else if (action == "quit") {
                 std::cout << "Client #" << clientId << " a quitté." << std::endl;
+                // faire quelque chose pour arrêter le jeu
             }
         } catch (json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
@@ -103,7 +109,13 @@ void Server::stop() {
 
 int main() {
     try {
-        Server server(12345);
+        std::ofstream serverLog("server.log"); // Créer un fichier de log
+        // Rediriger std::cout et std::cerr vers le fichier log
+        std::cout.rdbuf(serverLog.rdbuf());
+        std::cerr.rdbuf(serverLog.rdbuf());
+
+        Game game(10, 20);
+        Server server(12345, &game);
         if (!server.start()) {
             std::cerr << "Erreur: Impossible de démarrer le serveur." << std::endl;
             return 1;
