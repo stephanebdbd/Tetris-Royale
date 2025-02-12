@@ -82,11 +82,12 @@ void Grid::applyGravity() {
 
 int Grid::clearFullLines() {
     int linesCleared = 0;
-    for (int y = 0; y < height; ++y) {
+    for (int y = height - 1; y >= 0; --y) { // Parcours du bas vers le haut
         if (isLineComplete(y)) {
             linesCleared++;
-            clearLine(y); // Supprimer la ligne et déplacer les autres
+            clearLine(y);
             applyGravity();
+            y++; // reverifier la ligne actuelle car elle a été déplacée vers le bas (gravité)
         }
     }
     return linesCleared;
