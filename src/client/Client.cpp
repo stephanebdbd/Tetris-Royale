@@ -60,90 +60,27 @@ void Client::disconnect() {
 
 void Client::run() {
     initscr();
-    cbreak();
-    noecho();
     curs_set(0);
-
-    std::string choice;
-    while (true) {
-        // Affichage de la première page
-        clear();
-        receiveAndDisplayMenu();
-        refresh();
-
-        char input[10];
-        echo();
-        getstr(input);
-        noecho();
-
-        choice = std::string(input);
-
-        if (choice == "1") {
-            break; // On passe à l'étape suivante
-        } else if (choice == "3") {
-            disconnect();
-            endwin();
-            return;
-        }
-    }
-
-    while (true) {
-        // Affichage de la page se connecter
-        receiveAndDisplayMenu();
-
-        char input[10];
-        echo();
-        getstr(input);
-        noecho();
-
-        choice = std::string(input);
-
-        // Pour plus tard, appeler les fonctions run() de chaque page. Exemple: choice == 2 => friendsRun();
-        if (choice == "1") {
-            break; // On passe à la boucle de jeu
-        } else if (choice == "5") {
-            return run(); // Retourner au menu principal
-        }
-    }
-
-    clear();
-    mvprintw(5, 10, "GamePlay du jeu... lol");
-    refresh();
-
     keypad(stdscr, TRUE);
-    timeout(0);
-    nodelay(stdscr, TRUE);
 
-    int ch;
     while (true) {
-        ch = getch();
-        if (ch == ERR) {
-            continue;
-        }
-        std::string action;
-
-        if (ch == KEY_RIGHT) {
-            action = "right";
-        } else if (ch == KEY_LEFT) {
-            action = "left";
-        } else if (ch == KEY_UP) {
-            action = "up";
-        } else if (ch == KEY_DOWN) {
-            action = "down";
-        } else if (ch == 'q') {
-            action = "quit";
-        }
-
-        if (!action.empty()) {
-            sendInput(action);
-        }
-
-        if (action == "quit") {
+        receiveAndDisplayMenu();
+        char choice = getch();
+        echo();
+        if (choice == '1'){
+            sendInput("1");
             break;
         }
+
     }
+    while (true) {
+        clear();
+        receiveAndDisplayMenu();
+    }
+    
 
     endwin();
+    
 }
 
 
@@ -153,7 +90,6 @@ int main() {
     if (!client.connectToServer()) {
         return 1;
     }
-
     client.run();
     client.disconnect();
     return 0;

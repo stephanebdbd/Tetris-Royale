@@ -52,8 +52,9 @@ void Server::acceptClients() {
     int clientId = clientIdCounter.fetch_add(1);  // Attribuer un ID unique et incrémenter le compteur
     std::cout << "Client #" << clientId << " connecté." << std::endl;
     
-    
+    clear();
     sendMenuToClient(clientSocket, Menu::getMainMenu0()); 
+    refresh();
 
     // Lancer un thread pour gérer ce client
     std::thread clientThread(&Server::handleClient, this, clientSocket, clientId);
@@ -70,14 +71,16 @@ void Server::handleClient(int clientSocket, int clientId) {
             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
             close(clientSocket);
             break;
-        }
+        }  
 
         try {
             json receivedData = json::parse(buffer);
             std::string action = receivedData["action"];
-
             // Affichage côté serveur de l'action reçue
             std::cout << "Client #" << clientId << " a envoyé l'action: " << action << std::endl;
+            if(action == "1"){
+                sendMenuToClient(clientSocket, Menu::getMainMenu1());      
+            }
 
             if (action == "right") {
                 std::cout << "Go à droite pour" << clientId << std::endl;
@@ -130,7 +133,7 @@ int main() {
 
         while (true) {
             server.acceptClients();
-        }
+        } 
 
         server.stop();
     } catch (const std::exception& e) {
