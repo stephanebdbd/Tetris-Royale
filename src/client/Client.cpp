@@ -60,11 +60,70 @@ void Client::disconnect() {
 
 void Client::run() {
     initscr();
-    keypad(stdscr, TRUE);
-    timeout(0);
     cbreak();
     noecho();
     curs_set(0);
+
+    std::string choice;
+    while (true) {
+        // Affichage de la première page
+        clear();
+        mvprintw(5, 10, "Bienvenue dans Tetris Royal !");
+        mvprintw(7, 10, "1. Se connecter");
+        mvprintw(8, 10, "2. Créer un compte");
+        mvprintw(9, 10, "3. Quitter");
+        mvprintw(11, 10, "Votre choix: ");
+        refresh();
+
+        char input[10];
+        echo();
+        getstr(input);
+        noecho();
+
+        choice = std::string(input);
+
+        if (choice == "1") {
+            break; // On passe à l'étape suivante
+        } else if (choice == "3") {
+            disconnect();
+            endwin();
+            return;
+        }
+    }
+
+    while (true) {
+        // Affichage de la page se connecter
+        clear();
+        mvprintw(5, 10, "Menu principal");
+        mvprintw(7, 10, "1. Jouer");
+        mvprintw(8, 10, "2. Amis");
+        mvprintw(9, 10, "3. Classements");
+        mvprintw(10, 10, "4. Rejoindre");
+        mvprintw(11, 10, "5. Retour");
+        mvprintw(13, 10, "Votre choix: ");
+        refresh();
+
+        char input[10];
+        echo();
+        getstr(input);
+        noecho();
+
+        choice = std::string(input);
+
+        // Pour plus tard, appeler les fonctions run() de chaque page. Exemple: choice == 2 => friendsRun();
+        if (choice == "1") {
+            break; // On passe à la boucle de jeu
+        } else if (choice == "5") {
+            return run(); // Retourner au menu principal
+        }
+    }
+
+    clear();
+    mvprintw(5, 10, "GamePlay du jeu... lol");
+    refresh();
+
+    keypad(stdscr, TRUE);
+    timeout(0);
     nodelay(stdscr, TRUE);
 
     int ch;
@@ -75,7 +134,6 @@ void Client::run() {
         }
         std::string action;
 
-        // Gérer les flèches
         if (ch == KEY_RIGHT) {
             action = "right";
         } else if (ch == KEY_LEFT) {
@@ -89,17 +147,17 @@ void Client::run() {
         }
 
         if (!action.empty()) {
-            sendInput(action);  // Envoyer l'action au serveur
-            std::cout << "Envoyé au serveur: " << action << std::endl;
+            sendInput(action);
         }
 
         if (action == "quit") {
-            break;  // Quitter si le client demande
+            break;
         }
     }
 
     endwin();
 }
+
 
 int main() {
     Client client("127.0.0.1", 12345);
