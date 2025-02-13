@@ -50,13 +50,6 @@ void Client::sendInput(const std::string& action) {
     }
 }
 
-void Client::disconnect() {
-    if (clientSocket != -1) {
-        shutdown(clientSocket, SHUT_RDWR);
-        close(clientSocket);
-        clientSocket = -1;
-    }
-}
 
 void Client::run() {
     initscr();
@@ -65,22 +58,27 @@ void Client::run() {
 
     while (true) {
         receiveAndDisplayMenu();
-        char choice = getch();
-        echo();
-        if (choice == '1'){
-            sendInput("1");
+        if (runningGame) {
             break;
         }
-
+        char choice = getch();
+        echo();
+        sendInput(std::string(1, choice));
+        choice = '\0';
     }
-    while (true) {
-        clear();
-        receiveAndDisplayMenu();
-    }
-    
 
-    endwin();
+    // TROUVER UN MOYEN DE VOIR SI LE JEU EST LANCÉ POUR BREAK LA BOUCLE D'AVANT
+    std::cout << "Lancement du jeu..." << std::endl;
     
+    endwin(); // Restaure le terminal à son état initial
+    
+}
+
+void Client::disconnect() {
+    if (clientSocket != -1) {
+        close(clientSocket);
+        clientSocket = -1;
+    }
 }
 
 
@@ -93,9 +91,7 @@ int main() {
     client.run();
     client.disconnect();
     return 0;
-}//test
-
-
+}
 
 void Client::receiveAndDisplayMenu() {
     char buffer[1024]; // Stockage du texte reçu

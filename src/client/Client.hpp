@@ -10,6 +10,7 @@ class Client {
     std::string serverIP;
     int port;
     int clientSocket;
+    bool runningGame = false;
 
 public:
     Client(const std::string& serverIP, int port);

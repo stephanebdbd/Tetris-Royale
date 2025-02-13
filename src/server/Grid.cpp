@@ -94,4 +94,23 @@ int Grid::clearFullLines() {
 }
 
 
+nlohmann::json Grid::gridToJson() const {
+    nlohmann::json gridJson;
+    gridJson["width"] = width;
+    gridJson["height"] = height;
+    gridJson["cells"] = nlohmann::json::array();
+
+    for (int y = 0; y < height; ++y) {
+        nlohmann::json row = nlohmann::json::array();
+        for (int x = 1; x <= width; ++x) {
+            nlohmann::json cell;
+            cell["occupied"] = cells[y][x].isOccupied();
+            cell["symbol"] = cells[y][x].getSymbol();
+            cell["color"] = cells[y][x].getColor();
+            row.push_back(cell);
+        }
+        gridJson["cells"].push_back(row);
+    }
+    return gridJson;
+}
 

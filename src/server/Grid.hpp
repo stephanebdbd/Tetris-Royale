@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Cell.hpp"
+#include <nlohmann/json.hpp>
 
 class Grid {
     int width, height;
@@ -15,6 +16,8 @@ class Grid {
         void clearLine(int y);
         void applyGravity(); // TODO
         int clearFullLines();
+        nlohmann::json gridToJson() const;
+
 
         bool isCellOccupied(int x, int y) const;
         bool isLineComplete(int y) const;
