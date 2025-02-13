@@ -18,6 +18,7 @@ public:
     void sendInput(const std::string& action);
     void disconnect();
     void run();
+    void receiveAndDisplayMenu();
 };
 
 #endif

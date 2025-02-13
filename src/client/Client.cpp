@@ -68,11 +68,7 @@ void Client::run() {
     while (true) {
         // Affichage de la première page
         clear();
-        mvprintw(5, 10, "Bienvenue dans Tetris Royal !");
-        mvprintw(7, 10, "1. Se connecter");
-        mvprintw(8, 10, "2. Créer un compte");
-        mvprintw(9, 10, "3. Quitter");
-        mvprintw(11, 10, "Votre choix: ");
+        receiveAndDisplayMenu();
         refresh();
 
         char input[10];
@@ -93,15 +89,7 @@ void Client::run() {
 
     while (true) {
         // Affichage de la page se connecter
-        clear();
-        mvprintw(5, 10, "Menu principal");
-        mvprintw(7, 10, "1. Jouer");
-        mvprintw(8, 10, "2. Amis");
-        mvprintw(9, 10, "3. Classements");
-        mvprintw(10, 10, "4. Rejoindre");
-        mvprintw(11, 10, "5. Retour");
-        mvprintw(13, 10, "Votre choix: ");
-        refresh();
+        receiveAndDisplayMenu();
 
         char input[10];
         echo();
@@ -170,3 +158,25 @@ int main() {
     client.disconnect();
     return 0;
 }//test
+
+
+
+void Client::receiveAndDisplayMenu() {
+    char buffer[1024]; // Stockage du texte reçu
+    memset(buffer, 0, sizeof(buffer));
+
+    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    if (bytesReceived <= 0) {
+        std::cerr << "Erreur : Impossible de recevoir l'affichage du serveur." << std::endl;
+        return;
+    }
+
+    clear();
+    int y = 5;
+    char* line = strtok(buffer, "\n");
+    while (line) {
+        mvprintw(y++, 10, "%s", line); // Affichage du texte reçu
+        line = strtok(NULL, "\n"); 
+    }
+    refresh();
+}

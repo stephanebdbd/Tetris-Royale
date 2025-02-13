@@ -51,6 +51,9 @@ void Server::acceptClients() {
 
     int clientId = clientIdCounter.fetch_add(1);  // Attribuer un ID unique et incrémenter le compteur
     std::cout << "Client #" << clientId << " connecté." << std::endl;
+    
+    
+    sendMenuToClient(clientSocket, Menu::getMainMenu0()); 
 
     // Lancer un thread pour gérer ce client
     std::thread clientThread(&Server::handleClient, this, clientSocket, clientId);
@@ -105,6 +108,10 @@ void Server::stop() {
         close(serverSocket);
         serverSocket = -1;
     }
+}
+
+void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
+    send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
 int main() {
