@@ -14,16 +14,18 @@ class Grid {
         void draw();
         void markCell(int x, int y, char symbol, int color);
         void clearLine(int y);
-        void applyGravity(); // TODO
+        void applyGravity();
         int clearFullLines();
         nlohmann::json gridToJson() const;
-
 
         bool isCellOccupied(int x, int y) const;
         bool isLineComplete(int y) const;
 
         int getWidth() const { return width; }
         int getHeight() const { return height; }
+
+        Cell& getCell(int x, int y)  { return cells[y][x]; }
 };
+
 
 #endif

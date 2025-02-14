@@ -35,6 +35,7 @@ void Grid::draw() {
             }
         }
     }
+
     // Dessiner les murs
     for (int y = 0; y <= height; ++y) {
         mvaddch(y, 0, '|'); // Mur gauche
@@ -43,7 +44,10 @@ void Grid::draw() {
     for (int x = 0; x <= width + 1; ++x) {
         mvaddch(height, x, '-'); // Mur bas
     }
+
+    refresh();
 }
+
 
 // Vérifier si une ligne est complète
 bool Grid::isLineComplete(int y) const {

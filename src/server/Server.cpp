@@ -167,13 +167,27 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 }
 
 void Server::sendGameToClient(int clientSocket, const std::string& screen) {
-    json message;
-
-    message["grid"] = grid.gridToJson(); // Ajout de l'envoi de la grille
-    
-    std::string msg = message.dump();
-    send(clientSocket, msg.c_str(), msg.size(), 0);
+    std::string gridStr = gridToString();
+    std::cout << "Données envoyées au client :\n" << gridStr << std::endl;
+    send(clientSocket, gridStr.c_str(), gridStr.size(), 0);
 }
+
+std::string Server::gridToString() {
+    std::ostringstream oss;
+    for (int y = 0; y < grid.getHeight(); ++y) {
+        for (int x = 0; x < grid.getWidth(); ++x) {
+            Cell cell = grid.getCell(x, y);
+            if (cell.isOccupied()) {
+                oss << (char)cell.getSymbol();
+            }else {
+                oss << ' '; // Espace vide
+            }
+        }
+        oss << "\n";  // Nouvelle ligne pour ncurses
+    }
+    return oss.str();
+}
+
 
 int main() {
     try {
