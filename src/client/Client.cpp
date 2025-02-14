@@ -94,7 +94,7 @@ int main() {
 }
 
 void Client::receiveAndDisplayMenu() {
-    char buffer[1024]; // Stockage du texte reçu
+    char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
 
     int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
@@ -105,10 +105,12 @@ void Client::receiveAndDisplayMenu() {
 
     clear();
     int y = 5;
-    char* line = strtok(buffer, "\n");
-    while (line) {
-        mvprintw(y++, 10, "%s", line); // Affichage du texte reçu
-        line = strtok(NULL, "\n"); 
+    std::istringstream iss(buffer);
+    std::string line;
+
+    while (std::getline(iss, line)) {
+        mvprintw(y++, 10, "%s", line.c_str());
     }
+    
     refresh();
 }
