@@ -105,18 +105,32 @@ void Client::receiveAndDisplayMenu() {
     }
 
     clear();
-    int y = 5;
-    std::istringstream iss(buffer);
-    std::string line;
+    try {
+        // Ici on recoit un json mais mtn faut que le bloc en dessous soit dans afficher menu et 
+        // si il lit le mot grille bah ca affiche la grille 
+        json data = json::parse(buffer);
+        std::string title = data["title"];
+        
+        json options = data["options"];
 
-    while (std::getline(iss, line)) {
-        std::cout << line << std::endl;
-        if (line == "disconnect") {
-            disconnect();
-            break;
+        std::string prompt = data["prompt"];
+
+        int y = 5;
+        mvprintw(y++, 10, "%s", title.c_str());
+
+        for (auto& [key, value] : options.items()) {
+            std::string line = key + ". " + value.get<std::string>();
+            mvprintw(y++, 10, "%s", line.c_str());
         }
-        mvprintw(y++, 10, "%s", line.c_str());
+
+        mvprintw(y++, 10, "%s", prompt.c_str());
     }
-    
-    refresh();
+    catch (json::parse_error& e) {
+        std::cerr << "Erreur du parse de json: " << e.what() << std::endl;
+    }
+    refresh(); 
 }
+
+//fonction afficher les menus 
+
+// fonction afficher la grille
