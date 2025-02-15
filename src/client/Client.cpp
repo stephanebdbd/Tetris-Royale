@@ -4,7 +4,6 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <ncurses.h>
-#include "../common/json.hpp"
 
 using json = nlohmann::json;
 
@@ -95,7 +94,7 @@ int main() {
 }
 
 void Client::receiveAndDisplayMenu() {
-    char buffer[1024];
+    char buffer[10000];
     memset(buffer, 0, sizeof(buffer));
 
     int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
@@ -103,34 +102,77 @@ void Client::receiveAndDisplayMenu() {
         std::cerr << "Erreur : Impossible de recevoir l'affichage du serveur." << std::endl;
         return;
     }
-
     clear();
     try {
-        // Ici on recoit un json mais mtn faut que le bloc en dessous soit dans afficher menu et 
-        // si il lit le mot grille bah ca affiche la grille 
         json data = json::parse(buffer);
-        std::string title = data["title"];
-        
-        json options = data["options"];
 
-        std::string prompt = data["prompt"];
-
-        int y = 5;
-        mvprintw(y++, 10, "%s", title.c_str());
-
-        for (auto& [key, value] : options.items()) {
-            std::string line = key + ". " + value.get<std::string>();
-            mvprintw(y++, 10, "%s", line.c_str());
+        if (data.contains("title")) {
+            displayMenu(data);
         }
-
-        mvprintw(y++, 10, "%s", prompt.c_str());
+        else {
+            displayGrid(data);
+        }
     }
     catch (json::parse_error& e) {
-        std::cerr << "Erreur du parse de json: " << e.what() << std::endl;
+        std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
     }
+        
+}
+
+//fct displayMenu qui prend la data(json) et affiche le menu
+void Client::displayMenu(const json& data) {
+    clear();
+
+    std::string title = data["title"];
+    json options = data["options"];
+    std::string prompt = data["prompt"];
+
+    int y = 5;
+    mvprintw(y++, 10, "%s", title.c_str());
+    for (auto& [key, value] : options.items()) {
+        std::string line = key + ". " + value.get<std::string>();
+        mvprintw(y++, 10, "%s", line.c_str());
+    }
+    mvprintw(y++, 10, "%s", prompt.c_str());
+
     refresh(); 
 }
 
-//fonction afficher les menus 
 
-// fonction afficher la grille
+
+//
+void Client::displayGrid(const json& data){
+    clear();
+
+    
+    int width = data["grid"]["width"]; 
+
+    int height= data["grid"]["height"]; 
+
+    const json& cells = data["grid"]["cells"];
+
+    drawGrid(width, height, cells);
+
+    //draw tetramino
+
+    refresh();
+
+}
+
+void Client::drawGrid(int width, int height, const json& cells) {
+    int shift = 0;
+    for(int y = 0; y < height; ++y) {
+        for(int x = 0; x < width; ++x) {
+            int symbol = cells[y][x]["symbol"];
+            mvaddch(shift + y, x + 1, static_cast<char>(symbol));
+        }
+    }
+
+    for (int y = 0; y <= height; ++y) {
+        mvaddch(y, 0, '|'); // Mur gauche
+        mvaddch(y, width + 1, '|'); // Mur droit
+    }
+    for (int x = 0; x <= width + 1; ++x) {
+        mvaddch(height, x, '-'); // Mur bas
+    }
+}

@@ -7,8 +7,8 @@ using json = nlohmann::json;
 
 class Menu {
     public:
-        json getMainMenu0();  
-        json getMainMenu1();  
+        json getMainMenu0() const;  
+        json getMainMenu1() const;  
 };
 
 #endif

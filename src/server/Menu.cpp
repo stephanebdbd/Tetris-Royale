@@ -2,7 +2,7 @@
 
 using json = nlohmann::json;
 
-json Menu::getMainMenu0() {
+json Menu::getMainMenu0() const {
     json menu = {
         {"title", "Bienvenue dans Tetris Royal !"},
         {"options", {
@@ -15,7 +15,7 @@ json Menu::getMainMenu0() {
     return menu.dump();  // Convertir en chaîne JSON
 }
 
-json Menu::getMainMenu1() {
+json Menu::getMainMenu1() const {
     json menu = {
         {"title", "Menu principal"},
         {"options", {

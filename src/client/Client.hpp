@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include "../common/json.hpp"
 
 class Client {
     std::string serverIP;
@@ -20,6 +21,9 @@ public:
     void disconnect();
     void run();
     void receiveAndDisplayMenu();
+    void displayMenu(const nlohmann::json& data);
+    void displayGrid(const nlohmann::json& data);
+    void drawGrid(int width, int height, const nlohmann::json& cells);
 };
 
 #endif

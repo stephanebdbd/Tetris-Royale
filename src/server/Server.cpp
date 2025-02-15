@@ -110,7 +110,7 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     if (action == "1") {
         clientMenuChoices[clientId]++;
         runningGame = true;
-        sendGameToClient(clientSocket, "game");
+        sendGameToClient(clientSocket, game->getGrid().gridToJson().dump());
     }
     else if (action == "2") {
         // Amis => à implémenter
@@ -157,6 +157,7 @@ void Server::sendGameToClient(int clientSocket, const std::string& screen) {
     message["grid"] = grid.gridToJson(); // Ajout de l'envoi de la grille
     
     std::string msg = message.dump();
+
     send(clientSocket, msg.c_str(), msg.size(), 0);
 }
 

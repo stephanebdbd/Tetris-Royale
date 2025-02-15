@@ -109,7 +109,8 @@ nlohmann::json Grid::gridToJson() const {
         for (int x = 1; x <= width; ++x) {
             nlohmann::json cell;
             cell["occupied"] = cells[y][x].isOccupied();
-            cell["symbol"] = cells[y][x].getSymbol();
+            //cell["symbol"] = cells[y][x].getSymbol();
+            cell["symbol"] = 65;
             cell["color"] = cells[y][x].getColor();
             row.push_back(cell);
         }
