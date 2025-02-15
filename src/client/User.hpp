@@ -1,28 +1,33 @@
 #pragma once
-
 #include <string>
 #include "FriendList.hpp"
 
 class User {
 private:
-    std::string userName;
+    std::string userName;     // Nom d'utilisateur (utilisé lors de l'inscription ou de la connexion)
+    std::string pseudonym;    // Pseudonyme utilisé dans l'application (visible par les autres utilisateurs)
     std::string password;
-    int highScore = 0;
-    int matricule;
-    FriendList* friendList;
-    bool isOnline = false;
+    int highScore;
+    bool isOnline;
+    FriendList friendList;
+
 public:
-    User(const std::string& userName, const std::string& password, int matricule = 0);
-    
-    void addFriend(User* friendUser);
-    bool login(const std::string& passwordInput);
-    void logout();
-    
-    void setHighScore(int newHighScore);
-    
-    int getHighScore() const;
-    bool getIsOnline() const;
+    User(const std::string& userName, const std::string& pseudonym, const std::string& password);
+
     std::string getUserName() const;
-    int getMatricule() const;
-    FriendList& getFriendList();
+    std::string getPseudonym() const;  // Méthode pour récupérer le pseudonyme
+    void setPseudonym(const std::string& newPseudonym);  // Méthode pour changer le pseudonyme
+
+    bool login(const std::string& password);
+    void logout();
+    bool getIsOnline() const;
+    void setHighScore(int score);
+    int getHighScore() const;
+
+    // FriendList operations
+    void addFriend(const std::string& friendName);
+    void removeFriend(const std::string& friendName);
+    bool isFriend(const std::string& friendName) const;
+    const std::vector<std::string>& getFriends() const;
+    size_t getNumberOfFriends() const;
 };
