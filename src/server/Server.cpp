@@ -10,7 +10,7 @@
 
 using json = nlohmann::json;
 
-Server::Server(int port, Game* game, Grid grid) : port(port), serverSocket(-1), clientIdCounter(0), game(game), grid(grid) {}
+Server::Server(int port, Game* game, Grid grid, Tetramino tetramino) : port(port), serverSocket(-1), game(game), grid(grid), currentPiece(tetramino) {}
 
 bool Server::start() {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -154,10 +154,15 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 void Server::sendGameToClient(int clientSocket, const std::string& screen) {
     json message;
 
+    // Envoi de la grille
     message["grid"] = grid.gridToJson(); // Ajout de l'envoi de la grille
-    
     std::string msg = message.dump();
+    send(clientSocket, msg.c_str(), msg.size(), 0);
 
+    //Envoi de la pièce courante => Je crois faut attendre que le client envoie un message OK j'ai print la grille
+    // mtn je peux print le tetramino
+    message["tetraPiece"] = currentPiece.tetraminoToJson();
+    msg = message.dump();
     send(clientSocket, msg.c_str(), msg.size(), 0);
 }
 
@@ -169,7 +174,7 @@ int main() {
         std::cerr.rdbuf(serverLog.rdbuf());
 
         Game game(10, 20);
-        Server server(12345, &game, game.getGrid());
+        Server server(12345, &game, game.getGrid(), game.getCurrentPiece());
         if (!server.start()) {
             std::cerr << "Erreur: Impossible de démarrer le serveur." << std::endl;
             return 1;
