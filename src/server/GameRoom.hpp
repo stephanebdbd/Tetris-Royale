@@ -25,7 +25,7 @@ public:
     int getRoomId() const;
     std::string getRoomName() const;
     std::string getGameMode() const;
-    std::string setGameMode(const std::string& mode);
+    void setGameMode(const std::string& mode);
 };
 
 #endif
