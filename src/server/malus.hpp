@@ -10,9 +10,9 @@ class Malus {
     
     public:
         Malus(int nbrLine);
-        void createMalus();
-        int getnbreLine();
-        std::vector<std::vector<char> > sendMalus();
+        void createMalus(); //creation de malus 
+        int getnbreLine(); //renvoie de nopmbre de ligne qui represente le nombre de malus à créer 
+        std::vector<std::vector<char> > sendMalus(); 
         std::vector<std::vector<char> > getMalus();
 
 
