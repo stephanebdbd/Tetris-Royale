@@ -1,6 +1,4 @@
 #include "Grid.hpp"
-#include <ncurses.h>
-#include <iostream>
 
 Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {}
 
@@ -44,8 +42,6 @@ void Grid::draw() {
     for (int x = 0; x <= width + 1; ++x) {
         mvaddch(height, x, '-'); // Mur bas
     }
-
-    refresh();
 }
 
 
@@ -98,16 +94,16 @@ int Grid::clearFullLines() {
 }
 
 
-nlohmann::json Grid::gridToJson() const {
-    nlohmann::json gridJson;
+json Grid::gridToJson() const {
+    json gridJson;
     gridJson["width"] = width;
     gridJson["height"] = height;
-    gridJson["cells"] = nlohmann::json::array();
+    gridJson["cells"] = json::array();
 
     for (int y = 0; y < height; ++y) {
-        nlohmann::json row = nlohmann::json::array();
+        json row = json::array();
         for (int x = 1; x <= width; ++x) {
-            nlohmann::json cell;
+            json cell;
             cell["occupied"] = cells[y][x].isOccupied();
             //cell["symbol"] = cells[y][x].getSymbol();
             cell["symbol"] = 65;

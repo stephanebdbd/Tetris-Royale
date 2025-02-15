@@ -1,7 +1,5 @@
 #include "Tetramino.hpp"
 
-using json = nlohmann::json;
-
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
     : position{startX, startY}, gridWidth(w), gridHeight(h) {
     initializeShapes();

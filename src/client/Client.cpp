@@ -1,8 +1,4 @@
 #include "Client.hpp"
-#include <iostream>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <ncurses.h>
 
 using json = nlohmann::json;
 

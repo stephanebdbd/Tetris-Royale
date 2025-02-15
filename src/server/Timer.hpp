@@ -3,9 +3,12 @@
 
 #include <chrono>
 
+using namespace std::chrono;
+
 class Timer {
-    std::chrono::steady_clock::time_point lastUpdate;
+    steady_clock::time_point lastUpdate;
     int interval;
+
     public:
         Timer(int ms);
         bool hasElapsed();

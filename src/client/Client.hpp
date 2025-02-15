@@ -1,10 +1,9 @@
 #ifndef CLIENTDISPLAY_HPP
 #define CLIENTDISPLAY_HPP
 
-#include <string>
-#include <netinet/in.h>
+#include <iostream>
 #include <unistd.h>
-#include <arpa/inet.h>
+#include <ncurses.h>
 #include "ClientDisplay.hpp"  
 #include "Controller.hpp"
 #include "ClientNetwork.hpp"

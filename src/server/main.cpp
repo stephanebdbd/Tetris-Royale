@@ -1,12 +1,3 @@
-#include <vector>
-#include <ncurses.h>
-#include <chrono>
-#include <cstdlib>
-#include <ctime>
-#include <array>
-#include <iostream>
-
-
 #include "Game.hpp"
 
 

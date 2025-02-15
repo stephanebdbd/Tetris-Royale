@@ -81,9 +81,7 @@ int main() {
             game.moveTetrimino(Direction::DOWN);
         if (game.getHasMoved())
             playerBoard.display();
-        refresh();
     }
-
     if (game.getHasMoved()) playerBoard.display();
     printw("\nGame Over!\n");
     refresh();
