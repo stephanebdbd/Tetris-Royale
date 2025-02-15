@@ -44,19 +44,19 @@ int User::getHighScore() const {
     return highScore;
 }
 
-void User::addFriend(const std::string& friendName) {
-    friendList.addFriend(friendName);
+void User::addFriend(User* newFriend) {
+    friendList.addFriend(newFriend);
 }
 
-void User::removeFriend(const std::string& friendName) {
-    friendList.removeFriend(friendName);
+void User::removeFriend(User* friendToRemove) {
+    friendList.removeFriend(friendToRemove);
 }
 
-bool User::isFriend(const std::string& friendName) const {
-    return friendList.isFriend(friendName);
+bool User::isFriend(User* friendToCheck) const {
+    return friendList.isFriend(friendToCheck);
 }
 
-const std::vector<std::string>& User::getFriends() const {
+const std::vector<User*>& User::getFriends() const {
     return friendList.getFriends();
 }
 
