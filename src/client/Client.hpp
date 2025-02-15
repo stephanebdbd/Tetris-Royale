@@ -1,29 +1,28 @@
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
+#ifndef CLIENTDISPLAY_HPP
+#define CLIENTDISPLAY_HPP
 
 #include <string>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include "ClientDisplay.hpp"  
+#include "Controller.hpp"
+#include "ClientNetwork.hpp"
 #include "../common/json.hpp"
 
 class Client {
+    ClientDisplay display;  // Chaque client a son propre display
+    Controller controller;  // Chaque client a son propre controller
+    ClientNetwork network;  // Chaque client a son propre network
+
     std::string serverIP;
     int port;
     int clientSocket;
-    bool runningGame = false;
 
-public:
-    Client(const std::string& serverIP, int port);
-
-    bool connectToServer();
-    void sendInput(const std::string& action);
-    void disconnect();
-    void run();
-    void receiveAndDisplayMenu();
-    void displayMenu(const nlohmann::json& data);
-    void displayGrid(const nlohmann::json& data);
-    void drawGrid(int width, int height, const nlohmann::json& cells);
+    public:
+        Client(const std::string& serverIP, int port);
+        void run();
+        void receiveDisplay();
 };
 
 #endif

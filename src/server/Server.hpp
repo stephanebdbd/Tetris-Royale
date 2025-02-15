@@ -3,6 +3,7 @@
 
 #include "Game.hpp"
 #include "Grid.hpp"
+#include "Tetramino.hpp"
 #include <netinet/in.h>
 #include <atomic>
 #include <thread>
@@ -15,9 +16,10 @@ class Server {
     std::atomic<int> clientIdCounter;
     Game* game;
     Grid grid;
+    Tetramino currentPiece;
 
     public:
-        Server(int port, Game* game, Grid grid);
+        Server(int port, Game* game, Grid grid, Tetramino tetramino);
     
         bool start();
         void acceptClients();
@@ -28,8 +30,6 @@ class Server {
         void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
         void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
         void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
-
-        bool getRunningGame() { return runningGame; }
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include "Tetramino.hpp"
-#include <iostream>
+
+using json = nlohmann::json;
 
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
     : position{startX, startY}, gridWidth(w), gridHeight(h) {
@@ -224,6 +225,23 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
         }
     }
 }
+
+json Tetramino::tetraminoToJson() const {
+    json tetraminoJson;
+
+    tetraminoJson["x"] = 20;
+    tetraminoJson["y"] = 20;
+
+    //tetraminoJson["x"] = position.x;
+    //tetraminoJson["y"] = position.y;
+
+    //tetraminoJson["shape"] = currentShape;
+    //tetraminoJson["color"] = color;
+
+    return tetraminoJson;
+}
+
+
 
 // Générer un nouveau Tetramino
 void Tetramino::reset(int startX, int startY) {
