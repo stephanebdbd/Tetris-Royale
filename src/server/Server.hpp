@@ -3,7 +3,6 @@
 
 #include "Game.hpp"
 #include "Grid.hpp"
-#include "Menu.hpp"
 #include <netinet/in.h>
 #include <atomic>
 #include <thread>

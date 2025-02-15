@@ -75,6 +75,7 @@ void Client::run() {
 }
 
 void Client::disconnect() {
+    std::cout << "Déconnecté du serveur." << std::endl;
     if (clientSocket != -1) {
         close(clientSocket);
         clientSocket = -1;
@@ -109,6 +110,11 @@ void Client::receiveAndDisplayMenu() {
     std::string line;
 
     while (std::getline(iss, line)) {
+        std::cout << line << std::endl;
+        if (line == "disconnect") {
+            disconnect();
+            break;
+        }
         mvprintw(y++, 10, "%s", line.c_str());
     }
     
