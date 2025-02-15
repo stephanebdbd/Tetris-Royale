@@ -51,6 +51,7 @@ void Server::acceptClients() {
 
     int clientId = clientIdCounter.fetch_add(1);  // Attribuer un ID unique et incrémenter le compteur
     std::cout << "Client #" << clientId << " connecté." << std::endl;
+    clientMenuChoices[clientId] = 0;  // Chaque client commence avec menuChoice = 0
     
     clear();
     sendMenuToClient(clientSocket, Menu::getMainMenu0()); 
@@ -71,20 +72,19 @@ void Server::handleClient(int clientSocket, int clientId) {
             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
             close(clientSocket);
             break;
-        }  
-
+        }
         try {
             json receivedData = json::parse(buffer);
             std::string action = receivedData["action"];
             // Affichage côté serveur de l'action reçue
-            if (menuChoice == 0) {
-                keyInuptWelcomeMenu(clientSocket, action);
+            if (clientMenuChoices[clientId] == 0) {
+                keyInuptWelcomeMenu(clientSocket, clientId, action);
             }
-            else if (menuChoice == 1) {
-                keyInuptMainMenu(clientSocket, action);
+            else if (clientMenuChoices[clientId] == 1) {
+                keyInuptMainMenu(clientSocket, clientId, action);
             }
-            if (menuChoice == 2) {
-                keyInuptGameMenu(clientSocket, action);
+            if (clientMenuChoices[clientId] == 2) {
+                keyInuptGameMenu(clientSocket, clientId, action);
             }
         } 
         catch (json::parse_error& e) {
@@ -93,23 +93,23 @@ void Server::handleClient(int clientSocket, int clientId) {
     }
 }
 
-void Server::keyInuptWelcomeMenu(int clientSocket, const std::string& action) {
+void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
-        menuChoice++;
+        clientMenuChoices[clientId]++;
         sendMenuToClient(clientSocket, Menu::getMainMenu1());      
     }
     else if (action == "2") {
         // Créer un compte => à implémenter
     }
     else if (action == "3") {
-        close(clientSocket);
+        close(clientSocket); // a faire proprement (la le client reste sur le serveur)
     }
 }
 
-void Server::keyInuptMainMenu(int clientSocket, const std::string& action) {
+void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
     std::cout << "action: aa " << action << std::endl;
     if (action == "1") {
-        menuChoice++;
+        clientMenuChoices[clientId]++;
         runningGame = true;
         sendGameToClient(clientSocket, "game");
     }
@@ -124,12 +124,12 @@ void Server::keyInuptMainMenu(int clientSocket, const std::string& action) {
     }
     if (action == "5") { 
         std::cout << "retour" << std::endl; 
-        menuChoice--;
+        clientMenuChoices[clientId]--;
         sendMenuToClient(clientSocket, Menu::getMainMenu0());
     }
 }
 
-void Server::keyInuptGameMenu(int clientSocket, const std::string& action) {
+void Server::keyInuptGameMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "right"){
         //
     }
@@ -141,10 +141,6 @@ void Server::keyInuptGameMenu(int clientSocket, const std::string& action) {
     }
 }
 
-
-
-
-
 void Server::stop() {
     if (serverSocket != -1) {
         shutdown(serverSocket, SHUT_RDWR);
@@ -154,40 +150,17 @@ void Server::stop() {
 }
 
 void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
-    //if (runningGame) {
-        //runningGame = false;
-        //json message;
-        //message["RunningGame"] = "true";
-        //std::string msg = message.dump();
-        //send(clientSocket, msg.c_str(), msg.size(), 0);
-    //}
-    //else{
-        send(clientSocket, screen.c_str(), screen.size(), 0);
-    //}
+    send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
 void Server::sendGameToClient(int clientSocket, const std::string& screen) {
-    std::string gridStr = gridToString();
-    std::cout << "Données envoyées au client :\n" << gridStr << std::endl;
-    send(clientSocket, gridStr.c_str(), gridStr.size(), 0);
-}
+    json message;
 
-std::string Server::gridToString() {
-    std::ostringstream oss;
-    for (int y = 0; y < grid.getHeight(); ++y) {
-        for (int x = 0; x < grid.getWidth(); ++x) {
-            Cell cell = grid.getCell(x, y);
-            if (cell.isOccupied()) {
-                oss << (char)cell.getSymbol();
-            }else {
-                oss << ' '; // Espace vide
-            }
-        }
-        oss << "\n";  // Nouvelle ligne pour ncurses
-    }
-    return oss.str();
+    message["grid"] = grid.gridToJson(); // Ajout de l'envoi de la grille
+    
+    std::string msg = message.dump();
+    send(clientSocket, msg.c_str(), msg.size(), 0);
 }
-
 
 int main() {
     try {
