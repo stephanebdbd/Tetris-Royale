@@ -40,7 +40,6 @@ void Game::run() {
         }
 
         userInput();
-        refresh(); // Rafraîchir l'affichage après toutes les modifications
     }
 
     showGameOver();

@@ -4,6 +4,9 @@
 #include <vector>
 #include "Cell.hpp"
 #include <nlohmann/json.hpp>
+#include <ncurses.h>
+
+using json = nlohmann::json;
 
 class Grid {
     int width, height;
@@ -16,7 +19,7 @@ class Grid {
         void clearLine(int y);
         void applyGravity();
         int clearFullLines();
-        nlohmann::json gridToJson() const;
+        json gridToJson() const;
 
         bool isCellOccupied(int x, int y) const;
         bool isLineComplete(int y) const;

@@ -4,9 +4,9 @@
 #include "Grid.hpp"
 #include <iostream>
 #include <array>
-#include <cstdlib>
-#include <ctime>
-#include <nlohmann/json.hpp> 
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json; 
 
 class Tetramino {
     Coord position;
@@ -39,7 +39,7 @@ class Tetramino {
         int chooseColor(char shapeSymbols) const;
         
         int getColor() const { return color; } 
-        nlohmann::json tetraminoToJson() const;
+        json tetraminoToJson() const;
 };
 
 #endif

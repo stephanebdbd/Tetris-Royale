@@ -1,7 +1,5 @@
 #include "Menu.hpp"
 
-using json = nlohmann::json;
-
 json Menu::getMainMenu0() const {
     json menu = {
         {"title", "Bienvenue dans Tetris Royal !"},

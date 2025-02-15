@@ -1,6 +1,5 @@
 
 #include "ClientDisplay.hpp"
-#include <ncurses.h>
 
 using json = nlohmann::json;
 

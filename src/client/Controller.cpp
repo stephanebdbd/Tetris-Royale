@@ -1,8 +1,6 @@
 #include "Controller.hpp"
 
 
-using json = nlohmann::json;
-
 void Controller::sendInput(const std::string& action, int clientSocket) {
     if (clientSocket == -1) return;
 

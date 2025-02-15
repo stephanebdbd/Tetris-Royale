@@ -1,12 +1,10 @@
 #ifndef CLIENTNETWORK_HPP
 #define CLIENTNETWORK_HPP
 
-#include <string>
-#include <netinet/in.h>
+
 #include <unistd.h>
 #include <arpa/inet.h>
-#include "ClientDisplay.hpp"  
-#include "Controller.hpp"
+#include <iostream>
 #include "ClientNetwork.hpp"
 #include "../common/json.hpp"
 

@@ -1,7 +1,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include <string>
+#include <ncurses.h>
 #include <nlohmann/json.hpp>
 
 class ClientDisplay {

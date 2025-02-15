@@ -1,14 +1,4 @@
 #include "Server.hpp"
-#include <iostream>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <cstring>
-#include <atomic>
-#include <thread>
-#include <fstream>
-#include "../common/json.hpp"
-
-using json = nlohmann::json;
 
 Server::Server(int port, Game* game, Grid grid, Tetramino tetramino) : port(port), serverSocket(-1), game(game), grid(grid), currentPiece(tetramino) {}
 
