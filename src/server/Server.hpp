@@ -4,7 +4,6 @@
 #include "Game.hpp"
 #include "Grid.hpp"
 #include "Menu.hpp"
-#include "Cell.hpp"
 #include <netinet/in.h>
 #include <atomic>
 #include <thread>
@@ -12,7 +11,7 @@
 class Server {
     int port;
     int serverSocket;
-    int menuChoice = 0;
+    std::unordered_map<int, int> clientMenuChoices;
     bool runningGame = false;
     std::atomic<int> clientIdCounter;
     Game* game;
@@ -27,10 +26,9 @@ class Server {
         void stop();
         void sendMenuToClient(int clientSocket, const std::string& screen);
         void sendGameToClient(int clientSocket, const std::string& screen);
-        std::string gridToString();
-        void keyInuptWelcomeMenu(int clientSocket, const std::string& action);
-        void keyInuptMainMenu(int clientSocket, const std::string& action);
-        void keyInuptGameMenu(int clientSocket, const std::string& action);
+        void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
+        void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
+        void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
 
         bool getRunningGame() { return runningGame; }
 };
