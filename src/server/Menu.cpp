@@ -1,19 +1,31 @@
 #include "Menu.hpp"
 
-std::string Menu::getMainMenu0() {
-    return  "Bienvenue dans Tetris Royal !\n"
-            "1. Se connecter\n"
-            "2. Créer un compte\n"
-            "3. Quitter\n"
-            "Votre choix: ";
+using json = nlohmann::json;
+
+json Menu::getMainMenu0() {
+    json menu = {
+        {"title", "Bienvenue dans Tetris Royal !"},
+        {"options", {
+            {"1", "Se connecter"},
+            {"2", "Créer un compte"},
+            {"3", "Quitter"}
+        }},
+        {"prompt", "Votre choix: "}
+    };
+    return menu.dump();  // Convertir en chaîne JSON
 }
 
-std::string Menu::getMainMenu1() {
-    return  "Menu principal\n"
-            "1. Jouer\n"
-            "2. Amis\n"
-            "3. Classements\n"
-            "4. Rejoindre\n"
-            "5. Retour\n"
-            "Votre choix: ";
+json Menu::getMainMenu1() {
+    json menu = {
+        {"title", "Menu principal"},
+        {"options", {
+            {"1", "Jouer"},
+            {"2", "Amis"},
+            {"3", "Classements"},
+            {"4", "Rejoindre"},
+            {"5", "Retour"}
+        }},
+        {"prompt", "Votre choix: "}
+    };
+    return menu.dump();  // Convertir en chaîne JSON
 }

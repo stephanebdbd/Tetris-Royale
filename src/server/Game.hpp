@@ -24,8 +24,8 @@ class Game {
 
         Grid& getGrid() { return grid; }
         Tetramino& getCurrentPiece() { return currentPiece; }
-        std::string getMainMenu0() { return menu.getMainMenu0(); }  
-        std::string getMainMenu1() { return menu.getMainMenu1(); }
+        json getMainMenu0() { return menu.getMainMenu0(); }  
+        json getMainMenu1() { return menu.getMainMenu1(); }
 
 };
 

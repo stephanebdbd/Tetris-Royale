@@ -1,12 +1,14 @@
 #ifndef MENU_HPP
 #define MENU_HPP
 
-#include <string>
+#include "../common/json.hpp"  // Inclusion de la bibliothèque JSON
+
+using json = nlohmann::json;
 
 class Menu {
     public:
-        std::string getMainMenu0();
-        std::string getMainMenu1();
+        json getMainMenu0();  
+        json getMainMenu1();  
 };
 
 #endif
