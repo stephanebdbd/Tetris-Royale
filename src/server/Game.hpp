@@ -4,12 +4,14 @@
 #include "Tetramino.hpp"
 #include "Timer.hpp"
 #include "Score.hpp"
+#include "Menu.hpp"
 
 class Game {
     Grid grid;
     Tetramino currentPiece;
     Timer dropTimer;
     Score score;
+    Menu menu;
     bool running;
     bool gameOver;
 
@@ -22,6 +24,9 @@ class Game {
 
         Grid& getGrid() { return grid; }
         Tetramino& getCurrentPiece() { return currentPiece; }
+        std::string getMainMenu0() { return menu.getMainMenu0(); }  
+        std::string getMainMenu1() { return menu.getMainMenu1(); }
+
 };
 
 #endif

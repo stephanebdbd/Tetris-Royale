@@ -54,7 +54,7 @@ void Server::acceptClients() {
     clientMenuChoices[clientId] = 0;  // Chaque client commence avec menuChoice = 0
     
     clear();
-    sendMenuToClient(clientSocket, Menu::getMainMenu0()); 
+    sendMenuToClient(clientSocket, game->getMainMenu0()); 
     refresh();
 
     // Lancer un thread pour gérer ce client
@@ -96,18 +96,17 @@ void Server::handleClient(int clientSocket, int clientId) {
 void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
         clientMenuChoices[clientId]++;
-        sendMenuToClient(clientSocket, Menu::getMainMenu1());      
+        sendMenuToClient(clientSocket, game->getMainMenu1());      
     }
     else if (action == "2") {
         // Créer un compte => à implémenter
     }
     else if (action == "3") {
-        close(clientSocket); // a faire proprement (la le client reste sur le serveur)
+        // Quitter => à implémenter
     }
 }
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
-    std::cout << "action: aa " << action << std::endl;
     if (action == "1") {
         clientMenuChoices[clientId]++;
         runningGame = true;
@@ -123,9 +122,8 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
         // Rejoindre => à implémenter
     }
     if (action == "5") { 
-        std::cout << "retour" << std::endl; 
         clientMenuChoices[clientId]--;
-        sendMenuToClient(clientSocket, Menu::getMainMenu0());
+        sendMenuToClient(clientSocket, game->getMainMenu0());
     }
 }
 
