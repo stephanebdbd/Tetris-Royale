@@ -21,6 +21,7 @@ class Game {
         void showGame();
         void userInput();
         void showGameOver();
+        void update();
 
         Grid& getGrid() { return grid; }
         Tetramino& getCurrentPiece() { return currentPiece; }

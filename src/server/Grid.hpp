@@ -14,6 +14,7 @@ class Grid {
 
     public:
         Grid(int width, int height);
+
         void draw();
         void markCell(int x, int y, char symbol, int color);
         void clearLine(int y);

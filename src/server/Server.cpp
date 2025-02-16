@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int port, Game* game, Grid grid, Tetramino tetramino) : port(port), serverSocket(-1), game(game), grid(grid), currentPiece(tetramino) {}
+Server::Server(int port, Game* game) : port(port), serverSocket(-1), game(game) {}
 
 bool Server::start() {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -73,7 +73,11 @@ void Server::handleClient(int clientSocket, int clientId) {
             else if (clientMenuChoices[clientId] == 1) {
                 keyInuptMainMenu(clientSocket, clientId, action);
             }
-            if (clientMenuChoices[clientId] == 2) {
+            else if (clientMenuChoices[clientId] == 2) {
+                clientMenuChoices[clientId] == -1;
+            }
+            else {
+                std::cout << "Client #" << clientId << " est en jeu." << std::endl;
                 keyInuptGameMenu(clientSocket, clientId, action);
             }
         } 
@@ -100,7 +104,7 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     if (action == "1") {
         clientMenuChoices[clientId]++;
         runningGame = true;
-        sendGameToClient(clientSocket, game->getGrid().gridToJson().dump());
+        loopGame(clientSocket);
     }
     else if (action == "2") {
         // Amis => à implémenter
@@ -118,15 +122,16 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
 }
 
 void Server::keyInuptGameMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "right"){
+    if (action == "right") {
+        game->getCurrentPiece().moveRight(game->getGrid());
+    }
+    else if (action == "left"){
+        game->getCurrentPiece().moveLeft(game->getGrid());
+    }
+    else if (action == "down"){
         //
     }
-    if (action == "left"){
-        //
-    }
-    if (action == "down"){
-        //
-    }
+    sendGameToClient(clientSocket);
 }
 
 void Server::stop() {
@@ -141,20 +146,32 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
-void Server::sendGameToClient(int clientSocket, const std::string& screen) {
+void Server::sendGameToClient(int clientSocket) {
     json message;
+    message["grid"] = game->getGrid().gridToJson();
+    message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 
-    // Envoi de la grille
-    message["grid"] = grid.gridToJson(); // Ajout de l'envoi de la grille
     std::string msg = message.dump();
-    send(clientSocket, msg.c_str(), msg.size(), 0);
-
-    //Envoi de la pièce courante => Je crois faut attendre que le client envoie un message OK j'ai print la grille
-    // mtn je peux print le tetramino
-    message["tetraPiece"] = currentPiece.tetraminoToJson();
-    msg = message.dump();
-    send(clientSocket, msg.c_str(), msg.size(), 0);
+    send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
 }
+
+
+void Server::loopGame(int clientSocket) {
+    std::thread gameThread([this]() { // Lancer un thread pour le jeu et le maj
+        while (runningGame) {
+            game->update();  
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+    });
+
+    gameThread.detach();
+
+    while (runningGame) { // Envoi du jeu au client 
+        sendGameToClient(clientSocket);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Pause de 500 ms eviter un crash
+    }
+}
+
 
 int main() {
     try {
@@ -164,7 +181,7 @@ int main() {
         std::cerr.rdbuf(serverLog.rdbuf());
 
         Game game(10, 20);
-        Server server(12345, &game, game.getGrid(), game.getCurrentPiece());
+        Server server(12345, &game);
         if (!server.start()) {
             std::cerr << "Erreur: Impossible de démarrer le serveur." << std::endl;
             return 1;
