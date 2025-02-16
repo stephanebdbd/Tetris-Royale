@@ -24,7 +24,8 @@ void Client::run() {
     }
 
     network.disconnect(clientSocket);
-    endwin(); // Restaure le terminal à son état initial
+    delwin(stdscr);
+    endwin();
 }
 
 void Client::handleUserInput() {
@@ -44,7 +45,7 @@ void Client::handleUserInput() {
 }
 
 void Client::receiveDisplay() {
-    char buffer[10000];
+    char buffer[15000];
     
     memset(buffer, 0, sizeof(buffer));
 

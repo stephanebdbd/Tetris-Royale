@@ -96,7 +96,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
     }
     else if (clientMenuChoices[clientId] == 2) {
         std::cout << "Client #" << clientId << " est en jeu." << std::endl;
-        keyInuptGameMenu(clientSocket, clientId, action);
+        keyInuptGameMenu(clientSocket, action);
     }
 }
 
@@ -135,7 +135,7 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     }
 }
 
-void Server::keyInuptGameMenu(int clientSocket, int clientId, const std::string& unicodeAction) {
+void Server::keyInuptGameMenu(int clientSocket, const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
 
     if (action == "right") { 
@@ -196,7 +196,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
                     std::string action = receivedData["action"];
 
                     std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
-                    keyInuptGameMenu(clientSocket, clientId, action);
+                    keyInuptGameMenu(clientSocket, action);
                 } 
                 catch (json::parse_error& e) {
                     std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;

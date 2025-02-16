@@ -46,7 +46,7 @@ class Server {
         void sendGameToClient(int clientSocket);
         void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
         void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
-        void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
+        void keyInuptGameMenu(int clientSocket, const std::string& action);
         void loopGame(int clientSocket);
         void receiveInputFromClient(int clientSocket, int clientId);
         void handleMenu(int clientSocket, int clientId, const std::string& action);
