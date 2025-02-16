@@ -106,8 +106,7 @@ json Grid::gridToJson() const {
         for (int x = 1; x <= width; ++x) {
             json cell;
             cell["occupied"] = cells[y][x].isOccupied();
-            //cell["symbol"] = cells[y][x].getSymbol();
-            cell["symbol"] = 32;
+            cell["symbol"] = cells[y][x].getSymbol();
             cell["color"] = cells[y][x].getColor();
             row.push_back(cell);
         }
