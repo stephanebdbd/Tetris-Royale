@@ -42,19 +42,16 @@ void Client::receiveDisplay() {
         std::cerr << "Erreur : Impossible de recevoir l'affichage du serveur." << std::endl;
         return;
     }
-    clear();
+    refresh();
     
     try {
-        json data = json::parse(buffer);    
-        if (data.contains("grid")) {
-            display.displayGrid(data);
-        }
-        else if (data.contains("tetraPiece")) {
-            // voir buffer
-            //clear();
-            //mvprintw(20, 10, "T");
-            //refresh();
-            //display.displayTetramino(data);
+        json data = json::parse(buffer);
+
+        if (data.contains("grid")) {   
+            display.displayGame(data);
+            //char choice = getch(); trouver un moyen de bouger et pas de freeze en attendant l'input
+            //controller.sendInput(std::string(1, choice), clientSocket);
+            receiveDisplay();
         }
         else {
             display.displayMenu(data);

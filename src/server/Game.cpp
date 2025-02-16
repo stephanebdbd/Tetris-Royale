@@ -72,3 +72,22 @@ void Game::showGameOver() {
     endwin(); // Restaure le terminal à son état initial
     
 }
+
+void Game::update() {
+    if (!gameOver) {
+        if (dropTimer.hasElapsed()) {
+            if (currentPiece.canMoveDown(grid)) {
+                currentPiece.moveDown(grid);
+            } else {
+                currentPiece.fixToGrid(grid, gameOver);
+                if (!gameOver) { 
+                    int linesCleared = grid.clearFullLines();
+                    score.addScore(linesCleared);
+                    dropTimer.decreaseInterval(5);
+                    currentPiece.reset(grid.getWidth() / 2, 0);
+                }
+            }
+            dropTimer.reset();
+        }
+    }
+}

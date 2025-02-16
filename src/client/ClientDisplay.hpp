@@ -4,15 +4,18 @@
 #include <ncurses.h>
 #include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
+
 class ClientDisplay {
 
     public:
-        void displayMenu(const nlohmann::json& data);
-        void displayTetramino(const nlohmann::json& data);
-        void displayGrid(const nlohmann::json& data);
+        void displayMenu(const json& data);
+        void displayTetramino(const json& data);
+        void displayGame(const json& data);
 
 
-        void drawGrid(int width, int height, const nlohmann::json& cells);
+        void drawGrid(const json& grid);
+        void drawTetramino(const json& tetraPiece);
 };
 
 #endif

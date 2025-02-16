@@ -8,7 +8,7 @@ json Menu::getMainMenu0() const {
             {"2", "Créer un compte"},
             {"3", "Quitter"}
         }},
-        {"prompt", "Votre choix: "}
+        {"input", "Votre choix: "}
     };
     return menu.dump();  // Convertir en chaîne JSON
 }
@@ -23,7 +23,7 @@ json Menu::getMainMenu1() const {
             {"4", "Rejoindre"},
             {"5", "Retour"}
         }},
-        {"prompt", "Votre choix: "}
+        {"input", "Votre choix: "}
     };
     return menu.dump();  // Convertir en chaîne JSON
 }
