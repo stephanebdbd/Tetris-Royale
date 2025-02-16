@@ -22,33 +22,42 @@ void ClientDisplay::displayMenu(const json& data) {
     refresh(); 
 }
 
-void ClientDisplay::displayTetramino(const json& data) {
-    clear();
+void ClientDisplay::displayTetramino(const nlohmann::json& data) {
+    int x = data["x"];
+    int y = data["y"];
+    std::string symbol = data.contains("symbol") ? data["symbol"].get<std::string>() : "#";
 
-    int x = data["tetramino"]["x"];
-    int y = data["tetramino"]["y"];
+    const auto& shape = data["shape"];
 
-    mvaddch(y, x, 'B');
-    
+    for (size_t row = 0; row < shape.size(); ++row) {
+        for (size_t col = 0; col < shape[row].size(); ++col) {
+            if (shape[row][col] != " ") { // Si ce n'est pas un espace vide
+                mvaddch(y + row, x + col, symbol[0]); // Affichage à la bonne position
+            }
+        }
+    }
 
     refresh();
 }
 
-void ClientDisplay::displayGrid(const json& data){
+
+void ClientDisplay::displayGrid(const json& data) {
     clear();
 
     int width = data["grid"]["width"]; 
-    int height= data["grid"]["height"]; 
-
+    int height = data["grid"]["height"]; 
     const json& cells = data["grid"]["cells"];
 
     drawGrid(width, height, cells);
 
-    //draw tetramino
+    // Vérifier si un tétrimino est présent dans les données
+    if (data.contains("tetramino")) {
+        displayTetramino(data);
+    }
 
     refresh();
-
 }
+
 
 void ClientDisplay::drawGrid(int width, int height, const json& cells) {
     int shift = 0;

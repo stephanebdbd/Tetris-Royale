@@ -227,19 +227,23 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
 json Tetramino::tetraminoToJson() const {
     json tetraminoJson;
 
-    tetraminoJson["x"] = 20;
-    tetraminoJson["y"] = 20;
+    tetraminoJson["x"] = position.x;
+    tetraminoJson["y"] = position.y;
 
-    //tetraminoJson["x"] = position.x;
-    //tetraminoJson["y"] = position.y;
+    json shapeJson = json::array();
+    for (const auto& row : currentShape) {
+        json rowJson = json::array();
+        for (char cell : row) {
+            rowJson.push_back(std::string(1, cell));
+        }
+        shapeJson.push_back(rowJson);
+    }
 
-    //tetraminoJson["shape"] = currentShape;
-    //tetraminoJson["color"] = color;
+    tetraminoJson["shape"] = shapeJson;
+    tetraminoJson["symbol"] = std::string(1, shapeSymbols);
 
     return tetraminoJson;
 }
-
-
 
 // Générer un nouveau Tetramino
 void Tetramino::reset(int startX, int startY) {
