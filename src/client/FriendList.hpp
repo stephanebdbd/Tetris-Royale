@@ -1,20 +1,21 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <iostream>
-
-class User; // Déclaration avant inclusion pour éviter la dépendance circulaire
+#include "../include.hpp"
+#include "User.hpp" // Inclusion de User.hpp pour pouvoir utiliser la classe User
 
 class FriendList {
 private:
-    std::vector<User*> friends;
+    std::vector<std::shared_ptr<User>> friends;
+    std::vector <std::shared_ptr<User>> friendRequests;
 public:
     FriendList() = default;
     
     void addFriend(User* friendUser);
-    void removeFriend(const std::string& friendName);
-    int getAmountOfFriends() const;
-    std::vector<User*> getFriends() const;
-    void displayFriends() const;
+    void removeFriend(User* friendUser);
+    void sendFriendRequest(std::string pseudoUser);
+    void acceptFriendRequest(User* friendUser);
+    void rejectFriendRequest(User* friendUser);
+    void sendMessageToFriend(User* friendUser, std::string message);
+    bool isFriend(User* friendUser);
+    void removeFriendRequest(User* friendUser);
 };
