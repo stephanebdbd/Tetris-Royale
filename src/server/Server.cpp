@@ -55,35 +55,48 @@ void Server::acceptClients() {
 void Server::handleClient(int clientSocket, int clientId) {
     char buffer[1024];
 
+    // Envoyer le premier menu au client dès qu'il se connecte
+    sendMenuToClient(clientSocket, game->getMainMenu0());
+
     while (true) {
         memset(buffer, 0, sizeof(buffer));
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived <= 0) {
             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
+            clientMenuChoices.erase(clientId);
             close(clientSocket);
             break;
         }
+
         try {
             json receivedData = json::parse(buffer);
             std::string action = receivedData["action"];
-            // Affichage côté serveur de l'action reçue
-            if (clientMenuChoices[clientId] == 0) {
-                keyInuptWelcomeMenu(clientSocket, clientId, action);
+
+            std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
+
+            handleMenu(clientSocket, clientId, action);
+
+            // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
+            if (clientMenuChoices[clientId] == 2) {
+                receiveInputFromClient(clientSocket, clientId);
             }
-            else if (clientMenuChoices[clientId] == 1) {
-                keyInuptMainMenu(clientSocket, clientId, action);
-            }
-            else if (clientMenuChoices[clientId] == 2) {
-                clientMenuChoices[clientId] == -1;
-            }
-            else {
-                std::cout << "Client #" << clientId << " est en jeu." << std::endl;
-                keyInuptGameMenu(clientSocket, clientId, action);
-            }
-        } 
-        catch (json::parse_error& e) {
+
+        } catch (json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
         }
+    }
+}
+
+void Server::handleMenu(int clientSocket, int clientId, const std::string& action) {
+    if (clientMenuChoices[clientId] == 0) {
+        keyInuptWelcomeMenu(clientSocket, clientId, action);
+    }
+    else if (clientMenuChoices[clientId] == 1) {
+        keyInuptMainMenu(clientSocket, clientId, action);
+    }
+    else if (clientMenuChoices[clientId] == 2) {
+        std::cout << "Client #" << clientId << " est en jeu." << std::endl;
+        keyInuptGameMenu(clientSocket, clientId, action);
     }
 }
 
@@ -104,6 +117,7 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     if (action == "1") {
         clientMenuChoices[clientId]++;
         runningGame = true;
+        receiveInputFromClient(clientSocket, clientId); // lancer un thread pour recevoir les inputs
         loopGame(clientSocket);
     }
     else if (action == "2") {
@@ -121,17 +135,30 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     }
 }
 
-void Server::keyInuptGameMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "right") {
+void Server::keyInuptGameMenu(int clientSocket, int clientId, const std::string& unicodeAction) {
+    std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
+
+    if (action == "right") { 
         game->getCurrentPiece().moveRight(game->getGrid());
     }
-    else if (action == "left"){
+    else if (action == "left") { 
         game->getCurrentPiece().moveLeft(game->getGrid());
     }
+    else if (action == "up") { 
+        game->getCurrentPiece().rotate();
+    }
     else if (action == "down"){
-        //
+        game->getCurrentPiece().moveDown(game->getGrid());
+    }
+    else if(action == "drop") { // space
+        game->getCurrentPiece().dropTetrimino(game->getGrid());
     }
     sendGameToClient(clientSocket);
+}
+
+std::string Server::convertUnicodeToText(const std::string& unicode) {
+    auto action = unicodeToText.find(unicode);
+    return (action != unicodeToText.end()) ? action->second : "///"; 
 }
 
 void Server::stop() {
@@ -155,11 +182,37 @@ void Server::sendGameToClient(int clientSocket) {
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
 }
 
+//recuperer les inputs du client
+void Server::receiveInputFromClient(int clientSocket, int clientId) {
+    std::thread inputThread([this, clientSocket, clientId]() {
+        char buffer[1024];
+
+        while (runningGame) {
+            memset(buffer, 0, sizeof(buffer));
+            int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); 
+            if (bytesReceived > 0) {
+                try {
+                    json receivedData = json::parse(buffer);
+                    std::string action = receivedData["action"];
+
+                    std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
+                    keyInuptGameMenu(clientSocket, clientId, action);
+                } 
+                catch (json::parse_error& e) {
+                    std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Pause pour éviter une surcharge CPU
+        }
+    });
+
+    inputThread.detach(); // Permet d’exécuter en parallèle
+}
 
 void Server::loopGame(int clientSocket) {
     std::thread gameThread([this]() { // Lancer un thread pour le jeu et le maj
         while (runningGame) {
-            game->update();  
+            game->update(); 
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
     });
@@ -172,8 +225,10 @@ void Server::loopGame(int clientSocket) {
     }
 }
 
-
 int main() {
+    // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 
+    signal(SIGPIPE, SIG_IGN);  // le client arrivait à crasher le serveur en fermant la connexion
+
     try {
         std::ofstream serverLog("server.log"); // Créer un fichier de log
         // Rediriger std::cout et std::cerr vers le fichier log
@@ -192,9 +247,9 @@ int main() {
         } 
 
         server.stop();
-    } catch (const std::exception& e) {
+    } 
+    catch (const std::exception& e) {
         std::cerr << "Erreur : " << e.what() << std::endl;
     }
-
     return 0;
 }
