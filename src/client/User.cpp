@@ -1,5 +1,4 @@
 #include "User.hpp"
-#include <iostream>
 
 User::User(const std::string& userName, const std::string& pseudonym, const std::string& password)
     : userName(userName), pseudonym(pseudonym), password(password), highScore(0), isOnline(false) {}
@@ -69,8 +68,6 @@ void User::acceptFriendRequest(std::shared_ptr<User> friendUser) {
 }
 
 void User::rejectFriendRequest(std::shared_ptr<User> friendUser) {
-    //send message to friendUser
-    //sendMessageToFriend(friendUser->getPseudonym(), "Votre demande d'ami a été rejetée.");
     removeFriendRequest(friendUser);
 }
 
@@ -81,7 +78,7 @@ bool User::hasFriendRequest(std::shared_ptr<User> friendUser);
 
 //envoyer un message à un ami
 void User::sendMessageToFriend(std::string friendName, std::string message) {
-    //friendUser->receiveMessage(message);
+    //pass
 }
 
 //verfier si un utilisateur est ami

@@ -2,8 +2,21 @@
 
 FriendList::FriendList() = default;
 
+//Getters
 const std::vector<std::shared_ptr<User>>& FriendList::getFriends() const {
     return friends;
+}
+
+const std::vector<std::shared_ptr<User>>& FriendList::getFriendRequests() const {
+    return friendRequests;
+}
+
+int FriendList::getFriendRequestCount() const {
+    return friendRequestCount;
+}
+
+int FriendList::getFriendCount() const {
+    return friendCount;
 }
 
 //gerer la liste des amis
@@ -13,7 +26,7 @@ void FriendList::operator+=(std::shared_ptr<User> friendUser) {
 }
 
 void FriendList::operator-=(std::shared_ptr<User> friendUser) {
-    for (int i = 0; i < friends.size(); i++) {
+    for (int i = 0; i < friendCount; i++) {
         if (friends[i] == friendUser) {
             friends.erase(friends.begin() + i);
             break;
@@ -21,6 +34,8 @@ void FriendList::operator-=(std::shared_ptr<User> friendUser) {
     }
     friendCount--;
 }
+
+
 //gerer les demandes d'amis
 void FriendList::operator >> (std::shared_ptr<User> friendUser) {
     friendRequests.emplace_back(friendUser);
@@ -28,7 +43,7 @@ void FriendList::operator >> (std::shared_ptr<User> friendUser) {
 }
 
 void FriendList::operator<<(std::shared_ptr<User> friendUser) {
-    for (int i = 0; i < friendRequests.size(); i++) {
+    for (int i = 0; i < friendRequestCount; i++) {
         if (friendRequests[i] == friendUser) {
             friendRequests.erase(friendRequests.begin() + i);
             break;
