@@ -1,21 +1,36 @@
 #pragma once
 
 #include "../include.hpp"
-#include "User.hpp" // Inclusion de User.hpp pour pouvoir utiliser la classe User
+#include "User.hpp"
 
 class FriendList {
+
 private:
+
     std::vector<std::shared_ptr<User>> friends;
     std::vector <std::shared_ptr<User>> friendRequests;
+    int friendRequestCount = 0;
+    int friendCount = 0;
+
 public:
+
+    //Constructor
     FriendList() = default;
+
+    //Getters
+    const std::vector<std::shared_ptr<User>>& getFriends() const;
+    const std::vector<std::shared_ptr<User>>& getFriendRequests() const;
+    int getFriendRequestCount() const;
+    int getFriendCount() const;
+
+    //gerer la liste des amis
+    void operator+=(std::shared_ptr<User> friendUser);
+    void operator-=(std::shared_ptr<User> friendUser);
+
+    //gerer les demandes d'amis
+    void operator >> (std::shared_ptr<User> friendUser);
+    void operator<<(std::shared_ptr<User> friendUser);
     
-    void addFriend(User* friendUser);
-    void removeFriend(User* friendUser);
-    void sendFriendRequest(std::string pseudoUser);
-    void acceptFriendRequest(User* friendUser);
-    void rejectFriendRequest(User* friendUser);
-    void sendMessageToFriend(User* friendUser, std::string message);
-    bool isFriend(User* friendUser);
-    void removeFriendRequest(User* friendUser);
+    //Destructor
+    ~FriendList() = default;
 };
