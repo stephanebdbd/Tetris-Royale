@@ -1,14 +1,10 @@
-#ifndef CLIENTDISPLAY_HPP
-#define CLIENTDISPLAY_HPP
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
-#include <iostream>
-#include <unistd.h>
-#include <ncurses.h>
-#include <thread>
 #include "ClientDisplay.hpp"  
 #include "Controller.hpp"
 #include "ClientNetwork.hpp"
-#include "../common/json.hpp"
+
 
 class Client {
     ClientDisplay display;  // Chaque client a son propre display
@@ -24,6 +20,12 @@ class Client {
         void run();
         void receiveDisplay();
         void handleUserInput();
+        void displayMenu(const json& data);
+        //getters
+        int getClientSocket() const;
+        std::string getServerIP() const;
+        int getPort() const;
+
 };
 
 #endif
