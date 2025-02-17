@@ -133,7 +133,10 @@ void Tetramino::dropTetrimino(Grid &grid) {
     }
 }
 
-void Tetramino::rotate() {
+void Tetramino::rotate(const Grid &grid) {
+    if (!canRotate(grid)) {
+        return;
+    }
     // Créer une nouvelle matrice pour la forme après rotation
     std::array<std::array<char, 4>, 4> newShape = currentShape;
 

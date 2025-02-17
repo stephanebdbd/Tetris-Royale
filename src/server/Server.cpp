@@ -155,7 +155,7 @@ void Server::keyInuptGameMenu(int clientSocket, const std::string& unicodeAction
         game->getCurrentPiece().moveLeft(game->getGrid());
     }
     else if (action == "up") { 
-        game->getCurrentPiece().rotate();
+        game->getCurrentPiece().rotate(game->getGrid());
     }
     else if (action == "down"){
         game->getCurrentPiece().moveDown(game->getGrid());

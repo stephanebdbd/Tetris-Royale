@@ -25,7 +25,7 @@ class Tetramino {
         void moveDown(Grid &grid);
         void moveLeft(Grid &grid);
         void moveRight(Grid &grid);
-        void rotate();
+        void rotate(const Grid &grid);
         void fixToGrid(Grid &grid, bool &gameOver);
         bool canRotate(const Grid &grid);
         bool canMoveDown(const Grid &grid) const;

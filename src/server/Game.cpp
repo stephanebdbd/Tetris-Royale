@@ -55,7 +55,7 @@ void Game::showGame() {
 
 void Game::userInput() {
     int ch = getch();
-    if (ch == KEY_UP) { if (currentPiece.canRotate(grid)) currentPiece.rotate(); }
+    if (ch == KEY_UP) { currentPiece.rotate(grid); }
     if (ch == KEY_DOWN) { currentPiece.moveDown(grid); }
     if (ch == KEY_RIGHT) { currentPiece.moveRight(grid); }
     if (ch == KEY_LEFT) { currentPiece.moveLeft(grid); }
