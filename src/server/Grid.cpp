@@ -114,10 +114,31 @@ json Grid::gridToJson() const {
 }
 
 
+bool Grid::isLineEmpty(int y) const {
+    for (int x = 1; x <= width; ++x) {
+        if (cells[y][x].isOccupied()) {
+            return false; 
+        }
+    }
+    return true; 
+}
+
+
+int Grid::heightPieces(){
+    for(int y = height - 1; y > 0; --y){
+        if(isLineEmpty(y)) return y+1;
+    }
+}
+
+
 void Grid::piecesUp(int nbrOffset){
-    for (int y = height - 1; y > 0; --y) {
+
+    int h;
+    h = heightPieces();
+
+    for (int y = h; y < height; ++y) {
         for (int x = 1; x <= width; ++x) {  
-            cells[y + nbrOffset][x] = cells[y][x];
+            cells[y - nbrOffset][x] = cells[y][x];
             cells[y][x].setOccupied(false);
             cells[y][x].setColor(0);
             
