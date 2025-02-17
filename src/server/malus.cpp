@@ -24,8 +24,12 @@ void Malus:: sendMalus(Grid &grid){
     use_default_colors();
     init_pair(20, 244, -1);
 
-    for(int y = 0; y < nbrLine; ++y){
-        for(int x = 0; x < 10; ++x){
+    int height = grid.getHeight();
+    int width = grid.getWidth();
+    grid.piecesUp(nbrLine);
+    
+    for(int y = height - 1; y >= nbrLine ; --y){
+        for(int x = 1; x <= width; ++x){
             if (malus[y][x] =! ' '){
                 grid.markCell(x, y, 20);
             }
