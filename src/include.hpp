@@ -16,7 +16,7 @@
 #include <ncurses.h>
 
 // ALLEGRO
-#include <allegro5/allegro.h>
+/*#include <allegro5/allegro.h>
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
@@ -31,4 +31,4 @@
 #include <allegro5/mouse.h>
 #include <allegro5/system.h>
 #include <allegro5/timer.h>
-#include <allegro5/transformations.h>
+#include <allegro5/transformations.h>*/
