@@ -27,7 +27,7 @@ void Malus:: sendMalus(Grid &grid){
     for(int y = 0; y < nbrLine; ++y){
         for(int x = 0; x < 10; ++x){
             if (malus[y][x] =! ' '){
-                grid.markCell(x, y, malus[y][x], 20)
+                grid.markCell(x, y, 20);
             }
         }
     }

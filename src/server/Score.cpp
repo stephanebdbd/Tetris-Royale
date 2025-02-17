@@ -1,5 +1,7 @@
 #include "Score.hpp"
 
+#include <ncurses.h>
+
 Score::Score(int posX, int posY) : score(0), x(posX), y(posY) {}
 
 void Score::addScore(int linesCleared) {

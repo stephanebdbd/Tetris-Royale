@@ -1,5 +1,7 @@
 #include "Game.hpp"
 
+#include <ncurses.h>
+
 Game::Game(int gridWidth, int gridHeight) 
     : grid(gridWidth, gridHeight), 
       currentPiece(gridWidth / 2, 0, gridWidth, gridHeight), 

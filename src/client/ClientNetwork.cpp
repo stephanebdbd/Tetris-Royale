@@ -1,5 +1,9 @@
 #include "ClientNetwork.hpp"
 
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <iostream>
+
 
 bool ClientNetwork::connectToServer(const std::string& serverIP, int port, int& clientSocket) {
     clientSocket = socket(AF_INET, SOCK_STREAM, 0);

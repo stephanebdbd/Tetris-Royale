@@ -1,4 +1,5 @@
 #include "Tetramino.hpp"
+#include <ncurses.h>
 
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
     : position{startX, startY}, gridWidth(w), gridHeight(h) {
@@ -218,7 +219,7 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
                     gameOver = true; // Déclencher le game over
                     return;
                 }
-                grid.markCell(gridX, gridY, currentShape[y][x], color); // Marquer la cellule comme occupée
+                grid.markCell(gridX, gridY, color); // Marquer la cellule comme occupée
             }
         }
     }
@@ -238,9 +239,7 @@ json Tetramino::tetraminoToJson() const {
         }
         shapeJson.push_back(rowJson);
     }
-
     tetraminoJson["shape"] = shapeJson;
-    tetraminoJson["symbol"] = std::string(1, shapeSymbols);
 
     return tetraminoJson;
 }

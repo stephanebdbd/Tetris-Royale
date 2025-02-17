@@ -1,5 +1,11 @@
 #include "Controller.hpp"
 
+#include "../common/json.hpp"
+#include <netinet/in.h>
+#include <iostream>
+
+using json = nlohmann::json;
+
 
 void Controller::sendInput(const std::string& action, int clientSocket) {
     if (clientSocket == -1) return;

@@ -3,12 +3,11 @@ TARGET = client
 CXX = g++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++20 #-fsanitize=address
 
-LIBS = -lncurses
+LIBS = -lncurses #-fsanitize=address
 
 SRC = Client.cpp ClientDisplay.cpp ClientNetwork.cpp Controller.cpp main.cpp
 
 OBJECTS = $(SRC:.cpp=.o)
-
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
@@ -16,9 +15,8 @@ $(TARGET): $(OBJECTS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-clean :
+clean:
 	rm -f $(TARGET) $(OBJECTS)
 
 run: $(TARGET)
 	./$(TARGET)
-

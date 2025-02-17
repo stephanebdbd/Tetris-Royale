@@ -1,8 +1,6 @@
 #ifndef CELL_HPP
 #define CELL_HPP
 
-#include <ncurses.h>
-
 // Coordonnée d'une cellule
 struct Coord {
     int x, y;
@@ -12,17 +10,16 @@ struct Coord {
 class Cell { 
         bool occupied;
         int color;
-        char symbol;
 
     public:
         bool isOccupied() const { return occupied; }
-        char getSymbol() const { return symbol; }
+        //char getSymbol() const { return symbol; }
         int getColor() const { return color; }
 
         void setOccupied(bool value) { occupied = value; }
-        void setSymbol(char value) { symbol = value; }
+        //void setSymbol(char value) { symbol = value; }
         void setColor(int value) { color = value; }
-        Cell() : occupied(false), symbol(' ') {}
+        Cell() : occupied(false) {}
 };
 
 #endif

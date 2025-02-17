@@ -1,5 +1,6 @@
 #ifndef MALUS_HPP
 #define MALUS_HPP
+
 #include <vector>
 
 class Malus {
@@ -12,11 +13,7 @@ class Malus {
         Malus(int nbrLine);
         void createMalus(); //creation de malus 
         void drawMalus();
-
-
-
+        void sendMalus(Grid &grid);
 };
-
-
 
 #endif

@@ -2,9 +2,8 @@
 #define TETRAMINO_HPP
 
 #include "Grid.hpp"
-#include <iostream>
 #include <array>
-#include <nlohmann/json.hpp>
+#include "../common/json.hpp"
 
 using json = nlohmann::json; 
 

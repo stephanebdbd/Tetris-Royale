@@ -4,10 +4,10 @@ TARGET1 = serveur
 
 # Compilateur
 CXX = g++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++20 #-fsanitize=address
+CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 
 # Bibliothèques à lier
-LIBS = -lncurses -pthread
+LIBS = -lncurses -pthread -fsanitize=address
 
 # Fichiers source
 TETRIS_SRC = main.cpp Game.cpp Grid.cpp Tetramino.cpp Timer.cpp Score.cpp
@@ -17,11 +17,14 @@ SERVEUR_SRC = Server.cpp Menu.cpp Game.cpp Grid.cpp Tetramino.cpp Score.cpp Time
 TETRIS_OBJECTS = $(TETRIS_SRC:.cpp=.o)
 SERVEUR_OBJECTS = $(SERVEUR_SRC:.cpp=.o)
 
-# Compilation de `tetris`
+#Sinon compile que target0
+all: $(TARGET0) $(TARGET1)
+
+# Compilation de "tetris"
 $(TARGET0): $(TETRIS_OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET0) $(TETRIS_OBJECTS) $(LIBS)
 
-# Compilation de `serveur`
+# Compilation de "serveur"
 $(TARGET1): $(SERVEUR_OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET1) $(SERVEUR_OBJECTS) $(LIBS)
 
@@ -33,6 +36,6 @@ $(TARGET1): $(SERVEUR_OBJECTS)
 clean:
 	rm -f $(TARGET0) $(TETRIS_OBJECTS) $(TARGET1) $(SERVEUR_OBJECTS)
 
-# Exécuter `serveur` après compilation
+# Exécuter "serveur" après compilation
 run: $(TARGET1)
 	./$(TARGET1)
