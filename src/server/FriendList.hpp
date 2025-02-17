@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FRIENDLIST_HPP
+#define FRIENDLIST_HPP
 
 #include "../include.hpp"
 #include "User.hpp"
@@ -34,3 +35,5 @@ public:
     //Destructor
     ~FriendList() = default;
 };
+
+#endif //FRIENDLIST_HPP
