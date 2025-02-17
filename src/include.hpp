@@ -11,6 +11,8 @@
 #include <cctype>
 #include <chrono>
 #include <memory> 
+#include "thread.h"
+#include "signal.h"
 
 // NCURSES
 #include <ncurses.h>
