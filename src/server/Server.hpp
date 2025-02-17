@@ -19,7 +19,7 @@ using json = nlohmann::json;
 class Server {
     int port;
     int serverSocket;
-    std::unordered_map<int, int> clientMenuChoices;
+    std::unordered_map<int, MenuNode> clientMenuChoices;
     bool runningGame = false;
     std::atomic<int> clientIdCounter;
     Game* game;
@@ -51,6 +51,7 @@ class Server {
         void receiveInputFromClient(int clientSocket, int clientId);
         void handleMenu(int clientSocket, int clientId, const std::string& action);
         std::string convertUnicodeToText(const std::string& unicode);
+        void createMenuTree(MenuNode root);
 };
 
 #endif

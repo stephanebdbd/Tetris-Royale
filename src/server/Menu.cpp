@@ -19,11 +19,34 @@ json Menu::getMainMenu1() const {
         {"options", {
             {"1", "Jouer"},
             {"2", "Amis"},
-            {"3", "Classements"},
-            {"4", "Rejoindre"},
+            {"3", "Classement"},
+            {"4", "Chat"},
             {"5", "Retour"}
         }},
         {"input", "Votre choix: "}
     };
     return menu.dump();  // Convertir en chaîne JSON
+}
+
+MenuNode::MenuNode(std::string name, MenuNode* parent) : name(name), parent(parent) {}
+
+void MenuNode::addChild(MenuNode child) {
+    children.push_back(child);
+}
+
+MenuNode MenuNode::getChild(std::string name) {
+    for (MenuNode child : children) {
+        if (child.getName() == name) {
+            return child;
+        }
+    }
+    return MenuNode();
+}
+
+MenuNode* MenuNode::getParent() {
+    return parent;
+}
+
+std::string MenuNode::getName() {
+    return name;
 }
