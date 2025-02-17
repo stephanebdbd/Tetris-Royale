@@ -41,7 +41,9 @@ void Server::acceptClients() {
 
     int clientId = clientIdCounter.fetch_add(1);  // Attribuer un ID unique et incrémenter le compteur
     std::cout << "Client #" << clientId << " connecté." << std::endl;
-    clientMenuChoices[clientId] = 0;  // Chaque client commence avec menuChoice = 0
+    MenuNode root("Connexion");
+    createMenuTree(root);
+    clientMenuChoices[clientId] = root;  // Chaque client commence avec menuChoice = 0
     
     clear();
     sendMenuToClient(clientSocket, game->getMainMenu0()); 
@@ -67,15 +69,13 @@ void Server::handleClient(int clientSocket, int clientId) {
             json receivedData = json::parse(buffer);
             std::string action = receivedData["action"];
             // Affichage côté serveur de l'action reçue
-            if (clientMenuChoices[clientId] == 0) {
+            if (clientMenuChoices[clientId].getName() == "Connexion") {
                 keyInuptWelcomeMenu(clientSocket, clientId, action);
             }
-            else if (clientMenuChoices[clientId] == 1) {
+            else if (clientMenuChoices[clientId].getName() == "Menu principal") {
                 keyInuptMainMenu(clientSocket, clientId, action);
             }
-            else if (clientMenuChoices[clientId] == 2) {
-                clientMenuChoices[clientId] == -1;
-            }
+            // l'objectif est de créer une structure qui simplifie la redirection du joueur vers son menu en fonction de l'arbre
             else {
                 std::cout << "Client #" << clientId << " est en jeu." << std::endl;
                 keyInuptGameMenu(clientSocket, clientId, action);
@@ -89,34 +89,39 @@ void Server::handleClient(int clientSocket, int clientId) {
 
 void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
-        clientMenuChoices[clientId]++;
+        clientMenuChoices[clientId] = clientMenuChoices[clientId].getChild("Menu principal"); // ça doit être l'onglet pour se connecter
         sendMenuToClient(clientSocket, game->getMainMenu1());      
     }
     else if (action == "2") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId].getChild("Menu principal"); // ça diot être l'onglet pour créer un compte
         // Créer un compte => à implémenter
     }
     else if (action == "3") {
+        close(clientSocket);
         // Quitter => à implémenter
     }
 }
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
-        clientMenuChoices[clientId]++;
+        clientMenuChoices[clientId] = clientMenuChoices[clientId].getChild("Jouer");
         runningGame = true;
         loopGame(clientSocket);
     }
     else if (action == "2") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId].getChild("Amis");
         // Amis => à implémenter
     }
     else if (action == "3") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId].getChild("Classement");
         // Classements => à implémenter
     }
     else if (action == "4") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId].getChild("Chat");
         // Rejoindre => à implémenter
     }
     if (action == "5") { 
-        clientMenuChoices[clientId]--;
+        clientMenuChoices[clientId] = *clientMenuChoices[clientId].getParent();
         sendMenuToClient(clientSocket, game->getMainMenu0());
     }
 }
@@ -197,4 +202,44 @@ int main() {
     }
 
     return 0;
+}
+
+void Server::createMenuTree(MenuNode root) {
+    MenuNode seConnecter("Se connecter", &root);
+    MenuNode creerCompte("Créer un compte", &root);
+    MenuNode menuPrincipal("Menu principal", &root);
+    
+    MenuNode amis("Amis");
+    MenuNode ajouterOuSupprimer("Ajouter ou supprimer");
+    MenuNode afficherAmis("Afficher amis");
+
+    amis.addChild(ajouterOuSupprimer);
+    amis.addChild(afficherAmis);
+
+    MenuNode classement("Classement");
+    MenuNode chat("Chat");
+
+    MenuNode jouer("Jouer");
+    MenuNode rejoindre("Rejoindre");
+    MenuNode creer("Créer");
+    MenuNode endless("Endless");
+    MenuNode classic("Classic");
+    MenuNode duel("duel");
+    MenuNode royalCompetition("Royal Competition");
+
+    creer.addChild(endless);
+    creer.addChild(classic);
+    creer.addChild(duel);
+    creer.addChild(royalCompetition);
+
+    jouer.addChild(creer);
+    jouer.addChild(rejoindre);
+
+    menuPrincipal.addChild(jouer);
+    menuPrincipal.addChild(amis);
+    menuPrincipal.addChild(classement);
+    menuPrincipal.addChild(chat);
+
+    seConnecter.addChild(menuPrincipal);
+    creerCompte.addChild(menuPrincipal);
 }
