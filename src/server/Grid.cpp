@@ -115,3 +115,17 @@ json Grid::gridToJson() const {
     return gridJson;
 }
 
+
+void Grid::piecesUp(int nbrOffset){
+    for (int y = height - 1; y > 0; --y) {
+        for (int x = 1; x <= width; ++x) {
+            
+            cells[y + nbrOffset][x] = cells[y][x];
+
+            cells[y][x].setOccupied(false);
+            cells[y][x].setSymbol(' ');
+            cells[y][x].setColor(0);
+            
+        }
+    }
+}
