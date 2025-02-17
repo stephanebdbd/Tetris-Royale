@@ -4,6 +4,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <ncurses.h>
+#include <thread>
 #include "ClientDisplay.hpp"  
 #include "Controller.hpp"
 #include "ClientNetwork.hpp"
@@ -22,6 +23,7 @@ class Client {
         Client(const std::string& serverIP, int port);
         void run();
         void receiveDisplay();
+        void handleUserInput();
 };
 
 #endif

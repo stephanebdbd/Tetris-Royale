@@ -19,27 +19,6 @@ void ClientDisplay::displayMenu(const json& data) {
     refresh(); 
 }
 
-void ClientDisplay::displayTetramino(const json& data) {
-    clear();
-    json tetraPiece = data["tetraPiece"];
-
-    // Récupération des données du Tétramino
-    std::vector<std::vector<std::string>> shape = tetraPiece["shape"];
-    int x = tetraPiece["x"];
-    int y = tetraPiece["y"];
-
-    // Affichage du Tétramino
-    for (int row = 0; row < shape.size(); ++row) {
-        for (int col = 0; col < shape[row].size(); ++col) {
-            if (shape[row][col] != " ") {  // Si la case est occupée
-                mvprintw(y + row, x + col, "%s", shape[row][col].c_str());
-            }
-        }
-    }
-    refresh();
-}
-
-
 void ClientDisplay::displayGame(const json& data) {
 
     drawGrid(data["grid"]);
@@ -78,8 +57,8 @@ void ClientDisplay::drawTetramino(const json& tetraPiece) {
     int y = tetraPiece["y"];
 
     // Affichage du Tétramino
-    for (int row = 0; row < shape.size(); ++row) {
-        for (int col = 0; col < shape[row].size(); ++col) {
+    for (size_t row = 0; row < shape.size(); ++row) {
+        for (size_t col = 0; col < shape[row].size(); ++col) {
             if (shape[row][col] == "#") {  // Si c'est un bloc occupé
                 mvprintw(y + row, x + col, "#");
             }

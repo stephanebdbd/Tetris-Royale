@@ -1,0 +1,38 @@
+# Noms des exécutables
+TARGET0 = tetris
+TARGET1 = serveur
+
+# Compilateur
+CXX = g++
+CXXFLAGS = -Wall -Wextra -Werror -std=c++20 #-fsanitize=address
+
+# Bibliothèques à lier
+LIBS = -lncurses -pthread
+
+# Fichiers source
+TETRIS_SRC = main.cpp Game.cpp Grid.cpp Tetramino.cpp Timer.cpp Score.cpp
+SERVEUR_SRC = Server.cpp Menu.cpp Game.cpp Grid.cpp Tetramino.cpp Score.cpp Timer.cpp
+
+# Fichiers objets
+TETRIS_OBJECTS = $(TETRIS_SRC:.cpp=.o)
+SERVEUR_OBJECTS = $(SERVEUR_SRC:.cpp=.o)
+
+# Compilation de `tetris`
+$(TARGET0): $(TETRIS_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET0) $(TETRIS_OBJECTS) $(LIBS)
+
+# Compilation de `serveur`
+$(TARGET1): $(SERVEUR_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET1) $(SERVEUR_OBJECTS) $(LIBS)
+
+# Règle générique pour compiler les fichiers .cpp en .o
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Nettoyage des fichiers objets et exécutables
+clean:
+	rm -f $(TARGET0) $(TETRIS_OBJECTS) $(TARGET1) $(SERVEUR_OBJECTS)
+
+# Exécuter `serveur` après compilation
+run: $(TARGET1)
+	./$(TARGET1)
