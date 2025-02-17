@@ -24,8 +24,8 @@ public:
     int getFriendCount() const;
 
     //gerer la liste des amis
-    void operator+=(std::shared_ptr<User> friendUser);
-    void operator-=(std::shared_ptr<User> friendUser);
+    void addFriend(std::shared_ptr<User> friendUser);
+    void removeFriend(std::shared_ptr<User> friendUser);
 
     //gerer les demandes d'amis
     void operator >> (std::shared_ptr<User> friendUser);

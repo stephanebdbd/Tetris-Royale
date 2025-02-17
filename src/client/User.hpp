@@ -9,7 +9,7 @@ private:
     std::string pseudonym;    // Pseudonyme
     std::string password;
     int highScore;
-    bool isOnline;
+    bool isConnected;
     FriendList *friends;    // Liste des amis
 
 public:
@@ -22,7 +22,10 @@ public:
     //connexion et deconnexion de l'utilisateur
     bool login(const std::string& password);
     void logout();
-    bool getIsOnline() const;
+    void connect();
+    void disconnect();
+    bool isConnected() const;
+
     //score de l'utilisateur
     void setHighScore(int score);
     int getHighScore() const;
@@ -45,6 +48,7 @@ public:
     const std::vector<std::shared_ptr<User>>& getFriends() const;
     //comparer deux utilisateurs
     bool operator==(const User& user) const;
+
     
 };
 

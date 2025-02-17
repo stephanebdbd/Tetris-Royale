@@ -20,12 +20,12 @@ int FriendList::getFriendCount() const {
 }
 
 //gerer la liste des amis
-void FriendList::operator+=(std::shared_ptr<User> friendUser) {
+void FriendList::addFriend(std::shared_ptr<User> friendUser) {
     friends.emplace_back(friendUser);
     friendCount++;
 }
 
-void FriendList::operator-=(std::shared_ptr<User> friendUser) {
+void FriendList::removeFriend(std::shared_ptr<User> friendUser) {
     for (int i = 0; i < friendCount; i++) {
         if (friends[i] == friendUser) {
             friends.erase(friends.begin() + i);
