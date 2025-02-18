@@ -29,6 +29,7 @@ class Grid {
         int getHeight() const { return height; }
 
         Cell& getCell(int x, int y)  { return cells[y][x]; }
+        void piecesUp(int nbrOffset);
 };
 
 
