@@ -20,10 +20,12 @@ class Grid {
         void applyGravity();
         int clearFullLines();
         json gridToJson() const;
+        int heightPieces();
         void piecesUp(int nbrOffset);
 
         bool isCellOccupied(int x, int y) const;
         bool isLineComplete(int y) const;
+        bool isLineEmpty(int y) const;
 
         int getWidth() const { return width; }
         int getHeight() const { return height; }

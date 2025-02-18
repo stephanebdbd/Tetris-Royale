@@ -9,7 +9,6 @@ class Score {
         Score(int posX, int posY);
         void addScore(int linesCleared);
         void display() const;
-        
         int getScore() const;
 };
 

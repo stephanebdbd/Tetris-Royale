@@ -8,7 +8,8 @@ Game::Game(int gridWidth, int gridHeight)
       dropTimer(1000), 
       score(gridWidth + 5, 2), // Position du score à droite de la grille
       running(true),
-      gameOver(false) {}
+      gameOver(false)
+      {}
 
 void Game::run() {
     initscr();
@@ -29,6 +30,17 @@ void Game::run() {
                 currentPiece.fixToGrid(grid, gameOver);
                 if (!gameOver) { 
                     int linesCleared = grid.clearFullLines();
+                    
+                    //il ne faut pas supprimer le code suivant qui est en commantaire parce qu'il gere les malus mais localement
+
+                    /*int nbrMalus = getNbrMalus(linesCleared); // nombre du malus à envoyer
+
+                    if(nbrMalus > 0){
+                        Malus malus(nbrMalus);
+                        malus.sendMalus(grid);
+                    }*/
+                    
+
                     score.addScore(linesCleared);
 
                     dropTimer.decreaseInterval(5); // Diminue le temps d'attente entre chaque chute
@@ -40,17 +52,21 @@ void Game::run() {
             }
             dropTimer.reset();
         }
+    
 
         userInput();
     }
 
     showGameOver();
+   
 }
 
 void Game::showGame() {
+    
     grid.draw();
     currentPiece.draw();
     score.display();
+    
 }
 
 void Game::userInput() {
@@ -61,6 +77,7 @@ void Game::userInput() {
     if (ch == KEY_LEFT) { currentPiece.moveLeft(grid); }
     if (ch == ' ') { currentPiece.dropTetrimino(grid); }
     if (ch == 'q') running = false;
+    
 }
 
 void Game::showGameOver() {
@@ -91,5 +108,15 @@ void Game::update() {
             }
             dropTimer.reset();
         }
+    }
+}
+
+
+int Game::getNbrMalus(int nbrLineComplet) const{
+    switch(nbrLineComplet){
+        case 2 : return 1;
+        case 3 : return 2;
+        case 4 : return 4;
+        default : return 0;  
     }
 }
