@@ -26,6 +26,7 @@ void Grid::draw() {
         for (int x = 1; x <= width; ++x) {
             int color = cells[y][x].getColor();
             if (cells[y][x].isOccupied()) {
+
                 attron(COLOR_PAIR(color));
                 mvaddch(y, x, '#');
                 attroff(COLOR_PAIR(color));
@@ -128,13 +129,13 @@ int Grid::heightPieces(){
     for(int y = height - 1; y > 0; --y){
         if(isLineEmpty(y)) return y+1;
     }
+    return 1;
 }
 
 
 void Grid::piecesUp(int nbrOffset){
 
-    int h;
-    h = heightPieces();
+    int h= heightPieces();
 
     for (int y = h; y < height; ++y) {
         for (int x = 1; x <= width; ++x) {  

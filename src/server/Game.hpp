@@ -6,6 +6,7 @@
 #include "Score.hpp"
 #include "Menu.hpp"
 #include "malus.hpp"
+#include <iostream>
 
 class Game {
     Grid grid;
