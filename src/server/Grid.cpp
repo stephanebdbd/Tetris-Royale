@@ -2,6 +2,7 @@
 
 Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {}
 
+
 // Marquer une cellule comme occupée
 void Grid::markCell(int x, int y, char symbol, int color) {
     if ( !cells[y][x].isOccupied() && y >= 0 && y < height && x >= 1 && x <= width + 1) {
@@ -105,8 +106,7 @@ json Grid::gridToJson() const {
         for (int x = 1; x <= width; ++x) {
             json cell;
             cell["occupied"] = cells[y][x].isOccupied();
-            //cell["symbol"] = cells[y][x].getSymbol();
-            cell["symbol"] = 65;
+            cell["symbol"] = cells[y][x].getSymbol();
             cell["color"] = cells[y][x].getColor();
             row.push_back(cell);
         }
@@ -115,3 +115,17 @@ json Grid::gridToJson() const {
     return gridJson;
 }
 
+
+void Grid::piecesUp(int nbrOffset){
+    for (int y = height - 1; y > 0; --y) {
+        for (int x = 1; x <= width; ++x) {
+            
+            cells[y + nbrOffset][x] = cells[y][x];
+
+            cells[y][x].setOccupied(false);
+            cells[y][x].setSymbol(' ');
+            cells[y][x].setColor(0);
+            
+        }
+    }
+}

@@ -1,15 +1,12 @@
 
 #include "ClientDisplay.hpp"
 
-using json = nlohmann::json;
-
-
 void ClientDisplay::displayMenu(const json& data) {
     clear();
 
     std::string title = data["title"];
     json options = data["options"];
-    std::string prompt = data["prompt"];
+    std::string input = data["input"];
 
     int y = 5;
     mvprintw(y++, 10, "%s", title.c_str());
@@ -17,40 +14,24 @@ void ClientDisplay::displayMenu(const json& data) {
         std::string line = key + ". " + value.get<std::string>();
         mvprintw(y++, 10, "%s", line.c_str());
     }
-    mvprintw(y++, 10, "%s", prompt.c_str());
+    mvprintw(y++, 10, "%s", input.c_str());
 
     refresh(); 
 }
 
-void ClientDisplay::displayTetramino(const json& data) {
-    clear();
+void ClientDisplay::displayGame(const json& data) {
 
-    int x = data["tetramino"]["x"];
-    int y = data["tetramino"]["y"];
+    drawGrid(data["grid"]);
 
-    mvaddch(y, x, 'B');
-    
-
-    refresh();
+    drawTetramino(data["tetraPiece"]);
 }
 
-void ClientDisplay::displayGrid(const json& data){
+void ClientDisplay::drawGrid(const json& grid) {
+    int width = grid["width"]; 
+    int height = grid["height"]; 
+    const json& cells = grid["cells"];
+
     clear();
-
-    int width = data["grid"]["width"]; 
-    int height= data["grid"]["height"]; 
-
-    const json& cells = data["grid"]["cells"];
-
-    drawGrid(width, height, cells);
-
-    //draw tetramino
-
-    refresh();
-
-}
-
-void ClientDisplay::drawGrid(int width, int height, const json& cells) {
     int shift = 0;
     for(int y = 0; y < height; ++y) {
         for(int x = 0; x < width; ++x) {
@@ -68,3 +49,21 @@ void ClientDisplay::drawGrid(int width, int height, const json& cells) {
     }
 }
 
+void ClientDisplay::drawTetramino(const json& tetraPiece) {
+
+    // Récupération des informations
+    std::vector<std::vector<std::string>> shape = tetraPiece["shape"];
+    int x = tetraPiece["x"];
+    int y = tetraPiece["y"];
+
+    // Affichage du Tétramino
+    for (size_t row = 0; row < shape.size(); ++row) {
+        for (size_t col = 0; col < shape[row].size(); ++col) {
+            if (shape[row][col] == "#") {  // Si c'est un bloc occupé
+                mvprintw(y + row, x + col, "#");
+            }
+        }
+    }
+
+    refresh();
+}
