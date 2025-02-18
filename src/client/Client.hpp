@@ -1,30 +1,28 @@
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
-
-#include "ClientDisplay.hpp"  
-#include "Controller.hpp"
-#include "ClientNetwork.hpp"
-
+#pragma once
+#include <string>
+#include <memory>
+#include "../server/User.hpp"
 
 class Client {
-    ClientDisplay display;  // Chaque client a son propre display
-    Controller controller;  // Chaque client a son propre controller
-    ClientNetwork network;  // Chaque client a son propre network
-    std::string serverIP;
-    int port;
-    int clientSocket;
+private:
+    int sock;
+    struct sockaddr_in serverAddr;
+    bool isConnected;
+    std::shared_ptr<User> user;  // Association avec l'utilisateur
 
-    public:
-        Client(const std::string& serverIP, int port);
-        void run();
-        void receiveDisplay();
-        void handleUserInput();
-        void displayMenu(const json& data);
-        //getters
-        int getClientSocket() const;
-        std::string getServerIP() const;
-        int getPort() const;
+public:
+    // Constructeur : prend un shared_ptr<User>, l'IP du serveur, et le port
+    Client(std::shared_ptr<User> user, const std::string& serverIP, int port);
 
+    // Méthode pour envoyer un message au serveur avec le pseudonyme de l'utilisateur
+    void sendMessage(const std::string& message);
+
+    // Méthode pour écouter les messages reçus du serveur
+    void receiveMessages();
+
+    // Méthode pour commencer l'écoute des messages dans un thread séparé
+    void startListening();
+
+    ~Client();
 };
 
-#endif

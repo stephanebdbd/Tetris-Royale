@@ -1,96 +1,59 @@
 #include "Client.hpp"
-
-#include "../common/json.hpp"
 #include <iostream>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <ncurses.h>
 #include <thread>
+#include <arpa/inet.h>
+#include <unistd.h>
 
-using json = nlohmann::json;
+// Constructeur : initialisation du client et connexion au serveur
+Client::Client(std::shared_ptr<User> user, const std::string& serverIP, int port)
+    : user(user), isConnected(false) {
 
-Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1) {}
-
-void Client::run() {
-    if (!network.connectToServer(serverIP, port, clientSocket)) {
-        std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
-        return;
-    }
-    initscr();
-    curs_set(0);
-    keypad(stdscr, TRUE);
-    nodelay(stdscr, TRUE); // Permet de ne pas bloquer l'affichage en attendant un input
-
-    // Lancer un thread pour écouter les touches et envoyer les inputs
-    std::thread inputThread(&Client::handleUserInput, this);
-    inputThread.detach(); // Permet au thread de fonctionner indépendamment
-
-    // Boucle principale pour recevoir et afficher le jeu
-    while (true) {
-        receiveDisplay();
+    // Création du socket
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == -1) {
+        std::cerr << "Erreur: Impossible de créer le socket\n";
+        exit(1);
     }
 
-    network.disconnect(clientSocket);
-    delwin(stdscr);
-    endwin();
+    // Configuration de l'adresse du serveur
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(port);
+    inet_pton(AF_INET, serverIP.c_str(), &serverAddr.sin_addr);
+
+    // Connexion au serveur
+    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+        std::cerr << "Erreur: Impossible de se connecter au serveur\n";
+        exit(1);
+    }
+    isConnected = true;
+    std::cout << "✅ Connecté au serveur !\n";
 }
 
-void Client::handleUserInput() {
-    while (true) {
-        int ch = getch();
-        if (ch != ERR) {  // Si une touche est pressée
-            if (ch == 'q') {
-                network.disconnect(clientSocket);
-                endwin();
-                exit(0); 
-            }
-            std::string action(1, ch);
-            controller.sendInput(action, clientSocket);  // Envoyer au serveur
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Pause pour éviter une boucle trop rapide
-    }
+// Envoi de message au serveur en préfixant avec le pseudonyme de l'utilisateur
+void Client::sendMessage(const std::string& message) {
+    std::string fullMessage = user->getPseudonym() + ": " + message;
+    send(sock, fullMessage.c_str(), fullMessage.size(), 0);
 }
 
-void Client::receiveDisplay() {
-    char buffer[15000];
-    
-    memset(buffer, 0, sizeof(buffer));
-
-    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-    if (bytesReceived <= 0) {
-        std::cerr << "Erreur : Impossible de recevoir l'affichage du serveur." << std::endl;
-        return;
-    }
-    refresh();
-    
-    try {
-        json data = json::parse(buffer);
-
-        if (data.contains("grid")) {   
-            display.displayGame(data);
-            //char choice = getch(); trouver un moyen de bouger et pas de freeze en attendant l'input
-            //controller.sendInput(std::string(1, choice), clientSocket);
-            receiveDisplay();
-        }
-        else {
-            display.displayMenu(data);
+// Réception des messages du serveur
+void Client::receiveMessages() {
+    char buffer[1024];
+    while (isConnected) {
+        int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
+        if (bytesReceived > 0) {
+            buffer[bytesReceived] = '\0';
+            std::cout << "\n📩 Nouveau message: " << buffer << "\n";
         }
     }
-    catch (json::parse_error& e) {
-        std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
-    }
-        
 }
 
-//getters
-int Client::getClientSocket() const{
-    return clientSocket;
+// Démarrer un thread pour écouter les messages entrants
+void Client::startListening() {
+    std::thread listener(&Client::receiveMessages, this);
+    listener.detach();  // Lancer l'écoute en arrière-plan
 }
 
-std::string Client::getServerIP() const{
-    return serverIP;
-}
-
-int Client::getPort() const{
-    return port;
+// Destructeur pour fermer la connexion au serveur
+Client::~Client() {
+    close(sock);
 }
