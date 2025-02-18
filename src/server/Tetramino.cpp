@@ -17,6 +17,9 @@ void Tetramino::initializeColors() const {
     init_pair(5, COLOR_BLUE, -1);   // J - Bleu
     init_pair(6, COLOR_MAGENTA, -1);// T - Magenta
     init_pair(7, COLOR_WHITE, -1); // L - Blanc et pas Orange car pas de couleur orange (max 8 couleur dont noir et blanc)
+    init_color(8, 500, 500, 500);
+    init_pair(9, 8, -1);
+    
 }
 
 void Tetramino::initializeShapes() {
