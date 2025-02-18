@@ -1,9 +1,9 @@
 TARGET = client
 
 CXX = g++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++20 #-fsanitize=address
+CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 
-LIBS = -lncurses #-fsanitize=address
+LIBS = -lncurses -fsanitize=address
 
 SRC = Client.cpp ClientDisplay.cpp ClientNetwork.cpp Controller.cpp main.cpp
 

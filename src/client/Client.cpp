@@ -36,6 +36,7 @@ void Client::run() {
 }
 
 void Client::handleUserInput() {
+    halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
     while (true) {
         int ch = getch();
         if (ch != ERR) {  // Si une touche est pressée
@@ -47,37 +48,44 @@ void Client::handleUserInput() {
             std::string action(1, ch);
             controller.sendInput(action, clientSocket);  // Envoyer au serveur
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Pause pour éviter une boucle trop rapide
     }
 }
 
 void Client::receiveDisplay() {
-    char buffer[15000];
-    
-    memset(buffer, 0, sizeof(buffer));
+    std::string received;
 
-    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-    if (bytesReceived <= 0) {
-        std::cerr << "Erreur : Impossible de recevoir l'affichage du serveur." << std::endl;
-        return;
-    }
-    refresh();
-    
-    try {
-        json data = json::parse(buffer);
+    while (true) {
+        char buffer[12000];
+        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
 
-        if (data.contains("grid")) {   
-            display.displayGame(data);
-            //char choice = getch(); trouver un moyen de bouger et pas de freeze en attendant l'input
-            //controller.sendInput(std::string(1, choice), clientSocket);
-            receiveDisplay();
-        }
-        else {
-            display.displayMenu(data);
+        if (bytesReceived > 0) {
+            received += std::string(buffer, bytesReceived);
+
+            // Vérifier si un JSON complet est reçu (fini par un '\n') 
+            size_t pos = received.find("\n");
+            while (pos != std::string::npos) {
+                std::string jsonStr = received.substr(0, pos);  // Extraire un JSON complet
+                received.erase(0, pos + 1);  // Supprimer le JSON traité
+
+                try {
+                    json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
+
+                    // Si c'est une grille de jeu
+                    if (data.contains("grid")) {   
+                        display.displayGame(data);
+                    }
+                    // Sinon, c'est un menu
+                    else {
+                        display.displayMenu(data);
+                    }
+
+                    refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
+                } catch (json::parse_error& e) {
+                    std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;
+                }
+
+                pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer
+            }
         }
     }
-    catch (json::parse_error& e) {
-        std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
-    }
-        
 }

@@ -18,6 +18,9 @@ class Server {
     Grid* grid;
     Tetramino* currentPiece;
 
+    bool needToSendGame = false; // TODO: en gros faut arreter de spam l'envoie de message au client
+    //mais plutot envoyer un message quand le jeu a changé (quand le joueur a bougé, quand le joueur a tourné, quand le joueur a drop)
+
     std::unordered_map<std::string, std::string> unicodeToText = {
         {"\u0005", "right"},
         {"\u0004", "left"},

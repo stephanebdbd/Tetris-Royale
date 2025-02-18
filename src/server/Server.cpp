@@ -188,7 +188,7 @@ void Server::sendGameToClient(int clientSocket) {
     message["grid"] = game->getGrid().gridToJson();
     message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 
-    std::string msg = message.dump();
+    std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
 }
 
@@ -212,7 +212,6 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
                     std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
                 }
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Pause pour éviter une surcharge CPU
         }
     });
 
@@ -223,7 +222,7 @@ void Server::loopGame(int clientSocket) {
     std::thread gameThread([this]() { // Lancer un thread pour le jeu et le maj
         while (runningGame) {
             game->update(); 
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     });
 
@@ -231,7 +230,7 @@ void Server::loopGame(int clientSocket) {
 
     while (runningGame) { // Envoi du jeu au client 
         sendGameToClient(clientSocket);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Pause de 500 ms eviter un crash
+        std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Pause de 500 ms eviter un crash
     }
 }
 
