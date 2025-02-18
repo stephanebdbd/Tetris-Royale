@@ -13,7 +13,8 @@ private:
 public:
     // Constructeur : prend un shared_ptr<User>, l'IP du serveur, et le port
     Client(std::shared_ptr<User> user, const std::string& serverIP, int port);
-
+    // Processus de connexion : demander les informations à l'utilisateur et envoyer au serveur
+    bool login();
     // Méthode pour envoyer un message au serveur avec le pseudonyme de l'utilisateur
     void sendMessage(const std::string& message);
 

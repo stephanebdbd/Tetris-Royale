@@ -28,7 +28,41 @@ Client::Client(std::shared_ptr<User> user, const std::string& serverIP, int port
     isConnected = true;
     std::cout << "✅ Connecté au serveur !\n";
 }
+bool Client::login() {
+    std::string userName, pseudonym, password;
 
+    // Demander les informations
+    std::cout << "🔑 Nom d'utilisateur: ";
+    std::getline(std::cin, userName);
+    std::cout << "📛 Pseudonyme: ";
+    std::getline(std::cin, pseudonym);
+    std::cout << "🔒 Mot de passe: ";
+    std::getline(std::cin, password);
+
+    // Créer l'objet User avec les informations fournies
+    user = std::make_shared<User>(userName, pseudonym, password);
+
+    // Envoyer les infos d'authentification au serveur
+    std::string authMessage = "LOGIN " + userName + " " + pseudonym + " " + password;
+    send(sock, authMessage.c_str(), authMessage.size(), 0);
+
+    // Attendre la réponse du serveur
+    char buffer[256];
+    int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
+    if (bytesReceived > 0) {
+        buffer[bytesReceived] = '\0';
+        std::string response(buffer);
+        if (response == "SUCCESS") {
+            std::cout << "✅ Connexion réussie !\n";
+            return true;
+        } else {
+            std::cout << "❌ Échec de l'authentification !\n";
+            return false;
+        }
+    }
+
+    return false;
+}
 // Envoi de message au serveur en préfixant avec le pseudonyme de l'utilisateur
 void Client::sendMessage(const std::string& message) {
     std::string fullMessage = user->getPseudonym() + ": " + message;
