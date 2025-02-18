@@ -3,7 +3,6 @@
 
 #include "ClientDisplay.hpp"  
 #include "Controller.hpp"
-#include "User.hpp
 #include "ClientNetwork.hpp"
 
 
@@ -11,7 +10,6 @@ class Client {
     ClientDisplay display;  // Chaque client a son propre display
     Controller controller;  // Chaque client a son propre controller
     ClientNetwork network;  // Chaque client a son propre network
-    User user; // Chaque client a son propre user
     std::string serverIP;
     int port;
     int clientSocket;

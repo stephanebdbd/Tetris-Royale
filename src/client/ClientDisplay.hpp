@@ -1,5 +1,5 @@
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
+#ifndef CLIENTDISPLAY_HPP
+#define CLIENTDISPLAY_HPP
 
 #include <ncurses.h>
 #include <nlohmann/json.hpp>
