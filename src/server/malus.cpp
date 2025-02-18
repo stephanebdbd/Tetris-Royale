@@ -3,7 +3,6 @@
 #include <cstdlib>  // Pour rand() et srand()
 #include <ctime> // pour time()
 #include <ncurses.h>
-#include <Grid.hpp>
 
 using namespace std ;
 Malus::Malus(int nbrLine): nbrLine(nbrLine) { line = std::vector<char>(10, '#');}
@@ -27,7 +26,7 @@ void Malus:: sendMalus(Grid &grid){
     int height = grid.getHeight();
     int width = grid.getWidth();
     grid.piecesUp(nbrLine);
-    
+
     for(int y = height - 1; y >= nbrLine ; --y){
         for(int x = 1; x <= width; ++x){
             if (malus[y][x] =! ' '){

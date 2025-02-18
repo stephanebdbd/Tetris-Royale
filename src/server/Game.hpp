@@ -5,6 +5,7 @@
 #include "Timer.hpp"
 #include "Score.hpp"
 #include "Menu.hpp"
+#include "malus.hpp"
 
 class Game {
     Grid grid;
@@ -22,6 +23,7 @@ class Game {
         void userInput();
         void showGameOver();
         void update();
+        int getNbrMalus(int nbrLineComplet)const;
 
         Grid& getGrid() { return grid; }
         Tetramino& getCurrentPiece() { return currentPiece; }

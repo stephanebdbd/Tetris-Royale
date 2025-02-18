@@ -29,6 +29,14 @@ void Game::run() {
                 currentPiece.fixToGrid(grid, gameOver);
                 if (!gameOver) { 
                     int linesCleared = grid.clearFullLines();
+                    int nbrMalus = getNbrMalus(linesCleared); // nombre du malus à envoyer
+                    
+                    if(nbrMalus > 0){
+                        Malus malus(nbrMalus);
+                        malus.sendMalus(grid);
+                    }
+                    
+
                     score.addScore(linesCleared);
 
                     dropTimer.decreaseInterval(5); // Diminue le temps d'attente entre chaque chute
@@ -91,5 +99,15 @@ void Game::update() {
             }
             dropTimer.reset();
         }
+    }
+}
+
+
+int Game::getNbrMalus(int nbrLineComplet) const{
+    switch(nbrLineComplet){
+        case 2 : return 1;
+        case 3 : return 2;
+        case 4 : return 4;
+        default : return 0;  
     }
 }

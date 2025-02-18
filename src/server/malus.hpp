@@ -2,6 +2,7 @@
 #define MALUS_HPP
 
 #include <vector>
+#include <Grid.hpp>
 
 class Malus {
     int nbrLine;
