@@ -70,9 +70,11 @@ void ClientDisplay::drawTetramino(const json& tetraPiece) {
 
 void ClientDisplay::drawScore(const json& score) {
     int scoreValue = score["value"];
+    int comboValue = score["combo"];
     int xPosition = 25; // Position à droite de la grille
     int yPosition = 2; // Position verticale
 
     mvprintw(yPosition, xPosition, "Score: %d", scoreValue);
+    mvprintw(yPosition + 1, xPosition, "Last Combo: %d !", comboValue);
     refresh();
 }
