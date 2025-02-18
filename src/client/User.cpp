@@ -117,18 +117,7 @@ bool User::operator==(const User& user) const {
     return userName == user.userName;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Envoyer un messageà un ami
+void User::sendMessageToFriend(const std::string& friendName, const std::string& message) {
+    std::cout << "Message envoyé à " << friendName << ": " << message << std::endl;
+}

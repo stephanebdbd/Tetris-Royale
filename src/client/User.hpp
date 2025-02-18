@@ -53,5 +53,6 @@ public:
     // Comparaison des utilisateurs
     bool operator==(const User& user) const;
 
+    // Envoyer un message à un ami
+    void sendMessageToFriend(const std::string& friendName, const std::string& message);
 };
-
