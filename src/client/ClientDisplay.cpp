@@ -67,3 +67,12 @@ void ClientDisplay::drawTetramino(const json& tetraPiece) {
 
     refresh();
 }
+
+void ClientDisplay::drawScore(const json& score) {
+    int scoreValue = score["value"];
+    int xPosition = 25; // Position à droite de la grille
+    int yPosition = 2; // Position verticale
+
+    mvprintw(yPosition, xPosition, "Score: %d", scoreValue);
+    refresh();
+}
