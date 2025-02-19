@@ -3,37 +3,48 @@
 
 #include "../include.hpp"
 #include "User.hpp"
+#include "../client/Client.hpp"  // Inclure Client si nécessaire
 
 class FriendList {
-
 private:
-
+    // Liste des amis enregistrés (meme on est hors ligne)
     std::vector<std::shared_ptr<User>> friends;
-    std::vector <std::shared_ptr<User>> friendRequests;
+    
+    // Liste des demandes d'amis en attente
+    std::vector<std::shared_ptr<User>> friendRequests;
+    
+    // Liste des amis connectés (en ligne)
+    std::vector<std::shared_ptr<Client>> onlineFriends;
+    
+    // Comptage des amis et demandes d'amis
     int friendRequestCount = 0;
     int friendCount = 0;
 
 public:
-
-    //Constructor
+    // Constructeur
     FriendList() = default;
 
-    //Getters
+    // Getters
     const std::vector<std::shared_ptr<User>>& getFriends() const;
     const std::vector<std::shared_ptr<User>>& getFriendRequests() const;
+    const std::vector<std::shared_ptr<Client>>& getOnlineFriends() const;  
     int getFriendRequestCount() const;
     int getFriendCount() const;
 
-    //gerer la liste des amis
-    void operator+=(std::shared_ptr<User> friendUser);
-    void operator-=(std::shared_ptr<User> friendUser);
+    // Gérer la liste des amis enregistrés
+    void addFriend(std::shared_ptr<User> friendUser);
+    void removeFriend(std::shared_ptr<User> friendUser);
 
-    //gerer les demandes d'amis
-    void operator >> (std::shared_ptr<User> friendUser);
-    void operator<<(std::shared_ptr<User> friendUser);
-    
-    //Destructor
+    // Gérer les demandes d'amis
+    void operator>>(std::shared_ptr<User> friendUser);  // Ajouter une demande d'ami
+    void operator<<(std::shared_ptr<User> friendUser);  // Accepter une demande d'ami
+
+    // Gérer la liste des amis connectés (en ligne)
+    void addOnlineFriend(std::shared_ptr<Client> friendClient);  // Ajouter un ami connecté
+    void removeOnlineFriend(std::shared_ptr<Client> friendClient);  // Retirer un ami connecté
+
+    // Destructeur
     ~FriendList() = default;
 };
 
-#endif //FRIENDLIST_HPP
+#endif // FRIENDLIST_HPP

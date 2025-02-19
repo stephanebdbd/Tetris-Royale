@@ -1,4 +1,7 @@
 #include "io.hpp"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 // Lecture de N octets depuis le socket.
 static bool ReadNBytes(int fd, char* buffer, uint32_t n) {

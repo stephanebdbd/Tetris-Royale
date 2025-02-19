@@ -11,12 +11,12 @@
 class Server {
     int port;
     int serverSocket;
-    std::unordered_map<int, int> clientMenuChoices;
-    bool runningGame = false;
+    std::unordered_map<int, MenuNode> clientMenuChoices;
+    std::atomic<bool> runningGame{false};
     std::atomic<int> clientIdCounter;
-    Game* game;
-    Grid* grid;
-    Tetramino* currentPiece;
+    std::unique_ptr<Game> game;
+    std::unique_ptr<Grid> grid;
+    std::unique_ptr<Tetramino> currentPiece;
 
     bool needToSendGame = false; // TODO: en gros faut arreter de spam l'envoie de message au client
     //mais plutot envoyer un message quand le jeu a changé (quand le joueur a bougé, quand le joueur a tourné, quand le joueur a drop)

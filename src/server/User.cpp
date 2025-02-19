@@ -1,98 +1,134 @@
 #include "User.hpp"
+#include <iostream>
 
 User::User(const std::string& userName, const std::string& pseudonym, const std::string& password)
-    : userName(userName), pseudonym(pseudonym), password(password), highScore(0), isOnline(false) {}
+    : userName(userName), pseudonym(pseudonym), password(password), highScore(0), isConnected(false), friends(nullptr) {}
 
+// Obtenir le nom d'utilisateur
 std::string User::getUserName() const {
     return userName;
 }
 
+// Obtenir le pseudonyme
 std::string User::getPseudonym() const {
     return pseudonym;
 }
 
+// Modifier le pseudonyme
 void User::setPseudonym(const std::string& newPseudonym) {
     pseudonym = newPseudonym;
-    std::cout << "Votre pseudonyme a été changé en : " << pseudonym << std::endl;
 }
 
-bool User::login(const std::string& password) {
-    if (this->password == password) {
-        isOnline = true;
-        std::cout << pseudonym << " (" << userName << ") est maintenant connecté." << std::endl;
+// Connexion de l'utilisateur
+bool User::login(const std::string& inputPassword) {
+    if (password == inputPassword) {
+        isConnected = true;
         return true;
     }
-    std::cout << "Mot de passe incorrect." << std::endl;
     return false;
 }
 
+// Déconnexion de l'utilisateur
 void User::logout() {
-    isOnline = false;
-    std::cout << pseudonym << " est maintenant déconnecté." << std::endl;
+    isConnected = false;
 }
 
-bool User::getIsOnline() const {
-    return isOnline;
+// Connecter manuellement un utilisateur (ex: administrateur)
+void User::connect() {
+    isConnected = true;
 }
 
+// Déconnecter manuellement un utilisateur
+void User::disconnect() {
+    isConnected = false;
+}
+
+// Vérifier si l'utilisateur est connecté
+bool User::isConnected() const {
+    return isConnected;
+}
+
+// Définir un nouveau high score
 void User::setHighScore(int score) {
-    highScore = score;
+    if (score > highScore) {
+        highScore = score;
+    }
 }
 
+// Récupérer le high score
 int User::getHighScore() const {
     return highScore;
 }
 
-//gestion des amis
+// Ajouter un ami
 void User::addFriend(std::shared_ptr<User> friendUser) {
-    friends += friendUser;  
-}
-
-void User::removeFriend(std::shared_ptr<User> friendUser) {
-    friends -= friendUser;
-}
-
-//gerer les demandes des amis
-void User::sendFriendRequest(std::shared_ptr<User> friendUser) {
-    friendUser->receiveFriendRequest(std::shared_ptr<User>(this));
-}
-
-void User::receiveFriendRequest(std::shared_ptr<User> friendUser) {
-    friends >> friendUser;
-    //send message to friendUser
-    //sendMessageToFriend(friendUser->getPseudonym(), "Vous avez une demande d'ami de " + pseudonym);
-
-void User::acceptFriendRequest(std::shared_ptr<User> friendUser) {
-    friends += friendUser;
-    removeFriendRequest(friendUser);
-}
-
-void User::rejectFriendRequest(std::shared_ptr<User> friendUser) {
-    removeFriendRequest(friendUser);
-}
-
-void User::removeFriendRequest(std::shared_ptr<User> friendUser) {
-    friends -= friendUser;
-}
-bool User::hasFriendRequest(std::shared_ptr<User> friendUser);
-
-//envoyer un message à un ami
-void User::sendMessageToFriend(std::string friendName, std::string message) {
-    //pass
-}
-
-//verfier si un utilisateur est ami
-bool User::isFriend(std::shared_ptr<User> friendUser) {
-    for (int i = 0; i < friends->getFriendCount(); i++) {
-        if (friends[i] == friendUser) {
-            return true;
-        }
+    if (!isFriend(friendUser)) {
+        friends->addFriend(friendUser);
     }
-    return false;
 }
 
-//operator pour comparer deux utilisateurs
-bool User::operator==(const User& user) const {
-    return userName == user.userName && pseudonym == user.pseudonym;
+// Supprimer un ami
+void User::removeFriend(std::shared_ptr<User> friendUser) {
+    friends->removeFriend(friendUser);
 }
+
+// Envoyer une demande d'ami
+void User::sendFriendRequest(std::shared_ptr<User> friendUser) {
+    friendUser->receiveFriendRequest(std::make_shared<User>(*this));
+}
+
+// Recevoir une demande d'ami
+void User::receiveFriendRequest(std::shared_ptr<User> friendUser) {
+    friends->receiveRequest(friendUser);
+}
+
+// Accepter une demande d'ami
+void User::acceptFriendRequest(std::shared_ptr<User> friendUser) {
+    friends->acceptRequest(friendUser);
+}
+
+// Refuser une demande d'ami
+void User::rejectFriendRequest(std::shared_ptr<User> friendUser) {
+    friends->rejectRequest(friendUser);
+}
+
+// Supprimer une demande d'ami
+void User::removeFriendRequest(std::shared_ptr<User> friendUser) {
+    friends->removeRequest(friendUser);
+}
+
+// Vérifier si une demande d'ami existe
+bool User::hasFriendRequest(std::shared_ptr<User> friendUser) {
+    return friends->hasRequest(friendUser);
+}
+
+// Vérifier si un utilisateur est un ami
+bool User::isFriend(std::shared_ptr<User> friendUser) {
+    return friends->isFriend(friendUser);
+}
+
+// Récupérer la liste des amis
+const std::vector<std::shared_ptr<User>>& User::getFriends() const {
+    return friends->getFriendList();
+}
+
+// Comparer deux utilisateurs
+bool User::operator==(const User& user) const {
+    return userName == user.userName;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
