@@ -13,9 +13,9 @@ ServerChat::~ServerChat() {
 
 void ServerChat::handleClientChat(int clientSocket) {
     char buffer[1024];
-    std::string userId;
+    uint32_t userId;
 
-    while (true) {
+    while (ReadStreamMessage(clientSocket, buffer, sizeof(buffer), userId) > 0) {
         memset(buffer, 0, sizeof(buffer));
         int bytesRead = read(clientSocket, buffer, sizeof(buffer));
         if (bytesRead <= 0) break;
@@ -29,7 +29,7 @@ void ServerChat::handleClientChat(int clientSocket) {
 
     // Suppression du client à la déconnexion
     std::lock_guard<std::mutex> lock(clientsMutex);
-    clients.erase(userId);
+    clients.erase(std::to_string(userId));
     close(clientSocket);
 }
 
@@ -40,6 +40,7 @@ void ServerChat::broadcastMessage(const ChatMessage& msg, const std::string& cha
     }
 }
 
-void ServerChat::sendMessage(int clientSocket, const std::string& message) {
-    send(clientSocket, message.c_str(), message.size(), 0);
+void sendMessageToDest(char *Message, int client_fd) {
+    uint32_t messageSize = (uint32_t)strlen(Message);               
+    WriteStreamMessage(client_fd, Message, messageSize);      
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "ChatMessage.hpp"
+#include "io.hpp"
 #include <unordered_map>
 #include <mutex>
 #include <thread>
