@@ -10,7 +10,7 @@ json Menu::getMainMenu0() const {
         }},
         {"input", "Votre choix: "}
     };
-    return menu.dump();  // Convertir en chaîne JSON
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
 json Menu::getMainMenu1() const {
@@ -25,7 +25,7 @@ json Menu::getMainMenu1() const {
         }},
         {"input", "Votre choix: "}
     };
-    return menu.dump();  // Convertir en chaîne JSON
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
 MenuNode::MenuNode(std::string name, MenuNode* parent) : name(name), parent(parent) {}

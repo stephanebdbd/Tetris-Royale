@@ -1,4 +1,5 @@
 #include "Tetramino.hpp"
+#include <ncurses.h>
 
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
     : position{startX, startY}, gridWidth(w), gridHeight(h) {
@@ -16,6 +17,9 @@ void Tetramino::initializeColors() const {
     init_pair(5, COLOR_BLUE, -1);   // J - Bleu
     init_pair(6, COLOR_MAGENTA, -1);// T - Magenta
     init_pair(7, COLOR_WHITE, -1); // L - Blanc et pas Orange car pas de couleur orange (max 8 couleur dont noir et blanc)
+    init_color(8, 500, 500, 500);
+    init_pair(9, 8, -1);
+    
 }
 
 void Tetramino::initializeShapes() {
@@ -132,7 +136,10 @@ void Tetramino::dropTetrimino(Grid &grid) {
     }
 }
 
-void Tetramino::rotate() {
+void Tetramino::rotate(const Grid &grid) {
+    if (!canRotate(grid)) {
+        return;
+    }
     // Créer une nouvelle matrice pour la forme après rotation
     std::array<std::array<char, 4>, 4> newShape = currentShape;
 
@@ -218,7 +225,7 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
                     gameOver = true; // Déclencher le game over
                     return;
                 }
-                grid.markCell(gridX, gridY, currentShape[y][x], color); // Marquer la cellule comme occupée
+                grid.markCell(gridX, gridY, color); // Marquer la cellule comme occupée
             }
         }
     }
@@ -238,9 +245,7 @@ json Tetramino::tetraminoToJson() const {
         }
         shapeJson.push_back(rowJson);
     }
-
     tetraminoJson["shape"] = shapeJson;
-    tetraminoJson["symbol"] = std::string(1, shapeSymbols);
 
     return tetraminoJson;
 }

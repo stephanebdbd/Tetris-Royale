@@ -5,15 +5,7 @@
 #include "Grid.hpp"
 #include "Tetramino.hpp"
 #include <atomic>
-#include <csignal>
-#include <thread>
-#include <iostream>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <fstream>
-#include "../common/json.hpp"
 
-using json = nlohmann::json;
 
 
 class Server {
@@ -25,6 +17,9 @@ class Server {
     std::unique_ptr<Game> game;
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;
+
+    bool needToSendGame = false; // TODO: en gros faut arreter de spam l'envoie de message au client
+    //mais plutot envoyer un message quand le jeu a changé (quand le joueur a bougé, quand le joueur a tourné, quand le joueur a drop)
 
     std::unordered_map<std::string, std::string> unicodeToText = {
         {"\u0005", "right"},
@@ -51,8 +46,6 @@ class Server {
         void receiveInputFromClient(int clientSocket, int clientId);
         void handleMenu(int clientSocket, int clientId, const std::string& action);
         std::string convertUnicodeToText(const std::string& unicode);
-        void createMenuTree(MenuNode root);
-        ~Server(); 
 };
 
 #endif

@@ -1,11 +1,7 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
-#include <netinet/in.h>
-#include <iostream>
-#include "../common/json.hpp"
-
-using json = nlohmann::json;
+#include <string>
 
 class Controller {
 

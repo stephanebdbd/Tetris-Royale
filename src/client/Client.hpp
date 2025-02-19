@@ -1,7 +1,10 @@
-#pragma once
-#include <string>
-#include <memory>
-#include "../server/User.hpp"
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
+
+#include "ClientDisplay.hpp"  
+#include "Controller.hpp"
+#include "ClientNetwork.hpp"
+
 
 class Client {
 private:
@@ -18,12 +21,13 @@ public:
     // Méthode pour envoyer un message au serveur avec le pseudonyme de l'utilisateur
     void sendMessage(const std::string& message);
 
-    // Méthode pour écouter les messages reçus du serveur
-    void receiveMessages();
+    public:
+        Client(const std::string& serverIP, int port);
+        void run();
+        void receiveDisplay();
+        void handleUserInput();
+        void displayMenu(const json& data);
 
-    // Méthode pour commencer l'écoute des messages dans un thread séparé
-    void startListening();
-
-    ~Client();
 };
 
+#endif

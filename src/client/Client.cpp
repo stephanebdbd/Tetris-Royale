@@ -4,9 +4,14 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-// Constructeur : initialisation du client et connexion au serveur
-Client::Client(std::shared_ptr<User> user, const std::string& serverIP, int port)
-    : user(user), isConnected(false) {
+#include "../common/json.hpp"
+#include <iostream>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <ncurses.h>
+#include <thread>
+
+using json = nlohmann::json;
 
     // Création du socket
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -69,26 +74,57 @@ void Client::sendMessage(const std::string& message) {
     send(sock, fullMessage.c_str(), fullMessage.size(), 0);
 }
 
-// Réception des messages du serveur
-void Client::receiveMessages() {
-    char buffer[1024];
-    while (isConnected) {
-        int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
-        if (bytesReceived > 0) {
-            buffer[bytesReceived] = '\0';
-            std::cout << "\n📩 Nouveau message: " << buffer << "\n";
-            fflush(stdout);
+void Client::handleUserInput() {
+    halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
+    while (true) {
+        int ch = getch();
+        if (ch != ERR) {  // Si une touche est pressée
+            if (ch == 'q') {
+                network.disconnect(clientSocket);
+                endwin();
+                exit(0); 
+            }
+            std::string action(1, ch);
+            controller.sendInput(action, clientSocket);  // Envoyer au serveur
         }
     }
 }
 
-// Démarrer un thread pour écouter les messages entrants
-void Client::startListening() {
-    std::thread listener(&Client::receiveMessages, this);
-    listener.detach();  // Lancer l'écoute en arrière-plan
-}
+void Client::receiveDisplay() {
+    std::string received;
 
-// Destructeur pour fermer la connexion au serveur
-Client::~Client() {
-    close(sock);
+    while (true) {
+        char buffer[12000];
+        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+
+        if (bytesReceived > 0) {
+            received += std::string(buffer, bytesReceived);
+
+            // Vérifier si un JSON complet est reçu (fini par un '\n') 
+            size_t pos = received.find("\n");
+            while (pos != std::string::npos) {
+                std::string jsonStr = received.substr(0, pos);  // Extraire un JSON complet
+                received.erase(0, pos + 1);  // Supprimer le JSON traité
+
+                try {
+                    json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
+
+                    // Si c'est une grille de jeu
+                    if (data.contains("grid")) {   
+                        display.displayGame(data);
+                    }
+                    // Sinon, c'est un menu
+                    else {
+                        display.displayMenu(data);
+                    }
+
+                    refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
+                } catch (json::parse_error& e) {
+                    std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;
+                }
+
+                pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer
+            }
+        }
+    }
 }

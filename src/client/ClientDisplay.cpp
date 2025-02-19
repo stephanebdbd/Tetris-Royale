@@ -1,5 +1,9 @@
-
 #include "ClientDisplay.hpp"
+
+#include <ncurses.h>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 void ClientDisplay::displayMenu(const json& data) {
     clear();
@@ -35,8 +39,17 @@ void ClientDisplay::drawGrid(const json& grid) {
     int shift = 0;
     for(int y = 0; y < height; ++y) {
         for(int x = 0; x < width; ++x) {
-            int symbol = cells[y][x]["symbol"];
-            mvaddch(shift + y, x + 1, static_cast<char>(symbol));
+            //voir si la cellule est occupée
+            bool occupied = cells[y][x]["occupied"];
+            if (occupied) {
+                int color = cells[y][x]["color"];
+                attron(COLOR_PAIR(color));
+                mvaddch(shift + y, x + 1, '#');
+                attroff(COLOR_PAIR(color));
+            }
+            else {
+                mvaddch(shift + y, x + 1, ' ');
+            }
         }
     }
 
@@ -50,20 +63,17 @@ void ClientDisplay::drawGrid(const json& grid) {
 }
 
 void ClientDisplay::drawTetramino(const json& tetraPiece) {
-
     // Récupération des informations
-    std::vector<std::vector<std::string>> shape = tetraPiece["shape"];
     int x = tetraPiece["x"];
     int y = tetraPiece["y"];
+    std::vector<std::vector<std::string>> shape = tetraPiece["shape"];
 
-    // Affichage du Tétramino
     for (size_t row = 0; row < shape.size(); ++row) {
         for (size_t col = 0; col < shape[row].size(); ++col) {
-            if (shape[row][col] == "#") {  // Si c'est un bloc occupé
-                mvprintw(y + row, x + col, "#");
+            if (shape[row][col][0] != ' '){
+                mvaddch(y + row, x + col, '#');
             }
         }
     }
-
     refresh();
 }

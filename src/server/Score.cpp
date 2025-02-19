@@ -1,5 +1,7 @@
 #include "Score.hpp"
 
+#include <ncurses.h>
+
 Score::Score(int posX, int posY) : score(0), x(posX), y(posY) {}
 
 void Score::addScore(int linesCleared) {
@@ -11,6 +13,7 @@ void Score::addScore(int linesCleared) {
 
 void Score::display() const {
     mvprintw(y, x, "Score: %d", score);
+    //mvprintw(y+10, x, "hi:%d", 12);
 }
 
 int Score::getScore() const {
