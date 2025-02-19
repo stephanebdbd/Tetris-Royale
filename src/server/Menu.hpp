@@ -2,6 +2,7 @@
 #define MENU_HPP
 
 #include "../common/json.hpp"  // Inclusion de la bibliothèque JSON
+#include <memory>
 
 using json = nlohmann::json;
 
@@ -11,16 +12,19 @@ class Menu {
         json getMainMenu1() const;  
 };
 
-class MenuNode{
+class MenuNode : public std::enable_shared_from_this<MenuNode> {
     std::string name;
-    std::vector<MenuNode> children;
-    MenuNode* parent;
+    std::vector<std::shared_ptr<MenuNode>> children;
+    std::weak_ptr<MenuNode> parent;
 public:
-    MenuNode(std::string name="", MenuNode* parent=nullptr);
-    void addChild(MenuNode child);
-    MenuNode getChild(std::string name);
-    MenuNode* getParent();
-    std::string getName();
+    MenuNode(std::string name, std::shared_ptr<MenuNode> parent=nullptr);
+    void addChild(std::shared_ptr<MenuNode> child);
+    std::shared_ptr<MenuNode> getChild(std::string name) const;
+    std::weak_ptr<MenuNode> getParent() const;
+    std::string getName() const;
+    std::vector<std::shared_ptr<MenuNode>> getChildren() const;
+    void makeNodeTree();
+    void menutest(std::shared_ptr<MenuNode> root, int depth = 0);
 };
 
 #endif
