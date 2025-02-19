@@ -32,9 +32,9 @@ bool Client::login() {
     std::string userName, pseudonym, password;
 
     // Demander les informations
-    std::cout << "🔑 Nom d'utilisateur: ";
+    std::cout << "Nom d'utilisateur: ";
     std::getline(std::cin, userName);
-    std::cout << "📛 Pseudonyme: ";
+    std::cout << "Pseudonyme: ";
     std::getline(std::cin, pseudonym);
     std::cout << "🔒 Mot de passe: ";
     std::getline(std::cin, password);
@@ -77,6 +77,7 @@ void Client::receiveMessages() {
         if (bytesReceived > 0) {
             buffer[bytesReceived] = '\0';
             std::cout << "\n📩 Nouveau message: " << buffer << "\n";
+            fflush(stdout);
         }
     }
 }

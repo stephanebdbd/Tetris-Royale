@@ -20,11 +20,11 @@ class Server {
     int port;
     int serverSocket;
     std::unordered_map<int, MenuNode> clientMenuChoices;
-    bool runningGame = false;
+    std::atomic<bool> runningGame{false};
     std::atomic<int> clientIdCounter;
-    Game* game;
-    Grid* grid;
-    Tetramino* currentPiece;
+    std::unique_ptr<Game> game;
+    std::unique_ptr<Grid> grid;
+    std::unique_ptr<Tetramino> currentPiece;
 
     std::unordered_map<std::string, std::string> unicodeToText = {
         {"\u0005", "right"},
