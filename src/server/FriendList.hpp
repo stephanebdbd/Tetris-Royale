@@ -3,7 +3,6 @@
 
 #include "../include.hpp"
 #include "User.hpp"
-#include "../client/Client.hpp"  // Inclure Client si nécessaire
 
 class FriendList {
 private:
@@ -12,9 +11,6 @@ private:
     
     // Liste des demandes d'amis en attente
     std::vector<std::shared_ptr<User>> friendRequests;
-    
-    // Liste des amis connectés (en ligne)
-    std::vector<std::shared_ptr<Client>> onlineFriends;
     
     // Comptage des amis et demandes d'amis
     int friendRequestCount = 0;
@@ -27,7 +23,7 @@ public:
     // Getters
     const std::vector<std::shared_ptr<User>>& getFriends() const;
     const std::vector<std::shared_ptr<User>>& getFriendRequests() const;
-    const std::vector<std::shared_ptr<Client>>& getOnlineFriends() const;  
+    
     int getFriendRequestCount() const;
     int getFriendCount() const;
 

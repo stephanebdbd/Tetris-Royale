@@ -10,7 +10,7 @@ private:
     std::string pseudonym;    // Pseudonyme
     std::string password;
     int highScore;            // Meilleur score
-    bool isConnected;        // Connecté ou non
+    bool is_connected;        // Connecté ou non
     FriendList *friends;     // Liste des amis
     int userSocketFd;
 
