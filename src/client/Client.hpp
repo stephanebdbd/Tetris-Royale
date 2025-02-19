@@ -4,14 +4,18 @@
 #include "ClientDisplay.hpp"  
 #include "Controller.hpp"
 #include "ClientNetwork.hpp"
+#include "../server/User.hpp"
 
 
 class Client {
 private:
-    int sock;
+    int client_socket;
     struct sockaddr_in serverAddr;
     bool isConnected;
     std::shared_ptr<User> user;  // Association avec l'utilisateur
+    ClientDisplay display;
+    Controller controller;
+    ClientNetwork network;
 
 public:
     // Constructeur : prend un shared_ptr<User>, l'IP du serveur, et le port

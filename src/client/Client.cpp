@@ -13,9 +13,13 @@
 
 using json = nlohmann::json;
 
+
+Client::Client(std::shared_ptr<User> user, const std::string& serverIP, int port)
+    : user(user), isConnected(false) {
+
     // Création du socket
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == -1) {
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_socket == -1) {
         std::cerr << "Erreur: Impossible de créer le socket\n";
         exit(1);
     }
@@ -26,13 +30,14 @@ using json = nlohmann::json;
     inet_pton(AF_INET, serverIP.c_str(), &serverAddr.sin_addr);
 
     // Connexion au serveur
-    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+    if (connect(client_socket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
         std::cerr << "Erreur: Impossible de se connecter au serveur\n";
         exit(1);
     }
     isConnected = true;
     std::cout << "✅ Connecté au serveur !\n";
 }
+
 bool Client::login() {
     std::string userName, pseudonym, password;
 
@@ -49,11 +54,11 @@ bool Client::login() {
 
     // Envoyer les infos d'authentification au serveur
     std::string authMessage = "LOGIN " + userName + " " + pseudonym + " " + password;
-    send(sock, authMessage.c_str(), authMessage.size(), 0);
+    send(client_socket, authMessage.c_str(), authMessage.size(), 0);
 
     // Attendre la réponse du serveur
     char buffer[256];
-    int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
+    int bytesReceived = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived > 0) {
         buffer[bytesReceived] = '\0';
         std::string response(buffer);
@@ -71,7 +76,7 @@ bool Client::login() {
 // Envoi de message au serveur en préfixant avec le pseudonyme de l'utilisateur
 void Client::sendMessage(const std::string& message) {
     std::string fullMessage = user->getPseudonym() + ": " + message;
-    send(sock, fullMessage.c_str(), fullMessage.size(), 0);
+    send(client_socket, fullMessage.c_str(), fullMessage.size(), 0);
 }
 
 void Client::handleUserInput() {
@@ -80,12 +85,12 @@ void Client::handleUserInput() {
         int ch = getch();
         if (ch != ERR) {  // Si une touche est pressée
             if (ch == 'q') {
-                network.disconnect(clientSocket);
+                network.disconnect(client_socket);
                 endwin();
                 exit(0); 
             }
             std::string action(1, ch);
-            controller.sendInput(action, clientSocket);  // Envoyer au serveur
+            controller.sendInput(action, client_socket);  // Envoyer au serveur
         }
     }
 }
@@ -95,7 +100,7 @@ void Client::receiveDisplay() {
 
     while (true) {
         char buffer[12000];
-        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+        int bytesReceived = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
 
         if (bytesReceived > 0) {
             received += std::string(buffer, bytesReceived);
