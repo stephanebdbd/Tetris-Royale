@@ -11,7 +11,7 @@
 class Server {
     int port;
     int serverSocket;
-    std::unordered_map<int, int> clientMenuChoices;
+    std::unordered_map<int, std::shared_ptr<MenuNode>> clientMenuChoices;
     bool runningGame = false;
     std::atomic<int> clientIdCounter;
     Game* game;

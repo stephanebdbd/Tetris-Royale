@@ -1,4 +1,5 @@
 #include "Menu.hpp"
+#include <iostream>
 
 json Menu::getMainMenu0() const {
     json menu = {
@@ -28,10 +29,7 @@ json Menu::getMainMenu1() const {
     return menu.dump();  // Convertir en chaîne JSON
 }
 
-MenuNode::MenuNode(std::string name, std::shared_ptr<MenuNode> parent) : name(name), parent(parent) {
-    if (name == "Connexion")
-        this->makeNodeTree();
-}
+MenuNode::MenuNode(std::string name, std::shared_ptr<MenuNode> parent) : name(name), parent(parent) {}
 
 void MenuNode::addChild(std::shared_ptr<MenuNode> child) {
     children.push_back(child);
@@ -46,8 +44,8 @@ std::shared_ptr<MenuNode> MenuNode::getChild(std::string name) const {
     return nullptr;
 }
 
-std::weak_ptr<MenuNode> MenuNode::getParent() const {
-    return parent;
+std::shared_ptr<MenuNode> MenuNode::getParent() const {
+    return parent.lock();
 }
 
 std::string MenuNode::getName() const {
@@ -66,13 +64,14 @@ void MenuNode::makeNodeTree() {
     std::shared_ptr<MenuNode> amis = std::make_shared<MenuNode>("Amis");
     std::shared_ptr<MenuNode> ajouterOuSupprimer = std::make_shared<MenuNode>("Ajouter ou supprimer");
     std::shared_ptr<MenuNode> afficherAmis = std::make_shared<MenuNode>("Afficher amis");
-
+    
     amis->addChild(ajouterOuSupprimer);
     amis->addChild(afficherAmis);
-
+    
+    
     std::shared_ptr<MenuNode> classement = std::make_shared<MenuNode>("Classement");
     std::shared_ptr<MenuNode> chat = std::make_shared<MenuNode>("Chat");
-
+    
     std::shared_ptr<MenuNode> jouer = std::make_shared<MenuNode>("Jouer");
     std::shared_ptr<MenuNode> rejoindre = std::make_shared<MenuNode>("Rejoindre");
     std::shared_ptr<MenuNode> creer = std::make_shared<MenuNode>("Créer");
@@ -88,14 +87,18 @@ void MenuNode::makeNodeTree() {
 
     jouer->addChild(creer);
     jouer->addChild(rejoindre);
-
+    
     menuPrincipal->addChild(jouer);
     menuPrincipal->addChild(amis);
     menuPrincipal->addChild(classement);
     menuPrincipal->addChild(chat);
-
+    
     seConnecter->addChild(menuPrincipal);
     creerCompte->addChild(menuPrincipal);
+    
+    addChild(seConnecter);
+    addChild(creerCompte);
+    addChild(menuPrincipal);
 }
 
 void MenuNode::menutest(std::shared_ptr<MenuNode> root, int depth) {
@@ -103,7 +106,7 @@ void MenuNode::menutest(std::shared_ptr<MenuNode> root, int depth) {
     for (int i = 0; i < depth; ++i) {
         std::cout << "  ";
     }
-    std::cout << root->getName() << std::endl;
+    std::cout << root->getName() << " " << root->getChildren().size() << std::endl;
 
     // Parcourir les enfants du nœud et appeler récursivement menutest
     for (auto child : root->getChildren()) {
