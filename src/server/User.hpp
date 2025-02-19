@@ -9,9 +9,10 @@ private:
     std::string userName;     // Nom d'utilisateur
     std::string pseudonym;    // Pseudonyme
     std::string password;
-    int highScore;
-    bool isConnected;
-    FriendList *friends;    // Liste des amis
+    int highScore;            // Meilleur score
+    bool isConnected;        // Connecté ou non
+    FriendList *friends;     // Liste des amis
+    int userSocketFd;
 
 public:
     User(const std::string& userName, const std::string& pseudonym, const std::string& password);
@@ -20,6 +21,8 @@ public:
     std::string getUserName() const;
     std::string getPseudonym() const;
     void setPseudonym(const std::string& newPseudonym);
+    int getUserSocketFd() const;
+    void setUserSocketFd(int socketFd);
 
     // Connexion et déconnexion
     bool login(const std::string& password);

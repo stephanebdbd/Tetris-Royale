@@ -11,7 +11,7 @@ ServerChat::~ServerChat() {
 }
 
 
-void ServerChat::handleClientChat(int clientSocket) {
+void ServerChat::processClientChat(int clientSocket) {
     char buffer[1024];
     uint32_t userId;
 
@@ -26,11 +26,6 @@ void ServerChat::handleClientChat(int clientSocket) {
         // Broadcast selon le canal
         broadcastMessage(msg, msg.channel);
     }
-
-    // Suppression du client à la déconnexion
-    std::lock_guard<std::mutex> lock(clientsMutex);
-    clients.erase(std::to_string(userId));
-    close(clientSocket);
 }
 
 void ServerChat::broadcastMessage(const ChatMessage& msg, const std::string& channel) {
