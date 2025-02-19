@@ -100,16 +100,3 @@ void MenuNode::makeNodeTree() {
     addChild(creerCompte);
     addChild(menuPrincipal);
 }
-
-void MenuNode::menutest(std::shared_ptr<MenuNode> root, int depth) {
-    // Afficher le nom du nœud avec une indentation basée sur la profondeur
-    for (int i = 0; i < depth; ++i) {
-        std::cout << "  ";
-    }
-    std::cout << root->getName() << " " << root->getChildren().size() << std::endl;
-
-    // Parcourir les enfants du nœud et appeler récursivement menutest
-    for (auto child : root->getChildren()) {
-        menutest(child, depth + 1);
-    }
-}

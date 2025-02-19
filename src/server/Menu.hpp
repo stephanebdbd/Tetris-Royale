@@ -24,7 +24,6 @@ public:
     std::string getName() const;
     std::vector<std::shared_ptr<MenuNode>> getChildren() const;
     void makeNodeTree();
-    void menutest(std::shared_ptr<MenuNode> root, int depth = 0);
 };
 
 #endif

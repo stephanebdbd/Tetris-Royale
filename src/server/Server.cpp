@@ -137,13 +137,16 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
         loopGame(clientSocket);
     }
     else if (action == "2") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Amis");
         // Amis => à implémenter
     }
     else if (action == "3") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Classement");
         // Classements => à implémenter
     }
     else if (action == "4") {
-        // Rejoindre => à implémenter
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Chat");
+        // Chat => à implémenter
     }
     if (action == "5") { 
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getParent();
@@ -218,7 +221,6 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
                     std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
                 }
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Pause pour éviter une surcharge CPU
         }
     });
 
@@ -229,7 +231,7 @@ void Server::loopGame(int clientSocket) {
     std::thread gameThread([this]() { // Lancer un thread pour le jeu et le maj
         while (runningGame) {
             game->update(); 
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     });
 
@@ -237,13 +239,14 @@ void Server::loopGame(int clientSocket) {
 
     while (runningGame) { // Envoi du jeu au client 
         sendGameToClient(clientSocket);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Pause de 500 ms eviter un crash
+        std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Pause de 500 ms eviter un crash
     }
 }
 
 int main() {
     // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 
     signal(SIGPIPE, SIG_IGN);  // le client arrivait à crasher le serveur en fermant la connexion
+    
     try {
         std::ofstream serverLog("server.log"); // Créer un fichier de log
         // Rediriger std::cout et std::cerr vers le fichier log
