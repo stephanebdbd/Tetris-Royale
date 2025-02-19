@@ -52,6 +52,7 @@ class Server {
         void handleMenu(int clientSocket, int clientId, const std::string& action);
         std::string convertUnicodeToText(const std::string& unicode);
         void createMenuTree(MenuNode root);
+        ~Server(); 
 };
 
 #endif
