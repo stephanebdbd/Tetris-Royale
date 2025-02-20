@@ -158,21 +158,29 @@ void Server::keyInuptGameMenu(int clientSocket, const std::string& unicodeAction
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
 
     if (action == "right") { 
-        game->getCurrentPiece().moveRight(game->getGrid());
+        game->moveCurrentPieceRight();
+        game->setNeedToSendGame(true);
     }
     else if (action == "left") { 
-        game->getCurrentPiece().moveLeft(game->getGrid());
+        game->moveCurrentPieceLeft();
+        game->setNeedToSendGame(true);
     }
     else if (action == "up") { 
-        game->getCurrentPiece().rotate(game->getGrid());
+        game->rotateCurrentPiece();
+        game->setNeedToSendGame(true);
     }
     else if (action == "down"){
-        game->getCurrentPiece().moveDown(game->getGrid());
+        game->moveCurrentPieceDown();
+        game->setNeedToSendGame(true);
     }
     else if(action == "drop") { // space
-        game->getCurrentPiece().dropTetrimino(game->getGrid());
+        game->dropCurrentPiece();
+        game->setNeedToSendGame(true);
     }
-    sendGameToClient(clientSocket);
+    if (game->getNeedToSendGame()){ 
+        sendGameToClient(clientSocket);
+        game->setNeedToSendGame(false);
+    }
 }
 
 std::string Server::convertUnicodeToText(const std::string& unicode) {
@@ -194,6 +202,7 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 
 void Server::sendGameToClient(int clientSocket) {
     json message;
+    //message["score"] = score->getScore();
     message["grid"] = game->getGrid().gridToJson();
     message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 
@@ -231,15 +240,16 @@ void Server::loopGame(int clientSocket) {
     std::thread gameThread([this]() { // Lancer un thread pour le jeu et le maj
         while (runningGame) {
             game->update(); 
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     });
 
     gameThread.detach();
 
     while (runningGame) { // Envoi du jeu au client 
-        sendGameToClient(clientSocket);
-        std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Pause de 500 ms eviter un crash
+        if (game->getNeedToSendGame()) { 
+            sendGameToClient(clientSocket);
+            game->setNeedToSendGame(false);
+        }
     }
 }
 

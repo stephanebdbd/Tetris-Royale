@@ -95,6 +95,7 @@ void Game::showGameOver() {
 void Game::update() {
     if (!gameOver) {
         if (dropTimer.hasElapsed()) {
+            needToSendGame = true;
             if (currentPiece.canMoveDown(grid)) {
                 currentPiece.moveDown(grid);
             } else {
@@ -119,4 +120,24 @@ int Game::getNbrMalus(int nbrLineComplet) const{
         case 4 : return 4;
         default : return 0;  
     }
+}
+
+void Game::moveCurrentPieceRight() {
+    currentPiece.moveRight(grid);
+}
+
+void Game::moveCurrentPieceLeft() {
+    currentPiece.moveLeft(grid);
+}
+
+void Game::moveCurrentPieceDown() {
+    currentPiece.moveDown(grid);
+}
+
+void Game::rotateCurrentPiece() {
+    currentPiece.rotate(grid);
+}
+
+void Game::dropCurrentPiece() {
+    currentPiece.dropTetrimino(grid);
 }

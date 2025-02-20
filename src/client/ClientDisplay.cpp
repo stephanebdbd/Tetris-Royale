@@ -24,10 +24,13 @@ void ClientDisplay::displayMenu(const json& data) {
 }
 
 void ClientDisplay::displayGame(const json& data) {
+    clear();
 
     drawGrid(data["grid"]);
 
     drawTetramino(data["tetraPiece"]);
+
+    refresh();
 }
 
 void ClientDisplay::drawGrid(const json& grid) {
@@ -35,7 +38,6 @@ void ClientDisplay::drawGrid(const json& grid) {
     int height = grid["height"]; 
     const json& cells = grid["cells"];
 
-    clear();
     int shift = 0;
     for(int y = 0; y < height; ++y) {
         for(int x = 0; x < width; ++x) {
@@ -75,5 +77,4 @@ void ClientDisplay::drawTetramino(const json& tetraPiece) {
             }
         }
     }
-    refresh();
 }
