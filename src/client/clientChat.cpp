@@ -1,4 +1,4 @@
-#include "clientChat.hpp"
+#include "ClientChat.hpp"
 
 using json = nlohmann::json;
 
@@ -22,7 +22,14 @@ void ClientChat::receiveChatMessage() {
         }
         buffer[bytesReceived] = '\0';
         received += buffer;
+        try {
+            json j = json::parse(received);
+            if (j.find("type") != j.end() && j["type"] == "chat") {
+                displayChatMessage(j["message"]);
+                received.clear();
+            }
+        } catch (const json::parse_error& e) {
+            // Handle JSON parsing error
+        }
     }
-    ChatMessage chatMessage(received);
-    displayChatMessage(chatMessage);
 }

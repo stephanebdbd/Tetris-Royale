@@ -10,6 +10,7 @@ class Client {
     ClientDisplay display;  // Chaque client a son propre display
     Controller controller;  // Chaque client a son propre controller
     ClientNetwork network;  // Chaque client a son propre network
+    
 
     std::string serverIP;
     int port;
