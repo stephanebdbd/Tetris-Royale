@@ -37,6 +37,7 @@ class Game {
 
         Grid& getGrid() { return grid; }
         Tetramino& getCurrentPiece() { return currentPiece; }
+        Score& getScore() { return score; }
         json getMainMenu0() { return menu.getMainMenu0(); }  
         json getMainMenu1() { return menu.getMainMenu1(); }
 

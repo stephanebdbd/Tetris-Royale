@@ -30,6 +30,8 @@ void ClientDisplay::displayGame(const json& data) {
 
     drawTetramino(data["tetraPiece"]);
 
+    drawScore(data["score"]);
+
     refresh();
 }
 
@@ -77,4 +79,9 @@ void ClientDisplay::drawTetramino(const json& tetraPiece) {
             }
         }
     }
+}
+
+void ClientDisplay::drawScore(const json& score) {
+    int scoreValue = score["score"];
+    mvprintw(1, 13, "Score: %d", scoreValue);
 }

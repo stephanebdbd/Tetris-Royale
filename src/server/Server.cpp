@@ -202,7 +202,8 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 
 void Server::sendGameToClient(int clientSocket) {
     json message;
-    //message["score"] = score->getScore();
+    
+    message["score"] = game->getScore().scoreToJson();
     message["grid"] = game->getGrid().gridToJson();
     message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 

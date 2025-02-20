@@ -98,7 +98,8 @@ void Game::update() {
             needToSendGame = true;
             if (currentPiece.canMoveDown(grid)) {
                 currentPiece.moveDown(grid);
-            } else {
+            } 
+            else {
                 currentPiece.fixToGrid(grid, gameOver);
                 if (!gameOver) { 
                     int linesCleared = grid.clearFullLines();
