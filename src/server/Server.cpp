@@ -2,6 +2,7 @@
 
 #include "../common/json.hpp"
 #include <ncurses.h>
+#include <unistd.h>
 #include <csignal>
 #include <thread>
 #include <netinet/in.h>
@@ -51,7 +52,9 @@ void Server::acceptClients() {
 
     int clientId = clientIdCounter.fetch_add(1);  // Attribuer un ID unique et incrémenter le compteur
     std::cout << "Client #" << clientId << " connecté." << std::endl;
-    clientMenuChoices[clientId] = 0;  // Chaque client commence avec menuChoice = 0
+    std::shared_ptr<MenuNode> root = std::make_shared<MenuNode>("Connexion");
+    root->makeNodeTree();
+    clientMenuChoices[clientId] = root;  // Chaque client commence avec menuChoice = 0
     
     clear();
     sendMenuToClient(clientSocket, game->getMainMenu0()); 
@@ -87,7 +90,7 @@ void Server::handleClient(int clientSocket, int clientId) {
             handleMenu(clientSocket, clientId, action);
 
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
-            if (clientMenuChoices[clientId] == 2) {
+            if (clientMenuChoices[clientId]->getName() == "Jouer") {
                 receiveInputFromClient(clientSocket, clientId);
             }
 
@@ -98,13 +101,13 @@ void Server::handleClient(int clientSocket, int clientId) {
 }
 
 void Server::handleMenu(int clientSocket, int clientId, const std::string& action) {
-    if (clientMenuChoices[clientId] == 0) {
+    if (clientMenuChoices[clientId]->getName() == "Connexion") {
         keyInuptWelcomeMenu(clientSocket, clientId, action);
     }
-    else if (clientMenuChoices[clientId] == 1) {
+    else if (clientMenuChoices[clientId]->getName() == "Menu principal") {
         keyInuptMainMenu(clientSocket, clientId, action);
     }
-    else if (clientMenuChoices[clientId] == 2) {
+    else if (clientMenuChoices[clientId]->getName() == "Jouer") {
         std::cout << "Client #" << clientId << " est en jeu." << std::endl;
         keyInuptGameMenu(clientSocket, action);
     }
@@ -112,35 +115,41 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
 
 void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
-        clientMenuChoices[clientId]++;
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Menu principal");
         sendMenuToClient(clientSocket, game->getMainMenu1());      
     }
     else if (action == "2") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Créer un compte");
         // Créer un compte => à implémenter
     }
     else if (action == "3") {
+        clientMenuChoices.erase(clientId);
+        close(clientSocket);
         // Quitter => à implémenter
     }
 }
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
-        clientMenuChoices[clientId]++;
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Jouer");
         runningGame = true;
         receiveInputFromClient(clientSocket, clientId); // lancer un thread pour recevoir les inputs
         loopGame(clientSocket);
     }
     else if (action == "2") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Amis");
         // Amis => à implémenter
     }
     else if (action == "3") {
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Classement");
         // Classements => à implémenter
     }
     else if (action == "4") {
-        // Rejoindre => à implémenter
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Chat");
+        // Chat => à implémenter
     }
     if (action == "5") { 
-        clientMenuChoices[clientId]--;
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getParent();
         sendMenuToClient(clientSocket, game->getMainMenu0());
     }
 }
@@ -149,21 +158,29 @@ void Server::keyInuptGameMenu(int clientSocket, const std::string& unicodeAction
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
 
     if (action == "right") { 
-        game->getCurrentPiece().moveRight(game->getGrid());
+        game->moveCurrentPieceRight();
+        game->setNeedToSendGame(true);
     }
     else if (action == "left") { 
-        game->getCurrentPiece().moveLeft(game->getGrid());
+        game->moveCurrentPieceLeft();
+        game->setNeedToSendGame(true);
     }
     else if (action == "up") { 
-        game->getCurrentPiece().rotate(game->getGrid());
+        game->rotateCurrentPiece();
+        game->setNeedToSendGame(true);
     }
     else if (action == "down"){
-        game->getCurrentPiece().moveDown(game->getGrid());
+        game->moveCurrentPieceDown();
+        game->setNeedToSendGame(true);
     }
     else if(action == "drop") { // space
-        game->getCurrentPiece().dropTetrimino(game->getGrid());
+        game->dropCurrentPiece();
+        game->setNeedToSendGame(true);
     }
-    sendGameToClient(clientSocket);
+    if (game->getNeedToSendGame()){ 
+        sendGameToClient(clientSocket);
+        game->setNeedToSendGame(false);
+    }
 }
 
 std::string Server::convertUnicodeToText(const std::string& unicode) {
@@ -185,6 +202,8 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 
 void Server::sendGameToClient(int clientSocket) {
     json message;
+    
+    message["score"] = game->getScore().scoreToJson();
     message["grid"] = game->getGrid().gridToJson();
     message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 
@@ -222,22 +241,23 @@ void Server::loopGame(int clientSocket) {
     std::thread gameThread([this]() { // Lancer un thread pour le jeu et le maj
         while (runningGame) {
             game->update(); 
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     });
 
     gameThread.detach();
 
     while (runningGame) { // Envoi du jeu au client 
-        sendGameToClient(clientSocket);
-        std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Pause de 500 ms eviter un crash
+        if (game->getNeedToSendGame()) { 
+            sendGameToClient(clientSocket);
+            game->setNeedToSendGame(false);
+        }
     }
 }
 
 int main() {
     // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 
     signal(SIGPIPE, SIG_IGN);  // le client arrivait à crasher le serveur en fermant la connexion
-
+    
     try {
         std::ofstream serverLog("server.log"); // Créer un fichier de log
         // Rediriger std::cout et std::cerr vers le fichier log

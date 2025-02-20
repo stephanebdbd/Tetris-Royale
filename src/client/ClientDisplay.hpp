@@ -15,6 +15,7 @@ class ClientDisplay {
 
         void drawGrid(const json& grid);
         void drawTetramino(const json& tetraPiece);
+        void drawScore(const json& score);
 };
 
 #endif

@@ -17,6 +17,8 @@ class Game {
     bool running;
     bool gameOver;
 
+    bool needToSendGame = true;
+
     public:
         Game(int gridWidth, int gridHeight);
         void run();
@@ -26,10 +28,21 @@ class Game {
         void update();
         int getNbrMalus(int nbrLineComplet)const;
 
+        //Pour eviter le viole des lois de Demeter
+        void moveCurrentPieceDown();
+        void moveCurrentPieceRight();
+        void moveCurrentPieceLeft();
+        void rotateCurrentPiece();
+        void dropCurrentPiece();
+
         Grid& getGrid() { return grid; }
         Tetramino& getCurrentPiece() { return currentPiece; }
+        Score& getScore() { return score; }
         json getMainMenu0() { return menu.getMainMenu0(); }  
         json getMainMenu1() { return menu.getMainMenu1(); }
+
+        bool getNeedToSendGame() { return needToSendGame; }
+        void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }
 
 };
 

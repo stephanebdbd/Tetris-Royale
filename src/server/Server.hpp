@@ -4,22 +4,22 @@
 #include "Game.hpp"
 #include "Grid.hpp"
 #include "Tetramino.hpp"
+#include "Score.hpp"
 #include <atomic>
+
 
 
 
 class Server {
     int port;
     int serverSocket;
-    std::unordered_map<int, int> clientMenuChoices;
-    bool runningGame = false;
+    std::unordered_map<int, std::shared_ptr<MenuNode>> clientMenuChoices;
+    std::atomic<bool> runningGame{false};
     std::atomic<int> clientIdCounter;
-    Game* game;
-    Grid* grid;
-    Tetramino* currentPiece;
-
-    bool needToSendGame = false; // TODO: en gros faut arreter de spam l'envoie de message au client
-    //mais plutot envoyer un message quand le jeu a changé (quand le joueur a bougé, quand le joueur a tourné, quand le joueur a drop)
+    std::unique_ptr<Game> game;
+    std::unique_ptr<Grid> grid;
+    std::unique_ptr<Tetramino> currentPiece;
+    std::unique_ptr<Score> score;
 
     std::unordered_map<std::string, std::string> unicodeToText = {
         {"\u0005", "right"},
