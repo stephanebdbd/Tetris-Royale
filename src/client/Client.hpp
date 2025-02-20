@@ -4,13 +4,15 @@
 #include "ClientDisplay.hpp"  
 #include "Controller.hpp"
 #include "ClientNetwork.hpp"
+#include "ClientChat.hpp"
 
 
 class Client {
     ClientDisplay display;  // Chaque client a son propre display
     Controller controller;  // Chaque client a son propre controller
     ClientNetwork network;  // Chaque client a son propre network
-    
+    ClientChat *chat;        // Chaque client a son propre chat
+
 
     std::string serverIP;
     int port;

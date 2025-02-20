@@ -12,6 +12,7 @@
 #include <chrono>
 #include <memory> 
 #include "signal.h"
+#include <fstream>
 
 // NCURSES
 #include <ncurses.h>
