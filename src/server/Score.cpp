@@ -8,7 +8,7 @@ void Score::addScore(int linesCleared) {
     int points[] = {0, 100, 300, 500, 800}; // Points attribués selon les lignes supprimées
     if (linesCleared >= 1 && linesCleared <= 4) {
         score += points[linesCleared];
-        combo += linesCleared; // Augmente le combo du nombre de lignes détruites
+        combo = linesCleared; // Augmente le combo du nombre de lignes détruites
     }
 }
 
