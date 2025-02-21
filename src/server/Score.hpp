@@ -6,7 +6,7 @@
 using json = nlohmann::json;
 
 class Score {
-    int score;
+    int score, combo;
     int x, y; // Position oÃ¹ afficher le score
 
     public:
@@ -14,6 +14,7 @@ class Score {
         void addScore(int linesCleared);
         void display() const;
         int getScore() const;
+        int getCombo() const;
         json scoreToJson() const;
 };
 
