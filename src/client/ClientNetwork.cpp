@@ -39,9 +39,10 @@ void ClientNetwork::disconnect(int& clientSocket) {
     }
 }
 
-void ClientNetwork::sendData(const std::string& data, int clientSocket) {
+bool ClientNetwork::sendData(const std::string& data, int clientSocket) {
     if (send(clientSocket, data.c_str(), data.size(), 0) == -1)
-        std::cerr << "Erreur: Impossible d'envoyer les données." << std::endl;
+        std::cerr << "Erreur: Impossible d'envoyer les données." << std::endl; return false;
+    return true;
 }
 
 bool receivedData(int clientSocket, std::string& received, char *buffer) {

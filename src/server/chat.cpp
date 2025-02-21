@@ -1,14 +1,7 @@
 #include "chat.hpp"
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <cstring>
 
 
-ServerChat::~ServerChat() {
-    stop();
-}
+using json = nlohmann::json;
 
 
 void ServerChat::processClientChat(int clientSocket) {
@@ -19,12 +12,8 @@ void ServerChat::processClientChat(int clientSocket) {
         memset(buffer, 0, sizeof(buffer));
         int bytesRead = read(clientSocket, buffer, sizeof(buffer));
         if (bytesRead <= 0) break;
-
-        ChatMessage msg = ChatMessage::deserialize(buffer);
-        std::cout << "[" << msg.senderId << "] : " << msg.message << std::endl;
-
-        // Broadcast selon le canal
-        broadcastMessage(msg, msg.channel);
+        json j;
+        
     }
 }
 

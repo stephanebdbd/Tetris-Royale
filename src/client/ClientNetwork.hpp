@@ -12,8 +12,8 @@ class ClientNetwork {
     public:
         bool connectToServer(const std::string& serverIP, int port, int& clientSocket);
         void disconnect(int& clientSocket);       
-        void sendData(const std::string& data, int clientSocket);
-        void receivedData(int clientSocket, std::string& received);
+        bool sendData(const std::string& data, int clientSocket);
+        bool receivedData(int clientSocket, std::string& received);
 };
 
 

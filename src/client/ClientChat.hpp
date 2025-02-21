@@ -1,5 +1,5 @@
-#ifndef ClientChat_HPP
-#define ClientChat_HPP
+#ifndef CLIENTCHAT_HPP
+#define CLIENTCHAT_HPP
 
 #include "Client.hpp"
 #include "../common/json.hpp"
@@ -26,18 +26,18 @@ class ClientChat{
          * @brief Sends a chat message.
          * @param message The message to send.
          */
-        void sendChatMessage(const std::string& message);
+        void sendChatMessages();
 
         /**
          * @brief Receives a chat message.
          */
-        void receiveChatMessage();
+        void receiveChatMessages();
 
         /**
          * @brief Displays a chat message.
          * @param message The message to display.
          */
-        void displayChatMessage(const std::string& message);
+        void displayChatMessage(std::string sender, const std::string& message);
 
         /**
          * @brief Initializes the message memory.
@@ -62,4 +62,4 @@ class ClientChat{
         void setClientSocket(int clientSocket);
 };
 
-#endif
+#endif // CLIENTCHAT_HPP

@@ -3,37 +3,73 @@
 using json = nlohmann::json;
 
 
+void ClientChat::sendChatMessages() {
+    while (true) {
+        std::string input;
+        std::getline(std::cin, input);
 
-void ClientChat::sendChatMessage(const std::string& message) {
-    json j;
-    j["type"] = "chat";
-    j["message"] = message;
-    network.sendData(j.dump(), clientSocket);
+        if (input.empty()) {
+            std::cerr << "Le message ne peut pas être vide !\n";
+            continue;
+        }
+
+        if (input.size() < 4 || input[0] != '.' || input[1] != '/') {
+            std::cerr << "Format invalide ! Utilisez: ./receiver-name message\n";
+            continue;
+        }
+
+        size_t pos = input.find(' ');
+        if (pos == std::string::npos) {
+            std::cerr << "Format incorrect !\n";
+            continue;
+        }
+
+        std::string receiver = input.substr(2, pos - 2);
+        std::string message = input.substr(pos + 1);
+
+        if (message.empty()) {
+            std::cerr << "Le message ne peut pas être vide !\n";
+            continue;
+        }
+
+        // Construire le message JSON
+        json msg_json = {{"receiver", receiver}, {"message", message}};
+        std::string msg = msg_json.dump();
+
+        // Envoi du message
+        if (!network.sendData(msg, clientSocket)) {
+            std::cerr << "Erreur d'envoi du message !\n";
+        }
+    }
+
 }
 
-void ClientChat::receiveChatMessage() {
-    std::string received;
+
+void ClientChat::receiveChatMessages() {
+    char buffer[1024];
+
     while (true) {
-        char buffer[12000];
-        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-        if (bytesReceived <= 0) {
-            break;
+        memset(buffer, 0, sizeof(buffer));
+        int bytes_received = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+        if (bytes_received <= 0) {
+            close(clientSocket);
+            return;
         }
-        buffer[bytesReceived] = '\0';
-        received += buffer;
+
         try {
-            json j = json::parse(received);
-            if (j.find("type") != j.end() && j["type"] == "chat") {
-                displayChatMessage(j["message"]);
-                received.clear();
-            }
-        } catch (const json::parse_error& e) {
-            // Handle JSON parsing error
+            json msg = json::parse(std::string(buffer, bytes_received));
+
+            displayChatMessage(msg["sender"], msg["message"]);
+
+
+        } catch (const std::exception& e) {
+            std::cerr << "Erreur JSON: " << e.what() << std::endl;
         }
     }
 }
 
-void ClientChat::displayChatMessage(const std::string& message){}
+void ClientChat::displayChatMessage(std::string sender, const std::string& message){}
 
 bool ClientChat::initMessageMemory() {
     
@@ -68,7 +104,7 @@ bool ClientChat::FlushMemory() {
         std::string line;
         while (getline(file, line)) { // Lire ligne par ligne
             json message = json::parse(line);
-            std::cout << "📜 Message extrait : " << message.dump(4) << std::endl;
+            std::cout << message.dump(4) << std::endl;
         }
         file.close();
 
