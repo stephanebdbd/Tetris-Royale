@@ -87,4 +87,6 @@ void ClientDisplay::drawTetramino(const json& tetraPiece) {
 void ClientDisplay::drawScore(const json& score) {
     int scoreValue = score["score"];
     mvprintw(1, 13, "Score: %d", scoreValue);
+    int comboValue = score["combo"];
+    mvprintw(2, 13, "Combo: %d", comboValue);
 }
