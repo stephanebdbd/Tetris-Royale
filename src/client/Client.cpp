@@ -16,10 +16,6 @@ void Client::run() {
         std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
         return;
     }
-    initscr();
-    curs_set(0);
-    keypad(stdscr, TRUE);
-    nodelay(stdscr, TRUE); // Permet de ne pas bloquer l'affichage en attendant un input
 
     // Lancer un thread pour écouter les touches et envoyer les inputs
     std::thread inputThread(&Client::handleUserInput, this);

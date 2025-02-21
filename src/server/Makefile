@@ -10,8 +10,8 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 LIBS = -lncurses -pthread -fsanitize=address
 
 # Fichiers source
-TETRIS_SRC = main.cpp Game.cpp Grid.cpp Tetramino.cpp Timer.cpp Score.cpp
-SERVEUR_SRC = Server.cpp Menu.cpp Game.cpp Grid.cpp Tetramino.cpp Score.cpp Timer.cpp
+TETRIS_SRC = main.cpp Game.cpp Grid.cpp Tetramino.cpp Timer.cpp Score.cpp Color.cpp
+SERVEUR_SRC = Server.cpp Menu.cpp Game.cpp Grid.cpp Tetramino.cpp Score.cpp Timer.cpp Color.cpp
 
 # Fichiers objets
 TETRIS_OBJECTS = $(TETRIS_SRC:.cpp=.o)

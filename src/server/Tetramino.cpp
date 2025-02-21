@@ -7,20 +7,6 @@ Tetramino::Tetramino(int startX, int startY, int w, int h)
     selectRandomShape(); // Choisir une forme aléatoire au départµ
 }
 
-void Tetramino::initializeColors() const {
-    start_color();
-    use_default_colors(); // Garde le fond du terminal
-    init_pair(1, COLOR_RED, -1);    // Z - Rouge
-    init_pair(2, COLOR_YELLOW, -1); // O - Jaune
-    init_pair(3, COLOR_GREEN, -1);  // S - Vert
-    init_pair(4, COLOR_CYAN, -1);   // I - Cyan
-    init_pair(5, COLOR_BLUE, -1);   // J - Bleu
-    init_pair(6, COLOR_MAGENTA, -1);// T - Magenta
-    init_pair(7, COLOR_WHITE, -1); // L - Blanc et pas Orange car pas de couleur orange (max 8 couleur dont noir et blanc)
-    init_color(8, 500, 500, 500);
-    init_pair(9, 8, -1);
-    
-}
 
 void Tetramino::initializeShapes() {
     // Définir les formes des Tetraminos
@@ -80,7 +66,6 @@ void Tetramino::selectRandomShape() {
         case 6: shapeSymbols = 'S'; break; // S - Vert
         default:shapeSymbols  = ' '; break;
     }
-    color = chooseColor(shapeSymbols);
 }
 
 void Tetramino::moveDown(Grid &grid) {
@@ -180,42 +165,26 @@ bool Tetramino::canRotate(const Grid &grid) {
 }
 
 void Tetramino::draw() const {
+    Color color = chooseColor(shapeSymbols);
+    color.activate();
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
             if (currentShape[y][x] != ' ') {
-                int color = chooseColor(shapeSymbols);
-                colorOn(color);
                 mvaddch(position.y + y, position.x + x, currentShape[y][x]);
-                colorOff(color);
             }
         }
     }
+    color.deactivate();
 }
 
-int Tetramino::chooseColor(char shapeSymbol) const {
-    switch (shapeSymbol) {
-        case 'Z': return 1; // Rouge
-        case 'O': return 2; // Jaune
-        case 'S': return 3; // Vert
-        case 'I': return 4; // Cyan
-        case 'J': return 5; // Bleu
-        case 'T': return 6; // Magenta
-        case 'L': return 7; // Blanc / Orange
-        default: return 0;  // Aucune couleur
-    }
+Color Tetramino::chooseColor(char shapeSymbol) const {
+    return Color::fromShapeSymbol(std::string(1, shapeSymbol));
 }
 
-void Tetramino::colorOn(int color) const {
-    initializeColors();
-    attron(COLOR_PAIR(color));
-}
-
-void Tetramino::colorOff(int color) const {
-    attroff(COLOR_PAIR(color));
-}
 
 // Fixer la pièce à sa position 
 void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
+    Color cellColor = chooseColor(shapeSymbols);
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
             if (currentShape[y][x] != ' ') {
@@ -225,7 +194,7 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
                     gameOver = true; // Déclencher le game over
                     return;
                 }
-                grid.markCell(gridX, gridY, color); // Marquer la cellule comme occupée
+                grid.markCell(gridX, gridY, cellColor);
             }
         }
     }

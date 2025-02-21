@@ -2,6 +2,7 @@
 #define GRID_HPP
 
 #include "Cell.hpp"
+#include "Color.hpp"
 #include "../common/json.hpp"
 #include <vector>
 
@@ -15,7 +16,7 @@ class Grid {
         Grid(int width, int height);
 
         void draw();
-        void markCell(int x, int y, int color);
+        void markCell(int x, int y, const Color& color);
         void clearLine(int y);
         void applyGravity();
         int clearFullLines();

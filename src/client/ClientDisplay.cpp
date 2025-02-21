@@ -46,13 +46,7 @@ void ClientDisplay::drawGrid(const json& grid) {
             //voir si la cellule est occupée
             bool occupied = cells[y][x]["occupied"];
             if (occupied) {
-                int color = cells[y][x]["color"];
-                attron(COLOR_PAIR(color));
                 mvaddch(shift + y, x + 1, '#');
-                attroff(COLOR_PAIR(color));
-            }
-            else {
-                mvaddch(shift + y, x + 1, ' ');
             }
         }
     }

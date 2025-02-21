@@ -1,6 +1,8 @@
 #ifndef CELL_HPP
 #define CELL_HPP
 
+#include "Color.hpp"
+
 // Coordonnée d'une cellule
 struct Coord {
     int x, y;
@@ -9,17 +11,16 @@ struct Coord {
 // Classe représentant une cellule de la grille
 class Cell { 
         bool occupied;
-        int color;
+        Color color;
 
     public:
         bool isOccupied() const { return occupied; }
         //char getSymbol() const { return symbol; }
-        int getColor() const { return color; }
+        Color getColor() const { return color; }
 
         void setOccupied(bool value) { occupied = value; }
-        //void setSymbol(char value) { symbol = value; }
-        void setColor(int value) { color = value; }
-        Cell() : occupied(false) {}
+        void setColor(const Color& newColor) { color = newColor; }
+        Cell() : occupied(false), color(Type::NONE) {}
 };
 
 #endif
