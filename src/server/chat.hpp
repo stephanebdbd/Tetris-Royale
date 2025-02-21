@@ -29,7 +29,7 @@ public:
     //thread pour gerer un chat d'un client
     void processClientChat(int clientSocket);
     //envoi d'un message à tous les clients
-    void broadcastMessage(const std::string& channel);
+    void broadcastMessage(const std::string& message, const std::string& channel);
     //envoi d'un message à un client
     void sendMessage(int clientSocket, const std::string& message);
 };
