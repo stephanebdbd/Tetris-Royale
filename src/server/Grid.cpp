@@ -26,8 +26,9 @@ void Grid::draw() {
         for (int x = 1; x <= width; ++x) {
             Color color = cells[y][x].getColor();
             if (cells[y][x].isOccupied()) {
-               color.activate();
-                mvaddch(y, x, '#');
+                color.activate();
+                int id = color.getId();
+                mvprintw(y, x, "%d",  id);
                 color.deactivate();
             }
         }
@@ -102,7 +103,7 @@ json Grid::gridToJson() const {
         for (int x = 1; x <= width; ++x) {
             json cell;
             cell["occupied"] = cells[y][x].isOccupied();
-            //cell["color"] = cells[y][x].getColor();
+            cell["color"] = cells[y][x].getColor().getId();
             row.push_back(cell);
         }
         gridJson["cells"].push_back(row);

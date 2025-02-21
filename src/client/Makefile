@@ -5,7 +5,7 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 
 LIBS = -lncurses -fsanitize=address
 
-SRC = Client.cpp ClientDisplay.cpp ClientNetwork.cpp Controller.cpp main.cpp
+SRC = Client.cpp ClientDisplay.cpp ClientNetwork.cpp Controller.cpp main.cpp Color.cpp
 
 OBJECTS = $(SRC:.cpp=.o)
 

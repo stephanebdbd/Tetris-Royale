@@ -1,4 +1,5 @@
 #include "Tetramino.hpp"
+
 #include <ncurses.h>
 
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
@@ -215,6 +216,7 @@ json Tetramino::tetraminoToJson() const {
         shapeJson.push_back(rowJson);
     }
     tetraminoJson["shape"] = shapeJson;
+    tetraminoJson["shapeSymbol"] = shapeSymbols;
 
     return tetraminoJson;
 }
