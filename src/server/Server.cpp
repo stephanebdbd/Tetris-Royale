@@ -11,7 +11,10 @@
 
 using json = nlohmann::json;
 
-Server::Server(int port, Game* game) : port(port), serverSocket(-1), game(game) {}
+Server::Server(int port, Game* game) 
+    : port(port), serverSocket(-1), game(game), clientIdCounter(0)
+{ userManager = std::make_unique<UserManager>("users.txt"); }
+
 
 bool Server::start() {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -101,15 +104,27 @@ void Server::handleClient(int clientSocket, int clientId) {
 }
 
 void Server::handleMenu(int clientSocket, int clientId, const std::string& action) {
-    if (clientMenuChoices[clientId]->getName() == "Connexion") {
+    std::string currentMenu = clientMenuChoices[clientId]->getName();
+
+    if (currentMenu == "Connexion") {
         keyInuptWelcomeMenu(clientSocket, clientId, action);
     }
-    else if (clientMenuChoices[clientId]->getName() == "Menu principal") {
+    else if (currentMenu == "Menu principal") {
         keyInuptMainMenu(clientSocket, clientId, action);
     }
-    else if (clientMenuChoices[clientId]->getName() == "Jouer") {
+    else if (currentMenu == "Jouer") {
         std::cout << "Client #" << clientId << " est en jeu." << std::endl;
         keyInuptGameMenu(clientSocket, action);
+    }
+    else if (currentMenu == "Créer un compte") {
+        // Ici on attend un JSON contenant "username" et "password"
+        try {
+            nlohmann::json data = nlohmann::json::parse(action);
+            handleRegisterMenu(clientSocket, clientId, data);
+        }
+        catch(nlohmann::json::parse_error& e) {
+            std::cerr << "Erreur de parsing JSON sur la page d'inscription : " << e.what() << std::endl;
+        }
     }
 }
 
@@ -251,6 +266,36 @@ void Server::loopGame(int clientSocket) {
             sendGameToClient(clientSocket);
             game->setNeedToSendGame(false);
         }
+    }
+}
+
+void Server::handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data) {
+    // Récupérer les informations envoyées par le client
+    std::string username = data["username"];
+    std::string password = data["password"];
+
+    // Utilisation directe de l'instance UserManager dans Server
+    bool success = userManager->registerUser(username, password);
+
+    nlohmann::json response;
+    if (success) {
+        response["title"] = "Inscription réussie";
+        response["message"] = "Votre compte a été créé avec succès !";
+        response["input"] = "Appuyez sur entrée pour retourner au menu.";
+        sendMenuToClient(clientSocket, response.dump() + "\n");
+
+        // Retour au menu précédent (par exemple, menu de connexion)
+        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getParent();
+        sendMenuToClient(clientSocket, game->getMainMenu0());
+    }
+    else {
+        response["title"] = "Erreur";
+        response["message"] = "Le nom d'utilisateur existe déjà. Veuillez réessayer.";
+        response["input"] = "Appuyez sur entrée pour retourner au menu.";
+        sendMenuToClient(clientSocket, response.dump() + "\n");
+
+        // Renvoyer le menu d'inscription pour réessayer
+        sendMenuToClient(clientSocket, game->getRegisterMenu());
     }
 }
 
