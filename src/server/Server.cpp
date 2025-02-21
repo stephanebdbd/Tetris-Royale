@@ -120,7 +120,7 @@ void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::stri
     }
     else if (action == "2") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Créer un compte");
-        // Créer un compte => à implémenter
+        sendMenuToClient(clientSocket, game->getRegisterMenu());
     }
     else if (action == "3") {
         clientMenuChoices.erase(clientId);

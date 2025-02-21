@@ -40,6 +40,7 @@ class Game {
         Score& getScore() { return score; }
         json getMainMenu0() { return menu.getMainMenu0(); }  
         json getMainMenu1() { return menu.getMainMenu1(); }
+        json getRegisterMenu() { return menu.getRegisterMenu(); }
 
         bool getNeedToSendGame() { return needToSendGame; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }

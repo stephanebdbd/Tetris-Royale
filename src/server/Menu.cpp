@@ -29,6 +29,18 @@ json Menu::getMainMenu1() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+json Menu::getRegisterMenu() const {
+    json menu = {
+        {"title", "Création de compte"},
+        {"options", "Insérez d'abord le pseudo puis votre mot de passe"},
+        {"input", {
+            {"username", "Pseudo: "},
+            {"password", "Mot de passe: "}
+        }}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
 MenuNode::MenuNode(std::string name, std::shared_ptr<MenuNode> parent) : name(name), parent(parent) {}
 
 void MenuNode::addChild(std::shared_ptr<MenuNode> child) {
