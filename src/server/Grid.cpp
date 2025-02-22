@@ -6,7 +6,7 @@ Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1
 
 
 // Marquer une cellule comme occupée
-void Grid::markCell(int x, int y, int color) {
+void Grid::markCell(int x, int y, const Color& color) {
     if ( !cells[y][x].isOccupied() && y >= 0 && y < height && x >= 1 && x <= width + 1) {
         cells[y][x].setOccupied(true);
         cells[y][x].setColor(color);
@@ -24,15 +24,12 @@ bool Grid::isCellOccupied(int x, int y) const {
 void Grid::draw() {
     for (int y = 0; y < height; ++y) {
         for (int x = 1; x <= width; ++x) {
-            int color = cells[y][x].getColor();
+            Color color = cells[y][x].getColor();
             if (cells[y][x].isOccupied()) {
-
-                attron(COLOR_PAIR(color));
-                mvaddch(y, x, '#');
-                attroff(COLOR_PAIR(color));
-            }
-            else {
-                mvaddch(y, x, ' ');
+                color.activate();
+                int id = color.getId();
+                mvprintw(y, x, "%d",  id);
+                color.deactivate();
             }
         }
     }
@@ -61,7 +58,7 @@ bool Grid::isLineComplete(int y) const {
 void Grid::clearLine(int y) {
     for (int x = 1; x <= width; ++x) {
         cells[y][x].setOccupied(false);
-        cells[y][x].setColor(0);
+        cells[y][x].setColor(Color(Type::NONE));
     }
 }
 
@@ -75,7 +72,7 @@ void Grid::applyGravity() {
                 cells[y][x] = cells[y - 1][x];
                 // Vider la cellule d'origine (donc la cellule au-dessus)
                 cells[y - 1][x].setOccupied(false);
-                cells[y - 1][x].setColor(0);
+                cells[y - 1][x].setColor(Color(Type::NONE));
             }
         }
     }
@@ -106,7 +103,7 @@ json Grid::gridToJson() const {
         for (int x = 1; x <= width; ++x) {
             json cell;
             cell["occupied"] = cells[y][x].isOccupied();
-            cell["color"] = cells[y][x].getColor();
+            cell["color"] = cells[y][x].getColor().getId();
             row.push_back(cell);
         }
         gridJson["cells"].push_back(row);
@@ -141,8 +138,7 @@ void Grid::piecesUp(int nbrOffset){
         for (int x = 1; x <= width; ++x) {  
             cells[y - nbrOffset][x] = cells[y][x];
             cells[y][x].setOccupied(false);
-            cells[y][x].setColor(0);
-            
+            cells[y][x].setColor(Color(Type::NONE));
         }
     }
 }

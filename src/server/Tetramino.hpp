@@ -2,6 +2,7 @@
 #define TETRAMINO_HPP
 
 #include "Grid.hpp"
+#include "Color.hpp"
 #include <array>
 #include "../common/json.hpp"
 
@@ -10,7 +11,6 @@ using json = nlohmann::json;
 class Tetramino {
     Coord position;
     char shapeSymbols;
-    int color;
     int gridWidth, gridHeight;
 
     std::array<std::array<char, 4>, 4> currentShape;
@@ -32,12 +32,8 @@ class Tetramino {
         bool canMove(const Grid &grid, int dx, int dy) const;
         void dropTetrimino(Grid &grid);
         void reset(int startX, int startY);
-        void colorOn(int color) const;
-        void colorOff(int color) const;
-        void initializeColors() const;
-        int chooseColor(char shapeSymbols) const;
+        Color chooseColor(char shapeSymbol) const;
         
-        int getColor() const { return color; } 
         json tetraminoToJson() const;
 };
 

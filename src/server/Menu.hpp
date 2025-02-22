@@ -10,6 +10,7 @@ class Menu {
     public:
         json getMainMenu0() const;  
         json getMainMenu1() const;  
+        json getRegisterMenu() const;
 };
 
 class MenuNode : public std::enable_shared_from_this<MenuNode> {
