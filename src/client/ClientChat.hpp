@@ -4,6 +4,8 @@
 #include "Client.hpp"
 #include "../common/json.hpp"
 #include "../include.hpp"
+#include <ncurses.h>
+#include <thread>
 
 /**
  * @class ClientChat
@@ -11,8 +13,10 @@
  */
 class ClientChat{
     private:
-        int clientSocket;         ///< The client socket.
-        ClientNetwork network;    ///< The client network.
+        int clientSocket;                    ///< The client socket.
+        ClientNetwork network;               ///< The client network.
+        bool isPlaying = false;              ///< A boolean indicating if the client is playing.
+        static bool messagesWaitForDisplay; ///< A boolean indicating if the message is waiting for display.
 
 
     public:
@@ -21,6 +25,11 @@ class ClientChat{
          * @param clientSocket The client socket.
          */
         ClientChat() = default;
+
+        /**
+         *  @brief Launches the chat.
+         */
+        void run();
 
         /**
          * @brief Sends a chat message.
@@ -60,6 +69,12 @@ class ClientChat{
          * @param clientSocket The client socket.
          */
         void setClientSocket(int clientSocket);
+
+        /**
+         * @brief sets the isPlaying boolean.
+         * @param isPlaying The boolean to set.
+         */
+        void setIsPlaying(bool isPlaying);
 };
 
 #endif // CLIENTCHAT_HPP

@@ -3,6 +3,28 @@
 using json = nlohmann::json;
 
 
+
+void ClientChat::run(){
+    //initialiser la mémoire des messages
+    if (!initMessageMemory()) {
+        std::cerr << "Erreur lors de l'initialisation de la mémoire des messages !\n";
+        return;
+    }
+    //lancer un tread pour envoyer les messages du chat
+    std::thread sendThread(&ClientChat::sendChatMessages, this);
+    sendThread.detach();
+    while (true) {
+        //recevoir les messages du chat
+        receiveChatMessages();
+    }
+    //vider la mémoire des messages
+    if (messagesWaitForDisplay &&!FlushMemory()) {
+        std::cerr << "Erreur lors de la suppression de la mémoire des messages !\n";
+    }
+
+}
+
+
 void ClientChat::sendChatMessages() {
     while (true) {
         std::string input;
@@ -59,8 +81,10 @@ void ClientChat::receiveChatMessages() {
 
         try {
             json msg = json::parse(std::string(buffer, bytes_received));
-
-            displayChatMessage(msg["sender"], msg["message"]);
+            if(isPlaying)
+                saveMessage(msg.dump());
+            else 
+                displayChatMessage(msg["sender"], msg["message"]);
 
 
         } catch (const std::exception& e) {
@@ -69,7 +93,17 @@ void ClientChat::receiveChatMessages() {
     }
 }
 
-void ClientChat::displayChatMessage(std::string sender, const std::string& message){}
+void ClientChat::displayChatMessage(std::string sender, const std::string& message){
+    // Obtenir les dimensions de la fenêtre
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    // Calculer la position centrale
+    int y = rows - 1; // Dernière ligne
+    int x = 0; // Coin gauche
+
+    mvprintw(y, x, "[%s] : %s", sender.c_str(), message.c_str());
+}
 
 bool ClientChat::initMessageMemory() {
     
@@ -91,6 +125,7 @@ bool ClientChat::saveMessage(const std::string& message) {
     if (file.is_open()) {
         file << message << std::endl; // Écrire JSON en une seule ligne
         file.close();
+        messagesWaitForDisplay = true;
         return true;
     }
     return false;
@@ -110,9 +145,18 @@ bool ClientChat::FlushMemory() {
 
         // Nettoyer le fichier après extraction
         std::ofstream clearFile("messages.json", std::ios::trunc);
+        messagesWaitForDisplay = false;
         return true;
 
     }
     return false;
 
+}
+
+void ClientChat::setIsPlaying(bool isPlaying){
+    this->isPlaying = isPlaying;
+}
+
+void ClientChat::setClientSocket(int clientSocket){
+    this->clientSocket = clientSocket;
 }

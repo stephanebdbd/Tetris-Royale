@@ -16,10 +16,15 @@ void Client::run() {
         std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
         return;
     }
+    chat.setClientSocket(clientSocket);
 
     // Lancer un thread pour écouter les touches et envoyer les inputs
     std::thread inputThread(&Client::handleUserInput, this);
     inputThread.detach(); // Permet au thread de fonctionner indépendamment
+
+    //Lancer un thread pour lancer le chat
+    std::thread chatThread(&ClientChat::run, &chat);
+    chatThread.detach();
 
     // Boucle principale pour recevoir et afficher le jeu
     while (true) {
@@ -85,3 +90,5 @@ void Client::receiveDisplay() {
         }
     }
 }
+
+
