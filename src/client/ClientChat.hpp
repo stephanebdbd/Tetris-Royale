@@ -3,7 +3,6 @@
 
 #include "Client.hpp"
 #include "../common/json.hpp"
-#include "../include.hpp"
 
 /**
  * @class ClientChat

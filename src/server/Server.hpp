@@ -16,6 +16,10 @@ class Server {
     std::unique_ptr<Game> game;
     std::atomic<int> clientIdCounter;
     std::unordered_map<int, std::shared_ptr<MenuNode>> clientMenuChoices;
+
+    //chaque client aura sa game
+    std::unordered_map<int, std::unique_ptr<Game>> games;
+
     std::atomic<bool> runningGame{false};
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;
@@ -40,11 +44,11 @@ public:
     void handleClient(int clientSocket, int clientId);
     void stop();
     void sendMenuToClient(int clientSocket, const std::string& screen);
-    void sendGameToClient(int clientSocket);
+    void sendGameToClient(int clientSocket, int clientId);
     void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptGameMenu(int clientSocket, const std::string& action);
-    void loopGame(int clientSocket);
+    void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
+    void loopGame(int clientSocket, int clientId);
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     void handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data);

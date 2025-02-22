@@ -114,7 +114,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
     }
     else if (currentMenu == "Jouer") {
         std::cout << "Client #" << clientId << " est en jeu." << std::endl;
-        keyInuptGameMenu(clientSocket, action);
+        keyInuptGameMenu(clientSocket, clientId, action);
     }
     else if (currentMenu == "Créer un compte") {
         // Ici on attend un JSON contenant "username" et "password"
@@ -149,7 +149,8 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Jouer");
         runningGame = true;
         receiveInputFromClient(clientSocket, clientId); // lancer un thread pour recevoir les inputs
-        loopGame(clientSocket);
+        games[clientId] = std::make_unique<Game>(10, 20); // Créer une nouvelle instance de Game pour chaque client
+        loopGame(clientSocket, clientId);
     }
     else if (action == "2") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Amis");
@@ -169,8 +170,10 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     }
 }
 
-void Server::keyInuptGameMenu(int clientSocket, const std::string& unicodeAction) {
+void Server::keyInuptGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
+
+    auto& game = games[clientId];
 
     if (action == "right") { 
         game->moveCurrentPieceRight();
@@ -193,7 +196,7 @@ void Server::keyInuptGameMenu(int clientSocket, const std::string& unicodeAction
         game->setNeedToSendGame(true);
     }
     if (game->getNeedToSendGame()){ 
-        sendGameToClient(clientSocket);
+        sendGameToClient(clientSocket, clientId);
         game->setNeedToSendGame(false);
     }
 }
@@ -215,7 +218,9 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
-void Server::sendGameToClient(int clientSocket) {
+void Server::sendGameToClient(int clientSocket, int clientId) { //TODO: Deplacer le main pour faire un fichier game ??? 
+    auto& game = games[clientId];
+
     json message;
     
     message["score"] = game->getScore().scoreToJson();
@@ -240,7 +245,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
                     std::string action = receivedData["action"];
 
                     std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
-                    keyInuptGameMenu(clientSocket, action);
+                    keyInuptGameMenu(clientSocket, clientId, action);
                 } 
                 catch (json::parse_error& e) {
                     std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
@@ -252,10 +257,13 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     inputThread.detach(); // Permet d’exécuter en parallèle
 }
 
-void Server::loopGame(int clientSocket) {
-    std::thread gameThread([this]() { // Lancer un thread pour le jeu et le maj
+void Server::loopGame(int clientSocket, int clientId) {
+    auto& game = games[clientId]; // Récupérer la partie du client
+
+    std::thread gameThread([this, clientId]() { // Lancer un thread pour mettre à jour le jeu
+        auto& gameInstance = games[clientId];
         while (runningGame) {
-            game->update(); 
+            gameInstance->update(); 
         }
     });
 
@@ -263,11 +271,12 @@ void Server::loopGame(int clientSocket) {
 
     while (runningGame) { // Envoi du jeu au client 
         if (game->getNeedToSendGame()) { 
-            sendGameToClient(clientSocket);
+            sendGameToClient(clientSocket, clientId);
             game->setNeedToSendGame(false);
         }
     }
 }
+
 
 void Server::handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data) {
     // Récupérer les informations envoyées par le client
