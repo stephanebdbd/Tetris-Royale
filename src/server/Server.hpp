@@ -8,7 +8,6 @@
 #include "UserManager.hpp"  // Inclure le gestionnaire d'utilisateurs
 #include <atomic>
 #include <unordered_map>
-#include <memory>
 
 class Server {
     int port;

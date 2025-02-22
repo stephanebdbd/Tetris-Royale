@@ -1,7 +1,7 @@
 #include "ClientChat.hpp"
 
-using json = nlohmann::json;
-
+#include <iostream>
+#include <fstream>
 
 void ClientChat::sendChatMessages() {
     while (true) {

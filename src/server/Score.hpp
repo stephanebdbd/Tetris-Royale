@@ -3,8 +3,6 @@
 
 #include "../common/json.hpp"
 
-using json = nlohmann::json;
-
 class Score {
     int score, combo;
     int x, y; // Position oÃ¹ afficher le score

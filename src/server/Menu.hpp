@@ -2,9 +2,6 @@
 #define MENU_HPP
 
 #include "../common/json.hpp"  // Inclusion de la bibliothèque JSON
-#include <memory>
-
-using json = nlohmann::json;
 
 class Menu {
     public:

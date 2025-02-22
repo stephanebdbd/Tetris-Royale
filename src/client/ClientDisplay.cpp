@@ -2,9 +2,7 @@
 #include "Color.hpp"
 
 #include <ncurses.h>
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
+#include "../common/json.hpp"
 
 void ClientDisplay::displayMenu(const json& data) {
     clear();

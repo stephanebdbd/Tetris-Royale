@@ -9,7 +9,6 @@
 #include <fstream>
 #include <iostream>
 
-using json = nlohmann::json;
 
 Server::Server(int port, Game* game) 
     : port(port), serverSocket(-1), game(game), clientIdCounter(0)
@@ -119,10 +118,10 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
     else if (currentMenu == "Créer un compte") {
         // Ici on attend un JSON contenant "username" et "password"
         try {
-            nlohmann::json data = nlohmann::json::parse(action);
+            json data = json::parse(action);
             handleRegisterMenu(clientSocket, clientId, data);
         }
-        catch(nlohmann::json::parse_error& e) {
+        catch(json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON sur la page d'inscription : " << e.what() << std::endl;
         }
     }
@@ -278,7 +277,7 @@ void Server::loopGame(int clientSocket, int clientId) {
 }
 
 
-void Server::handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data) {
+void Server::handleRegisterMenu(int clientSocket, int clientId, const json& data) {
     // Récupérer les informations envoyées par le client
     std::string username = data["username"];
     std::string password = data["password"];

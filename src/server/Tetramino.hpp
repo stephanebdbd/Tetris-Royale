@@ -3,10 +3,7 @@
 
 #include "Grid.hpp"
 #include "Color.hpp"
-#include <array>
 #include "../common/json.hpp"
-
-using json = nlohmann::json; 
 
 class Tetramino {
     Coord position;

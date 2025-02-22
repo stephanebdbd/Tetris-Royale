@@ -7,7 +7,6 @@
 #include <ncurses.h>
 #include <thread>
 
-using json = nlohmann::json;
 
 Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1) {}
 
