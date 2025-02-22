@@ -11,15 +11,22 @@
 
 using json = nlohmann::json;
 
-Server::Server(int port, Game* game) 
-    : port(port), serverSocket(-1), game(game), clientIdCounter(0)
-{ userManager = std::make_unique<UserManager>("users.txt"); }
-
+Server::Server(int port, Game* game) : port(port), serverSocket(-1), game(game) {}
 
 bool Server::start() {
+    // Initialiser ncurses
+    initscr(); 
+    // Effacer l'écran
+    clear();
+    // Afficher un message de démarrage du serveur
+    printw("Démarrage du serveur...\n");
+    refresh();
+    
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
-        std::cerr << "Erreur: Impossible de créer le socket du serveur." << std::endl;
+        printw("Erreur: Impossible de créer le socket du serveur.\n");
+        refresh();
+        endwin(); // Terminer ncurses
         return false;
     }
 
@@ -29,32 +36,59 @@ bool Server::start() {
     serverAddr.sin_port = htons(port);
 
     if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
-        std::cerr << "Erreur: Impossible de binder le socket." << std::endl;
+        printw("Erreur: Impossible de binder le socket.\n");
+        refresh();
         close(serverSocket);
+        endwin(); // Terminer ncurses
         return false;
     }
 
     if (listen(serverSocket, 5) < 0) {
-        std::cerr << "Erreur: Impossible d'écouter sur le port." << std::endl;
+        printw("Erreur: Impossible d'écouter sur le port.\n");
+        refresh();
         close(serverSocket);
+        endwin(); // Terminer ncurses
         return false;
     }
 
-    std::cout << "Serveur en attente de connexions sur le port " << port << std::endl;
+    printw("Serveur en attente de connexions sur le port %d\n", port);
+    refresh();
     return true;
 }
 
+void Server::handleChatInput(int clientSocket, int clientId) {
+    char buffer[1024];
+    while (true) {
+        memset(buffer, 0, sizeof(buffer));
+        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (bytesReceived <= 0) {
+            printw("Client #%d déconnecté du chat.\n", clientId);
+            refresh();
+            close(clientSocket);
+            //chatMgr.removeClient("Client #" + std::to_string(clientId));
+            return;
+        }
+        std::string message(buffer, bytesReceived);
+        std::string chatMessage = "Client #" + std::to_string(clientId) + ": " + message;
+        printw("%s\n", chatMessage.c_str());
+        refresh();
+        //chatMgr.sendClientRequest("Client #" + std::to_string(clientId), chatMessage);
+    }
+}
 void Server::acceptClients() {
+    printw("En attente de connexion d'un client...\n");
+    refresh();
     sockaddr_in clientAddr;
     socklen_t clientLen = sizeof(clientAddr);
     int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientLen);
     if (clientSocket < 0) {
-        std::cerr << "Erreur: Échec de l'acceptation du client." << std::endl;
+        printw("Erreur: Échec de l'acceptation du client.\n");
+        refresh();
         return;
     }
 
     int clientId = clientIdCounter.fetch_add(1);  // Attribuer un ID unique et incrémenter le compteur
-    std::cout << "Client #" << clientId << " connecté." << std::endl;
+    refresh();
     std::shared_ptr<MenuNode> root = std::make_shared<MenuNode>("Connexion");
     root->makeNodeTree();
     clientMenuChoices[clientId] = root;  // Chaque client commence avec menuChoice = 0
@@ -88,8 +122,8 @@ void Server::handleClient(int clientSocket, int clientId) {
             json receivedData = json::parse(buffer);
             std::string action = receivedData["action"];
 
-            std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
-
+            printw("Action reçue du client %d : %s\n", clientId, action.c_str());
+            refresh();
             handleMenu(clientSocket, clientId, action);
 
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
@@ -104,27 +138,15 @@ void Server::handleClient(int clientSocket, int clientId) {
 }
 
 void Server::handleMenu(int clientSocket, int clientId, const std::string& action) {
-    std::string currentMenu = clientMenuChoices[clientId]->getName();
-
-    if (currentMenu == "Connexion") {
+    if (clientMenuChoices[clientId]->getName() == "Connexion") {
         keyInuptWelcomeMenu(clientSocket, clientId, action);
     }
-    else if (currentMenu == "Menu principal") {
+    else if (clientMenuChoices[clientId]->getName() == "Menu principal") {
         keyInuptMainMenu(clientSocket, clientId, action);
     }
-    else if (currentMenu == "Jouer") {
+    else if (clientMenuChoices[clientId]->getName() == "Jouer") {
         std::cout << "Client #" << clientId << " est en jeu." << std::endl;
         keyInuptGameMenu(clientSocket, action);
-    }
-    else if (currentMenu == "Créer un compte") {
-        // Ici on attend un JSON contenant "username" et "password"
-        try {
-            nlohmann::json data = nlohmann::json::parse(action);
-            handleRegisterMenu(clientSocket, clientId, data);
-        }
-        catch(nlohmann::json::parse_error& e) {
-            std::cerr << "Erreur de parsing JSON sur la page d'inscription : " << e.what() << std::endl;
-        }
     }
 }
 
@@ -135,7 +157,7 @@ void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::stri
     }
     else if (action == "2") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Créer un compte");
-        sendMenuToClient(clientSocket, game->getRegisterMenu());
+        // Créer un compte => à implémenter
     }
     else if (action == "3") {
         clientMenuChoices.erase(clientId);
@@ -161,8 +183,12 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     }
     else if (action == "4") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Chat");
-        // Chat => à implémenter
+        //sendMenuToClient(clientSocket, chatMgr.getChatMenu());
+        //chatMgr.addClient("Client #" + std::to_string(clientId), clientSocket);
+        std::thread chatThread(&Server::handleChatInput, this, clientSocket, clientId);
+        chatThread.detach();
     }
+    
     if (action == "5") { 
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getParent();
         sendMenuToClient(clientSocket, game->getMainMenu0());
@@ -173,29 +199,21 @@ void Server::keyInuptGameMenu(int clientSocket, const std::string& unicodeAction
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
 
     if (action == "right") { 
-        game->moveCurrentPieceRight();
-        game->setNeedToSendGame(true);
+        game->getCurrentPiece().moveRight(game->getGrid());
     }
     else if (action == "left") { 
-        game->moveCurrentPieceLeft();
-        game->setNeedToSendGame(true);
+        game->getCurrentPiece().moveLeft(game->getGrid());
     }
     else if (action == "up") { 
-        game->rotateCurrentPiece();
-        game->setNeedToSendGame(true);
+        game->getCurrentPiece().rotate(game->getGrid());
     }
     else if (action == "down"){
-        game->moveCurrentPieceDown();
-        game->setNeedToSendGame(true);
+        game->getCurrentPiece().moveDown(game->getGrid());
     }
     else if(action == "drop") { // space
-        game->dropCurrentPiece();
-        game->setNeedToSendGame(true);
+        game->getCurrentPiece().dropTetrimino(game->getGrid());
     }
-    if (game->getNeedToSendGame()){ 
-        sendGameToClient(clientSocket);
-        game->setNeedToSendGame(false);
-    }
+    sendGameToClient(clientSocket);
 }
 
 std::string Server::convertUnicodeToText(const std::string& unicode) {
@@ -209,6 +227,8 @@ void Server::stop() {
         close(serverSocket);
         serverSocket = -1;
     }
+    // Terminer ncurses
+    endwin();
 }
 
 void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
@@ -217,8 +237,6 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 
 void Server::sendGameToClient(int clientSocket) {
     json message;
-    
-    message["score"] = game->getScore().scoreToJson();
     message["grid"] = game->getGrid().gridToJson();
     message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 
@@ -256,46 +274,15 @@ void Server::loopGame(int clientSocket) {
     std::thread gameThread([this]() { // Lancer un thread pour le jeu et le maj
         while (runningGame) {
             game->update(); 
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     });
 
     gameThread.detach();
 
     while (runningGame) { // Envoi du jeu au client 
-        if (game->getNeedToSendGame()) { 
-            sendGameToClient(clientSocket);
-            game->setNeedToSendGame(false);
-        }
-    }
-}
-
-void Server::handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data) {
-    // Récupérer les informations envoyées par le client
-    std::string username = data["username"];
-    std::string password = data["password"];
-
-    // Utilisation directe de l'instance UserManager dans Server
-    bool success = userManager->registerUser(username, password);
-
-    nlohmann::json response;
-    if (success) {
-        response["title"] = "Inscription réussie";
-        response["message"] = "Votre compte a été créé avec succès !";
-        response["input"] = "Appuyez sur entrée pour retourner au menu.";
-        sendMenuToClient(clientSocket, response.dump() + "\n");
-
-        // Retour au menu précédent (par exemple, menu de connexion)
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getParent();
-        sendMenuToClient(clientSocket, game->getMainMenu0());
-    }
-    else {
-        response["title"] = "Erreur";
-        response["message"] = "Le nom d'utilisateur existe déjà. Veuillez réessayer.";
-        response["input"] = "Appuyez sur entrée pour retourner au menu.";
-        sendMenuToClient(clientSocket, response.dump() + "\n");
-
-        // Renvoyer le menu d'inscription pour réessayer
-        sendMenuToClient(clientSocket, game->getRegisterMenu());
+        sendGameToClient(clientSocket);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Pause de 500 ms eviter un crash
     }
 }
 
