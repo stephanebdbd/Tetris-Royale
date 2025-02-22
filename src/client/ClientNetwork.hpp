@@ -13,7 +13,7 @@ class ClientNetwork {
         bool connectToServer(const std::string& serverIP, int port, int& clientSocket);
         void disconnect(int& clientSocket);       
         bool sendData(const std::string& data, int clientSocket);
-        bool receivedData(int clientSocket, std::string& received);
+        int receivedData(int clientSocket, char *buffer);
 };
 
 

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <iostream>
+#include <cstring>
 
 
 bool ClientNetwork::connectToServer(const std::string& serverIP, int port, int& clientSocket) {
@@ -46,14 +47,13 @@ bool ClientNetwork::sendData(const std::string& data, int clientSocket) {
     }
     return true;
 }
-bool receivedData(int clientSocket, std::string& received, char *buffer) {
-
-    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+int ClientNetwork::receivedData(int clientSocket, char *buffer) {
+    memset(buffer, 0, 1024); // 1024 is the actual size of the buffer
+    int bytesReceived = recv(clientSocket, buffer, 1023, 0); // Adjust the size to 1023 to leave space for null terminator
     if (bytesReceived <= 0) {
-        return false;
+        return -1;
     }
     buffer[bytesReceived] = '\0';
-    received += buffer;
-    return true;
+    return bytesReceived;
     
 }

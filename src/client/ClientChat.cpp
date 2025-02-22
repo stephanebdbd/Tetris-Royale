@@ -2,7 +2,7 @@
 
 using json = nlohmann::json;
 
-
+bool ClientChat::messagesWaitForDisplay = false;
 
 void ClientChat::run(){
     //initialiser la mémoire des messages
@@ -71,11 +71,9 @@ void ClientChat::receiveChatMessages() {
     char buffer[1024];
 
     while (true) {
-        memset(buffer, 0, sizeof(buffer));
-        int bytes_received = recv(clientSocket, buffer, sizeof(buffer), 0);
-
-        if (bytes_received <= 0) {
-            close(clientSocket);
+        int bytes_received = network.receivedData(clientSocket, buffer);
+        if(bytes_received == -1){
+            std::cerr << "Erreur lors de la réception du message !\n";
             return;
         }
 
@@ -115,8 +113,8 @@ bool ClientChat::initMessageMemory() {
             newFile.close();
             return true;
         }
-        return false;
     }
+    return false;
 }
 
 bool ClientChat::saveMessage(const std::string& message) {

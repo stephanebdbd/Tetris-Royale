@@ -1,7 +1,7 @@
 #ifndef CLIENTCHAT_HPP
 #define CLIENTCHAT_HPP
 
-#include "Client.hpp"
+#include "ClientNetwork.hpp"
 #include "../common/json.hpp"
 #include "../include.hpp"
 #include <ncurses.h>
