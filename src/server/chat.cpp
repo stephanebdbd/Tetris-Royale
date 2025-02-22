@@ -1,37 +1,38 @@
 #include "chat.hpp"
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <cstring>
 
 
-ServerChat::~ServerChat() {
-    stop();
-}
+using json = nlohmann::json;
 
 
 void ServerChat::processClientChat(int clientSocket) {
     char buffer[1024];
-    uint32_t userId;
 
-    while (ReadStreamMessage(clientSocket, buffer, sizeof(buffer), userId) > 0) {
+    while (true) {
         memset(buffer, 0, sizeof(buffer));
-        int bytesRead = read(clientSocket, buffer, sizeof(buffer));
-        if (bytesRead <= 0) break;
+        int bytes_received = recv(clientSocket, buffer, sizeof(buffer), 0);
 
-        ChatMessage msg = ChatMessage::deserialize(buffer);
-        std::cout << "[" << msg.senderId << "] : " << msg.message << std::endl;
+        if (bytes_received <= 0) {
+            close(clientSocket);
+            return;
+        }
 
-        // Broadcast selon le canal
-        broadcastMessage(msg, msg.channel);
+        try {
+            json msg = json::parse(std::string(buffer, bytes_received));
+            std::string receiver = msg["receiver"];
+            std::string message = msg["message"];
+
+            std::cout << "[receiver: " << receiver << "] " << message << std::endl;
+            broadcastMessage(receiver, message);
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+        }
     }
 }
 
-void ServerChat::broadcastMessage(const ChatMessage& msg, const std::string& channel) {
+void ServerChat::broadcastMessage(const std::string& message, const std::string& channel) {
     std::lock_guard<std::mutex> lock(clientsMutex);
     for (const auto& [id, socket] : clients) {
-        sendMessage(socket, msg.serialize());
+        sendMessage(socket, message);
     }
 }
 
