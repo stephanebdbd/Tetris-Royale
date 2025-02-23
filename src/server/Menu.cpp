@@ -32,11 +32,11 @@ json Menu::getMainMenu1() const {
 json Menu::getRegisterMenu() const {
     json menu = {
         {"title", "Création de compte"},
-        {"options", "Insérez d'abord le pseudo puis votre mot de passe"},
-        {"input", {
+        {"options", {
             {"username", "Pseudo: "},
             {"password", "Mot de passe: "}
-        }}
+        }},
+        {"input", "alors ? "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
