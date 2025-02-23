@@ -124,7 +124,7 @@ void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::stri
     }
     else if (action == "2") {
         //clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Créer un compte");
-        sendMenuToClient(clientSocket, game->getRegisterMenu());
+        sendMenuToClient(clientSocket, game->getRegisterMenu1());
         currentMenu[clientId]++;  
     }
     else if (action == "3") {
@@ -296,7 +296,7 @@ void Server::handleRegisterMenu(int clientSocket, int clientId, const json& data
         sendMenuToClient(clientSocket, response.dump() + "\n");
 
         // Renvoyer le menu d'inscription pour réessayer
-        sendMenuToClient(clientSocket, game->getRegisterMenu());
+        sendMenuToClient(clientSocket, game->getRegisterMenu1());
     }
 }
 

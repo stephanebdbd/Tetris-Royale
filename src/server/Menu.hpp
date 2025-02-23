@@ -7,7 +7,8 @@ class Menu {
     public:
         json getMainMenu0() const;  
         json getMainMenu1() const;  
-        json getRegisterMenu() const;
+        json getRegisterMenu1() const;
+        json getRegisterMenu2() const;
 };
 
 #endif 
