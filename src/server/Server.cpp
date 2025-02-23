@@ -54,9 +54,6 @@ void Server::acceptClients() {
 
     int clientId = clientIdCounter.fetch_add(1);  // Attribuer un ID unique et incrémenter le compteur
     std::cout << "Client #" << clientId << " connecté." << std::endl;
-    std::shared_ptr<MenuNode> root = std::make_shared<MenuNode>("Connexion");
-    root->makeNodeTree();
-    clientMenuChoices[clientId] = root;  // Chaque client commence avec menuChoice = 0
     
     clear();
     sendMenuToClient(clientSocket, game->getMainMenu0()); 
@@ -78,7 +75,6 @@ void Server::handleClient(int clientSocket, int clientId) {
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived <= 0) {
             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
-            clientMenuChoices.erase(clientId);
             close(clientSocket);
             break;
         }
@@ -92,7 +88,7 @@ void Server::handleClient(int clientSocket, int clientId) {
             handleMenu(clientSocket, clientId, action);
 
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
-            if (clientMenuChoices[clientId]->getName() == "Jouer") {
+            if (runningGame) {
                 receiveInputFromClient(clientSocket, clientId);
             }
 
@@ -103,41 +99,30 @@ void Server::handleClient(int clientSocket, int clientId) {
 }
 
 void Server::handleMenu(int clientSocket, int clientId, const std::string& action) {
-    std::string currentMenu = clientMenuChoices[clientId]->getName();
+    //std::string currentMenu = clientMenuChoices[clientId]->getName();
 
-    if (currentMenu == "Connexion") {
+    if (currentMenu[clientId] == 0) {
         keyInuptWelcomeMenu(clientSocket, clientId, action);
     }
-    else if (currentMenu == "Menu principal") {
+    else if (currentMenu[clientId] == 1) {
         keyInuptMainMenu(clientSocket, clientId, action);
     }
-    else if (currentMenu == "Jouer") {
+    else if (runningGame) {
         std::cout << "Client #" << clientId << " est en jeu." << std::endl;
         keyInuptGameMenu(clientSocket, clientId, action);
-    }
-    else if (currentMenu == "Créer un compte") {
-        // Ici on attend un JSON contenant "username" et "password"
-        try {
-            json data = json::parse(action);
-            handleRegisterMenu(clientSocket, clientId, data);
-        }
-        catch(json::parse_error& e) {
-            std::cerr << "Erreur de parsing JSON sur la page d'inscription : " << e.what() << std::endl;
-        }
     }
 }
 
 void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Menu principal");
-        sendMenuToClient(clientSocket, game->getMainMenu1());      
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+        currentMenu[clientId]++;     
     }
     else if (action == "2") {
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Créer un compte");
-        sendMenuToClient(clientSocket, game->getRegisterMenu());
+        sendMenuToClient(clientSocket, game->getRegisterMenu1());
+        currentMenu[clientId]++;  
     }
     else if (action == "3") {
-        clientMenuChoices.erase(clientId);
         close(clientSocket);
         // Quitter => à implémenter
     }
@@ -145,27 +130,23 @@ void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::stri
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Jouer");
         runningGame = true;
         receiveInputFromClient(clientSocket, clientId); // lancer un thread pour recevoir les inputs
         games[clientId] = std::make_unique<Game>(10, 20); // Créer une nouvelle instance de Game pour chaque client
         loopGame(clientSocket, clientId);
     }
     else if (action == "2") {
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Amis");
         // Amis => à implémenter
     }
     else if (action == "3") {
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Classement");
         // Classements => à implémenter
     }
     else if (action == "4") {
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Chat");
         // Chat => à implémenter
     }
-    if (action == "5") { 
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getParent();
+    if (action == "5") {
         sendMenuToClient(clientSocket, game->getMainMenu0());
+        currentMenu[clientId]--;
     }
 }
 
@@ -290,10 +271,10 @@ void Server::handleRegisterMenu(int clientSocket, int clientId, const json& data
         response["title"] = "Inscription réussie";
         response["message"] = "Votre compte a été créé avec succès !";
         response["input"] = "Appuyez sur entrée pour retourner au menu.";
+        currentMenu[clientId]--;
         sendMenuToClient(clientSocket, response.dump() + "\n");
 
         // Retour au menu précédent (par exemple, menu de connexion)
-        clientMenuChoices[clientId] = clientMenuChoices[clientId]->getParent();
         sendMenuToClient(clientSocket, game->getMainMenu0());
     }
     else {
@@ -303,7 +284,7 @@ void Server::handleRegisterMenu(int clientSocket, int clientId, const json& data
         sendMenuToClient(clientSocket, response.dump() + "\n");
 
         // Renvoyer le menu d'inscription pour réessayer
-        sendMenuToClient(clientSocket, game->getRegisterMenu());
+        sendMenuToClient(clientSocket, game->getRegisterMenu1());
     }
 }
 

@@ -12,9 +12,10 @@
 class Server {
     int port;
     int serverSocket;
+    //int currentMenu = 0; 0 = welcome, 1 = main, 2 = game chauqeu client aura son menu
+    std::unordered_map<int, int> currentMenu;
     std::unique_ptr<Game> game;
     std::atomic<int> clientIdCounter;
-    std::unordered_map<int, std::shared_ptr<MenuNode>> clientMenuChoices;
 
     //chaque client aura sa game
     std::unordered_map<int, std::unique_ptr<Game>> games;
