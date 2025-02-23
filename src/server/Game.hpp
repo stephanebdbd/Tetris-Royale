@@ -6,6 +6,8 @@
 #include "Score.hpp"
 #include "Menu.hpp"
 #include "malus.hpp"
+#include "GameMode.hpp"
+#include <iostream>
 
 class Game {
     Grid grid;
@@ -13,6 +15,8 @@ class Game {
     Timer dropTimer;
     Score score;
     Menu menu;
+    std::unique_ptr<GameMode> gameMode;
+    
     bool running;
     bool gameOver;
 
@@ -25,7 +29,6 @@ class Game {
         void userInput();
         void showGameOver();
         void update();
-        int getNbrMalus(int nbrLineComplet)const;
 
         //Pour eviter le viole des lois de Demeter
         void moveCurrentPieceDown();
@@ -39,7 +42,6 @@ class Game {
         Score& getScore() { return score; }
         json getMainMenu0() { return menu.getMainMenu0(); }  
         json getMainMenu1() { return menu.getMainMenu1(); }
-        json getRegisterMenu1() { return menu.getRegisterMenu1(); }
 
         bool getNeedToSendGame() { return needToSendGame; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }

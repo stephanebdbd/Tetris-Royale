@@ -6,13 +6,12 @@
 
 
 class GameMode {
-    std::string NameMode;
 
     public:
-        GameMode(std::string NameMode) : NameMode(NameMode) {}
-        virtual void startGame(Game& game) {};
-        virtual void applyMalus(){};
-        virtual void applyBonus(){};
+        GameMode();
+        virtual void feautureMode(Game& game) {};
+        virtual void useMalus(int nbrMalus){};
+        virtual void useBonus(){};
         std::string getNameMode() const {return NameMode;}
 
 };

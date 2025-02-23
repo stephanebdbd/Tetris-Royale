@@ -8,7 +8,7 @@
 
 class EndlessMode : public GameMode{
     public:
-        EndlessMode() : GameMode("EndlessMode"){};
+        EndlessMode();
         
 };
 
