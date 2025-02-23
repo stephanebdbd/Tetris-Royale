@@ -1,6 +1,5 @@
 #include "chat.hpp"
 
-
 using json = nlohmann::json;
 
 
@@ -23,21 +22,27 @@ void ServerChat::processClientChat(int clientSocket) {
 
             mvprintw(0, 0, "[receiver: %s] %s\n", receiver.c_str(), message.c_str());
             refresh();
-            //broadcastMessage(receiver, message);
+            //            broadcastMessage(receiver, message);
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << std::endl;
         }
     }
 }
 
-void ServerChat::broadcastMessage(const std::string& message, const std::string& channel) {
+void ServerChat::broadcastMessage(const std::string& message) {
     std::lock_guard<std::mutex> lock(clientsMutex);
-    for (const auto& [id, socket] : clients) {
-        sendMessage(socket, message);
+    for (const auto& client : clients) {
+        sendMessage(client.first, message);
     }
 }
 
-void sendMessageToDest(char *Message, int client_fd) {
-    uint32_t messageSize = (uint32_t)strlen(Message);               
-    WriteStreamMessage(client_fd, Message, messageSize);      
+void ServerChat::sendMessage(int clientSocket, const std::string& message) {
+    json msg;
+    msg["message"] = message;
+    std::string msgStr = msg.dump();
+    send(clientSocket, msgStr.c_str(), msgStr.size(), 0);
+}
+
+std::string ServerChat::getChatMenu() const {
+    return "Vous êtes dans le chat. Tapez votre message et appuyez sur Entrée.\n";
 }

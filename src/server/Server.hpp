@@ -51,6 +51,7 @@ public:
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     void handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data);
     std::string convertUnicodeToText(const std::string& unicode);
+    void sendChatModeToClient(int clientSocket);
 };
 
 #endif

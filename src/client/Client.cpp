@@ -25,6 +25,7 @@ void Client::run() {
     //Lancer un thread pour lancer le chat
     std::thread chatThread(&ClientChat::run, &chat);
     chatThread.detach();
+    
 
     // Boucle principale pour recevoir et afficher le jeu
     while (true) {
@@ -47,7 +48,11 @@ void Client::handleUserInput() {
                 exit(0); 
             }
             std::string action(1, ch);
-            controller.sendInput(action, clientSocket);  // Envoyer au serveur
+            if (display.isChatMode()) {
+                network.sendData(action, clientSocket);
+            } else {
+                controller.sendInput(action, clientSocket);
+            }
         }
     }
 }
@@ -75,6 +80,10 @@ void Client::receiveDisplay() {
                     if (data.contains("grid")) {   
                         display.displayGame(data);
                     }
+                    // Si c'est un message de chat
+                    else if (data.contains("mode") && data["mode"] == "chat") {
+                        display.displayChat(data);
+                    }
                     // Sinon, c'est un menu
                     else {
                         display.displayMenu(data);
@@ -90,5 +99,3 @@ void Client::receiveDisplay() {
         }
     }
 }
-
-

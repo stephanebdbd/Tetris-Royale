@@ -10,9 +10,13 @@ void ClientChat::run(){
         std::cerr << "Erreur lors de l'initialisation de la mémoire des messages !\n";
         return;
     }
+    std::cout << "Mode chat activé. Tapez votre message et appuyez sur Entrée.\n";
+    
     //lancer un tread pour envoyer les messages du chat
     std::thread sendThread(&ClientChat::sendChatMessages, this);
     sendThread.detach();
+    
+    
     while (true) {
         //recevoir les messages du chat
         receiveChatMessages();

@@ -13,7 +13,10 @@ using json = nlohmann::json;
 
 Server::Server(int port, Game* game) 
     : port(port), serverSocket(-1), game(game), clientIdCounter(0)
-{ userManager = std::make_unique<UserManager>("users.txt"); }
+{ 
+    userManager = std::make_unique<UserManager>("users.txt"); 
+    chat = std::make_unique<ServerChat>(); // Initialize chat
+}
 
 
 bool Server::start() {
@@ -145,25 +148,36 @@ void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::stri
 }
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
+    
     if (action == "1") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Jouer");
         runningGame = true;
         receiveInputFromClient(clientSocket, clientId); // lancer un thread pour recevoir les inputs
         loopGame(clientSocket);
     }
+
     else if (action == "2") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Amis");
         // Amis => à implémenter
     }
+
     else if (action == "3") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Classement");
         // Classements => à implémenter
     }
+
     else if (action == "4") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Chat");
-        // Chat => à implémenter
+        
+        // Envoyer un message au client pour entrer en mode chat
+        sendChatModeToClient(clientSocket);
+        
+        // Lancer un thread pour le chat
+        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket);
+        chatThread.detach();
     }
-    if (action == "5") { 
+    
+    else if (action == "5") { 
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getParent();
         sendMenuToClient(clientSocket, game->getMainMenu0());
     }
@@ -297,6 +311,13 @@ void Server::handleRegisterMenu(int clientSocket, int clientId, const nlohmann::
         // Renvoyer le menu d'inscription pour réessayer
         sendMenuToClient(clientSocket, game->getRegisterMenu());
     }
+}
+
+void Server::sendChatModeToClient(int clientSocket) {
+    json message;
+    message["mode"] = "chat";
+    std::string msg = message.dump() + "\n";
+    send(clientSocket, msg.c_str(), msg.size(), 0);
 }
 
 int main() {

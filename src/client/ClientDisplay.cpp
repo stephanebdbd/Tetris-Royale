@@ -7,6 +7,7 @@
 using json = nlohmann::json;
 
 void ClientDisplay::displayMenu(const json& data) {
+    chatMode = false;
     clear();
 
     std::string title = data["title"];
@@ -89,4 +90,18 @@ void ClientDisplay::drawScore(const json& score) {
     mvprintw(1, 13, "Score: %d", scoreValue);
     int comboValue = score["combo"];
     mvprintw(2, 13, "Combo: %d", comboValue);
+}
+
+void ClientDisplay::displayChat(const json& data) {
+    chatMode = true;
+    clear();  // Effacer l'écran avant d'afficher le chat
+    mvprintw(0, 0, "Chat Mode");
+    mvprintw(1, 0, "Type your message and press Enter to send.");
+    
+    // Afficher les messages reçus
+    if (data.contains("message")) {
+        mvprintw(2, 0, "Received: %s", data["message"].get<std::string>().c_str());
+    }
+    
+    refresh();
 }
