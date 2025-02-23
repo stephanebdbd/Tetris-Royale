@@ -9,6 +9,11 @@ UserManager::UserManager(const std::string& filename) : file(filename) {
     loadUsers();
 }
 
+// Vérifie si l'utilisateur n'existe pas
+bool UserManager::userExists(const std::string& username) const {
+    return users.find(username) != users.end();
+}
+
 // Enregistre un nouvel utilisateur si le pseudo n'existe pas encore
 bool UserManager::registerUser(const std::string& username, const std::string& password) {
     if (users.find(username) != users.end()) {
