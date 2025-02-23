@@ -33,10 +33,10 @@ json Menu::getRegisterMenu() const {
     json menu = {
         {"title", "Création de compte"},
         {"options", {
-            {"username", "Pseudo: "},
-            {"password", "Mot de passe: "}
+            {"Veuillez insérer votre pseudo puis votre mot de passe", ":"},
+
         }},
-        {"input", "alors ? "}
+        {"input", ""}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
