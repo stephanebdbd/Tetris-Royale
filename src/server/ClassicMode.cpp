@@ -1,33 +1,39 @@
 #include "ClassicMode.hpp"
 #include "Malus.hpp"
+#include "Grid.hpp"
 
-ClassicMode::ClassicMode() : GameMode("ClassicMode"){}
+ClassicMode::ClassicMode(){}
 
-void ClassicMode::startGame(Game& game, int linesCleared){
+void ClassicMode::feautureMode(Game& game, int linesCleared){
 
     int nbrMalus = getNbrMalus(linesCleared); // nombre du malus à envoyer
 
     if(nbrMalus > 0){
-        Malus malus(nbrMalus);
-        int cible = chooseCible();
-
-        if (!acceptPlayerCible(cible)){
-            cible = enterCible(); 
-        }
-
-        Grid& grid = playerGrids[cible];
-        malus.sendMalus(grid);
-        
+        useMalus(nbrMalus);
     }
 }
 
-void ClassicMode::chooseCible(){
-    int C_Player = rand() % nbrPlayer;
-    return Player[C_Player].getId();
+
+void ClassicMode::useMalus(int nbrMalus){
+    Malus malus(nbrMalus);
+    int chosenPlayer = choosePlayer();
+
+    if (!acceptChosenPlayer(chosenPlayer)){
+        chosenPlayer = enterPlayer(); 
+    }
+
+    Grid& grid = playerGrids[chosenPlayer];
+    malus.sendMalus(grid);
 }
 
-bool ClassicMode::acceptPlayerCible(int cible){
-    cout<<"est ce que vous accepté le joueur "<<cible<<" comme  malus (y/n)?"<<endl;
+
+void ClassicMode::choosePlayer(){
+    int C_Player = rand() % players.size();
+    return players[C_Player].getId();
+}
+
+bool ClassicMode::acceptChosenPlayer(int chosenPlayer){
+    cout<<"est ce que vous accepté le joueur "<<chosenPlayer<<" comme  malus (y/n)?"<<endl;
     char reponse;
     cin>>reponse;
     if(reponse == 'y'){
@@ -36,11 +42,11 @@ bool ClassicMode::acceptPlayerCible(int cible){
     return false;
 }
 
-int ClassicMode::enterCible(){
-    int cible;
+int ClassicMode::enterPlayer(){
+    int chosenPlayer;
     cout<<"entrer le joueur cible"<<endl;
-    cin>>cible;
-    return cible;
+    cin>>chosenPlayer;
+    return chosenPlayer;
 }
 
 int ClassicMode::getNbrMalus(int nbrLineComplet) const{
