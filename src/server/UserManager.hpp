@@ -2,6 +2,7 @@
 #define USERMANAGER_HPP
 
 #include <string>
+#include <vector>
 #include <unordered_map>
 
 struct UserData {
@@ -10,19 +11,19 @@ struct UserData {
 };
 
 class UserManager {
+    std::string file;
+    std::unordered_map<std::string, UserData> users;
+
+    void loadUsers();
+    void saveUsers();
+
 public:
     UserManager(const std::string& filename);
     bool registerUser(const std::string& username, const std::string& password);
     bool authenticateUser(const std::string& username, const std::string& password);
     int getHighscore(const std::string& username);
     void updateHighscore(const std::string& username, int score);
-
-private:
-    std::string file;
-    std::unordered_map<std::string, UserData> users;
-
-    void loadUsers();
-    void saveUsers();
+    std::vector<std::pair<std::string, int>> getRanking() const;
 };
 
 #endif
