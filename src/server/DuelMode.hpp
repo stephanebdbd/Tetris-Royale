@@ -8,6 +8,7 @@
 class DuelMode : public ClassicMode{
     public:
         DuelMode();
+        void useMalus(int nbrMalus) override;
 };
 
 #endif
