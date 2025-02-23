@@ -21,8 +21,9 @@ void ServerChat::processClientChat(int clientSocket) {
             std::string receiver = msg["receiver"];
             std::string message = msg["message"];
 
-            std::cout << "[receiver: " << receiver << "] " << message << std::endl;
-            broadcastMessage(receiver, message);
+            mvprintw(0, 0, "[receiver: %s] %s\n", receiver.c_str(), message.c_str());
+            refresh();
+            //broadcastMessage(receiver, message);
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << std::endl;
         }
