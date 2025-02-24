@@ -5,7 +5,7 @@
 #include "Grid.hpp"
 #include "Tetramino.hpp"
 #include "Score.hpp"
-#include "UserManager.hpp"  // Inclure le gestionnaire d'utilisateurs
+#include "UserManager.hpp"
 #include <atomic>
 #include <unordered_map>
 
@@ -26,7 +26,6 @@ class Server {
     std::unique_ptr<Tetramino> currentPiece;
     std::unique_ptr<Score> score;
 
-    // Gestionnaire d'utilisateurs déclaré directement ici.
     std::unique_ptr<UserManager> userManager;
 
     std::unordered_map<std::string, std::string> unicodeToText = {

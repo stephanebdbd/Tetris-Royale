@@ -12,7 +12,7 @@
 
 Server::Server(int port, Game* game) 
     : port(port), serverSocket(-1), game(game), clientIdCounter(0)
-{ userManager = std::make_unique<UserManager>("users.txt"); }
+{ userManager = std::make_unique<UserManager>("./users.txt"); }
 
 
 bool Server::start() {
