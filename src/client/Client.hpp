@@ -8,6 +8,8 @@
 
 
 class Client {
+
+private:
     ClientDisplay display;  // Chaque client a son propre display
     Controller controller;  // Chaque client a son propre controller
     ClientNetwork network;  // Chaque client a son propre network
@@ -17,8 +19,11 @@ class Client {
     std::string serverIP;
     int port;
     int clientSocket;
-
-    public:
+    bool isPlaying = false;
+    bool chatMode = false;
+    bool stopInputThread;
+    
+public:
         Client(const std::string& serverIP, int port);
         void run();
         void receiveDisplay();

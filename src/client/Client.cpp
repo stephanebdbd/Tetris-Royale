@@ -6,10 +6,11 @@
 #include <sys/socket.h>
 #include <ncurses.h>
 #include <thread>
+#include <fstream>
 
 using json = nlohmann::json;
 
-Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1) {}
+Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1), stopInputThread(false) {}
 
 void Client::run() {
     if (!network.connectToServer(serverIP, port, clientSocket)) {
@@ -22,24 +23,37 @@ void Client::run() {
     std::thread inputThread(&Client::handleUserInput, this);
     inputThread.detach(); // Permet au thread de fonctionner indépendamment
 
-    //Lancer un thread pour lancer le chat
-    std::thread chatThread(&ClientChat::run, &chat);
-    chatThread.detach();
-    
+    // Rediriger std::cout vers un fichier avant de lancer le chat
+    std::ofstream file("chat.txt", std::ios::app);
+    if (!file) {
+        std::cerr << "Erreur: Impossible d'ouvrir chat.txt" << std::endl;
+        return;
+    }
+    std::streambuf* coutbuf = std::cout.rdbuf(); // Sauvegarder le buffer de cout
+    std::cout.rdbuf(file.rdbuf()); // Rediriger cout vers le fichier
 
     // Boucle principale pour recevoir et afficher le jeu
     while (true) {
         receiveDisplay();
     }
 
+    std::cout.rdbuf(coutbuf); // Restaurer le buffer de cout
+    file.close();
+
     network.disconnect(clientSocket);
     delwin(stdscr);
     endwin();
 }
 
+
 void Client::handleUserInput() {
     halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
     while (true) {
+        if (chatMode) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
+            continue;
+        }
+
         int ch = getch();
         if (ch != ERR) {  // Si une touche est pressée
             if (ch == 'q') {
@@ -48,11 +62,7 @@ void Client::handleUserInput() {
                 exit(0); 
             }
             std::string action(1, ch);
-            if (display.isChatMode()) {
-                network.sendData(action, clientSocket);
-            } else {
-                controller.sendInput(action, clientSocket);
-            }
+            controller.sendInput(action, clientSocket);
         }
     }
 }
@@ -77,15 +87,27 @@ void Client::receiveDisplay() {
                     json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
 
                     // Si c'est une grille de jeu
-                    if (data.contains("grid")) {   
+                    if (data.contains("grid")) {
+                        isPlaying = true;
+                        chatMode = false;
                         display.displayGame(data);
+
                     }
                     // Si c'est un message de chat
                     else if (data.contains("mode") && data["mode"] == "chat") {
+                        chatMode = true;
+                        isPlaying = false;
+                        // Lancer le chat dans un thread
+                        std::thread chatThread(&ClientChat::run, &chat);
+                        chatThread.detach();
+                        std::cout << "Chat thread launched" << std::endl;  // Ajout de message de débogage
                         display.displayChat(data);
+        
                     }
                     // Sinon, c'est un menu
                     else {
+                        chatMode = false;
+                        isPlaying = false;
                         display.displayMenu(data);
                     }
 
