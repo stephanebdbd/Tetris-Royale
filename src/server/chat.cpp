@@ -4,6 +4,7 @@ using json = nlohmann::json;
 
 
 void ServerChat::processClientChat(int clientSocket) {
+    std::cout << "Chat process started for client " << clientSocket << std::endl;
     char buffer[1024];
 
     while (true) {
@@ -17,11 +18,19 @@ void ServerChat::processClientChat(int clientSocket) {
 
         try {
             json msg = json::parse(std::string(buffer, bytes_received));
-            std::string receiver = msg["receiver"];
-            std::string message = msg["message"];
+            if(msg.contains("receiver")) {
+                std::cout << "Message reçu de " << clientSocket << " : " << msg["message"] << std::endl;
+                std::string receiver = msg["receiver"];
+                std::string message = msg["message"];
+                broadcastMessage(message);
+            }else{
+                //gere l exit du client
+                isChatActive = false;
+                return;
+            }
+            
 
-            mvprintw(0, 0, "[receiver: %s] %s\n", receiver.c_str(), message.c_str());
-            refresh();
+            
             //            broadcastMessage(receiver, message);
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << std::endl;
@@ -32,11 +41,11 @@ void ServerChat::processClientChat(int clientSocket) {
 void ServerChat::broadcastMessage(const std::string& message) {
     std::lock_guard<std::mutex> lock(clientsMutex);
     for (const auto& client : clients) {
-        sendMessage(client.first, message);
+        sendMessage(client.first, "", message);// todo: sender
     }
 }
 
-void ServerChat::sendMessage(int clientSocket, const std::string& message) {
+void ServerChat::sendMessage(int clientSocket, std::string sender, const std::string& message) {
     json msg;
     msg["message"] = message;
     std::string msgStr = msg.dump();
@@ -45,4 +54,16 @@ void ServerChat::sendMessage(int clientSocket, const std::string& message) {
 
 std::string ServerChat::getChatMenu() const {
     return "Vous êtes dans le chat. Tapez votre message et appuyez sur Entrée.\n";
+}
+
+void ServerChat::start() {
+    isChatActive = true;
+}
+
+void ServerChat::stop() {
+    isChatActive = false;
+}
+
+bool ServerChat::getIsChatActive() const {
+    return isChatActive;
 }

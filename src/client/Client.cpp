@@ -100,7 +100,6 @@ void Client::receiveDisplay() {
                         // Lancer le chat dans un thread
                         std::thread chatThread(&ClientChat::run, &chat);
                         chatThread.detach();
-                        std::cout << "Chat thread launched" << std::endl;  // Ajout de message de débogage
                         display.displayChat(data);
         
                     }

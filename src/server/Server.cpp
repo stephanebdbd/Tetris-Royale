@@ -89,20 +89,28 @@ void Server::handleClient(int clientSocket, int clientId) {
 
         try {
             json receivedData = json::parse(buffer);
+            
+            if (!receivedData.contains("action") || !receivedData["action"].is_string()) {
+                std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
+                return;
+            }
+        
             std::string action = receivedData["action"];
-
             std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
-
+        
             handleMenu(clientSocket, clientId, action);
 
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
             if (clientMenuChoices[clientId]->getName() == "Jouer") {
                 receiveInputFromClient(clientSocket, clientId);
+            }else if(clientMenuChoices[clientId]->getName() == "Chat"){
+                chat->processClientChat(clientSocket);
             }
-
+        
         } catch (json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
         }
+        
     }
 }
 
@@ -148,7 +156,6 @@ void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::stri
 }
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
-    
     if (action == "1") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Jouer");
         runningGame = true;
@@ -168,13 +175,8 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
 
     else if (action == "4") {
         clientMenuChoices[clientId] = clientMenuChoices[clientId]->getChild("Chat");
-        
         // Envoyer un message au client pour entrer en mode chat
         sendChatModeToClient(clientSocket);
-        
-        // Lancer un thread pour le chat
-        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket);
-        chatThread.detach();
     }
     
     else if (action == "5") { 

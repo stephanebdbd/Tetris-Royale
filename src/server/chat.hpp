@@ -19,6 +19,7 @@ class ServerChat {
 private:
     std::unordered_map<int, std::string> clients; // clientSocket -> pseudoName
     std::mutex clientsMutex;
+    bool isChatActive = false;
 
 public:
     ServerChat() = default;
@@ -36,9 +37,11 @@ public:
     // envoi d'un message à tous les clients
     void broadcastMessage(const std::string& message);
     // envoi d'un message à un client
-    void sendMessage(int clientSocket, const std::string& message);
+    void sendMessage(int clientSocket, std::string sender, const std::string& message);
     // obtenir le menu de chat
     std::string getChatMenu() const;
+    // obtenir le statut du chat
+    bool getIsChatActive() const;
 };
 
 #endif // SERVER_CHAT_HPP
