@@ -17,7 +17,7 @@ class ClientChat{
         ClientNetwork network;               ///< The client network.
         bool isPlaying = false;              ///< A boolean indicating if the client is playing.
         static bool messagesWaitForDisplay; ///< A boolean indicating if the message is waiting for display.
-
+        int y =0;                            ///< The y position of the chat message.
 
     public:
         /**
@@ -35,7 +35,7 @@ class ClientChat{
          * @brief Sends a chat message.
          * @param message The message to send.
          */
-        void sendChatMessages();
+        void sendChatMessages(WINDOW *input_win);
 
         /**
          * @brief Receives a chat message.
