@@ -2,7 +2,7 @@
 
 #include <ncurses.h>
 
-Game::Game(int gridWidth, int gridHeight, std::unique_ptr<GameMode> gameMode) 
+Game::Game(int gridWidth, int gridHeight) //ajouter ce parametre apres , std::unique_ptr<GameMode> gameMode 
     : grid(gridWidth, gridHeight),
       currentPiece(gridWidth / 2, 0, gridWidth, gridHeight), 
       dropTimer(1000), 
