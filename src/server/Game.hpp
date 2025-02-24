@@ -6,7 +6,7 @@
 #include "Score.hpp"
 #include "Menu.hpp"
 #include "malus.hpp"
-#include "GameMode.hpp"
+//#include "GameMode.hpp"
 #include <iostream>
 
 class Game {
@@ -15,7 +15,7 @@ class Game {
     Timer dropTimer;
     Score score;
     Menu menu;
-    std::unique_ptr<GameMode> gameMode;
+    //std::unique_ptr<GameMode> gameMode;
     
     bool running;
     bool gameOver;

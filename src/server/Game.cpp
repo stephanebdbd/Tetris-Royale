@@ -4,12 +4,12 @@
 
 Game::Game(int gridWidth, int gridHeight, std::unique_ptr<GameMode> gameMode) 
     : grid(gridWidth, gridHeight),
-      gameMode(gameMode), 
       currentPiece(gridWidth / 2, 0, gridWidth, gridHeight), 
       dropTimer(1000), 
       score(gridWidth + 5, 2), // Position du score à droite de la grille
       running(true),
       gameOver(false)
+      //gameMode(gameMode) il faut l ajouter apres
       {}
 
 void Game::run() {
@@ -32,7 +32,7 @@ void Game::run() {
                 if (!gameOver) { 
                     int linesCleared = grid.clearFullLines();
                     
-                    gameMode.feautureMode(*this, linesCleared);
+                    //gameMode.feautureMode(*this, linesCleared); il ne faut pas le supprimer
 
                     score.addScore(linesCleared);
 
