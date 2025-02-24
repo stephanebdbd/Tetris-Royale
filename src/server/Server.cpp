@@ -108,6 +108,13 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::RegisterPassword:
             keyInuptRegisterPasswordMenu(clientSocket, clientId, action);
             break;
+        case MenuState::LoginPseudo:
+            keyInuptLoginPseudoMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::LoginPassword:
+            std::cout << "LoginPassword" << std::endl;
+            keyInuptLoginPasswordMenu(clientSocket, clientId, action);
+            break;
         case MenuState::Main:
             keyInuptMainMenu(clientSocket, clientId, action);
             break;
@@ -124,8 +131,9 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
 }
 
 void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "1") {  
-        // Se connecter => à implémenter selon ta logique
+    if (action == "1") {  // Se connecter
+        clientStates[clientId] = MenuState::LoginPseudo;
+        sendMenuToClient(clientSocket, game->getLoginMenu1());
     }
     else if (action == "2") { // Créer un compte
         clientStates[clientId] = MenuState::RegisterPseudo; // Passage à l'état Register
@@ -155,6 +163,33 @@ void Server::keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const 
     clientStates[clientId] = MenuState::Main;
     sendMenuToClient(clientSocket, game->getMainMenu1());
 }
+
+void Server::keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action) {
+    std::cout << "Pseudo: " << action << std::endl;
+    if (!userManager->userNotExists(action)) { // Si le pseudo existe
+        std::cout << "Pseudo existe" << std::endl;
+        clientPseudo[clientId] = action;
+        clientStates[clientId] = MenuState::LoginPassword;
+        sendMenuToClient(clientSocket, game->getLoginMenu2());
+    } 
+    else {
+        std::cout << "Pseudo n'existe pas" << std::endl;
+        // si pseudo n'existe pas on annule et on retourne à l'étape 1 (dc dmd de pseudo)
+        sendMenuToClient(clientSocket, game->getLoginMenu1());
+    }
+}
+
+void Server::keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std::string& action) {
+    if (userManager->authenticateUser(clientPseudo[clientId], action)) { // Si le mot de passe est correct
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    } 
+    else {
+        // Si le mot de passe est incorrect, on retourne à l'étape 2 (dmd de mdp)
+        sendMenuToClient(clientSocket, game->getLoginMenu2());
+    }
+}
+
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {

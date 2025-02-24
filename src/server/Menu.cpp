@@ -52,3 +52,27 @@ json Menu::getRegisterMenu2() const {
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+
+json Menu::getLoginMenu1() const {
+    json menu = {
+        {"title", "Connexion au compte - Etape 1"},
+        {"options", {
+            {"Veuillez insérer votre pseudo", ":"},
+
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getLoginMenu2() const {
+    json menu = {
+        {"title", "Connexion au compte  - Etape 2"},
+        {"options", {
+            {"Veuillez insérer votre mot de passe", ":"},
+
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}

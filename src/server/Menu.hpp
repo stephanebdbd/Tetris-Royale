@@ -9,6 +9,8 @@ class Menu {
         json getMainMenu1() const;  
         json getRegisterMenu1() const;
         json getRegisterMenu2() const;
+        json getLoginMenu1() const;
+        json getLoginMenu2() const;
 };
 
 #endif 

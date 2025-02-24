@@ -12,7 +12,9 @@
 enum class MenuState {
     Welcome,
         RegisterPseudo,
-        RegisterPassword,
+            RegisterPassword,
+        LoginPseudo,
+            LoginPassword,
     Main,
         Game, 
         classement,
@@ -63,6 +65,8 @@ public:
     void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
     void loopGame(int clientSocket, int clientId);
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
