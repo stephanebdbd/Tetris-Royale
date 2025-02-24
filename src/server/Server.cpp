@@ -79,16 +79,26 @@ void Server::handleClient(int clientSocket, int clientId) {
         try {
             json receivedData = json::parse(buffer);
             std::string action = receivedData["action"];
+            std::string pseudo;
 
             // verifier la taille de action car si plus de 1 c'est pseudo ou mdp
-            //if (action.size() > 1 && currentMenu[clientId] == 2) { // c'est la verif du pseudo
-            //    std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
-            //    userManager->userExists(action) ?  handleMenu(clientSocket, clientId, receivedData) : sendMenuToClient(clientSocket, game->getRegisterMenu1());
-            //}
-
-            //else {
+            if (action.size() > 1 && currentMenu[clientId] == 2) { // c'est la verif du pseudo
+                std::cout << "Pseudo " << clientId << " : " << action << std::endl;    
+                if (userManager->userExists(action)){
+                    pseudo = action;
+                    handleMenu(clientSocket, clientId, action);
+                }
+            }
+            if (action.size() > 1 && currentMenu[clientId] == 1) { 
+                std::cout << "mdp " << clientId << " : " << action << std::endl;
+                userManager->registerUser(pseudo, action);
                 handleMenu(clientSocket, clientId, action);
-            //}
+            }
+
+            else {
+                handleMenu(clientSocket, clientId, action);
+            }
+        
 
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
             if (runningGame) {
@@ -323,3 +333,5 @@ int main() {
     }
     return 0;
 }
+
+
