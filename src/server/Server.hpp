@@ -9,6 +9,16 @@
 #include <atomic>
 #include <unordered_map>
 
+enum class MenuState {
+    Welcome,
+        RegisterPseudo,
+        RegisterPassword,
+    Main,
+        Game, 
+        classement,
+        chat
+};
+
 class Server {
     int port;
     int serverSocket;
@@ -20,6 +30,9 @@ class Server {
 
     //chaque client aura sa game
     std::unordered_map<int, std::unique_ptr<Game>> games;
+    std::unordered_map<int, std::string> clientPseudo;
+    std::unordered_map<int, MenuState> clientStates;
+
 
     std::atomic<bool> runningGame{false};
     std::unique_ptr<Grid> grid;
@@ -48,13 +61,15 @@ public:
     void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action);
     void loopGame(int clientSocket, int clientId);
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
-    void handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data);
     std::string convertUnicodeToText(const std::string& unicode);
 
-    bool isValidPseudo(int clientSocket, int clientId, const std::string& action);
+
+
 };
 
-#endif
+#endif 

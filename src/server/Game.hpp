@@ -30,7 +30,6 @@ class Game {
         void showGameOver();
         void update();
 
-        //Pour eviter le viole des lois de Demeter
         void moveCurrentPieceDown();
         void moveCurrentPieceRight();
         void moveCurrentPieceLeft();

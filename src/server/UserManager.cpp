@@ -10,8 +10,8 @@ UserManager::UserManager(const std::string& filename) : file(filename) {
 }
 
 // Vérifie si l'utilisateur n'existe pas (true si il n'existe pas)
-bool UserManager::userExists(const std::string& username) const {
-    return users.find(username) != users.end();
+bool UserManager::userNotExists(const std::string& username) const {
+    return users.find(username) == users.end();
 }
 
 // Enregistre un nouvel utilisateur si le pseudo n'existe pas encore
@@ -57,6 +57,8 @@ void UserManager::loadUsers() {
             users[username] = {password, highscore};
         }
     }
+    //fermer le fichier
+    infile.close();
 }
 
 // Sauvegarde la liste des utilisateurs dans le fichier texte

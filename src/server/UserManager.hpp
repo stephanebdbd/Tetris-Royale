@@ -19,7 +19,7 @@ class UserManager {
 
 public:
     UserManager(const std::string& filename);
-    bool userExists(const std::string& username) const;
+    bool userNotExists(const std::string& username) const;
     bool registerUser(const std::string& username, const std::string& password);
     bool authenticateUser(const std::string& username, const std::string& password);
     int getHighscore(const std::string& username);

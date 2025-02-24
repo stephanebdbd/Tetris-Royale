@@ -55,6 +55,8 @@ void Server::acceptClients() {
     int clientId = clientIdCounter.fetch_add(1);  // Attribuer un ID unique et incrémenter le compteur
     std::cout << "Client #" << clientId << " connecté." << std::endl;
     
+    clientStates[clientId] = MenuState::Welcome;
+
     clear();
     sendMenuToClient(clientSocket, game->getMainMenu0()); 
     refresh();
@@ -79,27 +81,9 @@ void Server::handleClient(int clientSocket, int clientId) {
         try {
             json receivedData = json::parse(buffer);
             std::string action = receivedData["action"];
-            std::string pseudo;
-
-            // verifier la taille de action car si plus de 1 c'est pseudo ou mdp
-            if (action.size() > 1 && currentMenu[clientId] == 2) { // c'est la verif du pseudo
-                std::cout << "Pseudo " << clientId << " : " << action << std::endl;    
-                if (userManager->userExists(action)){
-                    pseudo = action;
-                    handleMenu(clientSocket, clientId, action);
-                }
-            }
-            if (action.size() > 1 && currentMenu[clientId] == 1) { 
-                std::cout << "mdp " << clientId << " : " << action << std::endl;
-                userManager->registerUser(pseudo, action);
-                handleMenu(clientSocket, clientId, action);
-            }
-
-            else {
-                handleMenu(clientSocket, clientId, action);
-            }
         
-
+            handleMenu(clientSocket, clientId, action);
+             
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
             if (runningGame) {
                 receiveInputFromClient(clientSocket, clientId);
@@ -111,61 +95,93 @@ void Server::handleClient(int clientSocket, int clientId) {
     }
 }
 
-void Server::handleMenu(int clientSocket, int clientId, const std::string& action) {
 
-    if (currentMenu[clientId] == 0) { // Menu de base => se co, créer compte, quitter 
-        sendMenuToClient(clientSocket, game->getMainMenu0());
-        keyInuptWelcomeMenu(clientSocket, clientId, action);
-    }
-    else if (currentMenu[clientId] == 1) { // Second menu => jouer, classement, amis,... 
-        sendMenuToClient(clientSocket, game->getMainMenu1());
-        keyInuptMainMenu(clientSocket, clientId, action);
-    }
-    else if (currentMenu[clientId] == 2){ // créer un compte => On dmd le mdp
-        sendMenuToClient(clientSocket, game->getRegisterMenu2());
-        currentMenu[clientId]--;
-    }
-    else if (runningGame) {
-        std::cout << "Client #" << clientId << " est en jeu." << std::endl;
-        keyInuptGameMenu(clientSocket, clientId, action);
+void Server::handleMenu(int clientSocket, int clientId, const std::string& action) {
+    auto state = clientStates[clientId];
+    switch (state) {
+        case MenuState::Welcome:
+            keyInuptWelcomeMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::RegisterPseudo:
+            keyInuptRegisterPseudoMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::RegisterPassword:
+            keyInuptRegisterPasswordMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::Main:
+            keyInuptMainMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::Game:
+            keyInuptGameMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::classement:
+            // Classement
+            break;
+        case MenuState::chat:
+            // Chat
+            break;
     }
 }
 
 void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {  
-        // se connectet => à implémenter
+        // Se connecter => à implémenter selon ta logique
     }
-    else if (action == "2") { // créer un compte => On dmd le pseudo
+    else if (action == "2") { // Créer un compte
+        clientStates[clientId] = MenuState::RegisterPseudo; // Passage à l'état Register
         sendMenuToClient(clientSocket, game->getRegisterMenu1());
-        currentMenu[clientId]+=2;
     }
     else if (action == "3") {
+        // Quitter
         close(clientSocket);
-        // Quitter => à implémenter
     }
+}
+
+void Server::keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action) {
+    if (userManager->userNotExists(action)) { 
+        // Si le pseudo n'existe pas, on stock en tmp
+        clientPseudo[clientId] = action;
+        clientStates[clientId] = MenuState::RegisterPassword;
+        sendMenuToClient(clientSocket, game->getRegisterMenu2());
+    } 
+    else {
+        sendMenuToClient(clientSocket, game->getRegisterMenu1());
+    }
+}
+
+void Server::keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
+    userManager->registerUser(clientPseudo[clientId], action);
+    clientPseudo.erase(clientId);
+    clientStates[clientId] = MenuState::Main;
+    sendMenuToClient(clientSocket, game->getMainMenu1());
 }
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
+        receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
+        clientStates[clientId] = MenuState::Game;
         runningGame = true;
-        receiveInputFromClient(clientSocket, clientId); // lancer un thread pour recevoir les inputs
-        games[clientId] = std::make_unique<Game>(10, 20); // Créer une nouvelle instance de Game pour chaque client
+        games[clientId] = std::make_unique<Game>(10, 20);
         loopGame(clientSocket, clientId);
     }
-    else if (action == "2") {
-        // Amis => à implémenter
+    if (action == "2") {
+        // Amis => à implémenter 
     }
     else if (action == "3") {
-        // Classements => à implémenter
+        // classement => à implémenter 
+        
     }
     else if (action == "4") {
-        // Chat => à implémenter
+        // chat => à implémenter 
     }
-    if (action == "5") {
+    
+    else if (action == "5") {
+        // Retour à l'écran précédent
+        clientStates[clientId] = MenuState::Welcome;
         sendMenuToClient(clientSocket, game->getMainMenu0());
-        currentMenu[clientId]--;
     }
 }
+
 
 void Server::keyInuptGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
@@ -274,36 +290,6 @@ void Server::loopGame(int clientSocket, int clientId) {
     }
 }
 
-
-void Server::handleRegisterMenu(int clientSocket, int clientId, const json& data) {
-    // Récupérer les informations envoyées par le client
-    std::string username = data["username"];
-    std::string password = data["password"];
-
-    // Utilisation directe de l'instance UserManager dans Server
-    bool success = userManager->registerUser(username, password);
-
-    nlohmann::json response;
-    if (success) {
-        response["title"] = "Inscription réussie";
-        response["message"] = "Votre compte a été créé avec succès !";
-        response["input"] = "Appuyez sur entrée pour retourner au menu.";
-        currentMenu[clientId]--;
-        sendMenuToClient(clientSocket, response.dump() + "\n");
-
-        // Retour au menu précédent (par exemple, menu de connexion)
-        sendMenuToClient(clientSocket, game->getMainMenu0());
-    }
-    else {
-        response["title"] = "Erreur";
-        response["message"] = "Le nom d'utilisateur existe déjà. Veuillez réessayer.";
-        response["input"] = "Appuyez sur entrée pour retourner au menu.";
-        sendMenuToClient(clientSocket, response.dump() + "\n");
-
-        // Renvoyer le menu d'inscription pour réessayer
-        sendMenuToClient(clientSocket, game->getRegisterMenu1());
-    }
-}
 
 int main() {
     // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 
