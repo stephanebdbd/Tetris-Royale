@@ -9,7 +9,7 @@ UserManager::UserManager(const std::string& filename) : file(filename) {
     loadUsers();
 }
 
-// Vérifie si l'utilisateur n'existe pas
+// Vérifie si l'utilisateur n'existe pas (true si il n'existe pas)
 bool UserManager::userExists(const std::string& username) const {
     return users.find(username) != users.end();
 }

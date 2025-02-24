@@ -12,10 +12,11 @@
 class Server {
     int port;
     int serverSocket;
-    //int currentMenu = 0; 0 = welcome, 1 = main, 2 = game chauqeu client aura son menu
+    //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::unordered_map<int, int> currentMenu;
     std::unique_ptr<Game> game;
     std::atomic<int> clientIdCounter;
+    
 
     //chaque client aura sa game
     std::unordered_map<int, std::unique_ptr<Game>> games;
@@ -53,6 +54,8 @@ public:
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     void handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data);
     std::string convertUnicodeToText(const std::string& unicode);
+
+    bool isValidPseudo(int clientSocket, int clientId, const std::string& action);
 };
 
 #endif
