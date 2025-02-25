@@ -1,9 +1,6 @@
 #include "ClientDisplay.hpp"
 #include "Color.hpp"
 
-#include <ncurses.h>
-#include <nlohmann/json.hpp>
-
 using json = nlohmann::json;
 
 void ClientDisplay::displayMenu(const json& data) {

@@ -47,6 +47,7 @@ void ServerChat::broadcastMessage(const std::string& message) {
 
 void ServerChat::sendMessage(int clientSocket, std::string sender, const std::string& message) {
     json msg;
+    msg["sender"] = sender;
     msg["message"] = message;
     std::string msgStr = msg.dump();
     send(clientSocket, msgStr.c_str(), msgStr.size(), 0);

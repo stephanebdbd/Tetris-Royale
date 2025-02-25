@@ -3,7 +3,6 @@
 
 #include "ClientNetwork.hpp"
 #include "../common/json.hpp"
-#include "../include.hpp"
 #include <ncurses.h>
 #include <thread>
 

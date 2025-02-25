@@ -1,7 +1,6 @@
 #include "chatManager.hpp"
 #include <algorithm>
 
-ChatManager::ChatManager(ServerChat chat) : chat(chat) {}
 
 void ChatManager::start() {
     chat.start();
@@ -25,7 +24,7 @@ void ChatManager::sendClientRequest(const std::string& pseudoName, const std::st
     std::lock_guard<std::mutex> lock(clientsMutex);
     auto it = clients.find(pseudoName);
     if (it != clients.end()) {
-        chat.sendMessage(it->second, message);
+        //chat.sendMessage(it->second, message);
     }
 }
 
@@ -59,7 +58,7 @@ void ChatManager::broadcastMessage(const std::string& message, const std::string
     std::lock_guard<std::mutex> lock(clientsMutex);
     for (const auto& [pseudoName, socket] : clients) {
         std::string fullMessage = sender + ": " + message;
-        chat.sendMessage(socket, fullMessage);
+        //chat.sendMessage(socket, fullMessage);
     }
 }
 

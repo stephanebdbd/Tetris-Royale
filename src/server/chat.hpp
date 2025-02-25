@@ -1,18 +1,16 @@
 #ifndef SERVER_CHAT_HPP
 #define SERVER_CHAT_HPP
 
-#include "io.hpp"
 #include "../common/json.hpp"
 #include <unordered_map>
 #include <mutex>
 #include <thread>
-#include <vector>
 #include <string>
-#include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <cstring>
+#include <iostream>
+
 
 class ServerChat {
 
