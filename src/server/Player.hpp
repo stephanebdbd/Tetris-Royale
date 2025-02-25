@@ -4,13 +4,13 @@
 #include <string>
 
 class Player {
-    int id;
+    int clientId;
     std::string name;
     bool isConnected;
     bool isObserver;
 
 public:
-    Player(int id, const std::string& name, bool isObserver = false);
+    Player(int clientId, const std::string& name, bool isObserver = false);
     int getId() const;
     std::string getName() const;
     bool getIsConnected() const;

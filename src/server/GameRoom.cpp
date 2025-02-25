@@ -1,7 +1,7 @@
 #include "GameRoom.hpp"
 
-GameRoom::GameRoom(int id, const std::string& name, int maxPlayers, const std::string& gameMode)
-    : roomId(id), roomName(name), maxPlayers(maxPlayers), gameMode(gameMode), inProgress(false) {}
+GameRoom::GameRoom(int roomId, int clientId, int maxPlayers, GameModeName gameModeName)
+    : roomId(roomId), ownerId(clientId), maxPlayers(maxPlayers), gameModeName(gameModeName), gameMode{this->getGameMode()}, inProgress(false) {}
 
 bool GameRoom::addPlayer(const Player& player) {
     if (players.size() < maxPlayers) {
@@ -40,8 +40,23 @@ bool GameRoom::getInProgress() const { return inProgress; }
 
 int GameRoom::getRoomId() const { return roomId; }
 
-std::string GameRoom::getRoomName() const { return roomName; }
+void GameRoom::applyFeatureMode(int clientId) { /*gameMode->feautureMode(&games[clientId]);*/ }
 
-std::string GameRoom::getGameMode() const { return gameMode; }
-
-void GameRoom::setGameMode(const std::string& mode) { gameMode = mode; }
+GameMode GameRoom::getGameMode() const {
+    switch (gameModeName) {
+    case GameModeName::Classic:
+        return ClassicMode();
+        break;
+    case GameModeName::Duel:
+        return DuelMode();
+        break;
+    case GameModeName::Endless:
+        return EndlessMode();
+        break;
+    case GameModeName::Royal_Competition:
+        //return RoyalMode();
+        break;
+    default:
+        break;
+    }
+}

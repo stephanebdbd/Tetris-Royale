@@ -10,8 +10,8 @@
 #include <iostream>
 
 
-Server::Server(int port, Game* game) 
-    : port(port), serverSocket(-1), game(game), clientIdCounter(0)
+Server::Server(int port) 
+    : port(port), serverSocket(-1), clientIdCounter(0)
 { userManager = std::make_unique<UserManager>("./users.txt"); }
 
 
@@ -58,7 +58,7 @@ void Server::acceptClients() {
     clientStates[clientId] = MenuState::Welcome;
 
     clear();
-    sendMenuToClient(clientSocket, game->getMainMenu0()); 
+    sendMenuToClient(clientSocket, menus[clientId].getMainMenu0()); 
     refresh();
 
     // Lancer un thread pour gérer ce client
@@ -85,7 +85,7 @@ void Server::handleClient(int clientSocket, int clientId) {
             handleMenu(clientSocket, clientId, action);
              
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
-            if (runningGame) {
+            if (runningGame) {// changer pour qu'il puisse recevoir les inputs du joueur n'importe quand
                 receiveInputFromClient(clientSocket, clientId);
             }
 
@@ -133,11 +133,11 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
 void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {  // Se connecter
         clientStates[clientId] = MenuState::LoginPseudo;
-        sendMenuToClient(clientSocket, game->getLoginMenu1());
+        sendMenuToClient(clientSocket, menus[clientId].getLoginMenu1());
     }
     else if (action == "2") { // Créer un compte
         clientStates[clientId] = MenuState::RegisterPseudo; // Passage à l'état Register
-        sendMenuToClient(clientSocket, game->getRegisterMenu1());
+        sendMenuToClient(clientSocket, menus[clientId].getRegisterMenu1());
     }
     else if (action == "3") {
         // Quitter
@@ -150,10 +150,10 @@ void Server::keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const st
         // Si le pseudo n'existe pas, on stock en tmp
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::RegisterPassword;
-        sendMenuToClient(clientSocket, game->getRegisterMenu2());
+        sendMenuToClient(clientSocket, menus[clientId].getRegisterMenu2());
     } 
     else {
-        sendMenuToClient(clientSocket, game->getRegisterMenu1());
+        sendMenuToClient(clientSocket, menus[clientId].getRegisterMenu1());
     }
 }
 
@@ -161,7 +161,7 @@ void Server::keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const 
     userManager->registerUser(clientPseudo[clientId], action);
     clientPseudo.erase(clientId);
     clientStates[clientId] = MenuState::Main;
-    sendMenuToClient(clientSocket, game->getMainMenu1());
+    sendMenuToClient(clientSocket, menus[clientId].getMainMenu1());
 }
 
 void Server::keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action) {
@@ -170,29 +170,29 @@ void Server::keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::
         std::cout << "Pseudo existe" << std::endl;
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::LoginPassword;
-        sendMenuToClient(clientSocket, game->getLoginMenu2());
+        sendMenuToClient(clientSocket, menus[clientId].getLoginMenu2());
     } 
     else {
         std::cout << "Pseudo n'existe pas" << std::endl;
         // si pseudo n'existe pas on annule et on retourne à l'étape 1 (dc dmd de pseudo)
-        sendMenuToClient(clientSocket, game->getLoginMenu1());
+        sendMenuToClient(clientSocket, menus[clientId].getLoginMenu1());
     }
 }
 
 void Server::keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     if (userManager->authenticateUser(clientPseudo[clientId], action)) { // Si le mot de passe est correct
         clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, game->getMainMenu1());
+        sendMenuToClient(clientSocket, menus[clientId].getMainMenu1());
     } 
     else {
         // Si le mot de passe est incorrect, on retourne à l'étape 2 (dmd de mdp)
-        sendMenuToClient(clientSocket, game->getLoginMenu2());
+        sendMenuToClient(clientSocket, menus[clientId].getLoginMenu2());
     }
 }
 
 
 void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "1") {
+    if (action == "1") { // créer une gameRoom (choisir s'il veut créer sa partie ou rejoindre une partie)
         receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
         clientStates[clientId] = MenuState::Game;
         runningGame = true;
@@ -213,11 +213,11 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     else if (action == "5") {
         // Retour à l'écran précédent
         clientStates[clientId] = MenuState::Welcome;
-        sendMenuToClient(clientSocket, game->getMainMenu0());
+        sendMenuToClient(clientSocket, menus[clientId].getMainMenu0());
     }
 }
 
-
+//GameRoom
 void Server::keyInuptGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
 
@@ -266,6 +266,7 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
+//gameRoom
 void Server::sendGameToClient(int clientSocket, int clientId) { //TODO: Deplacer le main pour faire un fichier game ??? 
     auto& game = games[clientId];
 
@@ -284,7 +285,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     std::thread inputThread([this, clientSocket, clientId]() {
         char buffer[1024];
 
-        while (runningGame) {
+        while (runningGame) { //doit être un booléen de sa GameRoom
             memset(buffer, 0, sizeof(buffer));
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); 
             if (bytesReceived > 0) {
@@ -304,7 +305,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
 
     inputThread.detach(); // Permet d’exécuter en parallèle
 }
-
+//GameRoom
 void Server::loopGame(int clientSocket, int clientId) {
     auto& game = games[clientId]; // Récupérer la partie du client
 
@@ -336,8 +337,8 @@ int main() {
         std::cout.rdbuf(serverLog.rdbuf());
         std::cerr.rdbuf(serverLog.rdbuf());
 
-        Game game(10, 20);
-        Server server(12345, &game);
+        //Game game(10, 20);
+        Server server(12345/*, &game*/);
         if (!server.start()) {
             std::cerr << "Erreur: Impossible de démarrer le serveur." << std::endl;
             return 1;

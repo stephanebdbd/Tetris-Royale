@@ -4,6 +4,12 @@
 #include <iostream>
 #include "Game.hpp"
 
+enum GameModeName{
+    Endless,
+    Duel,
+    Classic,
+    Royal_Competition,
+};
 
 class GameMode {
 
@@ -12,7 +18,7 @@ class GameMode {
         virtual void feautureMode(Game& game) {};
         virtual void useMalus(int nbrMalus){};
         virtual void useBonus(){};
-        std::string getNameMode() const {return NameMode;}
+        virtual GameModeName getNameMode();
 
 };
 

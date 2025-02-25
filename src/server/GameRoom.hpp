@@ -3,28 +3,43 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 #include "Player.hpp"
+#include "Game.hpp"
+#include "GameMode.hpp"
+#include "ClassicMode.hpp"
+#include "DuelMode.hpp"
+#include "EndlessMode.hpp"
+
 
 class GameRoom {
     int roomId;
-    std::string roomName;
+    int ownerId;
     int maxPlayers;
+    int speed;
+    GameMode gameMode;
+    GameModeName gameModeName;
+    std::unordered_map<int, int> clientsSockets;
     std::vector<Player> players;
-    std::string gameMode;
+    std::vector<Game> games;
     bool inProgress;
 
 public:
-    GameRoom(int id, const std::string& name, int maxPlayers, const std::string& gameMode);
+    GameRoom(int roomId, int clientId, int maxPlayers, GameModeName gameMode);
     bool addPlayer(const Player& player);
     bool removePlayer(const Player& player);
     bool isFull() const;
     void startGame();
     void endGame();
+    void applyFeatureMode(int clientId);
     void setInProgress(bool status);
     bool getInProgress() const;
     int getRoomId() const;
-    std::string getRoomName() const;
-    std::string getGameMode() const;
+    int getOwnerId() const;
+    void setOwnerId(int roomId);
+    void setMaxPlayers(int max);
+    int getMaxPlayers() const;
+    GameMode getGameMode() const;
     void setGameMode(const std::string& mode);
 };
 

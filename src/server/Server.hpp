@@ -2,10 +2,13 @@
 #define SERVER_HPP
 
 #include "Game.hpp"
+#include "GameMode.hpp"
 #include "Grid.hpp"
 #include "Tetramino.hpp"
 #include "Score.hpp"
 #include "UserManager.hpp"
+#include "GameRoom.hpp"
+#include "Menu.hpp"
 #include <atomic>
 #include <unordered_map>
 
@@ -26,20 +29,23 @@ class Server {
     int serverSocket;
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::unordered_map<int, int> currentMenu;
-    std::unique_ptr<Game> game;
+    std::unordered_map<int, Menu> menus;
+    //std::unique_ptr<Game> game;
     std::atomic<int> clientIdCounter;
+    std::atomic<int> roomIdCounter;
+    std::vector<GameRoom> gameRooms;
     
 
     //chaque client aura sa game
-    std::unordered_map<int, std::unique_ptr<Game>> games;
+    //std::unordered_map<int, std::unique_ptr<Game>> games;
     std::unordered_map<int, std::string> clientPseudo;
     std::unordered_map<int, MenuState> clientStates;
 
 
     std::atomic<bool> runningGame{false};
-    std::unique_ptr<Grid> grid;
-    std::unique_ptr<Tetramino> currentPiece;
-    std::unique_ptr<Score> score;
+    //std::unique_ptr<Grid> grid;
+    //std::unique_ptr<Tetramino> currentPiece;
+    std::unordered_map<int, Score> score;
 
     std::unique_ptr<UserManager> userManager;
 
@@ -52,7 +58,7 @@ class Server {
     };
 
 public:
-    Server(int port, Game* game);
+    Server(int port/*, Game* game*/);
 
     bool start();
     void acceptClients();
