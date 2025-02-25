@@ -5,7 +5,8 @@
 #include "Grid.hpp"
 #include "Tetramino.hpp"
 #include "Score.hpp"
-#include "UserManager.hpp"
+#include "chat.hpp"
+#include "UserManager.hpp"  // Inclure le gestionnaire d'utilisateurs
 #include <atomic>
 #include <unordered_map>
 
@@ -27,6 +28,7 @@ class Server {
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::unordered_map<int, int> currentMenu;
     std::unique_ptr<Game> game;
+    std::unique_ptr<ServerChat> chat;
     std::atomic<int> clientIdCounter;
     
 

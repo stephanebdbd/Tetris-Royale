@@ -10,7 +10,7 @@ class ClientDisplay {
         void displayMenu(const json& data);
         void displayTetramino(const json& data);
         void displayGame(const json& data);
-
+        void displayChat(const json& data);
 
         void drawGrid(const json& grid);
         void drawTetramino(const json& tetraPiece);

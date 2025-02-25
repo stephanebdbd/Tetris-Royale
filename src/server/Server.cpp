@@ -80,6 +80,12 @@ void Server::handleClient(int clientSocket, int clientId) {
 
         try {
             json receivedData = json::parse(buffer);
+            
+            if (!receivedData.contains("action") || !receivedData["action"].is_string()) {
+                std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
+                return;
+            }
+        
             std::string action = receivedData["action"];
         
             handleMenu(clientSocket, clientId, action);
@@ -87,11 +93,14 @@ void Server::handleClient(int clientSocket, int clientId) {
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
             if (runningGame) {
                 receiveInputFromClient(clientSocket, clientId);
+            }else if(clientMenuChoices[clientId]->getName() == "Chat"){
+                chat->processClientChat(clientSocket);
             }
-
+        
         } catch (json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
         }
+        
     }
 }
 
@@ -202,10 +211,12 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     if (action == "2") {
         // Amis => à implémenter 
     }
+
     else if (action == "3") {
         // classement => à implémenter 
         
     }
+
     else if (action == "4") {
         // chat => à implémenter 
     }
@@ -326,6 +337,13 @@ void Server::loopGame(int clientSocket, int clientId) {
 }
 
 
+void Server::sendChatModeToClient(int clientSocket) {
+    json message;
+    message["mode"] = "chat";
+    std::string msg = message.dump() + "\n";
+    send(clientSocket, msg.c_str(), msg.size(), 0);
+}
+
 int main() {
     // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 
     signal(SIGPIPE, SIG_IGN);  // le client arrivait à crasher le serveur en fermant la connexion
@@ -354,5 +372,4 @@ int main() {
     }
     return 0;
 }
-
 

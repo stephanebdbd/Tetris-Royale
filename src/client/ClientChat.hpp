@@ -1,8 +1,10 @@
 #ifndef CLIENTCHAT_HPP
 #define CLIENTCHAT_HPP
 
-#include "Client.hpp"
+#include "ClientNetwork.hpp"
 #include "../common/json.hpp"
+#include <ncurses.h>
+#include <thread>
 
 /**
  * @class ClientChat
@@ -10,9 +12,11 @@
  */
 class ClientChat{
     private:
-        int clientSocket;         ///< The client socket.
-        ClientNetwork network;    ///< The client network.
-
+        int clientSocket;                    ///< The client socket.
+        ClientNetwork network;               ///< The client network.
+        bool isPlaying = false;              ///< A boolean indicating if the client is playing.
+        static bool messagesWaitForDisplay; ///< A boolean indicating if the message is waiting for display.
+        int y =0;                            ///< The y position of the chat message.
 
     public:
         /**
@@ -22,10 +26,15 @@ class ClientChat{
         ClientChat() = default;
 
         /**
+         *  @brief Launches the chat.
+         */
+        void run();
+
+        /**
          * @brief Sends a chat message.
          * @param message The message to send.
          */
-        void sendChatMessages();
+        void sendChatMessages(WINDOW *input_win);
 
         /**
          * @brief Receives a chat message.
@@ -59,6 +68,12 @@ class ClientChat{
          * @param clientSocket The client socket.
          */
         void setClientSocket(int clientSocket);
+
+        /**
+         * @brief sets the isPlaying boolean.
+         * @param isPlaying The boolean to set.
+         */
+        void setIsPlaying(bool isPlaying);
 };
 
 #endif // CLIENTCHAT_HPP
