@@ -9,21 +9,40 @@
 #include "UserManager.hpp"  // Inclure le gestionnaire d'utilisateurs
 #include <atomic>
 #include <unordered_map>
-#include <memory>
+
+enum class MenuState {
+    Welcome,
+        RegisterPseudo,
+            RegisterPassword,
+        LoginPseudo,
+            LoginPassword,
+    Main,
+        Game, 
+        classement,
+        chat
+};
 
 class Server {
     int port;
     int serverSocket;
+    //0 = welcome, 1 = main, 2 = création compte, x => game.
+    std::unordered_map<int, int> currentMenu;
     std::unique_ptr<Game> game;
     std::unique_ptr<ServerChat> chat;
     std::atomic<int> clientIdCounter;
-    std::unordered_map<int, std::shared_ptr<MenuNode>> clientMenuChoices;
+    
+
+    //chaque client aura sa game
+    std::unordered_map<int, std::unique_ptr<Game>> games;
+    std::unordered_map<int, std::string> clientPseudo;
+    std::unordered_map<int, MenuState> clientStates;
+
+
     std::atomic<bool> runningGame{false};
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;
     std::unique_ptr<Score> score;
 
-    // Gestionnaire d'utilisateurs déclaré directement ici.
     std::unique_ptr<UserManager> userManager;
 
     std::unordered_map<std::string, std::string> unicodeToText = {
@@ -42,16 +61,21 @@ public:
     void handleClient(int clientSocket, int clientId);
     void stop();
     void sendMenuToClient(int clientSocket, const std::string& screen);
-    void sendGameToClient(int clientSocket);
+    void sendGameToClient(int clientSocket, int clientId);
     void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptGameMenu(int clientSocket, const std::string& action);
-    void loopGame(int clientSocket);
+    void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
+    void loopGame(int clientSocket, int clientId);
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
-    void handleRegisterMenu(int clientSocket, int clientId, const nlohmann::json& data);
     std::string convertUnicodeToText(const std::string& unicode);
-    void sendChatModeToClient(int clientSocket);
+
+
+
 };
 
-#endif
+#endif 

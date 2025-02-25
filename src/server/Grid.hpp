@@ -6,8 +6,6 @@
 #include "../common/json.hpp"
 #include <vector>
 
-using json = nlohmann::json;
-
 class Grid {
     int width, height;
     std::vector<std::vector<Cell>> cells;

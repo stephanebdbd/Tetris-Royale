@@ -3,7 +3,6 @@
 
 #include "../common/json.hpp"
 
-using json = nlohmann::json;
 
 class ClientDisplay {
 

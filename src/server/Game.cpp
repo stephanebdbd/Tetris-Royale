@@ -2,13 +2,14 @@
 
 #include <ncurses.h>
 
-Game::Game(int gridWidth, int gridHeight) 
-    : grid(gridWidth, gridHeight), 
+Game::Game(int gridWidth, int gridHeight) //ajouter ce parametre apres , std::unique_ptr<GameMode> gameMode 
+    : grid(gridWidth, gridHeight),
       currentPiece(gridWidth / 2, 0, gridWidth, gridHeight), 
       dropTimer(1000), 
       score(gridWidth + 5, 2), // Position du score à droite de la grille
       running(true),
       gameOver(false)
+      //gameMode(gameMode) il faut l ajouter apres
       {}
 
 void Game::run() {
@@ -31,15 +32,7 @@ void Game::run() {
                 if (!gameOver) { 
                     int linesCleared = grid.clearFullLines();
                     
-                    //il ne faut pas supprimer le code suivant qui est en commantaire parce qu'il gere les malus mais localement
-
-                    /*int nbrMalus = getNbrMalus(linesCleared); // nombre du malus à envoyer
-
-                    if(nbrMalus > 0){
-                        Malus malus(nbrMalus);
-                        malus.sendMalus(grid);
-                    }*/
-                    
+                    //gameMode.feautureMode(*this, linesCleared); il ne faut pas le supprimer
 
                     score.addScore(linesCleared);
 
@@ -114,14 +107,6 @@ void Game::update() {
 }
 
 
-int Game::getNbrMalus(int nbrLineComplet) const{
-    switch(nbrLineComplet){
-        case 2 : return 1;
-        case 3 : return 2;
-        case 4 : return 4;
-        default : return 0;  
-    }
-}
 
 void Game::moveCurrentPieceRight() {
     currentPiece.moveRight(grid);

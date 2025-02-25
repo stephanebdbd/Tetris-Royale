@@ -1,7 +1,8 @@
 #include "ClientDisplay.hpp"
 #include "Color.hpp"
 
-using json = nlohmann::json;
+#include <ncurses.h>
+#include "../common/json.hpp"
 
 void ClientDisplay::displayMenu(const json& data) {
     clear();
@@ -13,7 +14,7 @@ void ClientDisplay::displayMenu(const json& data) {
     int y = 5;
     mvprintw(y++, 10, "%s", title.c_str());
     for (auto& [key, value] : options.items()) {
-        std::string line = key + ". " + value.get<std::string>();
+        std::string line = key + value.get<std::string>();
         mvprintw(y++, 10, "%s", line.c_str());
     }
     mvprintw(y++, 10, "%s", input.c_str());

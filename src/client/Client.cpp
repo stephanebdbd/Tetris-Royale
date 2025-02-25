@@ -8,7 +8,6 @@
 #include <thread>
 #include <fstream>
 
-using json = nlohmann::json;
 
 Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1), stopInputThread(false) {}
 
@@ -48,6 +47,8 @@ void Client::run() {
 
 void Client::handleUserInput() {
     halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
+    std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
+
     while (true) {
         if (chatMode) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
@@ -56,13 +57,37 @@ void Client::handleUserInput() {
 
         int ch = getch();
         if (ch != ERR) {  // Si une touche est pressée
-            if (ch == 'q') {
-                network.disconnect(clientSocket);
-                endwin();
-                exit(0); 
+            // Gestion directe pour les touches pour jouer
+            if (ch == KEY_UP || ch == KEY_DOWN || ch == KEY_LEFT || ch == KEY_RIGHT || ch == ' ') {
+                // Si le buffer contient déjà une commande en cours, on l'envoie d'abord
+                if (!inputBuffer.empty()) {
+                    if (inputBuffer == "q") {
+                        network.disconnect(clientSocket);
+                        endwin();
+                        exit(0);
+                    }
+                    controller.sendInput(inputBuffer, clientSocket);
+                    inputBuffer.clear();
+                }
+                // Envoie immédiat des touches pour jouer
+                std::string specialAction(1, static_cast<char>(ch));
+                controller.sendInput(specialAction, clientSocket);
+            } 
+            else if (ch == '\n') {  // Si le joueur appuie sur Enter
+                if (!inputBuffer.empty()) {
+                    if (inputBuffer == "q") {
+                        network.disconnect(clientSocket);
+                        endwin();
+                        exit(0);
+                    }
+                    controller.sendInput(inputBuffer, clientSocket);
+                    inputBuffer.clear();
+                }
             }
-            std::string action(1, ch);
-            controller.sendInput(action, clientSocket);
+            else {
+                // Ajout des caractères sur le buffer
+                inputBuffer += static_cast<char>(ch);
+            }
         }
     }
 }

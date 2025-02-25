@@ -2,10 +2,16 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 // Constructeur qui charge les utilisateurs depuis le fichier
 UserManager::UserManager(const std::string& filename) : file(filename) {
     loadUsers();
+}
+
+// Vérifie si l'utilisateur n'existe pas (true si il n'existe pas)
+bool UserManager::userNotExists(const std::string& username) const {
+    return users.find(username) == users.end();
 }
 
 // Enregistre un nouvel utilisateur si le pseudo n'existe pas encore
@@ -51,6 +57,8 @@ void UserManager::loadUsers() {
             users[username] = {password, highscore};
         }
     }
+    //fermer le fichier
+    infile.close();
 }
 
 // Sauvegarde la liste des utilisateurs dans le fichier texte
@@ -59,4 +67,16 @@ void UserManager::saveUsers() {
     for (const auto& [username, data] : users) {
         outfile << username << ":" << data.password << ":" << data.highscore << "\n";
     }
+}
+
+std::vector<std::pair<std::string, int>> UserManager::getRanking() const {
+    std::vector<std::pair<std::string, int>> ranking;
+    for (const auto& [username, data] : users) {
+        ranking.push_back({username, data.highscore});
+    }
+    // Tri décroissant par apport au highscore
+    std::sort(ranking.begin(), ranking.end(), [](const auto& a, const auto& b) {
+        return a.second > b.second;
+    });
+    return ranking;
 }
