@@ -47,7 +47,9 @@ class Game {
         json getRegisterMenu2() { return menu.getRegisterMenu2(); }
 
         json getLoginMenu1() { return menu.getLoginMenu1(); }
+        json getLoginMenuFailed1() { return menu.getLoginMenuFailed1(); }
         json getLoginMenu2() { return menu.getLoginMenu2(); }
+        json getLoginMenuFailed2() { return menu.getLoginMenuFailed2(); }
 
         bool getNeedToSendGame() { return needToSendGame; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }

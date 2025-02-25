@@ -14,7 +14,6 @@ enum class MenuState {
     Welcome,
         RegisterPseudo,
             RegisterPassword,
-        RegisterPseudoFailed,
         LoginPseudo,
             LoginPassword,
     Main,

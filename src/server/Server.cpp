@@ -115,9 +115,6 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::RegisterPseudo:
             keyInuptRegisterPseudoMenu(clientSocket, clientId, action);
             break;
-        case MenuState::RegisterPseudoFailed:
-            keyInuptRegisterPseudoMenuFailed(clientSocket, clientId, action);
-            break;
         case MenuState::RegisterPassword:
             keyInuptRegisterPasswordMenu(clientSocket, clientId, action);
             break;
@@ -190,17 +187,14 @@ void Server::keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const 
 }
 
 void Server::keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action) {
-    std::cout << "Pseudo: " << action << std::endl;
     if (!userManager->userNotExists(action)) { // Si le pseudo existe
-        std::cout << "Pseudo existe" << std::endl;
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::LoginPassword;
         sendMenuToClient(clientSocket, game->getLoginMenu2());
     } 
     else {
-        std::cout << "Pseudo n'existe pas" << std::endl;
         // si pseudo n'existe pas on annule et on retourne à l'étape 1 (dc dmd de pseudo)
-        sendMenuToClient(clientSocket, game->getLoginMenu1());
+        sendMenuToClient(clientSocket, game->getLoginMenuFailed1());
     }
 }
 
@@ -211,7 +205,7 @@ void Server::keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std
     } 
     else {
         // Si le mot de passe est incorrect, on retourne à l'étape 2 (dmd de mdp)
-        sendMenuToClient(clientSocket, game->getLoginMenu2());
+        sendMenuToClient(clientSocket, game->getLoginMenuFailed2());
     }
 }
 
