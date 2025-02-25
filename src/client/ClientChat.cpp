@@ -58,6 +58,8 @@ void ClientChat::sendChatMessages(WINDOW *input_win) {
         wrefresh(input_win);
         mtx.unlock();
 
+        std::string receiver, message;
+
         ch = getch();
         if (ch == 10) {  // Entrée
             if (inputStr.empty()) continue;
@@ -65,28 +67,30 @@ void ClientChat::sendChatMessages(WINDOW *input_win) {
                 std::cerr << "Format invalide ! Utilisez: ./receiver-name message\n";
                 continue;
             }
-
-            size_t pos = inputStr.find(' ');
-            if (pos == std::string::npos) {
-                std::cerr << "Format incorrect !\n";
-                continue;
+            if(inputStr == "./exit"){
+                receiver = "server";
+                message = "exit";
+                break;
+            }else{
+                size_t pos = inputStr.find(' ');
+                if (pos == std::string::npos) {
+                    std::cerr << "Format incorrect !\n";
+                    continue;
+                }
+                receiver = inputStr.substr(2, pos - 2);
+                message = inputStr.substr(pos + 1);
             }
 
-            std::string receiver = inputStr.substr(2, pos - 2);
-            std::string message = inputStr.substr(pos + 1);
-
-            if (message.empty()) continue;
-
+            if (receiver != "exit" && message.empty()) continue;
             json msg_json = { {"receiver", receiver}, {"message", message} };
-            std::string msg = msg_json.dump();
 
-            if (!network.sendData(msg, clientSocket)) {
+            if (!network.sendData(msg_json.dump(), clientSocket)) {
                 std::cerr << "Erreur d'envoi du message !\n";
-            } else {
-                displayChatMessage("Moi->"+receiver, message);
-                y++;
             }
+            displayChatMessage("Moi->"+receiver, message);
+            y++;
             inputStr.clear();
+
         } else if (ch == 127 || ch == KEY_BACKSPACE) {
             if (!inputStr.empty()) inputStr.pop_back();
         } else if (isprint(ch)) {

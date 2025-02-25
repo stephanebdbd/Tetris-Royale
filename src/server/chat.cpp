@@ -18,14 +18,13 @@ void ServerChat::processClientChat(int clientSocket) {
 
         try {
             json msg = json::parse(std::string(buffer, bytes_received));
-            if(msg.contains("receiver")) {
+            if(msg["receiver"] != "server" && msg["message"] != "exit"){
                 std::cout << "Message reçu de " << clientSocket << " : " << msg["message"] << std::endl;
                 std::string receiver = msg["receiver"];
                 std::string message = msg["message"];
-                broadcastMessage(message);
+                //broadcastMessage(message);
             }else{
                 //gere l exit du client
-                isChatActive = false;
                 return;
             }
             
@@ -55,16 +54,4 @@ void ServerChat::sendMessage(int clientSocket, std::string sender, const std::st
 
 std::string ServerChat::getChatMenu() const {
     return "Vous êtes dans le chat. Tapez votre message et appuyez sur Entrée.\n";
-}
-
-void ServerChat::start() {
-    isChatActive = true;
-}
-
-void ServerChat::stop() {
-    isChatActive = false;
-}
-
-bool ServerChat::getIsChatActive() const {
-    return isChatActive;
 }

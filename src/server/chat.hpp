@@ -17,7 +17,6 @@ class ServerChat {
 private:
     std::unordered_map<int, std::string> clients; // clientSocket -> pseudoName
     std::mutex clientsMutex;
-    bool isChatActive = false;
 
 public:
     ServerChat() = default;
@@ -26,9 +25,6 @@ public:
     // Supprimez le constructeur de copie et l'opérateur d'affectation de copie
     ServerChat(const ServerChat&) = delete;
     ServerChat& operator=(const ServerChat&) = delete;
-
-    void start();
-    void stop();
         
     // thread pour gérer un chat d'un client
     void processClientChat(int clientSocket);
