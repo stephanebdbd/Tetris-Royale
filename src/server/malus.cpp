@@ -38,4 +38,8 @@ void Malus:: sendMalus(Grid &grid){
 
 }
 
+void Malus::reverseControl(){
+    
+}
+
 
