@@ -39,6 +39,7 @@ class Server {
 
 
     std::atomic<bool> runningGame{false};
+    std::atomic<bool> runningChat{false};
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;
     std::unique_ptr<Score> score;

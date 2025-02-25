@@ -22,22 +22,10 @@ void Client::run() {
     std::thread inputThread(&Client::handleUserInput, this);
     inputThread.detach(); // Permet au thread de fonctionner indépendamment
 
-    // Rediriger std::cout vers un fichier avant de lancer le chat
-    std::ofstream file("chat.txt", std::ios::app);
-    if (!file) {
-        std::cerr << "Erreur: Impossible d'ouvrir chat.txt" << std::endl;
-        return;
-    }
-    std::streambuf* coutbuf = std::cout.rdbuf(); // Sauvegarder le buffer de cout
-    std::cout.rdbuf(file.rdbuf()); // Rediriger cout vers le fichier
-
     // Boucle principale pour recevoir et afficher le jeu
     while (true) {
         receiveDisplay();
     }
-
-    std::cout.rdbuf(coutbuf); // Restaurer le buffer de cout
-    file.close();
 
     network.disconnect(clientSocket);
     delwin(stdscr);

@@ -93,9 +93,10 @@ void Server::handleClient(int clientSocket, int clientId) {
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
             if (runningGame) {
                 receiveInputFromClient(clientSocket, clientId);
-            }//else if(clientMenuChoices[clientId]->getName() == "Chat"){
-                //chat->processClientChat(clientSocket);
-            //}
+            }else if (runningChat) {
+                std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket);
+                chatThread.detach();
+            }
         
         } catch (json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
@@ -218,7 +219,14 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     }
 
     else if (action == "4") {
-        // chat => à implémenter 
+        // Chat
+        clientStates[clientId] = MenuState::chat;
+        sendChatModeToClient(clientSocket);
+        runningChat = true;
+        // Lancer un thread pour le chat
+        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket);
+        chatThread.detach();
+
     }
     
     else if (action == "5") {
