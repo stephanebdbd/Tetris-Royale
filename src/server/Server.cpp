@@ -115,6 +115,9 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::RegisterPseudo:
             keyInuptRegisterPseudoMenu(clientSocket, clientId, action);
             break;
+        case MenuState::RegisterPseudoFailed:
+            keyInuptRegisterPseudoMenuFailed(clientSocket, clientId, action);
+            break;
         case MenuState::RegisterPassword:
             keyInuptRegisterPasswordMenu(clientSocket, clientId, action);
             break;
@@ -163,7 +166,19 @@ void Server::keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const st
         sendMenuToClient(clientSocket, game->getRegisterMenu2());
     } 
     else {
-        sendMenuToClient(clientSocket, game->getRegisterMenu1());
+        sendMenuToClient(clientSocket, game->getRegisterMenuFailed());
+    }
+}
+
+void Server::keyInuptRegisterPseudoMenuFailed(int clientSocket, int clientId, const std::string& action) {
+    if (userManager->userNotExists(action)) { 
+        // Si le pseudo n'existe pas, on stock en tmp
+        clientPseudo[clientId] = action;
+        clientStates[clientId] = MenuState::RegisterPassword;
+        sendMenuToClient(clientSocket, game->getRegisterMenu2());
+    } 
+    else {
+        sendMenuToClient(clientSocket, game->getRegisterMenuFailed());
     }
 }
 

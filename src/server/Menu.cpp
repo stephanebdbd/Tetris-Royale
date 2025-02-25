@@ -41,6 +41,18 @@ json Menu::getRegisterMenu1() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+json Menu::getRegisterMenuFailed() const {
+    json menu = {
+        {"title", "Création de compte - Etape 1"},
+        {"options", {
+            {"Pseudo déjà utilisé ! \n Veuillez insérer votre pseudo", ":"},
+
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
 json Menu::getRegisterMenu2() const {
     json menu = {
         {"title", "Création de compte - Etape 2"},

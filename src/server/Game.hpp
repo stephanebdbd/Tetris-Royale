@@ -43,6 +43,7 @@ class Game {
         json getMainMenu1() { return menu.getMainMenu1(); }
 
         json getRegisterMenu1() { return menu.getRegisterMenu1(); }
+        json getRegisterMenuFailed() { return menu.getRegisterMenuFailed(); }
         json getRegisterMenu2() { return menu.getRegisterMenu2(); }
 
         json getLoginMenu1() { return menu.getLoginMenu1(); }

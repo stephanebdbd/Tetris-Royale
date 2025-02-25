@@ -14,6 +14,7 @@ enum class MenuState {
     Welcome,
         RegisterPseudo,
             RegisterPassword,
+        RegisterPseudoFailed,
         LoginPseudo,
             LoginPassword,
     Main,
@@ -68,6 +69,7 @@ public:
     void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInuptRegisterPseudoMenuFailed(int clientSocket, int clientId, const std::string& action);
     void keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
