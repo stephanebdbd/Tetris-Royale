@@ -93,9 +93,9 @@ void Server::handleClient(int clientSocket, int clientId) {
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
             if (runningGame) {
                 receiveInputFromClient(clientSocket, clientId);
-            }else if(clientMenuChoices[clientId]->getName() == "Chat"){
-                chat->processClientChat(clientSocket);
-            }
+            }//else if(clientMenuChoices[clientId]->getName() == "Chat"){
+                //chat->processClientChat(clientSocket);
+            //}
         
         } catch (json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;

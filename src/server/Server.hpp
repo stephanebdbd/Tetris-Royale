@@ -62,6 +62,7 @@ public:
     void stop();
     void sendMenuToClient(int clientSocket, const std::string& screen);
     void sendGameToClient(int clientSocket, int clientId);
+    void sendChatModeToClient(int clientSocket);
     void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
     void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
