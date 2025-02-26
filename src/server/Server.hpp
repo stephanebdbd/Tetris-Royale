@@ -18,6 +18,8 @@ enum class MenuState {
             LoginPassword,
     Main,
         Game, 
+            JoinOrCreateGame,
+                GameMode,
         classement,
         chat
 };
@@ -64,14 +66,17 @@ public:
     void sendMenuToClient(int clientSocket, const std::string& screen);
     void sendGameToClient(int clientSocket, int clientId);
     void sendChatModeToClient(int clientSocket);
-    void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptRegisterPseudoMenuFailed(int clientSocket, int clientId, const std::string& action);
-    void keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputMainMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRegisterPseudoMenuFailed(int clientSocket, int clientId, const std::string& action);
+    void keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
     void loopGame(int clientSocket, int clientId);
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);

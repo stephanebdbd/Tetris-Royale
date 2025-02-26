@@ -113,3 +113,37 @@ json Menu::getLoginMenuFailed2() const {
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+
+
+json Menu::getJoinOrCreateGame() const {
+    json menu = {
+        {"title", "Rejoindre ou créer une partie"},
+        {"options", {
+            {"1. ", "créer"},
+            {"2. ", "rejoindre"},
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
+json Menu::getGameMode() const {
+    json menu = {
+        {"title", "Modes de jeu"},
+        {"options", {
+            {"1. ", "endless"},
+            {"2. ", "classic"},
+            {"3. ", "duel"},
+            {"4. ", "royal competion"}, 
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
+
+// TODO: Ajouter les menus : creer || rejoindre && mode de jeu (endless, duel, ... )
+// s'ajoute apres "jouer" de getmainmenu1
+// 

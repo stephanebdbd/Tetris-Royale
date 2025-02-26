@@ -51,6 +51,9 @@ class Game {
         json getLoginMenu2() { return menu.getLoginMenu2(); }
         json getLoginMenuFailed2() { return menu.getLoginMenuFailed2(); }
 
+        json getJoinOrCreateGame() const { return menu.getJoinOrCreateGame(); }
+        json getGameMode() const { return menu.getGameMode(); }
+
         bool getNeedToSendGame() { return needToSendGame; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }
 

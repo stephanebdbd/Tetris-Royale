@@ -107,26 +107,22 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
     auto state = clientStates[clientId];
     switch (state) {
         case MenuState::Welcome:
-            keyInuptWelcomeMenu(clientSocket, clientId, action);
+            keyInputWelcomeMenu(clientSocket, clientId, action);
             break;
         case MenuState::RegisterPseudo:
-            keyInuptRegisterPseudoMenu(clientSocket, clientId, action);
+            keyInputRegisterPseudoMenu(clientSocket, clientId, action);
             break;
         case MenuState::RegisterPassword:
-            keyInuptRegisterPasswordMenu(clientSocket, clientId, action);
+            keyInputRegisterPasswordMenu(clientSocket, clientId, action);
             break;
         case MenuState::LoginPseudo:
-            keyInuptLoginPseudoMenu(clientSocket, clientId, action);
+            keyInputLoginPseudoMenu(clientSocket, clientId, action);
             break;
         case MenuState::LoginPassword:
-            std::cout << "LoginPassword" << std::endl;
-            keyInuptLoginPasswordMenu(clientSocket, clientId, action);
+            keyInputLoginPasswordMenu(clientSocket, clientId, action);
             break;
         case MenuState::Main:
-            keyInuptMainMenu(clientSocket, clientId, action);
-            break;
-        case MenuState::Game:
-            keyInuptGameMenu(clientSocket, clientId, action);
+            keyInputMainMenu(clientSocket, clientId, action);
             break;
         case MenuState::classement:
             // Classement
@@ -134,10 +130,20 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::chat:
             // Chat
             break;
+        case MenuState::JoinOrCreateGame:
+            keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::GameMode:
+            keyInputModeGameMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::Game:
+            keyInputGameMenu(clientSocket, clientId, action);
+            break;
     }
 }
 
-void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
+
+void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {  // Se connecter
         clientStates[clientId] = MenuState::LoginPseudo;
         sendMenuToClient(clientSocket, game->getLoginMenu1());
@@ -152,7 +158,7 @@ void Server::keyInuptWelcomeMenu(int clientSocket, int clientId, const std::stri
     }
 }
 
-void Server::keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action) {
+void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action) {
     if (userManager->userNotExists(action)) { 
         // Si le pseudo n'existe pas, on stock en tmp
         clientPseudo[clientId] = action;
@@ -165,7 +171,7 @@ void Server::keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const st
     }
 }
 
-void Server::keyInuptRegisterPseudoMenuFailed(int clientSocket, int clientId, const std::string& action) {
+void Server::keyInputRegisterPseudoMenuFailed(int clientSocket, int clientId, const std::string& action) {
     if (userManager->userNotExists(action)) { 
         // Si le pseudo n'existe pas, on stock en tmp
         clientPseudo[clientId] = action;
@@ -177,14 +183,14 @@ void Server::keyInuptRegisterPseudoMenuFailed(int clientSocket, int clientId, co
     }
 }
 
-void Server::keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
+void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     userManager->registerUser(clientPseudo[clientId], action);
     clientPseudo.erase(clientId);
     clientStates[clientId] = MenuState::Main;
     sendMenuToClient(clientSocket, game->getMainMenu1());
 }
 
-void Server::keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action) {
+void Server::keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::string& action) {
     if (!userManager->userNotExists(action)) { // Si le pseudo existe
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::LoginPassword;
@@ -196,7 +202,7 @@ void Server::keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::
     }
 }
 
-void Server::keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std::string& action) {
+void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     if (userManager->authenticateUser(clientPseudo[clientId], action)) { // Si le mot de passe est correct
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
@@ -208,13 +214,10 @@ void Server::keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std
 }
 
 
-void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string& action) {
+void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
-        receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
-        clientStates[clientId] = MenuState::Game;
-        runningGame = true;
-        games[clientId] = std::make_unique<Game>(10, 20);
-        loopGame(clientSocket, clientId);
+        clientStates[clientId] = MenuState::JoinOrCreateGame;
+        sendMenuToClient(clientSocket, game->getJoinOrCreateGame());
     }
     if (action == "2") {
         // Amis => à implémenter 
@@ -230,21 +233,49 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
         clientStates[clientId] = MenuState::chat;
         sendChatModeToClient(clientSocket);
         // Lancer un thread pour gérer le chat du client
-        // Lancer un thread pour gérer le chat du client
         std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket));
         chatThread.detach();
 
     }
     
-    else if (action == "5") {
-        // Retour à l'écran précédent
+    else if (action == "5") { // Retour à l'écran précédent
         clientStates[clientId] = MenuState::Welcome;
         sendMenuToClient(clientSocket, game->getMainMenu0());
     }
 }
 
+void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        // Créer une partie
+        clientStates[clientId] = MenuState::GameMode;
+        sendMenuToClient(clientSocket, game->getGameMode());
+    }
+    else if (action == "1") {
+        // Rejoindre une partie
+    }
+}
 
-void Server::keyInuptGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
+void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        // endless
+    }
+    else if (action == "2") {
+        // classic
+    }
+    else if (action == "3") {
+        // duel
+    } 
+    else if (action == "4") {
+        // royal competition
+    }
+    receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
+    clientStates[clientId] = MenuState::Game;
+    runningGame = true;
+    games[clientId] = std::make_unique<Game>(10, 20);
+    loopGame(clientSocket, clientId);
+}
+
+void Server::keyInputGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
 
     auto& game = games[clientId];
@@ -319,7 +350,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
                     std::string action = receivedData["action"];
 
                     std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
-                    keyInuptGameMenu(clientSocket, clientId, action);
+                    keyInputGameMenu(clientSocket, clientId, action);
                 } 
                 catch (json::parse_error& e) {
                     std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
