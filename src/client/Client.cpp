@@ -71,6 +71,12 @@ void Client::handleUserInput() {
                     controller.sendInput(inputBuffer, clientSocket);
                     inputBuffer.clear();
                 }
+            }else if (ch == KEY_BACKSPACE || ch == 127) { // Gestion de la touche Backspace
+                if (!inputBuffer.empty()) {
+                    inputBuffer.pop_back(); // Supprime le dernier caractère
+                    clrtoeol();
+                    refresh();
+                }
             }
             else {
                 // Ajout des caractères sur le buffer
