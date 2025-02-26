@@ -81,7 +81,7 @@ void ClientChat::sendChatMessages(WINDOW *input_win) {
                 message = inputStr.substr(pos + 1);
             }
 
-            if (receiver != "exit" && message.empty()) continue;
+            if (message.empty()) continue;
             json msg_json = { {"receiver", receiver}, {"message", message} };
 
             if (!network.sendData(msg_json.dump(), clientSocket)) {

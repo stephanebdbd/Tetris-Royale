@@ -232,9 +232,6 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
         clientStates[clientId] = MenuState::chat;
         sendChatModeToClient(clientSocket);
         runningChat = true;
-        // Lancer un thread pour le chat
-        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket);
-        chatThread.detach();
 
     }
     
