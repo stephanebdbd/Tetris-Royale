@@ -3,7 +3,6 @@
 
 #include "../common/json.hpp"
 #include <unordered_map>
-#include <mutex>
 #include <thread>
 #include <string>
 #include <sys/socket.h>
@@ -14,10 +13,6 @@
 
 class ServerChat {
 
-private:
-    std::unordered_map<int, std::string> clients; // clientSocket -> pseudoName
-    std::mutex clientsMutex;
-
 public:
     ServerChat() = default;
     ~ServerChat() = default;
@@ -27,9 +22,7 @@ public:
     ServerChat& operator=(const ServerChat&) = delete;
         
     // thread pour gérer un chat d'un client
-    void processClientChat(int clientSocket);
-    // envoi d'un message à tous les clients
-    void broadcastMessage(const std::string& message);
+    void processClientChat(int clientSocket, std::unordered_map<std::string, int>& pseudoSocket);
     // envoi d'un message à un client
     void sendMessage(int clientSocket, std::string sender, const std::string& message);
     // obtenir le menu de chat

@@ -93,9 +93,6 @@ void Server::handleClient(int clientSocket, int clientId) {
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
             if (runningGame) {
                 receiveInputFromClient(clientSocket, clientId);
-            }else if (runningChat) {
-                std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket);
-                chatThread.detach();
             }
         
         } catch (json::parse_error& e) {
@@ -159,6 +156,7 @@ void Server::keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const st
     if (userManager->userNotExists(action)) { 
         // Si le pseudo n'existe pas, on stock en tmp
         clientPseudo[clientId] = action;
+        pseudoTosocket[action] = clientSocket;
         clientStates[clientId] = MenuState::RegisterPassword;
         sendMenuToClient(clientSocket, game->getRegisterMenu2());
     } 
@@ -231,7 +229,10 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
         // Chat
         clientStates[clientId] = MenuState::chat;
         sendChatModeToClient(clientSocket);
-        runningChat = true;
+        // Lancer un thread pour gérer le chat du client
+        // Lancer un thread pour gérer le chat du client
+        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket));
+        chatThread.detach();
 
     }
     

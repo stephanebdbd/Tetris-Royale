@@ -33,13 +33,13 @@ class Server {
     
 
     //chaque client aura sa game
-    std::unordered_map<int, std::unique_ptr<Game>> games;
-    std::unordered_map<int, std::string> clientPseudo;
-    std::unordered_map<int, MenuState> clientStates;
+    std::unordered_map<int, std::unique_ptr<Game>> games; // id -> game
+    std::unordered_map<int, std::string> clientPseudo;    // id -> pseudo
+    std::unordered_map<int, MenuState> clientStates;      // id -> menu
+    std::unordered_map<std::string, int> pseudoTosocket;  // pseudo -> socket
 
 
     std::atomic<bool> runningGame{false};
-    std::atomic<bool> runningChat{false};
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;
     std::unique_ptr<Score> score;
