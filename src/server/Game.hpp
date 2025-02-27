@@ -2,17 +2,17 @@
 #define GAME_HPP
 
 #include "Tetramino.hpp"
+#include "TetraminoDisplacement.hpp"
 #include "Timer.hpp"
 #include "Score.hpp"
 #include "Menu.hpp"
 #include "malus.hpp"
-//#include "GameMode.hpp"
+#include "GameMode.hpp"
 #include <iostream>
 
 class Game {
     Grid grid;
-    Tetramino currentPiece;
-    Timer dropTimer;
+    TetraminoDisplacement displacement;
     Score score;
     Menu menu;
     
@@ -25,20 +25,9 @@ class Game {
         Game(int gridWidth, int gridHeight);
         void run();
         void showGame();
-        void userInput();
         void showGameOver();
-        void update();
-
-        void moveCurrentPieceDown();
-        void moveCurrentPieceRight();
-        void moveCurrentPieceLeft();
-        void rotateCurrentPiece();
-        void dropCurrentPiece();
-
-        Grid& getGrid() { return grid; }
-        Tetramino& getCurrentPiece() { return currentPiece; }
+        TetraminoDisplacement& getDisplacement() { return displacement; } 
         Score& getScore() { return score; }
-
         bool getNeedToSendGame() { return needToSendGame; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }
 

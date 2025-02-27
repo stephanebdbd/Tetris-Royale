@@ -30,50 +30,34 @@ class Server {
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::unordered_map<int, int> currentMenu;
     std::unordered_map<int, Menu> menus;
-    //std::unique_ptr<Game> game;
     std::atomic<int> clientIdCounter;
     std::atomic<int> roomIdCounter;
     std::vector<GameRoom> gameRooms;
     
 
-    //chaque client aura sa game
-    //std::unordered_map<int, std::unique_ptr<Game>> games;
     std::unordered_map<int, std::string> clientPseudo;
     std::unordered_map<int, MenuState> clientStates;
 
 
     std::atomic<bool> runningGame{false};
-    //std::unique_ptr<Grid> grid;
-    //std::unique_ptr<Tetramino> currentPiece;
     std::unordered_map<int, Score> score;
 
     std::unique_ptr<UserManager> userManager;
 
-    std::unordered_map<std::string, std::string> unicodeToText = {
-        {"\u0005", "right"},
-        {"\u0004", "left"},
-        {"\u0003", "up"},
-        {"\u0002", "down"},
-        {" ", "drop"}
-    };
-
 public:
-    Server(int port/*, Game* game*/);
+    Server(int port);
 
     bool start();
     void acceptClients();
     void handleClient(int clientSocket, int clientId);
     void stop();
     void sendMenuToClient(int clientSocket, const std::string& screen);
-    void sendGameToClient(int clientSocket, int clientId);
-    void keyInuptWelcomeMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptMainMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptGameMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
-    void loopGame(int clientSocket, int clientId);
+    void keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputMainMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     std::string convertUnicodeToText(const std::string& unicode);
