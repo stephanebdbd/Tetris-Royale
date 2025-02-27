@@ -11,6 +11,7 @@ class TetraminoDisplacement {
     Timer dropTimer;
     bool needToSendGame;
     bool gameOver;
+    int ch;
 public:
     TetraminoDisplacement(Grid& grid, bool& needToSendGame, bool& gameOver);
     void keyInputGameMenu(const std::string& action);
@@ -24,7 +25,10 @@ public:
     void setNeedToSendGame(bool needToSendGame);
     void drawPiece();
     Grid& getGrid() { return grid; }
-    Tetramino& getCurrentPiece() { return currentPiece; }
+    void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
+    void setSpeed(int amount) { dropTimer.decreaseInterval(amount); }
+    void setEnter(int enter) { ch = enter; }
+
 };
 
 #endif

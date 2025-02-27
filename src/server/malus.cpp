@@ -38,16 +38,6 @@ void Malus:: sendMalus(Grid &grid){
 
 }
 
-void Malus::reverseControl(){
 
-    //peut etre ajouter ca dans une methode dans la classe Game
-    int ch = getch();
-    if (ch == KEY_UP) { currentPiece.moveLeft(grid); }
-    if (ch == KEY_DOWN) { currentPiece.rotate(grid); }
-    if (ch == KEY_RIGHT) { currentPiece.dropTetrimino(grid); }
-    if (ch == KEY_LEFT) { currentPiece.moveDown(grid); }
-    if (ch == ' ') { currentPiece.moveRight(grid); }
-    if (ch == 'q') running = false;
-}
 
 

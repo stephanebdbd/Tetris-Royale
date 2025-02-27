@@ -5,9 +5,9 @@
 #include "Game.hpp"
 
 class Bonus {
-    Game& game;
+    TetraminoDisplacement& displacement;
     public:
-        Bonus(Game& game);
+        Bonus(TetraminoDisplacement& displacement);
         void MiniBlock();
         void decreaseSpeed();
 };

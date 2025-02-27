@@ -15,7 +15,8 @@ class Game {
     TetraminoDisplacement displacement;
     Score score;
     Menu menu;
-    
+
+    int linesCleared;
     bool running;
     bool gameOver;
 

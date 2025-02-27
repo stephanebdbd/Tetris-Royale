@@ -14,11 +14,7 @@ class Malus {
         Malus(int nbrLine);
         void createMalus(); //creation de malus 
         void sendMalus(Grid &grid);
-        void reverseControl();
-        void blockControl();
-        void invreaseSpeed();
-        void sendLight();
-        void turnOffLight();
+  
 };
 
 #endif

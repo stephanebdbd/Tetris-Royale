@@ -13,12 +13,11 @@ enum GameModeName{
 
 class GameMode {
     
-    std::vector<Game> games;
     public:
         GameMode();
         virtual void feautureMode(Game& game) {};
-        virtual void useMalus(int nbrMalus){};
-        virtual void useBonus(){};
+        //virtual void useMalus(int nbrMalus){};
+        //virtual void useBonus(){};
         virtual GameModeName getNameMode();
 
 };

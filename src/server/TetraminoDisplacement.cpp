@@ -60,7 +60,7 @@ void TetraminoDisplacement::timerHandler() {
 }
 
 void TetraminoDisplacement::manageUserInput() {
-    int ch = getch();
+    ch = getch();
     if (ch == KEY_UP) { currentPiece.rotate(grid); }
     if (ch == KEY_DOWN) { currentPiece.moveDown(grid); }
     if (ch == KEY_RIGHT) { currentPiece.moveRight(grid); }

@@ -9,7 +9,7 @@ void ClassicMode::feautureMode(Game& game){
     int nbrMalus = getNbrMalus(linesCleared); // nombre du malus à envoyer
 
     if(nbrMalus > 0){
-        Grid& grid = game.getGrid();
+        Grid& grid = game.getDisplacement().getGrid();
         malus.sendMalus(grid);
     }
 }
@@ -17,10 +17,11 @@ void ClassicMode::feautureMode(Game& game){
 
 int ClassicMode::getNbrMalus(int nbrLineComplet) const{
     switch(nbrLineComplet){
-        case 2 : return 1;
-        case 3 : return 2;
-        case 4 : return 4;
-        default : return 0;  
+        case 2 : return 1; break;
+        case 3 : return 2; break;
+        case 4 : return 4; break;
+        default : return 0; break;
+        
     }
 }
 

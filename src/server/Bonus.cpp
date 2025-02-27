@@ -1,6 +1,6 @@
 #include "Bonus.hpp"
 
-Bonus::Bonus(Game& game) : game(game){}
+Bonus::Bonus(TetraminoDisplacement& displacement) : displacement(displacement){}
 
 void Bonus::MiniBlock(){
     std::array<std::array<char, 4>, 4> miniBlock = {{' ', ' ', ' ', ' '},
@@ -8,9 +8,11 @@ void Bonus::MiniBlock(){
                                                     {' ', ' ', ' ', ' '},
                                                     {' ', ' ', ' ', ' '}};
 
-    game.setcurrentshape(miniBlock);
+    
+    displacement.setCurrentPiece(miniBlock);
+
 }
 
 void Bonus::decreaseSpeed(){
-    game.setSpeed(10);
+    displacement.setSpeed(-30);
 }
