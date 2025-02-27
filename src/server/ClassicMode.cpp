@@ -1,53 +1,19 @@
 #include "ClassicMode.hpp"
 #include "Malus.hpp"
-#include "Grid.hpp"
 
 ClassicMode::ClassicMode(){}
 
-void ClassicMode::feautureMode(Game& game, int linesCleared){
+void ClassicMode::feautureMode(Game& game){
 
+    int linesCleared = game.getLinesCleared();
     int nbrMalus = getNbrMalus(linesCleared); // nombre du malus à envoyer
 
     if(nbrMalus > 0){
-        useMalus(nbrMalus);
+        Grid& grid = game.getGrid();
+        malus.sendMalus(grid);
     }
 }
 
-
-void ClassicMode::useMalus(int nbrMalus){
-    Malus malus(nbrMalus);
-    int chosenPlayer = choosePlayer();
-
-    if (!acceptChosenPlayer(chosenPlayer)){
-        chosenPlayer = enterPlayer(); 
-    }
-
-    Grid& grid = playerGrids[chosenPlayer];
-    malus.sendMalus(grid);
-}
-
-
-void ClassicMode::choosePlayer(){
-    int C_Player = rand() % players.size();
-    return players[C_Player].getId();
-}
-
-bool ClassicMode::acceptChosenPlayer(int chosenPlayer){
-    cout<<"est ce que vous accepté le joueur "<<chosenPlayer<<" comme  malus (y/n)?"<<endl;
-    char reponse;
-    cin>>reponse;
-    if(reponse == 'y'){
-        return true;
-    }
-    return false;
-}
-
-int ClassicMode::enterPlayer(){
-    int chosenPlayer;
-    cout<<"entrer le joueur cible"<<endl;
-    cin>>chosenPlayer;
-    return chosenPlayer;
-}
 
 int ClassicMode::getNbrMalus(int nbrLineComplet) const{
     switch(nbrLineComplet){
@@ -57,3 +23,47 @@ int ClassicMode::getNbrMalus(int nbrLineComplet) const{
         default : return 0;  
     }
 }
+
+
+/*void ClassicMode::useMalus(int nbrMalus){
+    Malus malus(nbrMalus);
+    int ClientId = choosePlayer();
+
+    if (!acceptChosenPlayer(ClientId)){
+        ClientId = enterPlayer(); 
+    }
+
+    Grid& grid = games[ClientId].getGrid();
+    malus.sendMalus(grid);
+}*/
+
+
+/*void ClassicMode::choosePlayer(){
+    int ClientId = rand() % games.size();
+    return ClientId;
+}*/
+
+/*bool ClassicMode::acceptChosenPlayer(int chosenPlayer){
+    mvprintw(0, 25, "est ce que vous acceptez d'envoyer malus au joueur %d (y/n)?", chosenPlayer);
+    refresh();
+    char respond = getch();
+    
+    move(0, 25);
+    clrtoeol();
+    refresh();
+
+    return respond == 'y';
+}*/
+
+/*int ClassicMode::enterPlayer(){
+    mvprintw(0, 25, "entrez le joueur ciblé");
+    refresh();
+    int chosenPlayer = getch();
+    
+    move(0, 25);
+    clrtoeol();
+    refresh();
+    
+    return chosenPlayer;
+}*/
+

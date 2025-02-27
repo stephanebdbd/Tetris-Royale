@@ -28,6 +28,7 @@ class Game {
         void showGameOver();
         TetraminoDisplacement& getDisplacement() { return displacement; } 
         Score& getScore() { return score; }
+        int getLinesCleared() { return linesCleared; }
         bool getNeedToSendGame() { return needToSendGame; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }
 

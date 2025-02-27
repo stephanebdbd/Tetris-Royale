@@ -24,7 +24,7 @@ void Game::run() {
 
         displacement.timerHandler();
         if (!gameOver){
-            int linesCleared = grid.clearFullLines();
+            linesCleared = grid.clearFullLines();
             //gameMode.feautureMode(*this, linesCleared); il ne faut pas le supprimer
             score.addScore(linesCleared);
         }
