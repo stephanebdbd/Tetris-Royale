@@ -3,10 +3,13 @@
 
 #include "Game.hpp"
 #include "GameMode.hpp"
+#include "GameMode.hpp"
 #include "Grid.hpp"
 #include "Tetramino.hpp"
 #include "Score.hpp"
 #include "UserManager.hpp"
+#include "GameRoom.hpp"
+#include "Menu.hpp"
 #include "GameRoom.hpp"
 #include "Menu.hpp"
 #include <atomic>

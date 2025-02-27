@@ -41,12 +41,25 @@ json Menu::getRegisterMenu1() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+json Menu::getRegisterMenuFailed() const {
+    json menu = {
+        {"title", "Création de compte - Etape 1"},
+        {"options", {
+            {"Pseudo déjà utilisé ! \n Veuillez ", ""},
+            {"insérer", " votre pseudo : "},
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
+
 json Menu::getRegisterMenu2() const {
     json menu = {
         {"title", "Création de compte - Etape 2"},
         {"options", {
             {"Veuillez insérer votre mot de passe", ":"},
-
         }},
         {"input", ""}
     };
@@ -65,6 +78,18 @@ json Menu::getLoginMenu1() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+json Menu::getLoginMenuFailed1() const {
+    json menu = {
+        {"title", "Connexion au compte - Etape 1"},
+        {"options", {
+            {"Aucun identifiant n'a été trouvé ! \n Veuillez ", ""},
+            {"insérer", " votre pseudo : "},
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
 json Menu::getLoginMenu2() const {
     json menu = {
         {"title", "Connexion au compte  - Etape 2"},
@@ -76,3 +101,49 @@ json Menu::getLoginMenu2() const {
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+
+json Menu::getLoginMenuFailed2() const {
+    json menu = {
+        {"title", "Connexion au compte - Etape 2"},
+        {"options", {
+            {"Mot de passe incorrect ! \n Veuillez ", ""},
+            {"insérer", " votre mot de passe : "},
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
+json Menu::getJoinOrCreateGame() const {
+    json menu = {
+        {"title", "Rejoindre ou créer une partie"},
+        {"options", {
+            {"1. ", "créer"},
+            {"2. ", "rejoindre"},
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
+json Menu::getGameMode() const {
+    json menu = {
+        {"title", "Modes de jeu"},
+        {"options", {
+            {"1. ", "endless"},
+            {"2. ", "classic"},
+            {"3. ", "duel"},
+            {"4. ", "royal competion"}, 
+        }},
+        {"input", ""}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
+
+// TODO: Ajouter les menus : creer || rejoindre && mode de jeu (endless, duel, ... )
+// s'ajoute apres "jouer" de getmainmenu1
+// 

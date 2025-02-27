@@ -1,7 +1,21 @@
 Serveur en attente de connexions sur le port 12345
 Client #0 connecté.
-Client #1 connecté.
-Action reçue du client 0 : 1
 Client #0 déconnecté.
-Action reçue du client 1 : 1
-Action reçue du client 1 : 1
+Client #1 connecté.
+Client #1 déconnecté.
+Client #2 connecté.
+Chat process started for client 5
+Erreur: 'action' manquant ou invalide dans le JSON reçu.
+Client #3 connecté.
+Chat process started for client 6
+Erreur: 'action' manquant ou invalide dans le JSON reçu.
+Client #4 connecté.
+Chat process started for client 5
+Message reçu de 5 : "hedghye"
+Message envoyé à hedb
+Client #4 déconnecté.
+Client #5 connecté.
+Chat process started for client 6
+Erreur: 'action' manquant ou invalide dans le JSON reçu.
+Message reçu de 6 : "udhuedgue"
+Message envoyé à ujedghedg

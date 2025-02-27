@@ -266,6 +266,8 @@ int main() {
 
         //Game game(10, 20);
         Server server(12345/*, &game*/);
+        //Game game(10, 20);
+        Server server(12345/*, &game*/);
         if (!server.start()) {
             std::cerr << "Erreur: Impossible de démarrer le serveur." << std::endl;
             return 1;
