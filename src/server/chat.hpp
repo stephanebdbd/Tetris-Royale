@@ -1,23 +1,22 @@
 #ifndef SERVER_CHAT_HPP
 #define SERVER_CHAT_HPP
 
-#include "chatRoom.hpp"
 #include "../common/json.hpp"
-
 #include <unordered_map>
+#include <mutex>
 #include <thread>
 #include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <iostream>
-#include <vector>
-
 
 
 class ServerChat {
+
 private:
-    std::vector<chatRoom> chatRooms;  // Liste des salles de chat
+    std::unordered_map<int, std::string> clients; // clientSocket -> pseudoName
+    std::mutex clientsMutex;
 
 public:
     ServerChat() = default;
@@ -28,7 +27,9 @@ public:
     ServerChat& operator=(const ServerChat&) = delete;
         
     // thread pour gérer un chat d'un client
-    void processClientChat(int clientSocket, std::unordered_map<std::string, int>& pseudoSocket);
+    void processClientChat(int clientSocket);
+    // envoi d'un message à tous les clients
+    void broadcastMessage(const std::string& message);
     // envoi d'un message à un client
     void sendMessage(int clientSocket, std::string sender, const std::string& message);
     // obtenir le menu de chat
@@ -38,3 +39,5 @@ public:
 };
 
 #endif // SERVER_CHAT_HPP
+
+// Test push Mohamed

@@ -3,7 +3,7 @@
 using json = nlohmann::json;
 
 
-void ServerChat::processClientChat(int clientSocket, std::unordered_map<std::string, int>& pseudoSocket) {
+void ServerChat::processClientChat(int clientSocket) {
     std::cout << "Chat process started for client " << clientSocket << std::endl;
     char buffer[1024];
 
@@ -18,20 +18,29 @@ void ServerChat::processClientChat(int clientSocket, std::unordered_map<std::str
 
         try {
             json msg = json::parse(std::string(buffer, bytes_received));
-            if (msg["receiver"] != "server" && msg["message"] != "exit") {
+            if(msg["receiver"] != "server" && msg["message"] != "exit"){
                 std::cout << "Message reçu de " << clientSocket << " : " << msg["message"] << std::endl;
-                // std::string sender = pseudoSocket[msg["sender"]];
-                int receiver = pseudoSocket[msg["receiver"]];
+                std::string receiver = msg["receiver"];
                 std::string message = msg["message"];
-                sendMessage(receiver, "?", message);
-                std::cout << "Message envoyé à " << msg["receiver"].get<std::string>() << std::endl;
-            } else {
-                // gere l exit du client
+                //broadcastMessage(message);
+            }else{
+                //gere l exit du client
                 return;
             }
+            
+
+            
+            //            broadcastMessage(receiver, message);
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << std::endl;
         }
+    }
+}
+
+void ServerChat::broadcastMessage(const std::string& message) {
+    std::lock_guard<std::mutex> lock(clientsMutex);
+    for (const auto& client : clients) {
+        sendMessage(client.first, "", message);// todo: sender
     }
 }
 
