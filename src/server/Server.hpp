@@ -76,6 +76,7 @@ public:
     void keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
     void loopGame(int clientSocket, int clientId);
     void receiveInputFromClient(int clientSocket, int clientId);

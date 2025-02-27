@@ -1,7 +1,9 @@
 #ifndef SERVER_CHAT_HPP
 #define SERVER_CHAT_HPP
 
+#include "chatRoom.hpp"
 #include "../common/json.hpp"
+
 #include <unordered_map>
 #include <thread>
 #include <string>
@@ -9,9 +11,13 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <iostream>
+#include <vector>
+
 
 
 class ServerChat {
+private:
+    std::vector<chatRoom> chatRooms;  // Liste des salles de chat
 
 public:
     ServerChat() = default;

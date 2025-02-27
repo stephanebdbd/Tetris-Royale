@@ -128,7 +128,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             // Classement
             break;
         case MenuState::chat:
-            // Chat
+            keyInputChatMenu(clientSocket, clientId, action);
             break;
         case MenuState::JoinOrCreateGame:
             keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
@@ -231,10 +231,7 @@ void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string&
     else if (action == "4") {
         // Chat
         clientStates[clientId] = MenuState::chat;
-        sendChatModeToClient(clientSocket);
-        // Lancer un thread pour gérer le chat du client
-        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket));
-        chatThread.detach();
+        sendMenuToClient(clientSocket, game->getChatMenu());
 
     }
     
@@ -252,6 +249,24 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
     }
     else if (action == "1") {
         // Rejoindre une partie
+    }
+}
+
+void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string& action) {
+    if(action == "1") {
+        // a implémenter
+    }else if(action == "2") {
+        // a implémenter
+    }else if(action == "3") {
+        // a implémenter
+    }else if(action == "4") {
+        sendChatModeToClient(clientSocket);
+        // Lancer un thread pour gérer le chat du client
+        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket));
+        chatThread.detach();
+    }else if(action == "5") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
     }
 }
 
@@ -274,6 +289,8 @@ void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::str
     games[clientId] = std::make_unique<Game>(10, 20);
     loopGame(clientSocket, clientId);
 }
+
+
 
 void Server::keyInputGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
