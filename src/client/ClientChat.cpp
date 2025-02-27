@@ -18,15 +18,19 @@ void ClientChat::run() {
     keypad(stdscr, TRUE); // Active la gestion des touches spéciales
     scrollok(stdscr, TRUE); // Permet le défilement du texte
 
-    int max_y, max_x;
-    getmaxyx(stdscr, max_y, max_x); // Récupère les dimensions du terminal
+    int height, width;
+    getmaxyx(stdscr, height, width); // Récupère les dimensions du terminal
 
-    WINDOW *chat_win = newwin(max_y - INPUT_HEIGHT, max_x, 0, 0);
-    WINDOW *input_win = newwin(INPUT_HEIGHT, max_x, max_y - INPUT_HEIGHT, 0);
-    scrollok(chat_win, TRUE);
-    box(input_win, 0, 0);
-    wrefresh(chat_win);
-    wrefresh(input_win);
+    // Fenêtre pour afficher les messages (en haut)
+    WINDOW* displayWin = newwin(height - 3, width, 0, 0); // Hauteur : height - 3, Largeur : width
+    scrollok(displayWin, TRUE); // Activer le défilement pour cette fenêtre
+    box(displayWin, 0, 0); // Dessiner une bordure autour de la fenêtre
+    wrefresh(displayWin); // Rafraîchir la fenêtre
+
+    WINDOW *inputWin = newwin(INPUT_HEIGHT, width, height - INPUT_HEIGHT, 0);
+    scrollok(inputWin, TRUE);
+    box(inputWin, 0, 0);
+    wrefresh(inputWin);
 
     if (!initMessageMemory()) {
         std::cerr << "Erreur lors de l'initialisation de la mémoire des messages !\n";
@@ -34,7 +38,7 @@ void ClientChat::run() {
         return;
     }
 
-    std::thread sendThread(&ClientChat::sendChatMessages, this, input_win);
+    std::thread sendThread(&ClientChat::sendChatMessages, this, inputWin);
     sendThread.join();  // Attendre la fin du thread avant de détruire l'objet
 
 
@@ -42,20 +46,20 @@ void ClientChat::run() {
         receiveChatMessages();
     }
 
-    delwin(chat_win);
-    delwin(input_win);
+    delwin(displayWin);
+    delwin(inputWin);
     endwin();
 }
 
-void ClientChat::sendChatMessages(WINDOW *input_win) {
+void ClientChat::sendChatMessages(WINDOW *inputWin) {
     std::string inputStr;
     int ch;
     while (true) {
         mtx.lock();
-        werase(input_win);
-        box(input_win, 0, 0);
-        mvwprintw(input_win, 1, 1, "%s", inputStr.c_str());
-        wrefresh(input_win);
+        werase(inputWin);
+        box(inputWin, 0, 0);
+        mvwprintw(inputWin, 1, 1, "> %s", inputStr.c_str()); // Afficher le buffer de saisie
+        wrefresh(inputWin);
         mtx.unlock();
 
         std::string receiver, message;
@@ -109,13 +113,13 @@ void ClientChat::receiveChatMessages() {
         }
 
         try {
-            json msg = json::parse(std::string(buffer, bytes_received));
+            json msg = json::parse(std::string(buffer, bytes_received)); // Convertir le buffer en objet JSON pour le manipuler plus facilement
             std::cout << "Message reçu: " << msg.dump() << std::endl;
             
-            if (isPlaying)
+            if (isPlaying) // Si le client est en train de jouer, on sauvegarde le message pour l'afficher plus tard
                 saveMessage(msg.dump());
             else{
-                displayChatMessage(msg["sender"], msg["message"]);y++;
+                displayChatMessage(msg["sender"], msg["message"]);y++; //sinon on l'affiche directement
             }
                 
         } catch (const std::exception& e) {
@@ -125,10 +129,10 @@ void ClientChat::receiveChatMessages() {
 }
 
 void ClientChat::displayChatMessage(std::string sender, const std::string& message) {
-    mtx.lock();
-    mvprintw(y, 0, "[%s] : %s", sender.c_str(), message.c_str());
+    mtx.lock();// Verrouiller l'accès à la fenêtre ncurses
+    mvprintw(y, 1, "[%s] : %s", sender.c_str(), message.c_str());
     refresh();
-    mtx.unlock();
+    mtx.unlock();// Déverrouiller l'accès
 }
 
 bool ClientChat::initMessageMemory() {

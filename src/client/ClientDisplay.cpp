@@ -88,16 +88,3 @@ void ClientDisplay::drawScore(const json& score) {
     int comboValue = score["combo"];
     mvprintw(2, 13, "Combo: %d", comboValue);
 }
-
-void ClientDisplay::displayChat(const json& data) {
-    clear();  // Effacer l'écran avant d'afficher le chat
-    
-    mvprintw(0, 0, "Chat Mode");
-    
-    // Afficher les messages reçus
-    if (data.contains("message")) {
-        mvprintw(2, 0, "Received: %s", data["message"].get<std::string>().c_str());
-    }
-    
-    refresh();
-}

@@ -119,7 +119,6 @@ void Client::receiveDisplay() {
                         // Lancer le chat dans un thread
                         std::thread chatThread(&ClientChat::run, &chat);
                         chatThread.detach();
-                        display.displayChat(data);
         
                     }
                     // Sinon, c'est un menu
