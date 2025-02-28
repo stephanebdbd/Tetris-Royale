@@ -22,3 +22,12 @@ void MalusRoyal::reverseControl(){
 void MalusRoyal::increaseSpeed(){
     displacement.setSpeed(5);
 }
+void MalusRoyal::blockControl(){
+    displacement.setBlockCommand(true);
+}
+void MalusRoyal::sendLight(){
+    displacement.setlightBlocked(true);
+}   
+void MalusRoyal::clear2x2Block(){
+    displacement.random2x2MaskedBlock();
+}
