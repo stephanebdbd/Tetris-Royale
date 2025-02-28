@@ -11,6 +11,19 @@ Game::Game(int gridWidth, int gridHeight) //ajouter ce parametre apres , std::un
       //gameMode(gameMode) il faut l ajouter apres
       {}
 
+
+Game& Game::operator=(const Game& game) {
+    if(this != &game) {
+        this->grid = game.grid;
+        this->score = game.score;
+        this->running = game.running;
+        this->gameOver = game.gameOver;
+        this->needToSendGame = game.needToSendGame;
+        this->malus5Royal = game.malus5Royal;
+        this->displacement = game.displacement;
+    }
+    return *this;
+}
 void Game::run() {
     initscr();
     noecho();
@@ -25,7 +38,6 @@ void Game::run() {
         displacement.timerHandler();
         if (!gameOver){
             linesCleared = grid.clearFullLines();
-            //gameMode.feautureMode(*this, linesCleared); il ne faut pas le supprimer
             score.addScore(linesCleared);
         }
         else {

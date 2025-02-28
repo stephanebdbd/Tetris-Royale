@@ -4,18 +4,16 @@
 #include <iostream>
 #include "GameMode.hpp"
 #include "Game.hpp"
+#include "malus.hpp"
+
 
 
 class ClassicMode : public GameMode{
-    
 
     public:
         ClassicMode();
-        void feautureMode(Game& game) override;
-        //void useMalus(int nbrMalus) override;
-        //void choosePlayer();
-        //bool acceptChosenPlayer(int chosenPlayer);
-        //int enterPlayer();
+        void featureMode(Game& game) override;
+        GameModeName getNameMode() override { return GameModeName::Classic; }
         int getNbrMalus(int nbrLineComplet) const;
 };
 

@@ -3,10 +3,12 @@
 Bonus::Bonus(TetraminoDisplacement& displacement) : displacement(displacement){}
 
 void Bonus::MiniBlock(){
-    std::array<std::array<char, 4>, 4> miniBlock = {{' ', ' ', ' ', ' '},
-                                                    {' ', '#', ' ', ' '},
-                                                    {' ', ' ', ' ', ' '},
-                                                    {' ', ' ', ' ', ' '}};
+    std::array<std::array<char, 4>, 4> miniBlock = {{
+        {' ', ' ', ' ', ' '},
+        {' ', '#', ' ', ' '},
+        {' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' '}
+    }};
 
     
     displacement.setCurrentPiece(miniBlock);

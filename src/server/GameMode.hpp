@@ -2,7 +2,8 @@
 #define GAMEMODE_HPP
 
 #include <iostream>
-#include "Game.hpp"
+
+class Game;
 
 enum GameModeName{
     Endless,
@@ -14,11 +15,10 @@ enum GameModeName{
 class GameMode {
     
     public:
-        GameMode();
-        virtual void feautureMode(Game& game) {};
-        //virtual void useMalus(int nbrMalus){};
-        //virtual void useBonus(){};
-        virtual GameModeName getNameMode();
+        GameMode() = default;
+        virtual void featureMode(Game& game) = 0;
+        //virtual void useMalus(int nbrMalus) = 0;
+        virtual GameModeName getNameMode() = 0;
 
 };
 

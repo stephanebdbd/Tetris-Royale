@@ -1,9 +1,25 @@
 #include "TetraminoDisplacement.hpp"
 
 TetraminoDisplacement::TetraminoDisplacement(Grid& grid, bool& needToSendGame, bool& gameOver)
-    : grid(grid), currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
-      dropTimer(1000), 
-      needToSendGame(needToSendGame), gameOver(gameOver), commandisBlocked(false), lightisBlocked(false) {}
+    : grid(grid), needToSendGame(needToSendGame), gameOver(gameOver),
+    currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
+    dropTimer(1000), 
+    commandisBlocked(false), lightisBlocked(false) {}
+
+TetraminoDisplacement& TetraminoDisplacement::operator=(const TetraminoDisplacement& displacement) {
+    if(this != &displacement) {
+        this->grid = displacement.grid;
+        this->needToSendGame = displacement.needToSendGame;
+        this->gameOver = displacement.gameOver;
+        this->currentPiece = displacement.currentPiece;
+        this->dropTimer = displacement.dropTimer;
+        this->commandisBlocked = displacement.commandisBlocked;
+        this->lightisBlocked = displacement.lightisBlocked;
+        this->ch = displacement.ch;
+        this->bonus1Royal = displacement.bonus1Royal;
+    }
+    return *this;
+}
 
 void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
     if (action == "right") { 
@@ -114,5 +130,3 @@ void TetraminoDisplacement::random2x2MaskedBlock(){
     grid.applyGravity();
 
 }
-
-

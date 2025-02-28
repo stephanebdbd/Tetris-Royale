@@ -3,11 +3,12 @@
 
 #include <iostream>
 #include "GameMode.hpp"
+#include "MalusRoyal.hpp"
+#include "Bonus.hpp"
 #include "Game.hpp"
 
 
 class RoyalMode : public GameMode{
-    
     int energie;
     bool chosenMalus = false;
     bool chosenBonus = false;
@@ -17,15 +18,16 @@ class RoyalMode : public GameMode{
 
     public:
         RoyalMode();
-        void feautureMode(Game& game) override;
-        void choiceMalus(int nbre);
-        void choiceBonus(int nbre);
-        void setMalus(bool malus){chosenMalus = malus;};
-        void setBonus(bool bonus){chosenBonus = bonus;};
-        void setNbre(int nbre){this->nbre = nbre;};
-        void decreaseEnergie(int amount){energie -= amount;};
-        void decreaseCounter(int counter){counter--;};
-        
+        void applyMalusBonus(MalusRoyal malus, Bonus bonus);
+        void featureMode(Game& game) override;
+        void choiceMalus(int nbre, MalusRoyal malus);
+        void choiceBonus(int nbre, Bonus bonus);
+        void setMalus(bool malus){chosenMalus = malus;}
+        void setBonus(bool bonus){chosenBonus = bonus;}
+        void setNbre(int nbre){this->nbre = nbre;}
+        void decreaseEnergie(int amount){energie -= amount;}
+        void decreaseCounter(int counter){counter--;}
+        GameModeName getNameMode() override { return GameModeName::Royal_Competition; }
 };
 
 #endif

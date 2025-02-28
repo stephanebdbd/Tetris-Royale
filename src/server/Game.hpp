@@ -12,22 +12,24 @@
 
 class Game {
     Grid grid;
-    TetraminoDisplacement displacement;
     Score score;
-    Menu menu;
-
+    
     int linesCleared;
     bool running;
     bool gameOver;
-
+    
     bool needToSendGame = true;
     bool malus5Royal = false;
-
+    
+    TetraminoDisplacement displacement;
+    
     public:
         Game(int gridWidth, int gridHeight);
+        Game& operator=(const Game& game);
         void run();
         void showGame();
         void showGameOver();
+        Grid& getGrid() { return grid; }
         TetraminoDisplacement& getDisplacement() { return displacement; } 
         Score& getScore() { return score; }
         int getLinesCleared() { return linesCleared; }
