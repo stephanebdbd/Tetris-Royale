@@ -22,6 +22,8 @@ bool Grid::isCellOccupied(int x, int y) const {
 }
 
 void Grid::draw() {
+    if(lightBlocked) return;
+    
     for (int y = 0; y < height; ++y) {
         for (int x = 1; x <= width; ++x) {
             Color color = cells[y][x].getColor();
@@ -62,6 +64,10 @@ void Grid::clearLine(int y) {
     }
 }
 
+void Grid::clearCell(int x, int y) {
+    cells[y][x].setOccupied(false);
+    cells[y][x].setColor(Color(Type::NONE));
+}
 
 void Grid::applyGravity() {
     for (int y = height - 1; y > 0; --y) {
