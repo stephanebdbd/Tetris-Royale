@@ -31,7 +31,7 @@ void Malus:: sendMalus(Grid &grid){
             
             if (malus[y][x] != ' '){
                 
-                grid.markCell(x+1, (height - 1) - y, 9);
+                grid.markCell(x+1, (height - 1) - y, Color(Color::Type::GRAY));
             }
         }
     }

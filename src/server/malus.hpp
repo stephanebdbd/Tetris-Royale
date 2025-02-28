@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Grid.hpp"
+#include "Color.hpp"
 
 class Malus {
     int nbrLine;

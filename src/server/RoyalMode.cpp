@@ -44,7 +44,7 @@ void RoyalMode::choiceMalus(int nbre){
             break;
         }
         case 4: {
-            malus.sendLight(); 
+            malus.clear2x2Block(); 
             decreaseEnergie(40);
             break;
         }

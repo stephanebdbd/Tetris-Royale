@@ -17,7 +17,7 @@ class RoyalMode : public GameMode{
 
     public:
         RoyalMode();
-        void feautureMode() override;
+        void feautureMode(Game& game) override;
         void choiceMalus(int nbre);
         void choiceBonus(int nbre);
         void setMalus(bool malus){chosenMalus = malus;};

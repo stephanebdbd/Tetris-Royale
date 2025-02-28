@@ -25,7 +25,7 @@ void MalusRoyal::increaseSpeed(){
 void MalusRoyal::blockControl(){
     displacement.setBlockCommand(true);
 }
-void MalusRoyal::sendLight(){
+void MalusRoyal::turnOffLight(){
     displacement.setlightBlocked(true);
 }   
 void MalusRoyal::clear2x2Block(){
