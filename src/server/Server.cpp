@@ -70,6 +70,12 @@ void Server::handleClient(int clientSocket, int clientId) {
     char buffer[1024];
 
     while (true) {
+
+        if(runningChats[clientId]) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
+            continue;
+        }
+
         memset(buffer, 0, sizeof(buffer));
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived <= 0) {
@@ -268,9 +274,8 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
         // a implémenter
     }else if(action == "4") {
         sendChatModeToClient(clientSocket);
-        // Lancer un thread pour gérer le chat du client
-        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket));
-        chatThread.detach();
+        runningChats[clientId] = true;
+        chat->processClientChat(clientSocket, pseudoTosocket, runningChats[clientId]);
     }else if(action == "5") {
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());

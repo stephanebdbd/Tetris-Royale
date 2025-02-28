@@ -41,6 +41,7 @@ class Server {
 
 
     std::unordered_map<int, bool> runningGames;
+    std::unordered_map<int, bool> runningChats;
 
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;

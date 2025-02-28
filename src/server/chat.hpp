@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <iostream>
+#include <atomic>
 
 
 class ServerChat {
@@ -22,13 +23,11 @@ public:
     ServerChat& operator=(const ServerChat&) = delete;
         
     // thread pour gérer un chat d'un client
-    void processClientChat(int clientSocket, std::unordered_map<std::string, int>& pseudoSocket);
+    void processClientChat(int clientSocket, std::unordered_map<std::string, int>& pseudoSocket, bool &runningChat);
     // envoi d'un message à un client
     void sendMessage(int clientSocket, std::string sender, const std::string& message);
     // obtenir le menu de chat
     std::string getChatMenu() const;
-    // obtenir le statut du chat
-    bool getIsChatActive() const;
 };
 
 #endif // SERVER_CHAT_HPP
