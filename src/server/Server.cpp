@@ -74,7 +74,11 @@ void Server::handleClient(int clientSocket, int clientId) {
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived <= 0) {
             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
-            close(clientSocket);
+            runningGames[clientId] = false; // Arrêter la partie du client
+            games.erase(clientId); // Supprimer la partie du client
+            runningGames.erase(clientId); // Supprimer le booléen de jeu
+            clientStates.erase(clientId); // Supprimer l'état des menus du client
+            close(clientSocket); // Fermer la connexion
             break;
         }
 
@@ -91,7 +95,7 @@ void Server::handleClient(int clientSocket, int clientId) {
             handleMenu(clientSocket, clientId, action);
              
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
-            if (runningGame) {
+            if (runningGames[clientId]) {
                 receiveInputFromClient(clientSocket, clientId);
             }
         
@@ -292,7 +296,8 @@ void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::str
     }
     receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
     clientStates[clientId] = MenuState::Game;
-    runningGame = true;
+    runningGames[clientId] = true; 
+
     games[clientId] = std::make_unique<Game>(10, 20);
     loopGame(clientSocket, clientId);
 }
@@ -348,7 +353,7 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 }
 
 void Server::sendGameToClient(int clientSocket, int clientId) { //TODO: Deplacer le main pour faire un fichier game ??? 
-    auto& game = games[clientId];
+    auto& game = games[clientId]; // Récupérer la partie du client
 
     json message;
     
@@ -365,7 +370,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     std::thread inputThread([this, clientSocket, clientId]() {
         char buffer[1024];
 
-        while (runningGame) {
+        while (runningGames[clientId]) {
             memset(buffer, 0, sizeof(buffer));
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); 
             if (bytesReceived > 0) {
@@ -388,17 +393,17 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
 
 void Server::loopGame(int clientSocket, int clientId) {
     auto& game = games[clientId]; // Récupérer la partie du client
-
+    
     std::thread gameThread([this, clientId]() { // Lancer un thread pour mettre à jour le jeu
         auto& gameInstance = games[clientId];
-        while (runningGame) {
+        while (runningGames[clientId]) {
             gameInstance->update(); 
         }
     });
 
     gameThread.detach();
 
-    while (runningGame) { // Envoi du jeu au client 
+    while (runningGames[clientId]) { 
         if (game->getNeedToSendGame()) { 
             sendGameToClient(clientSocket, clientId);
             game->setNeedToSendGame(false);

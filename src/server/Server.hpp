@@ -32,7 +32,6 @@ class Server {
     std::unique_ptr<Game> game;
     std::unique_ptr<ServerChat> chat;
     std::atomic<int> clientIdCounter;
-    
 
     //chaque client aura sa game
     std::unordered_map<int, std::unique_ptr<Game>> games; // id -> game
@@ -41,7 +40,8 @@ class Server {
     std::unordered_map<std::string, int> pseudoTosocket;  // pseudo -> socket
 
 
-    std::atomic<bool> runningGame{false};
+    std::unordered_map<int, bool> runningGames;
+
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;
     std::unique_ptr<Score> score;
