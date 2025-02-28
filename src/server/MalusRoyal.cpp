@@ -13,11 +13,12 @@ void MalusRoyal::reverseControl(){
         case 1: displacement.setEnter(KEY_DOWN); break; 
         case 2: displacement.setEnter(KEY_RIGHT); break; 
         case 3: displacement.setEnter(KEY_LEFT); break; 
-        default: displacement.setEnter(' '); break;
+        case 4: displacement.setEnter(' '); break;
+        default : break;
     }
 
 }
 
 void MalusRoyal::increaseSpeed(){
-    displacement.setSpeed(30);
+    displacement.setSpeed(5);
 }

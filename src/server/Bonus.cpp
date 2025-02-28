@@ -14,5 +14,6 @@ void Bonus::MiniBlock(){
 }
 
 void Bonus::decreaseSpeed(){
+    displacement.setBonus1Royal(true);
     displacement.setSpeed(-30);
 }

@@ -12,6 +12,7 @@ class TetraminoDisplacement {
     bool needToSendGame;
     bool gameOver;
     int ch;
+    bool bonus1Royal = false;
 public:
     TetraminoDisplacement(Grid& grid, bool& needToSendGame, bool& gameOver);
     void keyInputGameMenu(const std::string& action);
@@ -27,6 +28,7 @@ public:
     Grid& getGrid() { return grid; }
     void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
     void setSpeed(int amount) { dropTimer.decreaseInterval(amount); }
+    void setBonus1Royal(bool bonus) { bonus1Royal = bonus; }
     void setEnter(int enter) { ch = enter; }
 
 };

@@ -39,7 +39,13 @@ void Game::run() {
 }
 
 void Game::showGame() {
-    
+    if(malus5Royal){
+        Timer malusCounter(5000);
+        if(malusCounter.hasElapsed()){
+            malus5Royal = false;
+        }
+        malusCounter.reset();
+    }
     grid.draw();
     displacement.drawPiece();
     score.display();

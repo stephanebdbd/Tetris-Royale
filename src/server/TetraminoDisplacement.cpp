@@ -51,7 +51,18 @@ void TetraminoDisplacement::timerHandler() {
         } else {
             currentPiece.fixToGrid(grid, gameOver);
             if (!gameOver) { 
-                dropTimer.decreaseInterval(5); // Diminue le temps d'attente entre chaque chute
+                if(bonus1Royal){
+                    Timer bonusCounter(10000);
+                    if(bonusCounter.hasElapsed()){
+                        bonus1Royal = false;
+                        setSpeed(30);
+                    }
+                    bonusCounter.reset();
+                }
+                else{
+                    dropTimer.decreaseInterval(5); // Diminue le temps d'attente entre chaque chute
+                }
+                
                 currentPiece.reset(grid.getWidth() / 2, 0);
             }
         }

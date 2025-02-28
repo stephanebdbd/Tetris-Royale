@@ -21,6 +21,7 @@ class Game {
     bool gameOver;
 
     bool needToSendGame = true;
+    bool malus5Royal = false;
 
     public:
         Game(int gridWidth, int gridHeight);
@@ -32,6 +33,7 @@ class Game {
         int getLinesCleared() { return linesCleared; }
         bool getNeedToSendGame() { return needToSendGame; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }
+        void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
 
 };
 
