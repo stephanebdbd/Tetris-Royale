@@ -5,7 +5,7 @@
 
 class MalusRoyal {
     
-    TetraminoDisplacement& displacement
+    TetraminoDisplacement& displacement;
     
     public:
         MalusRoyal(TetraminoDisplacement& displacement);
@@ -14,6 +14,9 @@ class MalusRoyal {
         void increaseSpeed();
         void sendLight();
         void turnOffLight();
+        void blockCommand();
+        void lightCommand();
+        void clear2x2Block();
 };
 
 #endif
