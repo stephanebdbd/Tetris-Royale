@@ -11,6 +11,8 @@ class TetraminoDisplacement {
     Timer dropTimer;
     bool needToSendGame;
     bool gameOver;
+    bool commandisBlocked;
+    bool lightisBlocked;
     int ch;
     bool bonus1Royal = false;
 public:
@@ -30,7 +32,12 @@ public:
     void setSpeed(int amount) { dropTimer.decreaseInterval(amount); }
     void setBonus1Royal(bool bonus) { bonus1Royal = bonus; }
     void setEnter(int enter) { ch = enter; }
-
+    void setBlockCommand(bool block);
+    void setlightBlocked(bool block);
+    void randomPosition();
+    void random2x2MaskedBlock();
 };
+
+#endif
 
 #endif
