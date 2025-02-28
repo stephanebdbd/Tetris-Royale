@@ -3,7 +3,7 @@
 TetraminoDisplacement::TetraminoDisplacement(Grid& grid, bool& needToSendGame, bool& gameOver)
     : grid(grid), currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
       dropTimer(1000), 
-      needToSendGame(needToSendGame), gameOver(gameOver) {}
+      needToSendGame(needToSendGame), gameOver(gameOver), commandisBlocked(false), lightisBlocked(false) {}
 
 void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
     if (action == "right") { 
@@ -70,7 +70,10 @@ void TetraminoDisplacement::timerHandler() {
     }
 }
 
+
 void TetraminoDisplacement::manageUserInput() {
+    if(commandisBlocked) return;
+
     ch = getch();
     if (ch == KEY_UP) { currentPiece.rotate(grid); }
     if (ch == KEY_DOWN) { currentPiece.moveDown(grid); }
@@ -85,6 +88,31 @@ void TetraminoDisplacement::setNeedToSendGame(bool needToSendGame) {
 }
 
 void TetraminoDisplacement::drawPiece() {
+    if(lightisBlocked) return;
     currentPiece.draw();
 }
+
+void TetraminoDisplacement::setBlockCommand(bool block) {
+    commandisBlocked = block;
+}
+void TetraminoDisplacement::setlightBlocked(bool block){
+    lightisBlocked = block;
+    grid.setLightBlocked(block);
+}
+void TetraminoDisplacement::random2x2MaskedBlock(){
+    int x = rand()%(grid.getWidth() -1);
+    int y = grid.heightPieces() + rand()%(grid.getHeight() -1);
+    for(int i = 0; i<2 ;i++){
+        for(int j = 0; j<2 ;j++){
+            int x_clean = x+i;
+            int y_clean = y+j;
+            grid.clearCell(x_clean, y_clean);
+            grid.markCell(x_clean, y_clean, grid.getColor(x_clean, y_clean - 1));
+        }
+        
+    }
+    grid.applyGravity();
+
+}
+
 
