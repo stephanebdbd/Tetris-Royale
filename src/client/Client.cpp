@@ -36,18 +36,12 @@ void Client::run() {
 void Client::handleUserInput() {
     halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
     std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
-    bool begin = false;
     
     while (true) {
         
         if (chatMode) {
-            begin = true;
             std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
             continue;
-        }
-        if(begin && !chatMode){
-            begin = false;
-            std::cout << "handle reprend" << std::endl;
         }
 
         int ch = getch();
