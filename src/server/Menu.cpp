@@ -226,5 +226,5 @@ json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& rankin
         menu["options"].push_back({{"rank", i + 1}, {"name", ranking[i].first}, {"score", ranking[i].second}});
     }
 
-    return menu;
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
