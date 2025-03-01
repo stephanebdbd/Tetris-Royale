@@ -72,7 +72,8 @@ void Server::handleClient(int clientSocket, int clientId) {
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived <= 0) {
             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
-            close(clientSocket);
+            clientStates.erase(clientId); // Supprimer l'état des menus du client
+            close(clientSocket); // Fermer la connexion
             break;
         }
 
@@ -80,12 +81,10 @@ void Server::handleClient(int clientSocket, int clientId) {
             json receivedData = json::parse(buffer);
             std::string action = receivedData["action"];
         
-            handleMenu(clientSocket, clientId, action);
-             
+            handleMenu(clientSocket, clientId, action); 
+            receiveInputFromClient(clientSocket, clientId);
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
-            if (runningGame) {// changer pour qu'il puisse recevoir les inputs du joueur n'importe quand
-                receiveInputFromClient(clientSocket, clientId);
-            }
+            
 
         } catch (json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
@@ -115,14 +114,14 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::Main:
             keyInputMainMenu(clientSocket, clientId, action);
             break;
-        case MenuState::Game:
-            // Rejoindre ou créer une partie
+        case MenuState::JoinOrCreateGame:
+            keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
             break;
         case MenuState::classement:
             // Classement
             break;
         case MenuState::chat:
-            // Chat
+            keyInputChatMenu(clientSocket, clientId, action);
             break;
     }
 }
@@ -189,13 +188,8 @@ void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std
 
 void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") { // créer une gameRoom (choisir s'il veut créer sa partie ou rejoindre une partie)
-        receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
-        ////// redirection vers la création de la gameRoom ou la liste des gameRooms
-        /*clientStates[clientId] = MenuState::Game;
-        runningGame = true;
-        games[clientId] = std::make_unique<Game>(10, 20);
-        loopGame(clientSocket, clientId);
-        */
+        clientStates[clientId] = MenuState::JoinOrCreateGame;
+        sendMenuToClient(clientSocket, menus[clientId].getJoinOrCreateGame());
     }
     if (action == "2") {
         // Amis => à implémenter 
@@ -205,13 +199,31 @@ void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string&
         
     }
     else if (action == "4") {
-        // chat => à implémenter 
+        // Chat
+        clientStates[clientId] = MenuState::chat;
+        sendMenuToClient(clientSocket, menus[clientId].getchatMenu());
+        sendChatModeToClient(clientSocket);
+        // Lancer un thread pour gérer le chat du client
+        //std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket)); // initialiser la variable chat
+        //chatThread.detach();
+
     }
     
     else if (action == "5") {
         // Retour à l'écran précédent
         clientStates[clientId] = MenuState::Welcome;
         sendMenuToClient(clientSocket, menus[clientId].getMainMenu0());
+    }
+}
+
+void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        // Créer une partie
+        clientStates[clientId] = MenuState::GameMode;
+        sendMenuToClient(clientSocket, menus[clientId].getGameMode());
+    }
+    else if (action == "1") {
+        // Rejoindre une partie
     }
 }
 
@@ -232,7 +244,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     std::thread inputThread([this, clientSocket, clientId]() {
         char buffer[1024];
 
-        while (runningGame) { //doit être un booléen de sa GameRoom
+        while (true) {
             memset(buffer, 0, sizeof(buffer));
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); 
             if (bytesReceived > 0) {
@@ -253,6 +265,13 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     inputThread.detach(); // Permet d’exécuter en parallèle
 }
 
+
+void Server::sendChatModeToClient(int clientSocket) {
+    json message;
+    message["mode"] = "chat";
+    std::string msg = message.dump() + "\n";
+    send(clientSocket, msg.c_str(), msg.size(), 0);
+}
 
 int main() {
     // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 
