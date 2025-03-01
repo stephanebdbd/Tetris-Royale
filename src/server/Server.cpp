@@ -275,7 +275,7 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
     }else if(action == "4") {
         sendChatModeToClient(clientSocket);
         runningChats[clientId] = true;
-        chat->processClientChat(clientSocket, pseudoTosocket, runningChats[clientId]);
+        chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, game->getChatMenu());
     }else if(action == "5") {
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());

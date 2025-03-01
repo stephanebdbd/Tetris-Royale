@@ -5,39 +5,41 @@
 using json = nlohmann::json;
 
 
-void ServerChat::processClientChat(int clientSocket, std::unordered_map<std::string, int>& pseudoSocket, bool &runningChat) {
-    std::thread chatThread([this, clientSocket, &pseudoSocket, &runningChat]() {
+void ServerChat::processClientChat(int clientSocket, int clientId, Server &server, MenuState state, std::string menu) {
+    std::thread chatThread([this, clientSocket, clientId, &server, state, menu]() {
         std::cout << "Chat process started for client " << clientSocket << std::endl;
         char buffer[1024];
 
-        while (true) {
+        while (server.getRunningChat(clientId)) {
             memset(buffer, 0, sizeof(buffer));
             int bytes_received = recv(clientSocket, buffer, sizeof(buffer), 0);
 
             if (bytes_received <= 0) {
                 close(clientSocket);
-                return;
+                server.setRunningChat(clientId, false);
             }
 
             try {
                 json msg = json::parse(std::string(buffer, bytes_received));
                 std::cout <<  msg << std::endl;
-                if (msg.contains("receiver") && msg.contains("message") && !msg["receiver"].is_null() && !msg["message"].is_null()) {
+                if (msg.contains("receiver") && msg.contains("message") && !msg["receiver"].is_null() && !msg["message"].is_null() && msg["message"] != "exit") {
                     std::cout << "Message reçu de " << clientSocket << " : " << msg["message"] << std::endl;
                     // std::string sender = pseudoSocket[msg["sender"]];
-                    int receiver = pseudoSocket[msg["receiver"]];
+                    int receiver = server.getPseudoSocket()[msg["receiver"]];
                     std::string message = msg["message"];
                     sendMessage(receiver, "?", message);
                 } else {
                     // gere l exit du client
-                    return;
+                    std::cout << "Client " << clientSocket << " disconnected." << std::endl;
+                    server.setRunningChat(clientId, false);
                     
                 }
             } catch (const std::exception& e) {
                 std::cerr << "Error: " << e.what() << std::endl;
             }
         }
-        runningChat = false;
+        server.setClientState(clientId, state);
+        server.sendMenuToClient(clientSocket, menu);
         std::cout << "Chat process ended for client " << clientSocket << std::endl;
     });
     chatThread.detach();

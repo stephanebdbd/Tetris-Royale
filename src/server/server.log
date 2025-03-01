@@ -1,9 +1,11 @@
 Serveur en attente de connexions sur le port 12345
 Client #0 connecté.
 Chat process started for client 5
-{"message":"dhbdhebd","receiver":"kedudb"}
-Message reçu de 5 : "dhbdhebd"
-{"message":"dhbdhebd","sender":"?"}
-{"message":"uebudb","receiver":"jedybdb"}
-Message reçu de 5 : "uebudb"
-{"message":"uebudb","sender":"?"}
+{"message":"exit","receiver":"server"}
+Client 5 disconnected.
+Chat process ended for client 5
+Chat process started for client 5
+{"message":"exit","receiver":"server"}
+Client 5 disconnected.
+Chat process ended for client 5
+Client #0 déconnecté.

@@ -2,6 +2,7 @@
 #define SERVER_CHAT_HPP
 
 #include "../common/json.hpp"
+
 #include <unordered_map>
 #include <thread>
 #include <string>
@@ -11,6 +12,8 @@
 #include <iostream>
 #include <atomic>
 
+class Server;
+enum class MenuState;
 
 class ServerChat {
 
@@ -23,7 +26,7 @@ public:
     ServerChat& operator=(const ServerChat&) = delete;
         
     // thread pour gérer un chat d'un client
-    void processClientChat(int clientSocket, std::unordered_map<std::string, int>& pseudoSocket, bool &runningChat);
+    void processClientChat(int clientSocket, int clientId, Server &server, MenuState state, std::string menu);
     // envoi d'un message à un client
     void sendMessage(int clientSocket, std::string sender, const std::string& message);
     // obtenir le menu de chat

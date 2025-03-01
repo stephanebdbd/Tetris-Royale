@@ -83,7 +83,11 @@ public:
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     std::string convertUnicodeToText(const std::string& unicode);
-
+    void setRunningGame(int clientId, bool value) { runningGames[clientId] = value; }
+    void setRunningChat(int clientId, bool value) { runningChats[clientId] = value; }
+    void setClientState(int clientId, MenuState state) { clientStates[clientId] = state; }
+    bool getRunningChat(int clientId) { return runningChats[clientId]; }
+    std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
 
 
 };

@@ -27,6 +27,7 @@ void ClientChat::run() {
     box(displayWin, 0, 0); // Dessiner une bordure autour de la fenêtre
     wrefresh(displayWin); // Rafraîchir la fenêtre
 
+    // Fenêtre pour saisir les messages (en bas)
     WINDOW *inputWin = newwin(INPUT_HEIGHT, width, height - INPUT_HEIGHT, 0);
     scrollok(inputWin, TRUE);
     box(inputWin, 0, 0);
@@ -41,13 +42,9 @@ void ClientChat::run() {
     std::thread sendThread(&ClientChat::sendChatMessages, this, inputWin);
     sendThread.join();  // Attendre la fin du thread avant de détruire l'objet
 
-
-    while (true) {
-        receiveChatMessages();
-    }
-
     delwin(displayWin);
     delwin(inputWin);
+    echo(); // Réactiver l'affichage automatique des entrées utilisateur
     endwin();
 }
 
@@ -67,14 +64,12 @@ void ClientChat::sendChatMessages(WINDOW *inputWin) {
         ch = getch();
         if (ch == 10) {  // Entrée
             if (inputStr.empty()) continue;
-            if (inputStr.size() < 4 || inputStr[0] != '.' || inputStr[1] != '/') {
-                std::cerr << "Format invalide ! Utilisez: ./receiver-name message\n";
+            if (inputStr.size() < 2 || inputStr[0] != '.' || inputStr[1] != '/') {
                 continue;
             }
             if(inputStr == "./exit"){
                 receiver = "server";
                 message = "exit";
-                break;
             }else{
                 size_t pos = inputStr.find(' ');
                 if (pos == std::string::npos) {
@@ -91,6 +86,9 @@ void ClientChat::sendChatMessages(WINDOW *inputWin) {
             if (!network.sendData(msg_json.dump(), clientSocket)) {
                 std::cerr << "Erreur d'envoi du message !\n";
             }
+            if (receiver == "server" && message == "exit") {
+                break;
+            }
             displayChatMessage("Moi->"+receiver, message);
             y++;
             inputStr.clear();
@@ -101,31 +99,17 @@ void ClientChat::sendChatMessages(WINDOW *inputWin) {
             inputStr += static_cast<char>(ch);
         }
     }
+    std::cout << "Fin du thread d'envoi de messages !" << std::endl;
 }
 
-void ClientChat::receiveChatMessages() {
-    char buffer[1024];
-    while (true) {
-        int bytes_received = network.receivedData(clientSocket, buffer);
-        if (bytes_received <= 0) {
-            std::cerr << "Erreur lors de la réception du message !\n";
-            return;
-        }
+void ClientChat::receiveChatMessages(const std::string& sender, const std::string& message) {
 
-        try {
-            json msg = json::parse(std::string(buffer, bytes_received)); // Convertir le buffer en objet JSON pour le manipuler plus facilement
-            std::cout << "Message reçu: " << msg.dump() << std::endl;
-            
-            if (isPlaying) // Si le client est en train de jouer, on sauvegarde le message pour l'afficher plus tard
-                saveMessage(msg.dump());
-            else{
-                displayChatMessage(msg["sender"], msg["message"]);y++; //sinon on l'affiche directement
-            }
+    //if (!chatMode)
+            //saveMessage(msg.dump());
+    //else{
+            displayChatMessage(sender, message);y++; //sinon on l'affiche directement
+    //}
                 
-        } catch (const std::exception& e) {
-            std::cerr << "Erreur JSON: " << e.what() << std::endl;
-        }
-    }
 }
 
 void ClientChat::displayChatMessage(std::string sender, const std::string& message) {
