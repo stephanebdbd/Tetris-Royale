@@ -22,6 +22,7 @@ class GameRoom {
     int maxPlayers;
     GameModeName gameModeName;
     std::shared_ptr<GameMode> gameMode = nullptr;
+    bool started=false;
     bool inProgress;
     int speed;
     int amountOfPlayers=1;
@@ -37,10 +38,11 @@ class GameRoom {
         {" ", "drop"}
     };
 public:
-    GameRoom(int roomId, int clientId, int maxPlayers, GameModeName gameMode);
-    bool addPlayer(const Player& player);
+    GameRoom()=default;
+    GameRoom(int roomId, int clientId, int clientSocket, std::string pseudo, int maxPlayers, GameModeName gameModeName);
+    void addPlayer(int clientId, int clientSocket, std::string pseudo);
     bool removePlayer(const Player& player);
-    bool isFull() const;
+    bool getIsFull() const;
     void shiftPlayers(int index);
     void startGame();
     void endGame();
@@ -56,10 +58,15 @@ public:
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
     void sendGameToPlayer(int PlayerId);
-    void keyInputGameMenu(Player& player, const std::string& unicodeAction);
+    void keyInputGame(Player& player, const std::string& unicodeAction);
     std::string convertUnicodeToText(const std::string& unicode);
-    void getGameMode();
+    void setInsanceGameMode();
+    void handlePlayers(Player player);
+    //void handleViewers();
     void loopgame();
+    void setRoomId(int roomId) { this->roomId = roomId; }
+    bool getHasStarted() const { return started; }
+    ~GameRoom();
 };
 
 #endif

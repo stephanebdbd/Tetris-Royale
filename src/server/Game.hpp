@@ -30,10 +30,12 @@ class Game {
         void showGame();
         void showGameOver();
         Grid& getGrid() { return grid; }
+        void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
         TetraminoDisplacement& getDisplacement() { return displacement; } 
         Score& getScore() { return score; }
-        int getLinesCleared() { return linesCleared; }
-        bool getNeedToSendGame() { return needToSendGame; }
+        int getLinesCleared() const { return linesCleared; }
+        bool getNeedToSendGame() const { return needToSendGame; }
+        bool getGameOver() const { return gameOver; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
 

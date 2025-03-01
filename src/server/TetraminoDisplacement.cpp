@@ -24,18 +24,23 @@ TetraminoDisplacement& TetraminoDisplacement::operator=(const TetraminoDisplacem
 void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
     if (action == "right") { 
         moveCurrentPieceRight();
+        setNeedToSendGame(true);
     }
     else if (action == "left") { 
         moveCurrentPieceLeft();
+        setNeedToSendGame(true);
     }
     else if (action == "up") { 
         rotateCurrentPiece();
+        setNeedToSendGame(true);
     }
     else if (action == "down"){
         moveCurrentPieceDown();
+        setNeedToSendGame(true);
     }
     else if(action == "drop") { // space
         dropCurrentPiece();
+        setNeedToSendGame(true);
     }
 }
 

@@ -1,21 +1,28 @@
 #include "GameRoom.hpp"
 
-GameRoom::GameRoom(int roomId, int clientId, int maxPlayers, GameModeName gameModeName)
+GameRoom::GameRoom(int roomId, int clientId, int clientSocket, std::string pseudo, int maxPlayers, GameModeName gameModeName)
     : roomId(roomId), ownerId(clientId), maxPlayers(maxPlayers), gameModeName(gameModeName),
     inProgress(false) {
     setGameMode(gameModeName);
+    this->addPlayer(clientId, clientSocket, pseudo);
+    std::cout << "GameRoom #" << roomId << " créée." << std::endl;
+    std::thread gameRoomThread(&GameRoom::loopgame, this);
+    gameRoomThread.detach();
     }
 
-bool GameRoom::addPlayer(const Player& player) {
+void GameRoom::addPlayer(int clientId, int clientSocket, std::string pseudo) {
+    amountOfPlayers++;
+    Player player(clientId, amountOfPlayers, clientSocket, pseudo, *this, false);
     int currentAmount = players.size();
     if (currentAmount < maxPlayers) {
         players.push_back(player);
-        amountOfPlayers++;
         games.push_back(Game(10, 20));
         clientsSockets[amountOfPlayers] = player.getPlayerSocket();
-        return true;
+        std::thread playerThread(&GameRoom::handlePlayers, this, player);
+        playerThread.detach();
     }
-    return false;
+    else
+        amountOfPlayers--;
 }
 
 bool GameRoom::removePlayer(const Player& player) {
@@ -24,6 +31,7 @@ bool GameRoom::removePlayer(const Player& player) {
         int index = std::distance(players.begin(), it);
         players.erase(it);
         games.erase(games.begin() + index);
+        close(player.getPlayerSocket());
         clientsSockets.erase(index);
         int currentAmount = players.size();
         if (currentAmount != maxPlayers - 1) {
@@ -35,7 +43,7 @@ bool GameRoom::removePlayer(const Player& player) {
     return false;
 }
 
-bool GameRoom::isFull() const {
+bool GameRoom::getIsFull() const {
     return amountOfPlayers == maxPlayers;
 }
 
@@ -43,7 +51,6 @@ void GameRoom::startGame() {
     inProgress = true;
     for (int playerId = 0; playerId < maxPlayers; ++playerId)
         this->sendGameToPlayer(playerId);
-    this->loopgame();
 }
 
 void GameRoom::endGame() {
@@ -83,7 +90,7 @@ bool GameRoom::getInProgress() const { return inProgress; }
 
 int GameRoom::getRoomId() const { return roomId; }
 
-void GameRoom::getGameMode() {
+void GameRoom::setInsanceGameMode() {
     switch (gameModeName) {
     case GameModeName::Classic:
         this->gameMode = std::make_shared<ClassicMode>();
@@ -125,7 +132,11 @@ void GameRoom::sendGameToPlayer(int playerId) {
 }
 
 void GameRoom::loopgame() {
+    while (!this->getIsFull()){
+        continue; // Attendre que la salle soit pleine
+    }
     this->startGame();
+    started = true;
     for (int playerId = 0; playerId < maxPlayers; ++playerId) {
         std::thread gameThread([this, playerId]() { // Lancer un thread pour mettre à jour le jeu
             auto& gameInstance = games[playerId];
@@ -136,6 +147,8 @@ void GameRoom::loopgame() {
                     this->sendGameToPlayer(playerId);
                     gameInstance.setNeedToSendGame(false);
                 }
+                if (gameInstance.getGameOver())
+                    break;
                     
             }
         });
@@ -149,6 +162,7 @@ void GameRoom::shiftPlayers(int index) {
         players[i] = players[i + 1];
         games[i] = games[i + 1];
         clientsSockets[i] = clientsSockets[i + 1];
+        players[i].setPlayerId(i);
     }
     int clientIndex = std::distance(players.begin(), players.end());
     players.pop_back();
@@ -160,4 +174,35 @@ void GameRoom::shiftPlayers(int index) {
 std::string GameRoom::convertUnicodeToText(const std::string& unicode) {
     auto action = unicodeToText.find(unicode);
     return (action != unicodeToText.end()) ? action->second : "///"; 
+}
+
+void GameRoom::handlePlayers(Player player) {
+    char buffer[1024];
+    while (true) {
+        memset(buffer, 0, sizeof(buffer));
+        int bytesReceived = recv(player.getPlayerSocket(), buffer, sizeof(buffer) - 1, 0);
+        if (bytesReceived > 0) {
+            try {
+                json receivedData = json::parse(buffer);
+                std::string action = receivedData["action"];
+
+                std::cout << "Action reçue du client " << player.getPlayerId() << " : " << action << std::endl;
+                this->keyInputGame(player, action);
+            } 
+            catch (json::parse_error& e) {
+                std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
+            }
+        }
+    }
+}
+
+void GameRoom::keyInputGame(Player& player, const std::string& unicodeAction) {
+    std::string action = convertUnicodeToText(unicodeAction);
+    games[player.getPlayerId()].moveTetramino(action);
+}
+
+GameRoom::~GameRoom() {
+    for (auto& player : players) {
+        close(player.getPlayerSocket());
+    }
 }

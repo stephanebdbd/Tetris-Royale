@@ -1,8 +1,8 @@
 #include "Player.hpp"
 #include "GameRoom.hpp"
 
-Player::Player(int clientId, int clientSocket, const std::string& name, bool isObserver, std::shared_ptr<GameRoom> gameRoom)
-    : clientId(clientId), clientSocket(clientSocket),name(name), isObserver(isObserver), gameRoom{gameRoom} {}
+Player::Player(int clientId, int playerId, int clientSocket, const std::string& name, GameRoom& gameRoom, bool isObserver)
+    : clientId(clientId), playerId(playerId), clientSocket(clientSocket),name(name), gameRoom{std::make_shared<GameRoom>(gameRoom)}, isObserver(isObserver) {}
 
 int Player::getId() const { return clientId; }
 std::string Player::getName() const { return name; }
