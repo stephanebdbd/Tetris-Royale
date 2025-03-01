@@ -21,7 +21,7 @@ class Menu {
         json getAddFriendMenu() const;
         json getRemoveFriendMenu() const;
         json getListFriendsMenu(const std::vector<int>& friends) const;
-
+        json getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const;
 
 };
 
