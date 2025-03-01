@@ -7,6 +7,7 @@
 #include "Score.hpp"
 #include "chat.hpp"
 #include "UserManager.hpp"  // Inclure le gestionnaire d'utilisateurs
+#include "Menu.hpp"
 #include <atomic>
 #include <unordered_map>
 
@@ -31,6 +32,7 @@ class Server {
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::unordered_map<int, int> currentMenu;
     std::unique_ptr<Game> game;
+    Menu menu;
     std::unique_ptr<ServerChat> chat;
     std::atomic<int> clientIdCounter;
 
@@ -79,6 +81,8 @@ public:
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void loopGame(int clientSocket, int clientId);
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);

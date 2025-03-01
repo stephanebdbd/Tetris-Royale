@@ -213,21 +213,24 @@ json Menu::getListFriendsMenu(const std::vector<int>& friends) const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+
 json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const {
     json menu = {
         {"title", "Classement des meilleurs joueurs"},
-        {"options", json::array()},
-        {"input", ""}
+        {"options", json::object()},  // car avec array la key commence a 0
+        {"input", "Appuyez sur la touche \"1\" pour revenir au menu principal : "}
     };
 
-    // Ajoute les 10 meilleurs joueurs (ca prend le minimum entre 10 et le nombre de joueur pour pas avoir un out of range)
+    // Ajoute les 10 meilleurs joueurs
     int limit = std::min(10, static_cast<int>(ranking.size()));
     for (int i = 0; i < limit; ++i) {
-        menu["options"].push_back({{"rank", i + 1}, {"name", ranking[i].first}, {"score", ranking[i].second}});
+        std::string key = "    " + std::to_string(i + 1) + ". ";
+        std::string value = ranking[i].first + " - " + std::to_string(ranking[i].second);
+        menu["options"][key] = value;
     }
-
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+
 
 json Menu::getGameOverMenu() const {
     json menu = {

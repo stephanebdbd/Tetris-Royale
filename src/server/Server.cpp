@@ -129,7 +129,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             keyInputMainMenu(clientSocket, clientId, action);
             break;
         case MenuState::classement:
-            // Classement
+            keyInputRankingMenu(clientSocket, clientId, action);
             break;
         case MenuState::chat:
             keyInputChatMenu(clientSocket, clientId, action);
@@ -144,7 +144,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             keyInputGameMenu(clientSocket, clientId, action);
             break;
         case MenuState::GameOver:
-            // TODO: Game Over
+            keyInputGameOverMenu(clientSocket, clientId, action);
             break;
     }
 }
@@ -231,8 +231,11 @@ void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string&
     }
 
     else if (action == "3") {
-        // classement => à implémenter 
-        
+        // Classement
+        clientStates[clientId] = MenuState::classement;
+        // TODO: en gros c'est brouillon pour le moment parce que faudrait pas faire passser menu par
+        // la game mais avoir une instance de menu dans le serveur comme ici
+        sendMenuToClient(clientSocket, menu.getRankingMenu(userManager->getRanking()));   
     }
 
     else if (action == "4") {
@@ -256,7 +259,8 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
     }
     else if (action == "2") {
         // Rejoindre une partie
-    }else if (action == "3") {
+    }
+    else if (action == "3") {
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
     }
@@ -275,6 +279,13 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
         std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket));
         chatThread.detach();
     }else if(action == "5") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
+}
+
+void Server::keyInputRankingMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") { // TODO: faudra qu'on le voit dans le menu
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
     }
@@ -305,7 +316,16 @@ void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::str
     loopGame(clientSocket, clientId);
 }
 
-
+void Server::keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        clientStates[clientId] = MenuState::GameMode;
+        sendMenuToClient(clientSocket, game->getGameMode());
+    }
+    else if (action == "2") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
+}
 
 void Server::keyInputGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
@@ -410,6 +430,7 @@ void Server::loopGame(int clientSocket, int clientId) {
         if (game->isGameOver()) {
             clientStates[clientId] = MenuState::GameOver;
             runningGames[clientId] = false; // Arrêter la partie du client
+            userManager->updateHighscore(clientPseudo[clientId], game->getScore().getScore());
             sendMenuToClient(clientSocket, game->getGameOverMenu());
             break;
         }
