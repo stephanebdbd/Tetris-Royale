@@ -228,3 +228,16 @@ json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& rankin
 
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+
+json Menu::getGameOverMenu() const {
+    json menu = {
+        {"title", "Game Over"},
+        {"options", {
+            {"1. ", "Rejouer"},
+            {"2. ", "Retour au menu principal"}
+        }},
+        {"input", "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+

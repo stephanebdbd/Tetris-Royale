@@ -143,6 +143,9 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::Game:
             keyInputGameMenu(clientSocket, clientId, action);
             break;
+        case MenuState::GameOver:
+            // TODO: Game Over
+            break;
     }
 }
 
@@ -404,12 +407,20 @@ void Server::loopGame(int clientSocket, int clientId) {
     gameThread.detach();
 
     while (runningGames[clientId]) { 
+        if (game->isGameOver()) {
+            clientStates[clientId] = MenuState::GameOver;
+            runningGames[clientId] = false; // Arrêter la partie du client
+            sendMenuToClient(clientSocket, game->getGameOverMenu());
+            break;
+        }
+    
         if (game->getNeedToSendGame()) { 
             sendGameToClient(clientSocket, clientId);
             game->setNeedToSendGame(false);
         }
     }
 }
+
 
 
 void Server::sendChatModeToClient(int clientSocket) {

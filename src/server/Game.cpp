@@ -127,3 +127,5 @@ void Game::rotateCurrentPiece() {
 void Game::dropCurrentPiece() {
     currentPiece.dropTetrimino(grid);
 }
+
+

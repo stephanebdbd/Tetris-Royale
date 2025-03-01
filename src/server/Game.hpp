@@ -39,6 +39,9 @@ class Game {
         Grid& getGrid() { return grid; }
         Tetramino& getCurrentPiece() { return currentPiece; }
         Score& getScore() { return score; }
+
+        bool isGameOver() { return gameOver; }
+
         json getMainMenu0() { return menu.getMainMenu0(); }  
         json getMainMenu1() { return menu.getMainMenu1(); }
 
@@ -54,6 +57,7 @@ class Game {
 
         json getJoinOrCreateGame() const { return menu.getJoinOrCreateGame(); }
         json getGameMode() const { return menu.getGameMode(); }
+        json getGameOverMenu() const { return menu.getGameOverMenu(); }
 
 
         json getFriendMenu() { return menu.getFriendMenu(); }

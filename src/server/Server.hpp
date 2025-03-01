@@ -20,6 +20,7 @@ enum class MenuState {
         Game, 
             JoinOrCreateGame,
                 GameMode,
+                GameOver,
         classement,
         chat
 };
