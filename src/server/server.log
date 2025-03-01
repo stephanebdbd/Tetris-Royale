@@ -3,11 +3,29 @@ Erreur : Impossible d'ouvrir le fichier friendsRequest.txt pour lecture.
 Serveur en attente de connexions sur le port 12345
 Client #0 connecté.
 LoginPassword
-Chat process started for client 5
-{"message":"exit","receiver":"server"}
-Client 5 disconnected.
-Chat process ended for client 5
-Client #0 déconnecté.
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 :  
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 :  
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 : 
+Action reçue du client 0 :  
+Action reçue du client 0 : 
 Client #1 connecté.
 LoginPassword
-Erreur : Impossible d'ouvrir le fichier friendsList.txt pour lecture.
+Client #1 déconnecté.
+Client #2 connecté.
+LoginPassword
+Client #2 déconnecté.

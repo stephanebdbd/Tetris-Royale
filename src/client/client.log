@@ -1,7 +1,8 @@
 Connecté au serveur.
-{"input":"Votre choix: ","options":{"1. ":"Se connecter","2. ":"Créer un compte","3. ":"Quitter"},"title":"Bienvenue dans Tetris Royal !"}
-{"input":"","options":{"Veuillez insérer votre pseudo":":"},"title":"Connexion au compte - Etape 1"}
-{"input":"","options":{"Veuillez insérer votre mot de passe":":"},"title":"Connexion au compte  - Etape 2"}
-{"input":"Votre choix: ","options":{"1. ":"Jouer","2. ":"Amis","3. ":"Classement","4. ":"Chat","5. ":"Retour"},"title":"Menu principal"}
-{"input":"Votre choix: ","options":{"1. ":"Ajouter un ami","2. ":"Supprimer un ami","3. ":"Lister les amis","4. ":"Retour"},"title":"Gestion des amis"}
-{"input":"Votre choix: ","options":{"Veuillez insérer l'ID de l'ami à ajouter":":"},"title":"Ajouter un ami"}
+received : {"input":"Votre choix: ","options":{"1. ":"Se connecter","2. ":"Créer un compte","3. ":"Quitter"},"title":"Bienvenue dans Tetris Royal !"}
+received : {"input":"","options":{"Veuillez insérer votre pseudo":":"},"title":"Connexion au compte - Etape 1"}
+received : {"input":"","options":{"Veuillez insérer votre mot de passe":":"},"title":"Connexion au compte  - Etape 2"}
+received : {"input":"Votre choix: ","options":{"1. ":"Jouer","2. ":"Amis","3. ":"Classement","4. ":"Chat","5. ":"Retour"},"title":"Menu principal"}
+received : {"input":"Votre choix: ","options":{"1. ":"créer","2. ":"rejoindre","3. ":"Retour"},"title":"Rejoindre ou créer une partie"}
+received : {"input":"Votre choix: ","options":{"1. ":"endless","2. ":"classic","3. ":"duel","4. ":"royal competion","5. ":"Retour"},"title":"Modes de jeu"}
+received : {"input":"Votre choix: ","options":{"1. ":"créer","2. ":"rejoindre","3. ":"Retour"},"title":"Rejoindre ou créer une partie"}

@@ -142,14 +142,23 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::Main:
             keyInputMainMenu(clientSocket, clientId, action);
             break;
-        case MenuState::Game:
-            keyInputGameMenu(clientSocket, clientId, action);
-            break;
         case MenuState::classement:
-            // Classement
+            keyInputRankingMenu(clientSocket, clientId, action);
             break;
         case MenuState::chat:
             keyInputChatMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::JoinOrCreateGame:
+            keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::GameMode:
+            keyInputModeGameMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::Game:
+            keyInputGameMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::GameOver:
+            keyInputGameOverMenu(clientSocket, clientId, action);
             break;
         case MenuState::Friends:
             keyInputFriendsMenu(clientSocket, clientId, action);
@@ -167,9 +176,6 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             std::cerr << "Erreur : état inconnu dans handleMenu !" << std::endl;
             break;
     }
-
-
-////////////////////////////////////////////////////////////////////////////
 }
 
 
@@ -363,10 +369,20 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
     }else if(action == "3") {
         // a implémenter
     }else if(action == "4") {
-        sendChatModeToClient(clientSocket);
+        json message;
+        message["mode"] = "chat";
+        std::string msg = message.dump() + "\n";
+        sendMenuToClient(clientSocket, msg);
         runningChats[clientId] = true;
         chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, game->getChatMenu());
     }else if(action == "5") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
+}
+
+void Server::keyInputRankingMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") { // TODO: faudra qu'on le voit dans le menu
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
     }
@@ -397,6 +413,17 @@ void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::str
     loopGame(clientSocket, clientId);
 }
 
+
+void Server::keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        clientStates[clientId] = MenuState::GameMode;
+        sendMenuToClient(clientSocket, game->getGameMode());
+    }
+    else if (action == "2") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
+}
 
 
 void Server::keyInputGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
@@ -506,12 +533,6 @@ void Server::loopGame(int clientSocket, int clientId) {
     }
 }
 
-void Server::sendChatModeToClient(int clientSocket) {
-    json message;
-    message["mode"] = "chat";
-    std::string msg = message.dump() + "\n";
-    send(clientSocket, msg.c_str(), msg.size(), 0);
-}
 
 int main() {
     // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 

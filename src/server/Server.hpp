@@ -21,6 +21,7 @@ enum class MenuState {
         Game, 
             JoinOrCreateGame,
                 GameMode,
+                GameOver,
         classement,
         chat,
             createRoom,
@@ -77,7 +78,6 @@ public:
     void stop();
     void sendMenuToClient(int clientSocket, const std::string& screen);
     void sendGameToClient(int clientSocket, int clientId);
-    void sendChatModeToClient(int clientSocket);
     void keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputMainMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameMenu(int clientSocket, int clientId, const std::string& action);
@@ -90,6 +90,8 @@ public:
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
     void loopGame(int clientSocket, int clientId);
