@@ -149,7 +149,6 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
     }
 }
 
-
 void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {  // Se connecter
         clientStates[clientId] = MenuState::LoginPseudo;
@@ -162,6 +161,9 @@ void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::stri
     else if (action == "3") {
         // Quitter
         close(clientSocket);
+    }
+    else {
+        sendMenuToClient(clientSocket, game->getMainMenu0());
     }
 }
 
@@ -249,6 +251,9 @@ void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string&
         clientStates[clientId] = MenuState::Welcome;
         sendMenuToClient(clientSocket, game->getMainMenu0());
     }
+    else {
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
 }
 
 void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action) {
@@ -264,21 +269,28 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
     }
+    else {
+        sendMenuToClient(clientSocket, game->getJoinOrCreateGame());
+    }
 }
 
 void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string& action) {
     if(action == "1") {
         // a implémenter
-    }else if(action == "2") {
+    }
+    else if(action == "2") {
         // a implémenter
-    }else if(action == "3") {
+    }
+    else if(action == "3") {
         // a implémenter
-    }else if(action == "4") {
+    }
+    else if(action == "4") {
         sendChatModeToClient(clientSocket);
         // Lancer un thread pour gérer le chat du client
         std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket));
         chatThread.detach();
-    }else if(action == "5") {
+    }
+    else if(action == "5") {
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
     }
@@ -288,6 +300,9 @@ void Server::keyInputRankingMenu(int clientSocket, int clientId, const std::stri
     if (action == "1") { // TODO: faudra qu'on le voit dans le menu
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
+    else {
+        sendMenuToClient(clientSocket, menu.getRankingMenu(userManager->getRanking())); 
     }
 }
 
@@ -303,11 +318,16 @@ void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::str
     } 
     else if (action == "4") {
         // royal competition
-    }else if (action == "5") {
+    }
+    else if (action == "5") {
         clientStates[clientId] = MenuState::JoinOrCreateGame;
         sendMenuToClient(clientSocket, game->getJoinOrCreateGame());
         return;
     }
+    else {
+        sendMenuToClient(clientSocket, game->getGameMode());
+    }
+    // TODO: mettre ca dans les if
     receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
     clientStates[clientId] = MenuState::Game;
     runningGames[clientId] = true; 

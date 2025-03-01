@@ -87,9 +87,8 @@ public:
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     std::string convertUnicodeToText(const std::string& unicode);
-
-
-
+    void clearMenu(int clientSocket, const std::string& functionName);
+    
 };
 
 #endif 
