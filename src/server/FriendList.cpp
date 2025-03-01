@@ -46,51 +46,6 @@ std::unordered_map<std::string, std::vector<std::string>> FriendList::loadFriend
 }
 
 
-const std::vector<std::shared_ptr<Client>>& FriendList::getOnlineFriends() const {
-    return onlineFriends;
-}
-void FriendList::processClientFriendList(int clientSocket, int clientId) {
-    char buffer[1024];
-
-    while (true) {
-        memset(buffer, 0, sizeof(buffer));
-        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-        if (bytesReceived <= 0) {
-            std::cout << "Client #" << clientId << " déconnecté." << std::endl;
-            close(clientSocket);
-            break;
-        }
-
-        try {
-            json receivedData = json::parse(buffer);
-            std::string action = receivedData["action"];
-
-            if (action == "add") {
-                int friendId = receivedData["friendId"];
-                addFriend(clientId, friendId);
-                sendMenuToClient(clientSocket, "Ami ajouté.");
-            }
-            else if (action == "remove") {
-                int friendId = receivedData["friendId"];
-                removeFriend(clientId, friendId);
-                sendMenuToClient(clientSocket, "Ami supprimé.");
-            }
-            else if (action == "list") {
-                auto friends = getFriends(clientId);
-                json response;
-                response["friends"] = friends;
-                send(clientSocket, response.dump().c_str(), response.dump().size(), 0);
-            }
-            else if (action == "back") {
-                clientStates[clientId] = MenuState::Main;
-                sendMenuToClient(clientSocket, game->getMainMenu1());
-                break;
-            }
-        } catch (json::parse_error& e) {
-            std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
-        }
-    }
-}
 
 
 
@@ -271,3 +226,4 @@ void FriendList::registerUser(const std::string& username) {
 
     std::cout << "Utilisateur " << username << " ajouté avec succès." << std::endl;
 }
+

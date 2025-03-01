@@ -138,7 +138,7 @@ json Menu::getchatMenu() const {
             {"1. ", "Créer une Room"},
             {"2. ", "Rejoindre une Room"},
             {"3. ", "Lister les Rooms"},
-            {"4. ", "private message"},
+            {"4. ", "private chat"},
             {"5. ", "Retour"},
         }},
         {"input", "Votre choix: "}

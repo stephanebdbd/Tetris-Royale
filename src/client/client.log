@@ -3,16 +3,5 @@ Connecté au serveur.
 {"input":"","options":{"Veuillez insérer votre pseudo":":"},"title":"Connexion au compte - Etape 1"}
 {"input":"","options":{"Veuillez insérer votre mot de passe":":"},"title":"Connexion au compte  - Etape 2"}
 {"input":"Votre choix: ","options":{"1. ":"Jouer","2. ":"Amis","3. ":"Classement","4. ":"Chat","5. ":"Retour"},"title":"Menu principal"}
-{"input":"Votre choix: ","options":{"1. ":"Créer une Room","2. ":"Rejoindre une Room","3. ":"Lister les Rooms","4. ":"private message","5. ":"Retour"},"title":"Menu du chat"}
-{"mode":"chat"}
-Envoi de données: {"message":"exit","receiver":"server"}
-Données envoyées.
-Fin du thread d'envoi de messages !
-{"input":"Votre choix: ","options":{"1. ":"Créer une Room","2. ":"Rejoindre une Room","3. ":"Lister les Rooms","4. ":"private message","5. ":"Retour"},"title":"Menu du chat"}
-handle reprend
-{"mode":"chat"}
-Envoi de données: {"message":"exit","receiver":"server"}
-Données envoyées.
-Fin du thread d'envoi de messages !
-{"input":"Votre choix: ","options":{"1. ":"Créer une Room","2. ":"Rejoindre une Room","3. ":"Lister les Rooms","4. ":"private message","5. ":"Retour"},"title":"Menu du chat"}
-handle reprend
+{"input":"Votre choix: ","options":{"1. ":"Ajouter un ami","2. ":"Supprimer un ami","3. ":"Lister les amis","4. ":"Retour"},"title":"Gestion des amis"}
+{"input":"Votre choix: ","options":{"Veuillez insérer l'ID de l'ami à ajouter":":"},"title":"Ajouter un ami"}

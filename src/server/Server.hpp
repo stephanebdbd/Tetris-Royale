@@ -19,14 +19,19 @@ enum class MenuState {
             LoginPassword,
     Main,
         Game, 
+            JoinOrCreateGame,
+                GameMode,
         classement,
         chat,
-    Friends,
-        AddFriend,
-        RemoveFriend,
-        FriendList,
-        Request
-        
+            createRoom,
+            joinRoom,
+            listeRooms,
+            privateChat,
+        Friends,
+            AddFriend,
+            RemoveFriend,
+            FriendList,
+            Request
 };
 
 class Server {
@@ -40,9 +45,10 @@ class Server {
     std::atomic<int> clientIdCounter;
 
     //chaque client aura sa game
-    std::unordered_map<int, std::unique_ptr<Game>> games;
-    std::unordered_map<int, std::string> clientPseudo;
-    std::unordered_map<int, MenuState> clientStates;
+    std::unordered_map<int, std::unique_ptr<Game>> games; // id -> game
+    std::unordered_map<int, std::string> clientPseudo;    // id -> pseudo
+    std::unordered_map<int, MenuState> clientStates;      // id -> menu
+    std::unordered_map<std::string, int> pseudoTosocket;  // pseudo -> socket
 
 
     std::unordered_map<int, bool> runningGames;
@@ -51,7 +57,6 @@ class Server {
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;
     std::unique_ptr<Score> score;
-    
 
     std::unique_ptr<UserManager> userManager;
 
@@ -85,6 +90,8 @@ public:
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
     void loopGame(int clientSocket, int clientId);
     void receiveInputFromClient(int clientSocket, int clientId);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
@@ -94,14 +101,6 @@ public:
     void setClientState(int clientId, MenuState state) { clientStates[clientId] = state; }
     bool getRunningChat(int clientId) { return runningChats[clientId]; }
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
-
-
-    void processClientFriendList(int clientSocket, int clientId);
-    void keyInuptFriendsMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptAddFriendMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInuptRemoveFriendMenu(int clientSocket, int clientId, const std::string& action);
-
-
 
 
 };

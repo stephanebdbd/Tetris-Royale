@@ -34,9 +34,22 @@ public:
     // Récupérer les demandes d'amis en attente
     std::vector<std::string> getPendingRequests(const std::string& user);
 
-    void processClientFriendList(int clientSocket, int clientId);   
-    // Destructeur
-    ~FriendList() = default;
+    // Ajouter un ami après acceptation
+    void addFriend(const std::string& user1, const std::string& user2);
+
+    // Envoyer une demande d'ami
+    void sendFriendRequest(const std::string& sender, const std::string& receiver);
+
+    // Supprimer un ami
+    void removeFriend(const std::string& user1, const std::string& user2);
+
+    // Supprimer une demande d'ami
+    void removeFriendRequest(const std::string& sender, const std::string& receiver);
+
+    // Enregistrer un nouvel utilisateur
+    void registerUser(const std::string& username);
+
+    bool acceptFriendRequest(const std::string& user1, const std::string& user2);
 };
 
 #endif // FRIENDLIST_HPP
