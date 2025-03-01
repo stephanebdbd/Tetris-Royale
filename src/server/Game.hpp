@@ -50,9 +50,18 @@ class Game {
         json getLoginMenuFailed1() { return menu.getLoginMenuFailed1(); }
         json getLoginMenu2() { return menu.getLoginMenu2(); }
         json getLoginMenuFailed2() { return menu.getLoginMenuFailed2(); }
+        json getChatMenu() { return menu.getchatMenu(); }
 
         json getJoinOrCreateGame() const { return menu.getJoinOrCreateGame(); }
         json getGameMode() const { return menu.getGameMode(); }
+
+
+        json getFriendMenu() { return menu.getFriendMenu(); }
+        json getAddFriendMenu() { return menu.getAddFriendMenu(); }
+        json getRemoveFriendMenu()  { return menu.getRemoveFriendMenu(); }
+
+
+
 
         bool getNeedToSendGame() { return needToSendGame; }
         void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }

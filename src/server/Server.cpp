@@ -74,11 +74,21 @@ void Server::handleClient(int clientSocket, int clientId) {
     char buffer[1024];
 
     while (true) {
+
+        if(runningChats[clientId]) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
+            continue;
+        }
+
         memset(buffer, 0, sizeof(buffer));
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived <= 0) {
             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
-            close(clientSocket);
+            runningGames[clientId] = false; // Arrêter la partie du client
+            games.erase(clientId); // Supprimer la partie du client
+            runningGames.erase(clientId); // Supprimer le booléen de jeu
+            clientStates.erase(clientId); // Supprimer l'état des menus du client
+            close(clientSocket); // Fermer la connexion
             break;
         }
 
@@ -95,7 +105,7 @@ void Server::handleClient(int clientSocket, int clientId) {
             handleMenu(clientSocket, clientId, action);
              
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
-            if (runningGame) {
+            if (runningGames[clientId]) {
                 receiveInputFromClient(clientSocket, clientId);
             }else if (runningChat) {
                 std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket);
@@ -139,7 +149,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             // Classement
             break;
         case MenuState::chat:
-            // Chat
+            keyInputChatMenu(clientSocket, clientId, action);
             break;
         case MenuState::Friends:
             keyInuptFriendsMenu(clientSocket, clientId, action);
@@ -322,12 +332,7 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     else if (action == "4") {
         // Chat
         clientStates[clientId] = MenuState::chat;
-        sendMenuToClient(clientSocket, "chat");
-        
-        runningChat = true;
-        // Lancer un thread pour le chat
-        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket);
-        chatThread.detach();
+        sendMenuToClient(clientSocket, game->getChatMenu());
 
     }
     
@@ -338,8 +343,65 @@ void Server::keyInuptMainMenu(int clientSocket, int clientId, const std::string&
     }
 }
 
+void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        // Créer une partie
+        clientStates[clientId] = MenuState::GameMode;
+        sendMenuToClient(clientSocket, game->getGameMode());
+    }
+    else if (action == "2") {
+        // Rejoindre une partie
+    }else if (action == "3") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
+}
 
-void Server::keyInuptGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
+void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string& action) {
+    if(action == "1") {
+        // a implémenter
+    }else if(action == "2") {
+        // a implémenter
+    }else if(action == "3") {
+        // a implémenter
+    }else if(action == "4") {
+        sendChatModeToClient(clientSocket);
+        runningChats[clientId] = true;
+        chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, game->getChatMenu());
+    }else if(action == "5") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
+}
+
+void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        // endless
+    }
+    else if (action == "2") {
+        // classic
+    }
+    else if (action == "3") {
+        // duel
+    } 
+    else if (action == "4") {
+        // royal competition
+    }else if (action == "5") {
+        clientStates[clientId] = MenuState::JoinOrCreateGame;
+        sendMenuToClient(clientSocket, game->getJoinOrCreateGame());
+        return;
+    }
+    receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
+    clientStates[clientId] = MenuState::Game;
+    runningGames[clientId] = true; 
+
+    games[clientId] = std::make_unique<Game>(10, 20);
+    loopGame(clientSocket, clientId);
+}
+
+
+
+void Server::keyInputGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);  // Convertir \u0005 en "right"
 
     auto& game = games[clientId];
@@ -388,7 +450,7 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 }
 
 void Server::sendGameToClient(int clientSocket, int clientId) { //TODO: Deplacer le main pour faire un fichier game ??? 
-    auto& game = games[clientId];
+    auto& game = games[clientId]; // Récupérer la partie du client
 
     json message;
     
@@ -405,7 +467,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     std::thread inputThread([this, clientSocket, clientId]() {
         char buffer[1024];
 
-        while (runningGame) {
+        while (runningGames[clientId]) {
             memset(buffer, 0, sizeof(buffer));
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); 
             if (bytesReceived > 0) {
@@ -428,17 +490,17 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
 
 void Server::loopGame(int clientSocket, int clientId) {
     auto& game = games[clientId]; // Récupérer la partie du client
-
+    
     std::thread gameThread([this, clientId]() { // Lancer un thread pour mettre à jour le jeu
         auto& gameInstance = games[clientId];
-        while (runningGame) {
+        while (runningGames[clientId]) {
             gameInstance->update(); 
         }
     });
 
     gameThread.detach();
 
-    while (runningGame) { // Envoi du jeu au client 
+    while (runningGames[clientId]) { 
         if (game->getNeedToSendGame()) { 
             sendGameToClient(clientSocket, clientId);
             game->setNeedToSendGame(false);

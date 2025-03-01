@@ -36,8 +36,9 @@ void Client::run() {
 void Client::handleUserInput() {
     halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
     std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
-
+    
     while (true) {
+        
         if (chatMode) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
             continue;
@@ -104,7 +105,7 @@ void Client::receiveDisplay() {
 
                 try {
                     json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
-
+                    std::cout << data << std::endl;
                     // Si c'est une grille de jeu
                     if (data.contains("grid")) {
                         isPlaying = true;
@@ -112,7 +113,7 @@ void Client::receiveDisplay() {
                         display.displayGame(data);
 
                     }
-                    // Si c'est un message de chat
+                    // Si c'est un message pour entrer en mode chat
                     else if (data.contains("mode") && data["mode"] == "chat") {
                         chatMode = true;
                         isPlaying = false;
@@ -120,6 +121,10 @@ void Client::receiveDisplay() {
                         std::thread chatThread(&ClientChat::run, &chat);
                         chatThread.detach();
         
+                    }
+                    // Si c'est un message de chat
+                    else if (data.contains("sender")) {
+                        chat.receiveChatMessages(data["sender"], data["message"]);
                     }
                     // Sinon, c'est un menu
                     else {

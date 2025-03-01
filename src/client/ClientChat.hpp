@@ -24,7 +24,7 @@ class ClientChat{
 
         void run();
         void sendChatMessages(WINDOW *input_win);
-        void receiveChatMessages();
+        void receiveChatMessages(const std::string& sender, const std::string& message);
         void displayChatMessage(std::string sender, const std::string& message);
 
         static bool initMessageMemory();
