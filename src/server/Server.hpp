@@ -3,14 +3,12 @@
 
 #include "Game.hpp"
 #include "GameMode.hpp"
-#include "GameMode.hpp"
 #include "Grid.hpp"
 #include "Tetramino.hpp"
 #include "Score.hpp"
-#include "UserManager.hpp"
 #include "GameRoom.hpp"
-#include "Menu.hpp"
-#include "GameRoom.hpp"
+#include "chat.hpp"
+#include "UserManager.hpp"  // Inclure le gestionnaire d'utilisateurs
 #include "Menu.hpp"
 #include <atomic>
 #include <unordered_map>
@@ -22,9 +20,12 @@ enum class MenuState {
         LoginPseudo,
             LoginPassword,
     Main,
-        JoinOrCreateGame,
-            GameMode,
-                Game,
+        Game, 
+            JoinOrCreateGame,
+                CreateGame,
+                JoinGame,
+                    Play,
+                    GameOver,
         classement,
         chat
 };
@@ -35,6 +36,7 @@ class Server {
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::atomic<int> clientIdCounter;
     std::unordered_map<int, GameRoom> gameRooms;
+    std::unique_ptr<ServerChat> chat;
     
     int gameRoomIdCounter=0;
     
@@ -66,12 +68,14 @@ public:
     //void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void sendChatModeToClient(int clientSocket);
     void receiveInputFromClient(int clientSocket, int clientId);
-    void handleMenu(int clientSocket, int clientId, const std::string& action);
     void manageGameRooms();
     void shiftGameRooms(int index);
-
-
-
+    void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
+    void handleMenu(int clientSocket, int clientId, const std::string& action);
+    void clearMenu(int clientSocket, const std::string& functionName);
+    
 };
 
 #endif 

@@ -122,24 +122,36 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::Main:
             keyInputMainMenu(clientSocket, clientId, action);
             break;
-        case MenuState::JoinOrCreateGame:
-            keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
-            break;
         case MenuState::classement:
-            // Classement
+            keyInputRankingMenu(clientSocket, clientId, action);
             break;
         case MenuState::chat:
             //keyInputChatMenu(clientSocket, clientId, action);
             break;
-        case MenuState::GameMode:
+        case MenuState::JoinGame:
+            clientStates[clientId] = MenuState::Play;
+            [[fallthrough]];
+        case MenuState::CreateGame:
+            clientStates[clientId] = MenuState::Play;
+            [[fallthrough]];
+        case MenuState::Play:
             keyInputGameModeMenu(clientSocket, clientId);
             break;
         case MenuState::Game:
+            clientStates[clientId] = MenuState::JoinOrCreateGame;
+            [[fallthrough]];
+        case MenuState::JoinOrCreateGame:
+            keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::GameOver:
+            keyInputGameOverMenu(clientSocket, clientId, action);
             break;
         default:
             break;
     }
 }
+
+
 
 void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode) {
     //création de la gameRoom (partie Endless pour l'instant)
@@ -179,6 +191,9 @@ void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::stri
     else if (action == "3") {
         // Quitter
         close(clientSocket);
+    }
+    else {
+        sendMenuToClient(clientSocket, menu.getMainMenu0());
     }
 }
 
@@ -231,15 +246,18 @@ void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std
 
 void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") { // créer une gameRoom (choisir s'il veut créer sa partie ou rejoindre une partie)
-        clientStates[clientId] = MenuState::JoinOrCreateGame;
+        clientStates[clientId] = MenuState::Game;
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
     }
-    if (action == "2") {
+    else if (action == "2") {
         // Amis => à implémenter 
     }
     else if (action == "3") {
-        // classement => à implémenter 
-        
+        // Classement
+        clientStates[clientId] = MenuState::classement;
+        // TODO: en gros c'est brouillon pour le moment parce que faudrait pas faire passser menu par
+        // la game mais avoir une instance de menu dans le serveur comme ici
+        sendMenuToClient(clientSocket, menu.getRankingMenu(userManager->getRanking()));   
     }
     else if (action == "4") {
         // Chat
@@ -257,23 +275,101 @@ void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string&
         clientStates[clientId] = MenuState::Welcome;
         sendMenuToClient(clientSocket, menu.getMainMenu0());
     }
+    else {
+        sendMenuToClient(clientSocket, menu.getMainMenu1());
+    }
 }
 
 void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
         // Créer une partie => lobby
-        /*clientStates[clientId] = MenuState::GameMode;
-        sendMenuToClient(clientSocket, menu.getGameMode());
-        */
-        clientStates[clientId] = MenuState::Game;
+        //clientStates[clientId] = MenuState::CreateGame;
+        clientStates[clientId] = MenuState::Play;
         this->keyInputGameModeMenu(clientSocket, clientId, GameModeName::Endless);
         // Raccourci vers une game Endless car on doit implémenter le reste
         }
     else if (action == "2") {
+        clientStates[clientId] = MenuState::JoinGame;
         // Rejoindre une partie
+    }
+    else if (action == "3") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, menu.getMainMenu1());
+    }
+    else {
+        sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
     }
 }
 
+/*void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string& action) {
+    if(action == "1") {
+        // a implémenter
+    }
+    else if(action == "2") {
+        // a implémenter
+    }
+    else if(action == "3") {
+        // a implémenter
+    }
+    else if(action == "4") {
+        sendChatModeToClient(clientSocket);
+        // Lancer un thread pour gérer le chat du client
+        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket));
+        chatThread.detach();
+    }
+    else if(action == "5") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, menu.getMainMenu1());
+    }
+}
+*/
+
+void Server::keyInputRankingMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") { // TODO: faudra qu'on le voit dans le menu
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, menu.getMainMenu1());
+    }
+    else {
+        sendMenuToClient(clientSocket, menu.getRankingMenu(userManager->getRanking())); 
+    }
+}
+
+void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        // endless
+    }
+    else if (action == "2") {
+        // classic
+    }
+    else if (action == "3") {
+        // duel
+    } 
+    else if (action == "4") {
+        // royal competition
+    }
+    else if (action == "5") {
+        clientStates[clientId] = MenuState::JoinOrCreateGame;
+        sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
+        return;
+    }
+    else {
+        sendMenuToClient(clientSocket, menu.getMainMenu1());
+    }
+    // TODO: mettre ca dans les if
+    receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
+    clientStates[clientId] = MenuState::Game;
+}
+
+void Server::keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action == "1") {
+        clientStates[clientId] = MenuState::JoinOrCreateGame;
+        sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
+    }
+    else if (action == "2") {
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, menu.getMainMenu1());
+    }
+}
 
 
 void Server::stop() {
@@ -313,6 +409,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
 
     inputThread.detach(); // Permet d’exécuter en parallèle
 }
+
 
 
 void Server::sendChatModeToClient(int clientSocket) {

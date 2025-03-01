@@ -16,12 +16,12 @@ class Menu {
         json getLoginMenuFailed2() const;
         json getchatMenu() const;
         json getJoinOrCreateGame() const;
-        json getGameMode() const;
         json getFriendMenu() const;
         json getAddFriendMenu() const;
         json getRemoveFriendMenu() const;
         json getListFriendsMenu(const std::vector<int>& friends) const;
-
+        json getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const;
+        json getGameOverMenu() const;
 
 };
 

@@ -147,22 +147,6 @@ json Menu::getchatMenu() const {
 }
 
 
-json Menu::getGameMode() const {
-    json menu = {
-        {"title", "Modes de jeu"},
-        {"options", {
-            {"1. ", "endless"},
-            {"2. ", "classic"},
-            {"3. ", "duel"},
-            {"4. ", "royal competion"},
-            {"5. ", "Retour"},
-        }},
-        {"input", "Votre choix: "}
-    };
-    return menu.dump() + "\n";  // Convertir en chaîne JSON
-}
-
-
 json Menu::getFriendMenu() const {
     json menu = {
         {"title", "Gestion des amis"},
@@ -212,3 +196,35 @@ json Menu::getListFriendsMenu(const std::vector<int>& friends) const {
 
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+
+
+json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const {
+    json menu = {
+        {"title", "Classement des meilleurs joueurs"},
+        {"options", json::object()},  // car avec array la key commence a 0
+        {"input", "Appuyez sur la touche \"1\" pour revenir au menu principal : "}
+    };
+
+    // Ajoute les 10 meilleurs joueurs
+    int limit = std::min(10, static_cast<int>(ranking.size()));
+    for (int i = 0; i < limit; ++i) {
+        std::string key = "    " + std::to_string(i + 1) + ". ";
+        std::string value = ranking[i].first + " - " + std::to_string(ranking[i].second);
+        menu["options"][key] = value;
+    }
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
+json Menu::getGameOverMenu() const {
+    json menu = {
+        {"title", "Game Over"},
+        {"options", {
+            {"1. ", "Rejouer"},
+            {"2. ", "Retour au menu principal"}
+        }},
+        {"input", "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
