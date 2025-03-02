@@ -7,17 +7,17 @@
 
 class TetraminoDisplacement {
     Grid& grid;
-    bool& needToSendGame;
-    bool& gameOver;
     
     Tetramino currentPiece;
     Timer dropTimer;
+    bool gameOver=false;
+    bool needToSendGame = true;
     bool commandisBlocked;
     bool lightisBlocked;
-    int ch;
     bool bonus1Royal = false;
+    int ch;
 public:
-    TetraminoDisplacement(Grid& grid, bool& needToSendGame, bool& gameOver);
+    TetraminoDisplacement(Grid& grid);
     TetraminoDisplacement(const TetraminoDisplacement& other) = default;
     TetraminoDisplacement& operator=(const TetraminoDisplacement& displacement);
     void keyInputGameMenu(const std::string& action);
@@ -28,8 +28,11 @@ public:
     void dropCurrentPiece();
     void timerHandler();
     void manageUserInput();
-    void setNeedToSendGame(bool needToSendGame);
     void drawPiece();
+    void setNeedToSendGame(bool needToSendGame);
+    bool getNeedToSendGame() const { return needToSendGame; }
+    bool getIsGameOver() const { return gameOver; }
+    void setGameOver() { this->gameOver = false; }
     Grid& getGrid() { return grid; }
     void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
     Tetramino& getCurrentPiece() { return currentPiece; }

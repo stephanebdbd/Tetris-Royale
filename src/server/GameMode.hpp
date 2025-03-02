@@ -2,6 +2,7 @@
 #define GAMEMODE_HPP
 
 #include <iostream>
+#include <memory>
 
 class Game;
 
@@ -16,7 +17,7 @@ class GameMode {
     
     public:
         GameMode() = default;
-        virtual void featureMode(Game& game) = 0;
+        virtual void featureMode(std::shared_ptr<Game> game) = 0;
         //virtual void useMalus(int nbrMalus) = 0;
         virtual GameModeName getNameMode() = 0;
 

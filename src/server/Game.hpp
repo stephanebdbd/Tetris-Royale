@@ -18,7 +18,6 @@ class Game {
     bool running;
     bool gameOver;
     
-    bool needToSendGame = true;
     bool malus5Royal = false;
     
     TetraminoDisplacement displacement;
@@ -29,14 +28,17 @@ class Game {
         void run();
         void showGame();
         void showGameOver();
+        void timerHandler() { displacement.timerHandler(); }
         Grid& getGrid() { return grid; }
         void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
         TetraminoDisplacement& getDisplacement() { return displacement; } 
         Score& getScore() { return score; }
         int getLinesCleared() const { return linesCleared; }
-        bool getNeedToSendGame() const { return needToSendGame; }
-        bool getGameOver() const { return gameOver; }
-        void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }
+        void setNeedToSendGame(bool needToSendGame) { displacement.setNeedToSendGame(needToSendGame); }
+        bool getNeedToSendGame() const { return displacement.getNeedToSendGame(); }
+        Tetramino& getCurrentPiece() { return displacement.getCurrentPiece(); }
+        bool getIsGameOver() const { return displacement.getIsGameOver(); }
+        void setGameOver() { displacement.setGameOver(); }
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
 
 };

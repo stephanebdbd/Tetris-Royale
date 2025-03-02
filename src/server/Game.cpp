@@ -6,8 +6,7 @@ Game::Game(int gridWidth, int gridHeight) //ajouter ce parametre apres , std::un
     : grid(gridWidth, gridHeight), 
       score(gridWidth + 5, 2), // Position du score à droite de la grille
       running(true),
-      gameOver(false), 
-      displacement(grid, needToSendGame, gameOver)
+      displacement(grid)
       //gameMode(gameMode) il faut l ajouter apres
       {}
 
@@ -18,7 +17,6 @@ Game& Game::operator=(const Game& game) {
         this->score = game.score;
         this->running = game.running;
         this->gameOver = game.gameOver;
-        this->needToSendGame = game.needToSendGame;
         this->malus5Royal = game.malus5Royal;
         this->displacement = game.displacement;
     }

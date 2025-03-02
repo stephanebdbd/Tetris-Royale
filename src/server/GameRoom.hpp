@@ -1,11 +1,9 @@
 #ifndef GAMEROOM_HPP
 #define GAMEROOM_HPP
 
-#include <vector>
 #include <string>
 #include <iostream>
 #include <thread>
-#include <unistd.h>
 #include <unordered_map>
 #include <memory>
 #include <sys/socket.h>
@@ -25,10 +23,10 @@ class GameRoom {
     bool started=false;
     bool inProgress;
     int speed;
-    int amountOfPlayers=1;
-    std::unordered_map<int, int> clientsSockets;
+    int amountOfPlayers=0;
+    std::vector<int> clientsSockets;
     std::vector<Player> players;
-    std::vector<Game> games;
+    std::vector<std::shared_ptr<Game>> games;
     std::vector<Player> viewers;
     std::unordered_map<std::string, std::string> unicodeToText = {
         {"\u0005", "right"},
@@ -66,7 +64,6 @@ public:
     void loopgame();
     void setRoomId(int roomId) { this->roomId = roomId; }
     bool getHasStarted() const { return started; }
-    ~GameRoom();
 };
 
 #endif

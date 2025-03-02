@@ -129,13 +129,12 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             //keyInputChatMenu(clientSocket, clientId, action);
             break;
         case MenuState::JoinGame:
-            clientStates[clientId] = MenuState::Play;
-            [[fallthrough]];
-        case MenuState::CreateGame:
-            clientStates[clientId] = MenuState::Play;
-            [[fallthrough]];
-        case MenuState::Play:
             keyInputGameModeMenu(clientSocket, clientId);
+            break;
+        case MenuState::CreateGame:
+            keyInputGameModeMenu(clientSocket, clientId);
+            break;
+        case MenuState::Play:            
             break;
         case MenuState::Game:
             clientStates[clientId] = MenuState::JoinOrCreateGame;
@@ -152,17 +151,16 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
 }
 
 
-
 void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode) {
     //création de la gameRoom (partie Endless pour l'instant)
+    clientStates[clientId] = MenuState::Play;
     gameRoomIdCounter++;
-    gameRooms[gameRoomIdCounter] = GameRoom(gameRoomIdCounter, clientId, clientSocket, clientPseudo[clientId], 1, gameMode);
+    gameRooms[gameRoomIdCounter] = std::make_shared<GameRoom>(gameRoomIdCounter, clientId, clientSocket, clientPseudo[clientId], 1, gameMode);
 }
 
 void Server::manageGameRooms() {
     for (auto& [roomId, gameRoom] : gameRooms) {
-        if (!gameRoom.getInProgress() && gameRoom.getIsFull() && gameRoom.getHasStarted()) {
-            gameRoom.~GameRoom();
+        if (!gameRoom->getInProgress() && gameRoom->getIsFull() && gameRoom->getHasStarted()) {
             gameRooms.erase(roomId);
             this->shiftGameRooms(roomId);
             gameRoomIdCounter--;
@@ -174,7 +172,7 @@ void Server::shiftGameRooms(int index) {
     int size = gameRooms.size();
     for (int i = index; i < size - 1; ++i) {
         gameRooms[i] = gameRooms[i + 1];
-        gameRooms[i].setRoomId(i);
+        gameRooms[i]->setRoomId(i);
     }   
     gameRooms.erase(gameRooms.size() - 1);
 }

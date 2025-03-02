@@ -1,7 +1,7 @@
 #include "TetraminoDisplacement.hpp"
 
-TetraminoDisplacement::TetraminoDisplacement(Grid& grid, bool& needToSendGame, bool& gameOver)
-    : grid(grid), needToSendGame(needToSendGame), gameOver(gameOver),
+TetraminoDisplacement::TetraminoDisplacement(Grid& grid)
+    : grid(grid),
     currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
     dropTimer(1000), 
     commandisBlocked(false), lightisBlocked(false) {}
@@ -10,7 +10,6 @@ TetraminoDisplacement& TetraminoDisplacement::operator=(const TetraminoDisplacem
     if(this != &displacement) {
         this->grid = displacement.grid;
         this->needToSendGame = displacement.needToSendGame;
-        this->gameOver = displacement.gameOver;
         this->currentPiece = displacement.currentPiece;
         this->dropTimer = displacement.dropTimer;
         this->commandisBlocked = displacement.commandisBlocked;
@@ -22,6 +21,7 @@ TetraminoDisplacement& TetraminoDisplacement::operator=(const TetraminoDisplacem
 }
 
 void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
+    std::cout << "Action reçue : " << action << std::endl;
     if (action == "right") { 
         moveCurrentPieceRight();
         setNeedToSendGame(true);

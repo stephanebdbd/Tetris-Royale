@@ -35,7 +35,7 @@ class Server {
     int serverSocket;
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::atomic<int> clientIdCounter;
-    std::unordered_map<int, GameRoom> gameRooms;
+    std::unordered_map<int, std::shared_ptr<GameRoom>> gameRooms;
     std::unique_ptr<ServerChat> chat;
     
     int gameRoomIdCounter=0;
