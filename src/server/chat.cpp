@@ -24,11 +24,13 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
                 if (msg.contains("receiver") && msg.contains("message") && !msg["receiver"].is_null() && !msg["message"].is_null() && msg["message"] != "exit") {
                     // std::string sender = pseudoSocket[msg["sender"]];
                     int receiver = server.getPseudoSocket()[msg["receiver"]];
+                    for (auto const& [pseudo, socket] : server.getPseudoSocket()) {
+                        std::cout << pseudo << " : " << socket << std::endl;
+                    }
                     std::string message = msg["message"];
                     sendMessage(receiver, "?", message);
                 } else {
                     // gere l exit du client
-                    std::cout << "Client " << clientSocket << " disconnected." << std::endl;
                     server.setRunningChat(clientId, false);
                     
                 }
