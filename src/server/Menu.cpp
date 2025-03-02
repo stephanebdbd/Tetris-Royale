@@ -169,8 +169,9 @@ json Menu::getFriendMenu() const {
         {"options", {
             {"1. ", "Ajouter un ami"},
             {"2. ", "Supprimer un ami"},
-            {"3. ", "Lister les amis"},
-            {"4. ", "Retour"}
+            {"3. ", "liste des amis"},
+            {"4. ", "liste des demandes d'amis"},
+            {"5. ", "Retour"}
         }},
         {"input", "Votre choix: "}
     };
@@ -199,16 +200,40 @@ json Menu::getRemoveFriendMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getListFriendsMenu(const std::vector<int>& friends) const {
+json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
     json menu = {
         {"title", "Liste des amis"},
         {"options", {}},
-        {"input", "Appuyez sur une touche pour revenir"}
+        {"input", ""}
     };
 
-    for (const auto& friendId : friends) {
-        menu["options"].push_back({std::to_string(friendId)});
+    for (const auto& user : friends) {
+        menu["options"].push_back({user});
     }
 
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+json Menu::getRequestsListMenu(const std::vector<std::string>& pendingRequests) const {
+    json menu = {
+        {"title", "Liste des demandes d'amis"},
+        {"options", {}},
+        {"input", ""}
+    };
+
+    for (const auto& request : pendingRequests) {
+        menu["options"].push_back(request);
+    }
+
+    return menu;
+}
+json Menu::displayMessage(const std::string& message) const {
+    json menu = {
+        {"title", message},
+        {"options", {
+            {"", "pour retourner au menu principal appyer sur q"},
+            {"2. ", "Annuler"}
+        }},
+        {"input", "Votre choix: "}
+    };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }

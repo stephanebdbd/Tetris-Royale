@@ -8,48 +8,44 @@
 class FriendList {
 private:
     std::unordered_map<std::string, std::vector<std::string>> friends;
-    std::unordered_map<std::string, std::vector<std::string>> pendingRequests;
+    std::unordered_map<std::string, std::vector<std::string>> requests;
     std::string friendsFile ;  // Fichier pour stocker la liste des amis
     std::string requestsFile; // Fichier pour stocker les demandes d'amis
 
     // charggement des donnes depuis les fichier 
     std::unordered_map<std::string, std::vector<std::string>> loadFriends();
-    void saveFriends(const std::unordered_map<std::string, std::vector<std::string>>& data);
+    void saveFriends();
     std::unordered_map<std::string, std::vector<std::string>> loadRequests();
-    void saveRequests(const std::unordered_map<std::string, std::vector<std::string>>& data);
+    void saveRequests();
 
 public:
     // Constructeur
     FriendList();
 
-    // Vérifier si un utilisateur existe
-    bool userExists(const std::string& userId);
 
-    // Vérifier si deux utilisateurs sont amis
-    bool areFriends(const std::string& user1, const std::string& user2);
-
-    // Récupérer la liste des amis d'un utilisateur
-    std::vector<std::string> getFriendsList(const std::string& user);
-
-    // Récupérer les demandes d'amis en attente
-    std::vector<std::string> getPendingRequests(const std::string& user);
-
-    // Ajouter un ami après acceptation
-    void addFriend(const std::string& user1, const std::string& user2);
-
-    // Envoyer une demande d'ami
-    void sendFriendRequest(const std::string& sender, const std::string& receiver);
-
-    // Supprimer un ami
-    void removeFriend(const std::string& user1, const std::string& user2);
-
-    // Supprimer une demande d'ami
-    void removeFriendRequest(const std::string& sender, const std::string& receiver);
-
-    // Enregistrer un nouvel utilisateur
     void registerUser(const std::string& username);
+    void sendFriendRequest(const std::string& sender, const std::string& receiver);
+    void acceptFriendRequest(const std::string& user, const std::string& friendToAccept);
+    void rejectFriendRequest(const std::string& user, const std::string& friendToReject);
+    void listFriends(const std::string& user) const;
+    void listPendingRequests(const std::string& user) const;
+    bool areFriends(const std::string& user1, const std::string& user2) const;
+    bool userExists(const std::string& userId) const;
+    void removeFriend(const std::string& user, const std::string& friendToRemove);
+    void removeFriendRequest(const std::string& sender, const std::string& receiver);
+    std::vector<std::string> getFriendList(const std::string& user) const;
+    std::vector<std::string> getRequestList(const std::string& user) const;
+    bool isPendingRequest(const std::string& sender, const std::string& receiver);
+    
 
-    bool acceptFriendRequest(const std::string& user1, const std::string& user2);
+
+
+
+
+
+
+
+
 };
 
 #endif // FRIENDLIST_HPP

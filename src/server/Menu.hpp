@@ -17,11 +17,13 @@ class Menu {
         json getchatMenu() const;
         json getJoinOrCreateGame() const;
         json getGameMode() const;
+
         json getFriendMenu() const;
         json getAddFriendMenu() const;
         json getRemoveFriendMenu() const;
-        json getListFriendsMenu(const std::vector<int>& friends) const;
-
+        json getFriendListMenu(const std::vector<std::string>& friends) const;
+        json getRequestsListMenu(const std::vector<std::string>& pendingRequests) const;
+        json displayMessage(const std::string& message) const;
 
 };
 

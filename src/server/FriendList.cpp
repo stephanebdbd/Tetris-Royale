@@ -7,7 +7,7 @@
 // Constructeur : initialise les noms de fichiers
 FriendList::FriendList() : friendsFile("friendsList.txt"), requestsFile("friendsRequest.txt") {
     friends = loadFriends();
-    pendingRequests = loadRequests();
+    requests = loadRequests();
     }
 
 // Charger la liste des amis depuis le fichier
@@ -85,14 +85,14 @@ std::unordered_map<std::string, std::vector<std::string>> FriendList::loadReques
 }
 
 // Sauvegarder les demandes d'amis
-void FriendList::saveRequests(const std::unordered_map<std::string, std::vector<std::string>>& data) {
+void FriendList::saveRequests() {
     std::ofstream file(requestsFile);
     if (!file.is_open()) {
         std::cerr << "Erreur : Impossible d'ouvrir le fichier " << requestsFile << " pour écriture." << std::endl;
         return;
     }
 
-    for (const auto& [sender, receivers] : data) {
+    for (const auto& [sender, receivers] : requests) {
         file << sender << ":";
         for (size_t i = 0; i < receivers.size(); ++i) {
             file << receivers[i];
@@ -103,92 +103,19 @@ void FriendList::saveRequests(const std::unordered_map<std::string, std::vector<
     file.close();
 }
 
-// Vérifier si un utilisateur existe
-bool FriendList::userExists(const std::string& userId) {
-    auto friends = loadFriends();
-    return friends.find(userId) != friends.end();
-}
+bool FriendList::isPendingRequest(const std::string& sender, const std::string& receiver) {
+    // Vérifie si 'receiver' a une demande en attente de 'sender'
+    auto it = requests.find(receiver);
+    if (it != requests.end()) {
+        return std::find(it->second.begin(), it->second.end(), sender) != it->second.end();
 
-// Vérifier si deux utilisateurs sont déjà amis
-bool FriendList::areFriends(const std::string& user1, const std::string& user2) {
-    auto friends = loadFriends();
-    auto it = friends.find(user1);
-    if (it != friends.end()) {
-        return std::find(it->second.begin(), it->second.end(), user2) != it->second.end();
     }
     return false;
 }
 
-// Ajouter une demande d'ami
-void FriendList::sendFriendRequest(const std::string& sender, const std::string& receiver) {
-    auto requests = loadRequests();
-    if (std::find(requests[sender].begin(), requests[sender].end(), receiver) == requests[sender].end()) {
-        requests[sender].push_back(receiver);
-        saveRequests(requests);
-    }
-}
-
-// Accepter une demande d'ami et l'ajouter à la liste
-bool FriendList::acceptFriendRequest(const std::string& user1, const std::string& user2) {
-    auto requests = loadRequests();
-    auto it = std::find(requests[user2].begin(), requests[user2].end(), user1);
-    
-    if (it != requests[user2].end()) {
-        requests[user2].erase(it);
-        saveRequests(requests);
-
-        auto friends = loadFriends();
-        friends[user1].push_back(user2);
-        friends[user2].push_back(user1);
-        saveFriends(friends);
-        return true;
-    }
-    return false;
-}
-
-// Supprimer un ami
-void FriendList::removeFriend(const std::string& user1, const std::string& user2) {
-    auto friends = loadFriends();
-
-    auto it1 = std::find(friends[user1].begin(), friends[user1].end(), user2);
-    if (it1 != friends[user1].end()) {
-        friends[user1].erase(it1);
-    }
-
-    auto it2 = std::find(friends[user2].begin(), friends[user2].end(), user1);
-    if (it2 != friends[user2].end()) {
-        friends[user2].erase(it2);
-    }
-
-    saveFriends(friends);
-}
-
-// Supprimer une demande d'ami
-void FriendList::removeFriendRequest(const std::string& sender, const std::string& receiver) {
-    auto requests = loadRequests();
-    auto it = std::find(requests[sender].begin(), requests[sender].end(), receiver);
-    
-    if (it != requests[sender].end()) {
-        requests[sender].erase(it);
-        saveRequests(requests);
-    }
-}
-
-// Récupérer la liste des amis d'un utilisateur
-std::vector<std::string> FriendList::getFriendsList(const std::string& user) {
-    auto friends = loadFriends();
-    return friends[user]; // Retourne une liste vide si l'utilisateur n'existe pas
-}
-
-// Récupérer les demandes d'amis en attente
-std::vector<std::string> FriendList::getPendingRequests(const std::string& user) {
-    auto requests = loadRequests();
-    return requests[user]; // Retourne une liste vide si pas de demande
-}
 
 
-
-void FriendList::saveFriends(const std::unordered_map<std::string, std::vector<std::string>>& data) {
+void FriendList::saveFriends() {
     // Ouvrir le fichier pour ajouter sans écraser les données existantes
     std::ofstream file(friendsFile, std::ios::out); // std::ios::out est suffisant, pas besoin de std::ios::trunc
 
@@ -197,7 +124,7 @@ void FriendList::saveFriends(const std::unordered_map<std::string, std::vector<s
         return;
     }
 
-    for (const auto& [user, friends] : data) {
+    for (const auto& [user, friends] : friends) {
         file << user << ":";
         for (size_t i = 0; i < friends.size(); ++i) {
             file << friends[i];
@@ -210,7 +137,7 @@ void FriendList::saveFriends(const std::unordered_map<std::string, std::vector<s
 }
 void FriendList::registerUser(const std::string& username) {
     // Charger les amis existants
-    std::unordered_map<std::string, std::vector<std::string>> friends = loadFriends();
+    //std::unordered_map<std::string, std::vector<std::string>> friends = loadFriends();
 
     // Vérifier si l'utilisateur existe déjà
     if (friends.find(username) != friends.end()) {
@@ -222,8 +149,168 @@ void FriendList::registerUser(const std::string& username) {
     friends[username] = {}; 
 
     // Sauvegarder les mises à jour (n'écrase pas les données existantes)
-    saveFriends(friends); 
+    saveFriends(); 
 
     std::cout << "Utilisateur " << username << " ajouté avec succès." << std::endl;
 }
 
+void FriendList::sendFriendRequest(const std::string& sender, const std::string& receiver) {
+ 
+    // Vérifier que l'utilisateur n'envoie pas une demande à lui-même
+    if (sender == receiver) {
+        std::cout << "Vous ne pouvez pas envoyer une demande d'ami à vous-même." << std::endl;
+        return;
+    }
+
+    // Ajouter la demande dans la liste des demandes de l'utilisateur récepteur
+    if (requests.find(receiver) == requests.end()) {
+        // Si l'utilisateur n'a pas encore de demandes, initialiser la liste
+        requests[receiver] = {};
+    }
+    // Vérifier si la demande existe déjà
+    auto& receiverRequests = requests[receiver];
+    if (std::find(receiverRequests.begin(), receiverRequests.end(), sender) != receiverRequests.end()) {
+        std::cout << "La demande d'ami a déjà été envoyée à " << receiver << "." << std::endl;
+        return;
+    }
+
+    // Ajouter l'expéditeur à la liste des demandes en attente du récepteur
+    receiverRequests.push_back(sender);
+
+    // Sauvegarder les demandes après modification
+    saveRequests();
+    
+}
+
+void FriendList::acceptFriendRequest(const std::string& user, const std::string& friendToAccept) {
+    // Vérifier si la demande existe
+
+    auto& userRequests = requests[user];
+    auto it = std::find(userRequests.begin(), userRequests.end(), friendToAccept);
+    if (it == userRequests.end()) {
+        std::cout << "Aucune demande d'ami de " << friendToAccept << " trouvée." << std::endl;
+        return;
+    }
+
+    friends[user].push_back(friendToAccept);
+    friends[friendToAccept].push_back(user);
+
+    // Supprimer la demande de la liste
+    userRequests.erase(it);
+    // Sauvegarder les mises à jour des amis et des demandes
+    saveFriends();
+    saveRequests();
+}
+// Méthode pour rejeter une demande d'ami
+void FriendList::rejectFriendRequest(const std::string& user, const std::string& friendToReject) {
+    // Vérifier si la demande existe
+    auto& userRequests = requests[user];
+    auto it = std::find(userRequests.begin(), userRequests.end(), friendToReject);
+    if (it == userRequests.end()) {
+        std::cout << "Aucune demande d'ami de " << friendToReject << " trouvée." << std::endl;
+        return;
+    }
+
+    // Retirer la demande d'ami sans ajouter l'utilisateur à la liste des amis
+    userRequests.erase(it);
+
+    // Sauvegarder les mises à jour des demandes
+    saveRequests();
+
+}
+
+// Méthode pour lister les amis d'un utilisateur
+void FriendList::listFriends(const std::string& user) const {
+    auto it = friends.find(user);
+    if (it == friends.end() || it->second.empty()) {
+        std::cout << user << " n'a pas d'amis." << std::endl;
+        return;
+    }
+
+    std::cout << "Liste des amis de " << user << " : ";
+    for (const auto& friendName : it->second) {
+        std::cout << friendName << " ";
+    }
+    std::cout << std::endl;
+}
+
+// Méthode pour lister les demandes en attente pour un utilisateur
+void FriendList::listPendingRequests(const std::string& user) const {
+    auto it = requests.find(user);
+    if (it == requests.end() || it->second.empty()) {
+        std::cout << "Aucune demande d'ami en attente pour " << user << "." << std::endl;
+        return;
+    }
+
+    std::cout << "Demandes d'ami en attente pour " << user << " : ";
+    for (const auto& requester : it->second) {
+        std::cout << requester << " ";
+    }
+    std::cout << std::endl;
+}
+// Vérifie si un utilisateur existe dans la liste des amis
+bool FriendList::userExists(const std::string& username) const {
+    return friends.find(username) != friends.end();
+}
+
+// Vérifie si deux utilisateurs sont amis
+bool FriendList::areFriends(const std::string& user1, const std::string& user2) const {
+    if (!userExists(user1) || !userExists(user2)) {
+        return false; // Un des utilisateurs n'existe pas
+    }
+    const auto& userFriends = friends.at(user1);
+    return std::find(userFriends.begin(), userFriends.end(), user2) != userFriends.end();
+}
+void FriendList::removeFriend(const std::string& user, const std::string& friendToRemove) {
+    if (!areFriends(user, friendToRemove)) {
+        std::cout << user << " et " << friendToRemove << " ne sont pas amis." << std::endl;
+        return;
+    }
+
+    // Supprimer de la liste de l'utilisateur
+    auto& userFriends = friends[user];
+    userFriends.erase(std::remove(userFriends.begin(), userFriends.end(), friendToRemove), userFriends.end());
+
+    // Supprimer de la liste de l'ami
+    auto& friendFriends = friends[friendToRemove];
+    friendFriends.erase(std::remove(friendFriends.begin(), friendFriends.end(), user), friendFriends.end());
+
+    // Sauvegarde des modifications
+    saveFriends();
+    std::cout << friendToRemove << " a été retiré de la liste d'amis de " << user << "." << std::endl;
+}
+
+// Supprime une demande d'ami
+void FriendList::removeFriendRequest(const std::string& sender, const std::string& receiver) {
+    if (requests.find(receiver) == requests.end()) {
+        std::cout << "Aucune demande d'ami trouvée de " << sender << " à " << receiver << "." << std::endl;
+        return;
+    }
+
+    auto& req = requests[receiver];
+    auto it = std::remove(req.begin(), req.end(), sender);
+    
+    if (it != req.end()) {
+        req.erase(it, req.end());
+        saveRequests();
+        std::cout << "Demande d'ami de " << sender << " à " << receiver << " supprimée." << std::endl;
+    } else {
+        std::cout << "Aucune demande d'ami trouvée de " << sender << " à " << receiver << "." << std::endl;
+    }
+}
+std::vector<std::string> FriendList::getFriendList(const std::string& user) const {
+    auto it = friends.find(user);
+    if (it != friends.end()) {
+        return it->second;
+    }
+    return {}; // Retourne une liste vide si l'utilisateur n'a pas d'amis
+}
+
+// Récupère la liste des demandes d'amis en attente pour un utilisateur
+std::vector<std::string> FriendList::getRequestList(const std::string& user) const {
+    auto it = requests.find(user);
+    if (it != requests.end()) {
+        return it->second;
+    }
+    return {}; // Retourne une liste vide si l'utilisateur n'a pas de demandes en attente
+}

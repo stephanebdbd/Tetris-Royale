@@ -21,7 +21,6 @@ enum class MenuState {
         Game, 
             JoinOrCreateGame,
                 GameMode,
-                GameOver,
         classement,
         chat,
             createRoom,
@@ -32,7 +31,9 @@ enum class MenuState {
             AddFriend,
             RemoveFriend,
             FriendList,
-            Request
+            FriendRequestList,
+            acceptFriendRequest,
+            rejectFriendRequest,
 };
 
 class Server {
@@ -78,6 +79,7 @@ public:
     void stop();
     void sendMenuToClient(int clientSocket, const std::string& screen);
     void sendGameToClient(int clientSocket, int clientId);
+    void sendChatModeToClient(int clientSocket);
     void keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputMainMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameMenu(int clientSocket, int clientId, const std::string& action);
@@ -90,8 +92,6 @@ public:
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
     void loopGame(int clientSocket, int clientId);
@@ -103,7 +103,11 @@ public:
     void setClientState(int clientId, MenuState state) { clientStates[clientId] = state; }
     bool getRunningChat(int clientId) { return runningChats[clientId]; }
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
-
+    void keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRejectFriendMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRemoveFriendMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputListFriendsMenu(int clientSocket, int clientId);
+    void keyInputListPendingRequestsMenu(int clientSocket, int clientId);
 
 };
 

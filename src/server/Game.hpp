@@ -59,7 +59,9 @@ class Game {
         json getFriendMenu() { return menu.getFriendMenu(); }
         json getAddFriendMenu() { return menu.getAddFriendMenu(); }
         json getRemoveFriendMenu()  { return menu.getRemoveFriendMenu(); }
-
+        json getFriendListMenu(const std::vector<std::string>& friends) { return menu.getFriendListMenu(friends); }
+        json getRequestsListMenu(const std::vector<std::string>& pendingRequests) { return menu.getRequestsListMenu(pendingRequests); }
+        json displayMessage(const std::string& message) { return menu.displayMessage(message); }
 
 
 

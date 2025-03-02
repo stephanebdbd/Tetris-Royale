@@ -142,23 +142,14 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::Main:
             keyInputMainMenu(clientSocket, clientId, action);
             break;
-        case MenuState::classement:
-            keyInputRankingMenu(clientSocket, clientId, action);
-            break;
-        case MenuState::chat:
-            keyInputChatMenu(clientSocket, clientId, action);
-            break;
-        case MenuState::JoinOrCreateGame:
-            keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
-            break;
-        case MenuState::GameMode:
-            keyInputModeGameMenu(clientSocket, clientId, action);
-            break;
         case MenuState::Game:
             keyInputGameMenu(clientSocket, clientId, action);
             break;
-        case MenuState::GameOver:
-            keyInputGameOverMenu(clientSocket, clientId, action);
+        case MenuState::classement:
+            // Classement
+            break;
+        case MenuState::chat:
+            keyInputChatMenu(clientSocket, clientId, action);
             break;
         case MenuState::Friends:
             keyInputFriendsMenu(clientSocket, clientId, action);
@@ -167,79 +158,272 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             keyInputAddFriendMenu(clientSocket, clientId, action);
             break;
         case MenuState::RemoveFriend:
-            //keyInputRemoveFriendMenu(clientSocket, clientId, action);
+            keyInputRemoveFriendMenu(clientSocket, clientId, action);
             break;
-        case MenuState::Request:
-            // Request handling (if needed)
+        case MenuState::FriendList:
+            keyInputListFriendsMenu(clientSocket, clientId);
             break;
+        case MenuState::FriendRequestList:
+            keyInputListPendingRequestsMenu(clientSocket, clientId);
+            break;
+        case MenuState::acceptFriendRequest:
+            keyInputAcceptFriendMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::rejectFriendRequest:
+            keyInputRejectFriendMenu(clientSocket, clientId, action);
+            break;
+
         default:
             std::cerr << "Erreur : état inconnu dans handleMenu !" << std::endl;
             break;
     }
+
+
+////////////////////////////////////////////////////////////////////////////
+}
+
+void Server::keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action) {
+    std::string currentUser = clientPseudo[clientId];
+
+    if (action == "accept.all") {
+        std::vector<std::string> requests = friendList->getRequestList(currentUser);
+        if (requests.empty()) {
+            sendMenuToClient(clientSocket, "📭 Vous n'avez aucune demande d'ami en attente.");
+            return;
+        }
+
+        for (const std::string& friend_request : requests) {
+            friendList->acceptFriendRequest(currentUser, friend_request);
+        }
+
+        sendMenuToClient(clientSocket, "✅ Toutes les demandes d'amis ont été acceptées ! 🎉");
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+        return;
+    }
+
+    // Vérification du format "accept.pseudo"
+    std::string prefix = "accept.";
+    if (action.substr(0, prefix.size()) != prefix) {
+        sendMenuToClient(clientSocket, "Erreur : Format invalide. Utilisez 'accept.pseudo' ou 'accept.all'.");
+        return;
+    }
+
+    std::string friend_request = action.substr(prefix.size());
+    if (friend_request.empty()) {
+        sendMenuToClient(clientSocket, "Erreur : Aucun pseudonyme fourni.");
+        return;
+    }
+
+    // Vérifier la demande et l'accepter
+    if (!friendList->isPendingRequest(currentUser, friend_request)) {
+        sendMenuToClient(clientSocket, "Erreur : Aucune demande d'ami en attente de '" + friend_request + "'.");
+        return;
+    }
+
+    friendList->acceptFriendRequest(currentUser, friend_request);
+    sendMenuToClient(clientSocket, "✅ Demande d'ami acceptée avec '" + friend_request + "' 🎉");
+
+    clientStates[clientId] = MenuState::Main;
+    sendMenuToClient(clientSocket, game->getMainMenu1());
 }
 
 
+
+
+
+
+
+
+
+/*
+void Server::keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action.empty()) {
+        return;
+    }
+
+    std::string friend_request = action;
+    std::string currentUser = clientPseudo[clientId];
+
+    // Vérifier si la demande d'ami existe
+    if (!friendList->isPendingRequest(currentUser, friend_request)) {
+        sendMenuToClient(clientSocket, "Erreur : Aucune demande d'ami en attente de " + friend_request + ".");
+        return;
+    }
+
+    // Accepter la demande
+    friendList->acceptFriendRequest(currentUser, friend_request);
+    sendMenuToClient(clientSocket, game->displayMessage("Demande d'ami acceptée avec " + friend_request + "."));
+
+    // Retour au menu principal
+    clientStates[clientId] = MenuState::Main;
+    sendMenuToClient(clientSocket, game->getMainMenu1());
+}
+
+*/
+void Server::keyInputRejectFriendMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action.empty()) {
+        return;
+    }
+
+    std::string friend_request = action;
+    std::string currentUser = clientPseudo[clientId];
+
+    // Vérifier si la demande d'ami existe
+    if (!friendList->isPendingRequest(currentUser, friend_request)) {
+        sendMenuToClient(clientSocket, game->displayMessage("Erreur : Aucune demande d'ami en attente de " + friend_request + "."));
+        return;
+    }
+
+    // Refuser la demande
+    friendList->rejectFriendRequest(currentUser, friend_request);
+    sendMenuToClient(clientSocket, game->displayMessage("Demande d'ami refusée de " + friend_request + "."));
+
+    // Retour au menu principal
+    clientStates[clientId] = MenuState::Main;
+    //sendMenuToClient(clientSocket, game->getMainMenu1());
+}
+void Server::keyInputRemoveFriendMenu(int clientSocket, int clientId, const std::string& action) {
+    if (action.empty()) {
+        return;
+    }
+
+    std::string friend_request = action;
+    std::string currentUser = clientPseudo[clientId];
+
+    // Vérifier si l'utilisateur est ami avec l'autre utilisateur
+    if (!friendList->areFriends(currentUser, friend_request)) {
+        sendMenuToClient(clientSocket, game->displayMessage("Erreur : Vous n'êtes pas ami avec " + friend_request + "."));
+        return;
+    }
+
+    // Supprimer l'ami
+    friendList->removeFriend(currentUser, friend_request);
+    sendMenuToClient(clientSocket, game->displayMessage(friend_request + " a été supprimé de votre liste d'amis."));
+
+    // Retour au menu principal
+    clientStates[clientId] = MenuState::Main;
+    //sendMenuToClient(clientSocket, game->getMainMenu1());
+}
+void Server::keyInputListFriendsMenu(int clientSocket, int clientId) {
+    std::string currentUser = clientPseudo[clientId];
+
+    // Récupérer la liste des amis de l'utilisateur
+    std::vector<std::string> friends = friendList->getFriendList(currentUser);
+
+    if (friends.empty()) {
+        sendMenuToClient(clientSocket, game->displayMessage("Vous n'avez pas d'amis."));
+        return;
+    }
+
+
+    sendMenuToClient(clientSocket, game->getFriendListMenu(friends));
+
+    // Retour au menu principal
+    clientStates[clientId] = MenuState::Main;
+    //sendMenuToClient(clientSocket, game->getMainMenu1());
+}
+void Server::keyInputListPendingRequestsMenu(int clientSocket, int clientId) {
+    std::string currentUser = clientPseudo[clientId];
+
+    // Récupérer les demandes en attente pour l'utilisateur
+    std::vector<std::string> pendingRequests = friendList->getRequestList(currentUser);
+
+    if (pendingRequests.empty()) {
+        sendMenuToClient(clientSocket, game->displayMessage("Vous n'avez pas de demandes d'amis en attente."));
+        return;
+    }
+
+
+    sendMenuToClient(clientSocket, game->getRequestsListMenu(pendingRequests));
+
+    // Retour au menu principal
+    clientStates[clientId] = MenuState::Main;
+    //sendMenuToClient(clientSocket, game->getMainMenu1());
+}
+
+
+
+/*void Server::keyInputFriendListMenu(int clientSocket, int clientId, const std::string& action) {
+
+    if (action == "1") {
+        // Accepter une demande d'ami
+        clientStates[clientId] = MenuState::acceptFriendRequest;
+        sendMenuToClient(clientSocket, game->getAcceptFriendRequestMenu(friendList->getRequestList(clientPseudo[clientId])));
+    }
+    else if (action == "2") {
+        // Refuser une demande d'ami
+        clientStates[clientId] = MenuState::rejectFriendRequest;
+        sendMenuToClient(clientSocket, game->getRejectFriendRequestMenu(friendList->getRequestList(clientPseudo[clientId])));
+    }
+    else if (action == "3") {
+        // Retour au menu principal
+        clientStates[clientId] = MenuState::Main;
+        sendMenuToClient(clientSocket, game->getMainMenu1());
+    }
+}*/
 void Server::keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
         clientStates[clientId] = MenuState::AddFriend;
         sendMenuToClient(clientSocket, game->getAddFriendMenu());
+    
     }
     else if (action == "2") {
         clientStates[clientId] = MenuState::RemoveFriend;
         sendMenuToClient(clientSocket, game->getRemoveFriendMenu());
     }
     else if (action == "3") {
-        //auto friends = getFriends(clientId);
-        //sendMenuToClient(clientSocket, game->getListFriendsMenu(friends));
+        clientStates[clientId] = MenuState::FriendList;
+        sendMenuToClient(clientSocket, game->getFriendListMenu(friendList->getFriendList(clientPseudo[clientId])));
+        
     }
     else if (action == "4") {
+        clientStates[clientId] = MenuState::FriendRequestList;
+        sendMenuToClient(clientSocket, game->getRequestsListMenu(friendList->getRequestList(clientPseudo[clientId])));
+    
+    }
+    else if (action == "5") {
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
     }
+
 }
-/*void Server::sendFriendRequest(int clientId, const std::string& friendId) {
-    // Logique pour envoyer une demande d'ami
-    // Par exemple, ajouter la demande à une liste de demandes en attente
-    pendingFriendRequests[friendId].push_back(clientId);
-    std::cout << "Demande d'ami envoyée de " << clientId << " à " << friendId << std::endl;
-}*/
+
 void Server::keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action) {
-    std::string friend_request = action; // Récupérer le pseudo de l'utilisateur actuel
-    std::string currentUser = clientPseudo[clientId]; // Récupérer le pseudo de l'utilisateur actuel
     if (action.empty()) {
-        // Si l'action est vide, on demande à l'utilisateur de saisir un pseudo
-
-
-        //-->   ??????????????????
         return;
     }
 
-    // Vérifier si l'ami existe
+    std::string friend_request = action; 
+    std::string currentUser = clientPseudo[clientId]; 
+
+    // Vérifier si l'utilisateur existe
     if (!friendList->userExists(friend_request)) {
-        sendMenuToClient(clientSocket, "Erreur : L'utilisateur " + friend_request + " n'existe pas.");
+        sendMenuToClient(clientSocket, game->displayMessage("Erreur : L'utilisateur " + friend_request + " n'existe pas."));
         return;
     }
 
     // Vérifier si l'utilisateur essaie de s'ajouter lui-même
     if (friend_request == currentUser) {
-        sendMenuToClient(clientSocket, "Erreur : Vous ne pouvez pas vous ajouter vous-même.");
+
+        sendMenuToClient(clientSocket, game->displayMessage("Erreur : Vous ne pouvez pas vous ajouter vous-même."));
         return;
     }
 
-    // Vérifier s'ils sont déjà amis
+    // Vérifier si les deux utilisateurs sont déjà amis
     if (friendList->areFriends(currentUser, friend_request)) {
-        sendMenuToClient(clientSocket, "Erreur : Vous êtes déjà ami avec " + friend_request + ".");
+        sendMenuToClient(clientSocket, game->displayMessage("Erreur : Vous êtes déjà ami avec " + friend_request + "."));
         return;
     }
 
     // Envoyer la demande d'ami
-    //friendList->addFriendRequest(currentUser, friend_request);
-    sendMenuToClient(clientSocket, "Demande d'ami envoyée à " + friend_request + ".");
-
+    friendList->sendFriendRequest(currentUser, friend_request);
+    //sendMenuToClient(clientSocket, game->displayMessage("Demande d'ami envoyée à " + friend_request + "."));
     // Retour au menu principal
     clientStates[clientId] = MenuState::Main;
-    sendMenuToClient(clientSocket, game->getMainMenu1());
+    //sendMenuToClient(clientSocket, game->getMainMenu1());
 }
+
 void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {  // Se connecter
         clientStates[clientId] = MenuState::LoginPseudo;
@@ -260,7 +444,6 @@ void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const st
         // Si le pseudo n'existe pas, on stock en tmp
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::RegisterPassword;
-        pseudoTosocket[action] = clientSocket;
         sendMenuToClient(clientSocket, game->getRegisterMenu2());
     } 
     else {
@@ -273,10 +456,8 @@ void Server::keyInputRegisterPseudoMenuFailed(int clientSocket, int clientId, co
         // Si le pseudo n'existe pas, on stock en tmp
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::RegisterPassword;
-        pseudoTosocket[action] = clientSocket;
-        std::cout << "Client #" << clientId << " connecté en tant que " << clientPseudo[clientId] << std::endl;
         sendMenuToClient(clientSocket, game->getRegisterMenu2());
-    }
+    } 
     else {
         sendMenuToClient(clientSocket, game->getRegisterMenuFailed());
     }
@@ -284,8 +465,7 @@ void Server::keyInputRegisterPseudoMenuFailed(int clientSocket, int clientId, co
 
 void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     userManager->registerUser(clientPseudo[clientId], action);
-    //friendList->registerUser(clientPseudo[clientId]);
-    pseudoTosocket[clientPseudo[clientId]] = clientSocket;
+    friendList->registerUser(clientPseudo[clientId]);
     clientPseudo.erase(clientId);
     clientStates[clientId] = MenuState::Main;
     sendMenuToClient(clientSocket, game->getMainMenu1());
@@ -295,7 +475,6 @@ void Server::keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::
     if (!userManager->userNotExists(action)) { // Si le pseudo existe
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::LoginPassword;
-        pseudoTosocket[action] = clientSocket;
         sendMenuToClient(clientSocket, game->getLoginMenu2());
     } 
     else {
@@ -307,8 +486,6 @@ void Server::keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::
 void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     if (userManager->authenticateUser(clientPseudo[clientId], action)) { // Si le mot de passe est correct
         clientStates[clientId] = MenuState::Main;
-        pseudoTosocket[clientPseudo[clientId]] = clientSocket;
-        std::cout << "Client #" << clientId << " connecté en tant que " << clientPseudo[clientId] << std::endl;
         sendMenuToClient(clientSocket, game->getMainMenu1());
 
     } 
@@ -376,20 +553,10 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
     }else if(action == "3") {
         // a implémenter
     }else if(action == "4") {
-        json message;
-        message["mode"] = "chat";
-        std::string msg = message.dump() + "\n";
-        sendMenuToClient(clientSocket, msg);
+        sendChatModeToClient(clientSocket);
         runningChats[clientId] = true;
         chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, game->getChatMenu());
     }else if(action == "5") {
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, game->getMainMenu1());
-    }
-}
-
-void Server::keyInputRankingMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "1") { // TODO: faudra qu'on le voit dans le menu
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, game->getMainMenu1());
     }
@@ -420,17 +587,6 @@ void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::str
     loopGame(clientSocket, clientId);
 }
 
-
-void Server::keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "1") {
-        clientStates[clientId] = MenuState::GameMode;
-        sendMenuToClient(clientSocket, game->getGameMode());
-    }
-    else if (action == "2") {
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, game->getMainMenu1());
-    }
-}
 
 
 void Server::keyInputGameMenu(int clientSocket, int clientId,const std::string& unicodeAction) {
@@ -540,6 +696,12 @@ void Server::loopGame(int clientSocket, int clientId) {
     }
 }
 
+void Server::sendChatModeToClient(int clientSocket) {
+    json message;
+    message["mode"] = "chat";
+    std::string msg = message.dump() + "\n";
+    send(clientSocket, msg.c_str(), msg.size(), 0);
+}
 
 int main() {
     // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 
