@@ -2,25 +2,3 @@ Serveur en attente de connexions sur le port 12345
 Client #0 connecté.
 LoginPassword
 Client #0 connecté en tant que ismail
-Chat process started for client 5
-Client #1 connecté.
-LoginPassword
-Client #1 connecté en tant que momo
-Chat process started for client 6
-{"message":"cv","receiver":"momo"}
-Message reçu de 5 : "cv"
-momo : 6
-Error: Receiver not found.
-{"message":"cv","sender":"ismail"}
-{"message":"comment va tu","receiver":"ismail"}
-Message reçu de 6 : "comment va tu"
-momo : 6
-ismail : 5
-Error: Receiver not found.
-{"message":"comment va tu","sender":"momo"}
-Error: [json.exception.parse_error.101] parse error at line 1, column 1: attempting to parse an empty input; check that your input string or stream contains the expected JSON
-Chat process ended for client 5
-Client #0 déconnecté.
-Error: [json.exception.parse_error.101] parse error at line 1, column 1: attempting to parse an empty input; check that your input string or stream contains the expected JSON
-Chat process ended for client 6
-Client #1 déconnecté.

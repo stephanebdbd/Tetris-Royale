@@ -22,7 +22,8 @@ class Menu {
         json getAddFriendMenu() const;
         json getRemoveFriendMenu() const;
         json getFriendListMenu(const std::vector<std::string>& friends) const;
-        json getRequestsListMenu(const std::vector<std::string>& pendingRequests) const;
+        json getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const;
+        json getGameOverMenu() const;        json getRequestsListMenu(const std::vector<std::string>& pendingRequests) const;
         json displayMessage(const std::string& message) const;
 
 };

@@ -2,71 +2,43 @@
 #define GAME_HPP
 
 #include "Tetramino.hpp"
+#include "TetraminoDisplacement.hpp"
 #include "Timer.hpp"
 #include "Score.hpp"
 #include "Menu.hpp"
 #include "malus.hpp"
-//#include "GameMode.hpp"
+#include "GameMode.hpp"
 #include <iostream>
 
 class Game {
     Grid grid;
-    Tetramino currentPiece;
-    Timer dropTimer;
     Score score;
-    Menu menu;
-    //std::unique_ptr<GameMode> gameMode;
     
+    int linesCleared;
     bool running;
-    bool gameOver;
-
-    bool needToSendGame = true;
-
+    
+    bool malus5Royal = false;
+    
+    TetraminoDisplacement displacement;
+    
     public:
         Game(int gridWidth, int gridHeight);
+        Game& operator=(const Game& game);
         void run();
         void showGame();
-        void userInput();
         void showGameOver();
-        void update();
-
-        void moveCurrentPieceDown();
-        void moveCurrentPieceRight();
-        void moveCurrentPieceLeft();
-        void rotateCurrentPiece();
-        void dropCurrentPiece();
-
+        void updateGame();
         Grid& getGrid() { return grid; }
-        Tetramino& getCurrentPiece() { return currentPiece; }
+        void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
+        TetraminoDisplacement& getDisplacement() { return displacement; } 
         Score& getScore() { return score; }
-        json getMainMenu0() { return menu.getMainMenu0(); }  
-        json getMainMenu1() { return menu.getMainMenu1(); }
-
-        json getRegisterMenu1() { return menu.getRegisterMenu1(); }
-        json getRegisterMenuFailed() { return menu.getRegisterMenuFailed(); }
-        json getRegisterMenu2() { return menu.getRegisterMenu2(); }
-
-        json getLoginMenu1() { return menu.getLoginMenu1(); }
-        json getLoginMenuFailed1() { return menu.getLoginMenuFailed1(); }
-        json getLoginMenu2() { return menu.getLoginMenu2(); }
-        json getLoginMenuFailed2() { return menu.getLoginMenuFailed2(); }
-        json getChatMenu() { return menu.getchatMenu(); }
-
-        json getJoinOrCreateGame() const { return menu.getJoinOrCreateGame(); }
-        json getGameMode() const { return menu.getGameMode(); }
-
-
-        json getFriendMenu() { return menu.getFriendMenu(); }
-        json getAddFriendMenu() { return menu.getAddFriendMenu(); }
-        json getRemoveFriendMenu()  { return menu.getRemoveFriendMenu(); }
-        json getFriendListMenu(const std::vector<std::string>& friends) { return menu.getFriendListMenu(friends); }
-        json getRequestsListMenu(const std::vector<std::string>& pendingRequests) { return menu.getRequestsListMenu(pendingRequests); }
-        json displayMessage(const std::string& message) { return menu.displayMessage(message); }
-
-
-
-        bool getNeedToSendGame() { return needToSendGame; }
-        void setNeedToSendGame(bool needToSendGame) { this->needToSendGame = needToSendGame; }
+        int getLinesCleared() const { return linesCleared; }
+        void setNeedToSendGame(bool needToSendGame) { displacement.setNeedToSendGame(needToSendGame); }
+        bool getNeedToSendGame() const { return displacement.getNeedToSendGame(); }
+        Tetramino& getCurrentPiece() { return displacement.getCurrentPiece(); }
+        bool getIsGameOver() const { return displacement.getIsGameOver(); }
+        void setGameOver() ;
+        void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
 
 };
 

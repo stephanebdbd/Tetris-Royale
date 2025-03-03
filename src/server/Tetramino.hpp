@@ -29,6 +29,7 @@ class Tetramino {
         bool canMove(const Grid &grid, int dx, int dy) const;
         void dropTetrimino(Grid &grid);
         void reset(int startX, int startY);
+        void setCurrentShape(std::array<std::array<char, 4>, 4> shape) { currentShape = shape; };
         Color chooseColor(char shapeSymbol) const;
         
         json tetraminoToJson() const;

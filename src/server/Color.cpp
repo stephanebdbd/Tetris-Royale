@@ -15,6 +15,8 @@ void Color::initialize() {
     init_pair(5, COLOR_BLUE, -1);   // J - Bleu
     init_pair(6, COLOR_MAGENTA, -1);// T - Magenta
     init_pair(7, COLOR_WHITE, -1);  // L - Blanc
+    init_pair(8, 244, -1); // Malus - Gris
+
 }
 
 

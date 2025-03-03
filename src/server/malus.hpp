@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Grid.hpp"
+#include "Color.hpp"
 
 class Malus {
     int nbrLine;
@@ -14,6 +15,7 @@ class Malus {
         Malus(int nbrLine);
         void createMalus(); //creation de malus 
         void sendMalus(Grid &grid);
+  
 };
 
 #endif
