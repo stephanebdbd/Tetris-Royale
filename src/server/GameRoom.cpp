@@ -52,6 +52,11 @@ bool GameRoom::getIsFull() const {
     return amountOfPlayers == maxPlayers;
 }
 
+void GameRoom::setHasStarted(){
+    started = true;
+    inProgress = true;
+}
+
 void GameRoom::startGame() {
     while(!this->getIsFull())
         continue;
@@ -60,8 +65,8 @@ void GameRoom::startGame() {
         playersVictim[0] = 1;
         playersVictim[1] = 0;
     }
-
-    inProgress = true;
+    
+    this->setHasStarted();
     int countGameOvers = 0;
     
     while (inProgress) {
@@ -73,6 +78,7 @@ void GameRoom::startGame() {
                 games[i]->updateGame();
                 if (gameMode != nullptr) this->handleMalusOrBonus(i);
             }
+            amountOfPlayers = maxPlayers - countGameOvers;
         }
         if ((countGameOvers == maxPlayers-1) && (gameModeName != GameModeName::Endless)) 
             this->endGame();
@@ -242,7 +248,7 @@ void GameRoom::input(int PlayerServerId, const std::string& unicodeAction) {
             }
         }
         else
-        this->keyInputGame(playerId, unicodeAction);
+            this->keyInputGame(playerId, unicodeAction);
     }
     /*else if (amountOfPlayers < maxPlayers)
         this->inputLobby(playerId, unicodeAction);

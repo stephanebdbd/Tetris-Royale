@@ -11,7 +11,12 @@
 Server::Server(int port) 
     : port(port), serverSocket(-1), clientIdCounter(0){
         userManager = std::make_unique<UserManager>("./users.txt");
- }
+        initscr(); // Initialiser ncurses
+        cbreak(); // Mode non-canonique
+        noecho(); // Désactiver l'écho des caractères
+        keypad(stdscr, TRUE); // Activer la détection des touches spéciales
+        nodelay(stdscr, TRUE); // Ne pas bloquer sur getch()
+    }
 
 
 bool Server::start() {
@@ -88,8 +93,9 @@ void Server::handleClient(int clientSocket, int clientId) {
 
             std::string action = receivedData["action"];
         
-            handleMenu(clientSocket, clientId, action); 
-            receiveInputFromClient(clientSocket, clientId);
+            handleMenu(clientSocket, clientId, action);
+            if (clientStates[clientId] == MenuState::Play)
+                receiveInputFromClient(clientSocket, clientId);
             // Si le joueur est en jeu, lancer un thread pour recevoir les inputs
             
 
@@ -185,20 +191,24 @@ void Server::sendInputToGameRoom(int clientId, const std::string& action) {
 
 void Server::loopGame(int clientSocket, int clientId) {
     int gameRoomId = clientGameRoomId[clientId];
-    
-    while (!gameRooms[gameRoomId]->getIsFull())
+    while (!gameRooms[gameRoomId]->getHasStarted())
         continue;
+    std::cout << "Game #" << gameRoomId << " started." << std::endl;
     while (gameRooms[gameRoomId]->getInProgress()) { 
-        if (gameRooms[gameRoomId]->getGameIsOver(clientId))
-            break;
-        
+        if ((gameRooms[gameRoomId]->getGameIsOver(clientId))){
+            if (gameRooms[gameRoomId]->getGameModeName() == GameModeName::Endless)
+                break;
+            else if ((gameRooms[gameRoomId]->getAmountOfPlayers() < 2))
+                break;
+        }
         if (gameRooms[gameRoomId]->getNeedToSendGame(clientId)) { 
             sendGameToClient(clientSocket, clientId);
             gameRooms[gameRoomId]->setNeedToSendGame(false, clientId);
         }
     }
     clientStates[clientId] = MenuState::GameOver;
-    userManager->updateHighscore(clientPseudo[clientId], gameRooms[gameRoomId]->getScore(clientId).getScore());
+    if (gameRooms[gameRoomId]->getGameModeName() == GameModeName::Endless)
+        userManager->updateHighscore(clientPseudo[clientId], gameRooms[gameRoomId]->getScore(clientId).getScore());
     deleteGameRoom(gameRoomId);
     sendMenuToClient(clientSocket, menu.getGameOverMenu());
     std::cout << "Game #" << gameRoomId << " ended." << std::endl;
@@ -377,32 +387,6 @@ void Server::keyInputRankingMenu(int clientSocket, int clientId, const std::stri
     }
 }
 
-void Server::keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "1") {
-        // endless
-    }
-    else if (action == "2") {
-        // classic
-    }
-    else if (action == "3") {
-        // duel
-    } 
-    else if (action == "4") {
-        // royal competition
-    }
-    else if (action == "5") {
-        clientStates[clientId] = MenuState::JoinOrCreateGame;
-        sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
-        return;
-    }
-    else {
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
-    }
-    // TODO: mettre ca dans les if
-    receiveInputFromClient(clientSocket, clientId); // lance un thread pour recevoir les inputs
-    clientStates[clientId] = MenuState::Game;
-}
-
 void Server::keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
         clientStates[clientId] = MenuState::JoinOrCreateGame;
@@ -447,6 +431,9 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
         char buffer[1024];
 
         while (true) {
+            if (clientStates[clientId] != MenuState::Play) {
+                break;
+            }
             memset(buffer, 0, sizeof(buffer));
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); 
             if (bytesReceived > 0) {

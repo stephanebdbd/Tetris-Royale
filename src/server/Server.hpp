@@ -76,12 +76,12 @@ public:
     void sendGameToClient(int clientSocket, int clientId);
     void sendInputToGameRoom(int clientId, const std::string& action);
     void shiftGameRooms(int index);
-    void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     void clearMenu(int clientSocket, const std::string& functionName);
     void sendGameToPlayer(int clientSocket, int clientId);
+    ~Server() {endwin();}
 };
 
 #endif 

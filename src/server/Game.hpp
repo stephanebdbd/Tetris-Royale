@@ -27,7 +27,7 @@ class Game {
         void run();
         void showGame();
         void showGameOver();
-        void updateGame() { displacement.update(); }
+        void updateGame();
         Grid& getGrid() { return grid; }
         void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
         TetraminoDisplacement& getDisplacement() { return displacement; } 

@@ -27,7 +27,6 @@ public:
     void rotateCurrentPiece();
     void dropCurrentPiece();
     void update();
-    void manageUserInput();
     void drawPiece();
     void setNeedToSendGame(bool needToSendGame);
     bool getNeedToSendGame() const { return needToSendGame; }

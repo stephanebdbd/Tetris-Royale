@@ -40,12 +40,17 @@ void Game::run() {
         else {
             running = false;
         }
-        displacement.manageUserInput();
         gameOver = displacement.getIsGameOver();
     }
 
     showGameOver();
    
+}
+
+void Game::updateGame() {
+    displacement.update();
+    linesCleared = grid.clearFullLines();
+    score.addScore(linesCleared);
 }
 
 void Game::showGame() {

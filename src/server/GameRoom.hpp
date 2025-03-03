@@ -66,13 +66,16 @@ public:
     void setOwnerId(int roomId);
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
-    //void sendGameToPlayer(int PlayerId);
     bool getNeedToSendGame(int playerId) const { return games[players[playerId]]->getNeedToSendGame(); }
     void setNeedToSendGame(bool needToSendGame, int playerId) { games[players[playerId]]->setNeedToSendGame(needToSendGame); }
     void setInsanceGameMode();
     void setRoomId(int roomId) { this->roomId = roomId; }
+    void setHasStarted();
     bool getHasStarted() const { return started; }
+    void setGameIsOver(int playerServerId) { games[players[playerServerId]]->setGameOver(); }
     void input(int playerId, const std::string& unicodeAction);
+    GameModeName getGameModeName() const { return gameModeName; }
+    int getAmountOfPlayers() const { return amountOfPlayers; }
     //void inputLobby(int playerId, const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);

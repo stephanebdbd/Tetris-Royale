@@ -22,6 +22,7 @@ TetraminoDisplacement& TetraminoDisplacement::operator=(const TetraminoDisplacem
 
 void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
     std::cout << "Action reçue : " << action << std::endl;
+    if(commandisBlocked) return;
     if (action == "right") { 
         moveCurrentPieceRight();
         setNeedToSendGame(true);
@@ -38,9 +39,12 @@ void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
         moveCurrentPieceDown();
         setNeedToSendGame(true);
     }
-    else if(action == "drop") { // space
+    else if (action == "drop") { // space
         dropCurrentPiece();
         setNeedToSendGame(true);
+    }
+    else if (action == "q") { // Quitter
+        gameOver = true;
     }
 }
 
@@ -89,19 +93,6 @@ void TetraminoDisplacement::update() {
         }
         dropTimer.reset();
     }
-}
-
-
-void TetraminoDisplacement::manageUserInput() {
-    if(commandisBlocked) return;
-
-    ch = getch();
-    if (ch == KEY_UP) { currentPiece.rotate(grid); }
-    if (ch == KEY_DOWN) { currentPiece.moveDown(grid); }
-    if (ch == KEY_RIGHT) { currentPiece.moveRight(grid); }
-    if (ch == KEY_LEFT) { currentPiece.moveLeft(grid); }
-    if (ch == ' ') { currentPiece.dropTetrimino(grid); }
-    if (ch == 'q') gameOver = true;
 }
 
 void TetraminoDisplacement::setNeedToSendGame(bool needToSendGame) {
