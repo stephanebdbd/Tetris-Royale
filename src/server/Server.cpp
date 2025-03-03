@@ -429,6 +429,7 @@ void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const st
         // Si le pseudo n'existe pas, on stock en tmp
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::RegisterPassword;
+        sockToPseudo[clientSocket] = clientPseudo[clientId];
         sendMenuToClient(clientSocket, game->getRegisterMenu2());
     } 
     else {
@@ -441,6 +442,9 @@ void Server::keyInputRegisterPseudoMenuFailed(int clientSocket, int clientId, co
         // Si le pseudo n'existe pas, on stock en tmp
         clientPseudo[clientId] = action;
         clientStates[clientId] = MenuState::RegisterPassword;
+        pseudoTosocket[action] = clientSocket;
+        sockToPseudo[clientSocket] = clientPseudo[clientId];
+        std::cout << "Client #" << clientId << " connecté en tant que " << clientPseudo[clientId] << std::endl;
         sendMenuToClient(clientSocket, game->getRegisterMenu2());
     } 
     else {
@@ -450,7 +454,8 @@ void Server::keyInputRegisterPseudoMenuFailed(int clientSocket, int clientId, co
 
 void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     userManager->registerUser(clientPseudo[clientId], action);
-    friendList->registerUser(clientPseudo[clientId]);
+    //friendList->registerUser(clientPseudo[clientId]);
+    pseudoTosocket[clientPseudo[clientId]] = clientSocket;
     clientPseudo.erase(clientId);
     clientStates[clientId] = MenuState::Main;
     sendMenuToClient(clientSocket, game->getMainMenu1());
@@ -471,6 +476,9 @@ void Server::keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::
 void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     if (userManager->authenticateUser(clientPseudo[clientId], action)) { // Si le mot de passe est correct
         clientStates[clientId] = MenuState::Main;
+        pseudoTosocket[clientPseudo[clientId]] = clientSocket;
+        sockToPseudo[clientSocket] = clientPseudo[clientId];
+        std::cout << "Client #" << clientId << " connecté en tant que " << clientPseudo[clientId] << std::endl;
         sendMenuToClient(clientSocket, game->getMainMenu1());
 
     } 

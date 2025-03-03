@@ -124,7 +124,7 @@ void Client::receiveDisplay() {
                     }
                     // Si c'est un message de chat
                     else if (data.contains("sender")) {
-                        chat.receiveChatMessages(data["sender"], data["message"]);
+                        chat.receiveChatMessages(data);
                     }
                     // Sinon, c'est un menu
                     else {

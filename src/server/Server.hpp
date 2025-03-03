@@ -10,6 +10,7 @@
 #include <atomic>
 #include <unordered_map>
 #include "FriendList.hpp"
+#include "chatRoom.hpp"
 
 enum class MenuState {
     Welcome,
@@ -51,10 +52,12 @@ class Server {
     std::unordered_map<int, std::string> clientPseudo;    // id -> pseudo
     std::unordered_map<int, MenuState> clientStates;      // id -> menu
     std::unordered_map<std::string, int> pseudoTosocket;  // pseudo -> socket
+    std::unordered_map<int, std::string> sockToPseudo;    // socket -> pseudo
 
 
     std::unordered_map<int, bool> runningGames;
     std::unordered_map<int, bool> runningChats;
+    std::unordered_map<std::string , std::unique_ptr<chatRoom>> chatRooms;
 
     std::unique_ptr<Grid> grid;
     std::unique_ptr<Tetramino> currentPiece;
@@ -103,6 +106,7 @@ public:
     void setClientState(int clientId, MenuState state) { clientStates[clientId] = state; }
     bool getRunningChat(int clientId) { return runningChats[clientId]; }
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
+    std::unordered_map<int, std::string> getSocketPseudo() { return sockToPseudo; }
     //void keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action);
     //void keyInputRejectFriendMenu(int clientSocket, int clientId, const std::string& action);
     //void keyInputRemoveFriendMenu(int clientSocket, int clientId, const std::string& action);

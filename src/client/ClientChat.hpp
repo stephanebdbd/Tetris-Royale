@@ -17,14 +17,15 @@ class ClientChat{
         bool isPlaying;                      ///< A boolean indicating if the client is playing.
         static bool messagesWaitForDisplay;  ///< A boolean indicating if the message is waiting for display.
         int y = 1;                            ///< The y position of the chat message.
+        WINDOW * inputWin, *displayWin;       ///< The input and display window.
 
     public:
 
         ClientChat() = default;
 
         void run();
-        void sendChatMessages(WINDOW *input_win);
-        void receiveChatMessages(const std::string& sender, const std::string& message);
+        void sendChatMessages();
+        void receiveChatMessages(const json& msg);
         void displayChatMessage(std::string sender, const std::string& message);
 
         static bool initMessageMemory();

@@ -22,13 +22,13 @@ void ClientChat::run() {
     getmaxyx(stdscr, height, width); // Récupère les dimensions du terminal
 
     // Fenêtre pour afficher les messages (en haut)
-    WINDOW* displayWin = newwin(height - 3, width, 0, 0); // Hauteur : height - 3, Largeur : width
+    displayWin = newwin(height - 3, width, 0, 0); // Hauteur : height - 3, Largeur : width
     scrollok(displayWin, TRUE); // Activer le défilement pour cette fenêtre
     box(displayWin, 0, 0); // Dessiner une bordure autour de la fenêtre
     wrefresh(displayWin); // Rafraîchir la fenêtre
 
     // Fenêtre pour saisir les messages (en bas)
-    WINDOW *inputWin = newwin(INPUT_HEIGHT, width, height - INPUT_HEIGHT, 0);
+    inputWin = newwin(INPUT_HEIGHT, width, height - INPUT_HEIGHT, 0);
     scrollok(inputWin, TRUE);
     box(inputWin, 0, 0);
     wrefresh(inputWin);
@@ -39,7 +39,7 @@ void ClientChat::run() {
         return;
     }
 
-    std::thread sendThread(&ClientChat::sendChatMessages, this, inputWin);
+    std::thread sendThread(&ClientChat::sendChatMessages, this);
     sendThread.join();  // Attendre la fin du thread avant de détruire l'objet
 
     delwin(displayWin);
@@ -48,7 +48,7 @@ void ClientChat::run() {
     endwin();
 }
 
-void ClientChat::sendChatMessages(WINDOW *inputWin) {
+void ClientChat::sendChatMessages() {
     std::string inputStr;
     int ch;
     while (true) {
@@ -102,12 +102,12 @@ void ClientChat::sendChatMessages(WINDOW *inputWin) {
     std::cout << "Fin du thread d'envoi de messages !" << std::endl;
 }
 
-void ClientChat::receiveChatMessages(const std::string& sender, const std::string& message) {
+void ClientChat::receiveChatMessages(const json& msg) {
 
     //if (!chatMode)
-            //saveMessage(msg.dump());
+            saveMessage(msg.dump());
     //else{
-            displayChatMessage(sender, message);y++; //sinon on l'affiche directement
+            displayChatMessage(msg["sender"], msg["message"]);y++; //sinon on l'affiche directement
     //}
                 
 }
