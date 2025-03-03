@@ -11,8 +11,6 @@
 Server::Server(int port) 
     : port(port), serverSocket(-1), clientIdCounter(0){
         userManager = std::make_unique<UserManager>("./users.txt");
-        std::thread gameRoomThread(&Server::manageGameRooms, this);
-        gameRoomThread.detach();
  }
 
 
@@ -134,7 +132,8 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::CreateGame:
             keyInputGameModeMenu(clientSocket, clientId);
             break;
-        case MenuState::Play:            
+        case MenuState::Play: 
+            sendInputToGameRoom(clientId, action);          
             break;
         case MenuState::Game:
             clientStates[clientId] = MenuState::JoinOrCreateGame;
@@ -154,18 +153,20 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
 void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode) {
     //création de la gameRoom (partie Endless pour l'instant)
     clientStates[clientId] = MenuState::Play;
+    clientGameRoomId[clientId] = gameRoomIdCounter;
+    gameRooms.push_back(std::make_shared<GameRoom>(gameRoomIdCounter, clientId, gameMode));
     gameRoomIdCounter++;
-    gameRooms[gameRoomIdCounter] = std::make_shared<GameRoom>(gameRoomIdCounter, clientId, clientSocket, clientPseudo[clientId], 1, gameMode);
+    std::thread toSendGameToClient(&Server::loopGame, this, clientSocket, clientId);
+    toSendGameToClient.detach();
 }
 
-void Server::manageGameRooms() {
-    for (auto& [roomId, gameRoom] : gameRooms) {
-        if (!gameRoom->getInProgress() && gameRoom->getIsFull() && gameRoom->getHasStarted()) {
-            gameRooms.erase(roomId);
-            this->shiftGameRooms(roomId);
-            gameRoomIdCounter--;
-        }
-    }
+void Server::deleteGameRoom(int roomId) {
+    gameRooms.erase(gameRooms.begin() + roomId);
+    gameRoomIdCounter--;
+    if ((roomId < gameRoomIdCounter) && (gameRoomIdCounter > 1))
+        this->shiftGameRooms(roomId);
+    std::cout << "GameRoom #" << roomId << " deleted." << std::endl;
+
 }
 
 void Server::shiftGameRooms(int index) {
@@ -174,8 +175,50 @@ void Server::shiftGameRooms(int index) {
         gameRooms[i] = gameRooms[i + 1];
         gameRooms[i]->setRoomId(i);
     }   
-    gameRooms.erase(gameRooms.size() - 1);
+    gameRooms.pop_back();
 }
+
+void Server::sendInputToGameRoom(int clientId, const std::string& action) {
+    int roomId = clientGameRoomId[clientId];
+    gameRooms[roomId]->keyInputGame(clientId, action);
+}
+
+void Server::loopGame(int clientSocket, int clientId) {
+    int gameRoomId = clientGameRoomId[clientId];
+    
+    while (!gameRooms[gameRoomId]->getIsFull())
+        continue;
+    while (gameRooms[gameRoomId]->getInProgress()) { 
+        if (gameRooms[gameRoomId]->getGameIsOver(clientId))
+            break;
+        
+        if (gameRooms[gameRoomId]->getNeedToSendGame(clientId)) { 
+            sendGameToClient(clientSocket, clientId);
+            gameRooms[gameRoomId]->setNeedToSendGame(false, clientId);
+        }
+    }
+    clientStates[clientId] = MenuState::GameOver;
+    userManager->updateHighscore(clientPseudo[clientId], gameRooms[gameRoomId]->getScore(clientId).getScore());
+    deleteGameRoom(gameRoomId);
+    sendMenuToClient(clientSocket, menu.getGameOverMenu());
+    std::cout << "Game #" << gameRoomId << " ended." << std::endl;
+}
+
+void Server::sendGameToClient(int clientSocket, int clientId) { //TODO: Deplacer le main pour faire un fichier game ??? 
+    int gameRoomId = clientGameRoomId[clientId];
+    std::shared_ptr<Game> gameRoom = gameRooms[gameRoomId]->getGame(clientId); // Récupérer la partie du client
+
+    json message;
+    
+    message["score"] = gameRoom->getScore().scoreToJson();
+    message["grid"] = gameRoom->getGrid().gridToJson();
+    message["tetraPiece"] = gameRoom->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
+
+    std::string msg = message.dump() + "\n";
+    send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
+}
+
+
 
 void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {  // Se connecter
@@ -283,7 +326,7 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
         // Créer une partie => lobby
         //clientStates[clientId] = MenuState::CreateGame;
         clientStates[clientId] = MenuState::Play;
-        this->keyInputGameModeMenu(clientSocket, clientId, GameModeName::Endless);
+        this->keyInputGameModeMenu(clientSocket, clientId);
         // Raccourci vers une game Endless car on doit implémenter le reste
         }
     else if (action == "2") {
@@ -299,7 +342,8 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
     }
 }
 
-/*void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string& action) {
+/*
+void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string& action) {
     if(action == "1") {
         // a implémenter
     }
@@ -321,6 +365,7 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
     }
 }
 */
+
 
 void Server::keyInputRankingMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") { // TODO: faudra qu'on le voit dans le menu
@@ -380,6 +425,20 @@ void Server::stop() {
 
 void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
+}
+
+void Server::sendGameToPlayer(int clientSocket, int clientId) {
+    
+    std::shared_ptr<Game> game = gameRooms[clientGameRoomId[clientId]]->getGame(clientId);
+
+    json message;
+    
+    message["score"] = game->getScore().scoreToJson();
+    message["grid"] = game->getGrid().gridToJson();
+    message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
+
+    std::string msg = message.dump() + "\n";
+    send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
 }
 
 //recuperer les inputs du client

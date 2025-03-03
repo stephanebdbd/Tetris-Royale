@@ -26,7 +26,7 @@ public:
     void moveCurrentPieceLeft();
     void rotateCurrentPiece();
     void dropCurrentPiece();
-    void timerHandler();
+    void update();
     void manageUserInput();
     void drawPiece();
     void setNeedToSendGame(bool needToSendGame);

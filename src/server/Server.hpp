@@ -35,7 +35,8 @@ class Server {
     int serverSocket;
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::atomic<int> clientIdCounter;
-    std::unordered_map<int, std::shared_ptr<GameRoom>> gameRooms;
+    std::unordered_map<int, int> clientGameRoomId;
+    std::vector<std::shared_ptr<GameRoom>> gameRooms;
     std::unique_ptr<ServerChat> chat;
     
     int gameRoomIdCounter=0;
@@ -49,6 +50,8 @@ class Server {
     std::unique_ptr<UserManager> userManager;
     
     Menu menu;
+
+
 public:
     Server(int port);
 
@@ -56,6 +59,7 @@ public:
     void acceptClients();
     void handleClient(int clientSocket, int clientId);
     void stop();
+    void loopGame(int clientSocket, int clientId);
     void sendMenuToClient(int clientSocket, const std::string& screen);
     void keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputMainMenu(int clientSocket, int clientId, const std::string& action);
@@ -68,14 +72,16 @@ public:
     //void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void sendChatModeToClient(int clientSocket);
     void receiveInputFromClient(int clientSocket, int clientId);
-    void manageGameRooms();
+    void deleteGameRoom(int roomId);
+    void sendGameToClient(int clientSocket, int clientId);
+    void sendInputToGameRoom(int clientId, const std::string& action);
     void shiftGameRooms(int index);
     void keyInputModeGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     void clearMenu(int clientSocket, const std::string& functionName);
-    
+    void sendGameToPlayer(int clientSocket, int clientId);
 };
 
 #endif 

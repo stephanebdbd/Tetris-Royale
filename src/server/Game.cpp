@@ -16,7 +16,6 @@ Game& Game::operator=(const Game& game) {
         this->grid = game.grid;
         this->score = game.score;
         this->running = game.running;
-        this->gameOver = game.gameOver;
         this->malus5Royal = game.malus5Royal;
         this->displacement = game.displacement;
     }
@@ -28,12 +27,12 @@ void Game::run() {
     curs_set(0);
     nodelay(stdscr, TRUE); // Permet à getch de ne pas bloquer l'exécution
     keypad(stdscr, TRUE);  // Active la gestion des touches fléchées
-
+    bool gameOver = displacement.getIsGameOver();
     while (running && !gameOver) { 
         erase(); // Efface uniquement le contenu sans supprimer l'affichage
         showGame();
 
-        displacement.timerHandler();
+        displacement.update();
         if (!gameOver){
             linesCleared = grid.clearFullLines();
             score.addScore(linesCleared);
@@ -42,6 +41,7 @@ void Game::run() {
             running = false;
         }
         displacement.manageUserInput();
+        gameOver = displacement.getIsGameOver();
     }
 
     showGameOver();
@@ -72,4 +72,9 @@ void Game::showGameOver() {
 
     endwin(); // Restaure le terminal à son état initial
     
+}
+
+void Game::setGameOver() {
+    displacement.setGameOver();
+    this->showGameOver();
 }

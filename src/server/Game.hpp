@@ -16,7 +16,6 @@ class Game {
     
     int linesCleared;
     bool running;
-    bool gameOver;
     
     bool malus5Royal = false;
     
@@ -28,7 +27,7 @@ class Game {
         void run();
         void showGame();
         void showGameOver();
-        void timerHandler() { displacement.timerHandler(); }
+        void updateGame() { displacement.update(); }
         Grid& getGrid() { return grid; }
         void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
         TetraminoDisplacement& getDisplacement() { return displacement; } 
@@ -38,7 +37,7 @@ class Game {
         bool getNeedToSendGame() const { return displacement.getNeedToSendGame(); }
         Tetramino& getCurrentPiece() { return displacement.getCurrentPiece(); }
         bool getIsGameOver() const { return displacement.getIsGameOver(); }
-        void setGameOver() { displacement.setGameOver(); }
+        void setGameOver() ;
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
 
 };

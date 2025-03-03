@@ -64,7 +64,7 @@ void TetraminoDisplacement::dropCurrentPiece() {
     currentPiece.dropTetrimino(grid);
 }
 
-void TetraminoDisplacement::timerHandler() {
+void TetraminoDisplacement::update() {
     if (dropTimer.hasElapsed() && !gameOver) { // Si le timer a expiré, tenter de descendre la pièce
         this->setNeedToSendGame(true);
         if (currentPiece.canMoveDown(grid)) {
