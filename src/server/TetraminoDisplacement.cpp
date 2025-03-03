@@ -43,9 +43,6 @@ void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
         dropCurrentPiece();
         setNeedToSendGame(true);
     }
-    else if (action == "q") { // Quitter
-        gameOver = true;
-    }
 }
 
 void TetraminoDisplacement::moveCurrentPieceRight() {
