@@ -102,20 +102,20 @@ public:
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     std::string convertUnicodeToText(const std::string& unicode);
-    void setRunningGame(int clientId, bool value) { runningGames[clientId] = value; }
-    void setRunningChat(int clientId, bool value) { runningChats[clientId] = value; }
-    void setClientState(int clientId, MenuState state) { clientStates[clientId] = state; }
-    bool getRunningChat(int clientId) { return runningChats[clientId]; }
+    void setRunningChat(int clientId, bool value);
+    void setClientState(int clientId, MenuState state);
+    bool getRunningChat(int clientId);
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
     std::unordered_map<int, std::string> getSocketPseudo() { return sockToPseudo; }
-    //void keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action);
-    //void keyInputRejectFriendMenu(int clientSocket, int clientId, const std::string& action);
-    //void keyInputRemoveFriendMenu(int clientSocket, int clientId, const std::string& action);
-    //void keyInputListFriendsMenu(int clientSocket, int clientId);
-    //void keyInputListPendingRequestsMenu(int clientSocket, int clientId);
+    void keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRejectFriendMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputRemoveFriendMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputListFriendsMenu(int clientSocket, int clientId);
+    void keyInputListPendingRequestsMenu(int clientSocket, int clientId);
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
     void clearMenu(int clientSocket, const std::string& functionName);
+    void sendGameToPlayer(int clientSocket, int clientId);
 };
 
 #endif 

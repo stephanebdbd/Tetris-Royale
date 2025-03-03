@@ -71,7 +71,7 @@ void Server::handleClient(int clientSocket, int clientId) {
 
     while (true) {
 
-        if(runningChats[clientId]) {
+        if(getRunningChat(clientId)) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
             continue;
         }
@@ -136,6 +136,19 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::chat:
             keyInputChatMenu(clientSocket, clientId, action);
             break;
+        case MenuState::Friends:
+            keyInputFriendsMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::AddFriend:
+            keyInputAddFriendMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::FriendList:
+            keyInputManageFriendlist(clientSocket, clientId,action);
+            break;
+        case MenuState::FriendRequestList:
+            keyInputManageFriendRequests(clientSocket, clientId,action);
+            break;
+
         case MenuState::JoinGame:
             keyInputGameModeMenu(clientSocket, clientId);
             break;
@@ -320,11 +333,6 @@ void Server::keyInputManageFriendlist(int clientSocket, int clientId, const std:
 
 
 void Server::keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "./ret") {
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
-        return;
-    }
     if (action == "1") {
         clientStates[clientId] = MenuState::AddFriend;
         sendMenuToClient(clientSocket, menu.getAddFriendMenu());
@@ -505,6 +513,7 @@ void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const st
 void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     userManager->registerUser(clientPseudo[clientId], action);
     //friendList->registerUser(clientPseudo[clientId]);
+    sockToPseudo[clientSocket] = clientPseudo[clientId];
     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
     clientPseudo.erase(clientId);
     clientStates[clientId] = MenuState::Main;
@@ -547,7 +556,9 @@ void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string&
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
     }
     if (action == "2") {
-        // Amis => à implémenter 
+        clientStates[clientId] = MenuState::Friends;
+        sendMenuToClient(clientSocket, menu.getFriendMenu());
+
     }
     else if (action == "3") {
         // Classement
@@ -560,10 +571,6 @@ void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string&
         // Chat
         clientStates[clientId] = MenuState::chat;
         sendMenuToClient(clientSocket, menu.getChatMenu());
-        sendChatModeToClient(clientSocket);
-        // Lancer un thread pour gérer le chat du client
-        std::thread chatThread(&ServerChat::processClientChat, chat.get(), clientSocket, std::ref(pseudoTosocket)); // initialiser la variable chat
-        chatThread.detach();
         
     }
     
@@ -611,7 +618,7 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
     }
     else if(action == "4") {
         sendChatModeToClient(clientSocket);
-        runningChats[clientId] = true;
+        setRunningChat(clientId, true);
         chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, menu.getChatMenu());
     }else if(action == "5") {
         clientStates[clientId] = MenuState::Main;
@@ -705,6 +712,22 @@ void Server::sendChatModeToClient(int clientSocket) {
     message["mode"] = "chat";
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0);
+}
+
+bool Server::getRunningChat(int clientId) {
+    auto it = runningChats.find(clientId);
+    if (it != runningChats.end()) {
+        return it->second;
+    }
+    return false;
+}
+
+void Server::setRunningChat(int clientId, bool value) {
+    runningChats[clientId] = value;
+}
+
+void Server::setClientState(int clientId, MenuState state) {
+    clientStates[clientId] = state;
 }
 
 int main() {
