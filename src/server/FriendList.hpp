@@ -39,6 +39,7 @@ public:
     void addOnlineFriend(std::shared_ptr<Client> friendClient);  // Ajouter un ami connecté
     void removeOnlineFriend(std::shared_ptr<Client> friendClient);  // Retirer un ami connecté
 
+    void processClientFriendList(int clientSocket, int clientId);   
     // Destructeur
     ~FriendList() = default;
 };

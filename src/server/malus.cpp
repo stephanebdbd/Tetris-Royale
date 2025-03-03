@@ -27,11 +27,11 @@ void Malus:: sendMalus(Grid &grid){
     grid.piecesUp(nbrLine);
 
     for(int y = 0; y < nbrLine ; y++){
-        for(int x = 0; x < 10; x++){
+        for(int x = 0; x < width; x++){
             
             if (malus[y][x] != ' '){
                 
-                grid.markCell(x+1, (height - 1) - y, Color(Color::Type::GRAY));
+                grid.markCell(x+1, (height - 1) - y, Color(Type::GRAY));
             }
         }
     }

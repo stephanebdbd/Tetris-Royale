@@ -1,25 +1,47 @@
 #include "TetraminoDisplacement.hpp"
 
-TetraminoDisplacement::TetraminoDisplacement(Grid& grid, bool& needToSendGame, bool& gameOver)
-    : grid(grid), currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
-      dropTimer(1000), 
-      needToSendGame(needToSendGame), gameOver(gameOver), commandisBlocked(false), lightisBlocked(false) {}
+TetraminoDisplacement::TetraminoDisplacement(Grid& grid)
+    : grid(grid),
+    currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
+    dropTimer(1000), 
+    commandisBlocked(false), lightisBlocked(false) {}
+
+TetraminoDisplacement& TetraminoDisplacement::operator=(const TetraminoDisplacement& displacement) {
+    if(this != &displacement) {
+        this->grid = displacement.grid;
+        this->needToSendGame = displacement.needToSendGame;
+        this->currentPiece = displacement.currentPiece;
+        this->dropTimer = displacement.dropTimer;
+        this->commandisBlocked = displacement.commandisBlocked;
+        this->lightisBlocked = displacement.lightisBlocked;
+        this->ch = displacement.ch;
+        this->bonus1Royal = displacement.bonus1Royal;
+    }
+    return *this;
+}
 
 void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
+    std::cout << "Action reçue : " << action << std::endl;
+    if(commandisBlocked) return;
     if (action == "right") { 
         moveCurrentPieceRight();
+        setNeedToSendGame(true);
     }
     else if (action == "left") { 
         moveCurrentPieceLeft();
+        setNeedToSendGame(true);
     }
     else if (action == "up") { 
         rotateCurrentPiece();
+        setNeedToSendGame(true);
     }
     else if (action == "down"){
         moveCurrentPieceDown();
+        setNeedToSendGame(true);
     }
-    else if(action == "drop") { // space
+    else if (action == "drop") { // space
         dropCurrentPiece();
+        setNeedToSendGame(true);
     }
 }
 
@@ -43,7 +65,7 @@ void TetraminoDisplacement::dropCurrentPiece() {
     currentPiece.dropTetrimino(grid);
 }
 
-void TetraminoDisplacement::timerHandler() {
+void TetraminoDisplacement::update() {
     if (dropTimer.hasElapsed() && !gameOver) { // Si le timer a expiré, tenter de descendre la pièce
         this->setNeedToSendGame(true);
         if (currentPiece.canMoveDown(grid)) {
@@ -68,19 +90,6 @@ void TetraminoDisplacement::timerHandler() {
         }
         dropTimer.reset();
     }
-}
-
-
-void TetraminoDisplacement::manageUserInput() {
-    if(commandisBlocked) return;
-
-    ch = getch();
-    if (ch == KEY_UP) { currentPiece.rotate(grid); }
-    if (ch == KEY_DOWN) { currentPiece.moveDown(grid); }
-    if (ch == KEY_RIGHT) { currentPiece.moveRight(grid); }
-    if (ch == KEY_LEFT) { currentPiece.moveLeft(grid); }
-    if (ch == ' ') { currentPiece.dropTetrimino(grid); }
-    if (ch == 'q') gameOver = true;
 }
 
 void TetraminoDisplacement::setNeedToSendGame(bool needToSendGame) {
@@ -114,5 +123,3 @@ void TetraminoDisplacement::random2x2MaskedBlock(){
     grid.applyGravity();
 
 }
-
-

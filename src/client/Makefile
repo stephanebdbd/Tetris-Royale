@@ -5,7 +5,7 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 
 LIBS = -lncurses -fsanitize=address
 
-SRC = ClientChat.cpp Client.cpp ClientDisplay.cpp ClientNetwork.cpp Controller.cpp main.cpp Color.cpp 
+SRC = $(wildcard *.cpp)
 
 OBJECTS = $(SRC:.cpp=.o)
 
@@ -17,6 +17,7 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)
+	> messages.json
 
 run: $(TARGET)
 	./$(TARGET)

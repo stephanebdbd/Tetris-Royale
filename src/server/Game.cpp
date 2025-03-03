@@ -6,36 +6,51 @@ Game::Game(int gridWidth, int gridHeight) //ajouter ce parametre apres , std::un
     : grid(gridWidth, gridHeight), 
       score(gridWidth + 5, 2), // Position du score à droite de la grille
       running(true),
-      gameOver(false), 
-      displacement(grid, needToSendGame, gameOver)
+      displacement(grid)
       //gameMode(gameMode) il faut l ajouter apres
       {}
 
+
+Game& Game::operator=(const Game& game) {
+    if(this != &game) {
+        this->grid = game.grid;
+        this->score = game.score;
+        this->running = game.running;
+        this->malus5Royal = game.malus5Royal;
+        this->displacement = game.displacement;
+    }
+    return *this;
+}
 void Game::run() {
     initscr();
     noecho();
     curs_set(0);
     nodelay(stdscr, TRUE); // Permet à getch de ne pas bloquer l'exécution
     keypad(stdscr, TRUE);  // Active la gestion des touches fléchées
-
+    bool gameOver = displacement.getIsGameOver();
     while (running && !gameOver) { 
         erase(); // Efface uniquement le contenu sans supprimer l'affichage
         showGame();
 
-        displacement.timerHandler();
+        displacement.update();
         if (!gameOver){
             linesCleared = grid.clearFullLines();
-            //gameMode.feautureMode(*this, linesCleared); il ne faut pas le supprimer
             score.addScore(linesCleared);
         }
         else {
             running = false;
         }
-        displacement.manageUserInput();
+        gameOver = displacement.getIsGameOver();
     }
 
     showGameOver();
    
+}
+
+void Game::updateGame() {
+    displacement.update();
+    linesCleared = grid.clearFullLines();
+    score.addScore(linesCleared);
 }
 
 void Game::showGame() {
@@ -62,4 +77,9 @@ void Game::showGameOver() {
 
     endwin(); // Restaure le terminal à son état initial
     
+}
+
+void Game::setGameOver() {
+    displacement.setGameOver();
+    this->showGameOver();
 }

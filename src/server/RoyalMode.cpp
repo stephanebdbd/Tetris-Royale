@@ -4,29 +4,29 @@
 
 RoyalMode::RoyalMode() : energie(0){}
 
-void RoyalMode::feautureMode(Game& game){
+void RoyalMode::featureMode(std::shared_ptr<Game> game){
 
-    MalusRoyal malus(game.getDisplacement());
-    Bonus bonus(game.getDisplacement());
+    MalusRoyal malus(game->getDisplacement());
+    Bonus bonus(game->getDisplacement());
 
-    int linesCleared = game.getLinesCleared();
+    int linesCleared = game->getLinesCleared();
     energie += 20 * linesCleared;
     if(energie >= 100){
         if(chosenMalus){
-            choiceMalus(nbre);
+            choiceMalus(nbre, malus);
         }
 
         if(chosenBonus){
-            choiceBonus(nbre);
+            choiceBonus(nbre, bonus);
         }
 
     }
 
-    applyMalusBonus();
+    applyMalusBonus(malus, bonus);
     
 }
 
-void RoyalMode::choiceMalus(int nbre){
+void RoyalMode::choiceMalus(int nbre, MalusRoyal malus){
     switch(nbre){
         case 1: {
             decreaseEnergie(60);
@@ -59,7 +59,7 @@ void RoyalMode::choiceMalus(int nbre){
 
 }
 
-void RoyalMode::choiceBonus(int nbre){
+void RoyalMode::choiceBonus(int nbre, Bonus bonus){
     switch(nbre){
         case 1: {
             bonus.decreaseSpeed(); 
@@ -78,7 +78,7 @@ void RoyalMode::choiceBonus(int nbre){
 
 }
 
-void RoyalMode::applyMalusBonus(){
+void RoyalMode::applyMalusBonus(MalusRoyal malus, Bonus bonus){
     if (malus1counter > 0){
         malus.reverseControl();
         decreaseCounter(malus1counter);
