@@ -49,6 +49,7 @@ void ClientChat::run() {
 }
 
 void ClientChat::sendChatMessages() {
+    isChatting = true;
     std::string inputStr;
     int ch;
     while (true) {
@@ -99,12 +100,13 @@ void ClientChat::sendChatMessages() {
             inputStr += static_cast<char>(ch);
         }
     }
+    isChatting = false;
     std::cout << "Fin du thread d'envoi de messages !" << std::endl;
 }
 
 void ClientChat::receiveChatMessages(const json& msg) {
 
-    //if (!chatMode)
+    //if (!isChatting)
             saveMessage(msg.dump());
     //else{
             displayChatMessage(msg["sender"], msg["message"]);y++; //sinon on l'affiche directement

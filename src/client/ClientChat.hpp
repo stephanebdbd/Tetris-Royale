@@ -14,7 +14,7 @@ class ClientChat{
     private:
         int clientSocket;                    ///< The client socket.
         ClientNetwork network;               ///< The client network.
-        bool isPlaying;                      ///< A boolean indicating if the client is playing.
+        bool isChatting;                     ///< A boolean indicating if the client is chatting.
         static bool messagesWaitForDisplay;  ///< A boolean indicating if the message is waiting for display.
         int y = 1;                            ///< The y position of the chat message.
         WINDOW * inputWin, *displayWin;       ///< The input and display window.
@@ -33,7 +33,7 @@ class ClientChat{
         static bool FlushMemory();
 
         void setClientSocket(int clientSocket);
-        void setIsPlaying(bool isPlaying);
+        void setIsChatting(bool isChatting);
 };
 
 #endif // CLIENTCHAT_HPP
