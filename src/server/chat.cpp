@@ -24,15 +24,11 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
                 std::cout <<  msg << std::endl;
                 if (msg.contains("receiver") && msg.contains("message") && !msg["receiver"].is_null() && !msg["message"].is_null() && msg["message"] != "exit") {
                     std::cout << "Message reçu de " << clientSocket << " : " << msg["message"] << std::endl;
-                    // std::string sender = pseudoSocket[msg["sender"]];
                     int receiver = server.getPseudoSocket()[msg["receiver"]];
                     std::string sender = server.getSocketPseudo()[clientSocket];
-                    for (auto const& [pseudo, socket] : server.getPseudoSocket()) {
-                        std::cout << pseudo << " : " << socket << std::endl;
-                    }
                     std::string message = msg["message"];
-                    sendMessage(receiver, sender, message);
-                } else {
+                    sendMessage(receiver, sender, message); 
+                }else {
                     // gere l exit du client
                     std::cout << "Client " << clientSocket << " disconnected." << std::endl;
                     server.setRunningChat(clientId, false);
@@ -53,7 +49,7 @@ void ServerChat::sendMessage(int clientSocket, std::string sender, const std::st
     json msg;
     msg["sender"] = sender;
     msg["message"] = message;
-    std::string msgStr = msg.dump();
+    std::string msgStr = msg.dump() + "\n";
     send(clientSocket, msgStr.c_str(), msgStr.size(), 0);
     std::cout << msg << std::endl;
 }
