@@ -11,11 +11,6 @@
 Server::Server(int port) 
     : port(port), serverSocket(-1), clientIdCounter(0){
         userManager = std::make_unique<UserManager>("./users.txt");
-        initscr(); // Initialiser ncurses
-        cbreak(); // Mode non-canonique
-        noecho(); // Désactiver l'écho des caractères
-        keypad(stdscr, TRUE); // Activer la détection des touches spéciales
-        nodelay(stdscr, TRUE); // Ne pas bloquer sur getch()
     }
 
 

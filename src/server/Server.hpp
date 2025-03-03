@@ -81,7 +81,6 @@ public:
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     void clearMenu(int clientSocket, const std::string& functionName);
     void sendGameToPlayer(int clientSocket, int clientId);
-    ~Server() {endwin();}
 };
 
 #endif 
