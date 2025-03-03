@@ -131,7 +131,7 @@ json Menu::getJoinOrCreateGame() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getchatMenu() const {
+json Menu::getChatMenu() const {
     json menu = {
         {"title", "Menu du chat"},
         {"options", {

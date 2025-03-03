@@ -23,7 +23,6 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
                 json msg = json::parse(std::string(buffer, bytes_received));
                 std::cout <<  msg << std::endl;
                 if (msg.contains("receiver") && msg.contains("message") && !msg["receiver"].is_null() && !msg["message"].is_null() && msg["message"] != "exit") {
-                    std::cout << "Message reçu de " << clientSocket << " : " << msg["message"] << std::endl;
                     int receiver = server.getPseudoSocket()[msg["receiver"]];
                     std::string sender = server.getSocketPseudo()[clientSocket];
                     std::string message = msg["message"];
@@ -51,7 +50,6 @@ void ServerChat::sendMessage(int clientSocket, std::string sender, const std::st
     msg["message"] = message;
     std::string msgStr = msg.dump() + "\n";
     send(clientSocket, msgStr.c_str(), msgStr.size(), 0);
-    std::cout << msg << std::endl;
 }
 
 std::string ServerChat::getChatMenu() const {

@@ -162,8 +162,8 @@ bool ClientChat::FlushMemory() {
     return false;
 }
 
-void ClientChat::setIsPlaying(bool isPlaying) {
-    this->isPlaying = isPlaying;
+void ClientChat::setIsChatting(bool isChatting) {
+    this->isChatting = isChatting;
 }
 
 void ClientChat::setClientSocket(int clientSocket) {

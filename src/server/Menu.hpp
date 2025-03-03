@@ -14,7 +14,7 @@ class Menu {
         json getLoginMenuFailed1() const;
         json getLoginMenu2() const;
         json getLoginMenuFailed2() const;
-        json getchatMenu() const;
+        json getChatMenu() const;
         json getJoinOrCreateGame() const;
         json getGameMode() const;
 
