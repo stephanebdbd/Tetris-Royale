@@ -136,8 +136,7 @@ void FriendList::saveFriends() {
     file.close();
 }
 void FriendList::registerUser(const std::string& username) {
-    // Charger les amis existants
-    //std::unordered_map<std::string, std::vector<std::string>> friends = loadFriends();
+
 
     // Vérifier si l'utilisateur existe déjà
     if (friends.find(username) != friends.end()) {
@@ -147,9 +146,11 @@ void FriendList::registerUser(const std::string& username) {
 
     // Ajouter l'utilisateur avec une liste d'amis vide
     friends[username] = {}; 
+    requests[username] = {}; // Initialiser la liste des demandes vides
 
     // Sauvegarder les mises à jour (n'écrase pas les données existantes)
     saveFriends(); 
+    saveRequests();
 
     std::cout << "Utilisateur " << username << " ajouté avec succès." << std::endl;
 }

@@ -168,15 +168,30 @@ json Menu::getFriendMenu() const {
         {"title", "Gestion des amis"},
         {"options", {
             {"1. ", "Ajouter un ami"},
-            {"2. ", "Supprimer un ami"},
-            {"3. ", "liste des amis"},
-            {"4. ", "liste des demandes d'amis"},
-            {"5. ", "Retour"}
+            {"2. ", "liste des amis"},
+            {"3. ", "liste des demandes d'amis"},
+            {"4. ", "Retour"}
         }},
         {"input", "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
+    json menu = {
+        {"title", "Liste de vos amis"},
+        {"options", json::array()},
+        {"input", "Tapez 'del.pseudo' pour supprimer un ami ou 'del.all' pour tout supprimer."}
+    };
+
+    int index = 1;
+    for (const auto& user : friends) {
+        menu["options"].push_back(std::to_string(index) + ". " + user);  // ✅ Ajout en tant que chaîne et non objet
+        index++;
+    }
+
+    return menu.dump() + "\n";  // Affichage formaté
+}
+
 
 json Menu::getAddFriendMenu() const {
     json menu = {
@@ -200,31 +215,21 @@ json Menu::getRemoveFriendMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
-    json menu = {
-        {"title", "Liste des amis"},
-        {"options", {}},
-        {"input", ""}
-    };
 
-    for (const auto& user : friends) {
-        menu["options"].push_back({user});
-    }
-
-    return menu.dump() + "\n";  // Convertir en chaîne JSON
-}
 json Menu::getRequestsListMenu(const std::vector<std::string>& pendingRequests) const {
     json menu = {
         {"title", "Liste des demandes d'amis"},
-        {"options", {}},
+        {"options", json::array()},
         {"input", ""}
     };
 
-    for (const auto& request : pendingRequests) {
-        menu["options"].push_back(request);
+    int index = 1;
+    for (const auto& user : pendingRequests) {
+        menu["options"].push_back(std::to_string(index) + ". " + user);  
+        index++;
     }
 
-    return menu;
+    return menu.dump() + "\n";
 }
 json Menu::displayMessage(const std::string& message) const {
     json menu = {

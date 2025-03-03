@@ -103,12 +103,13 @@ public:
     void setClientState(int clientId, MenuState state) { clientStates[clientId] = state; }
     bool getRunningChat(int clientId) { return runningChats[clientId]; }
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
-    void keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputRejectFriendMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputRemoveFriendMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputListFriendsMenu(int clientSocket, int clientId);
-    void keyInputListPendingRequestsMenu(int clientSocket, int clientId);
-
+    //void keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action);
+    //void keyInputRejectFriendMenu(int clientSocket, int clientId, const std::string& action);
+    //void keyInputRemoveFriendMenu(int clientSocket, int clientId, const std::string& action);
+    //void keyInputListFriendsMenu(int clientSocket, int clientId);
+    //void keyInputListPendingRequestsMenu(int clientSocket, int clientId);
+    void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
+    void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
 };
 
 #endif 
