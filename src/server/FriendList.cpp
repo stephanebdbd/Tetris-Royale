@@ -45,11 +45,6 @@ std::unordered_map<std::string, std::vector<std::string>> FriendList::loadFriend
     return friends;
 }
 
-
-
-
-
-
 // Charger les demandes d'amis
 std::unordered_map<std::string, std::vector<std::string>> FriendList::loadRequests() {
     std::unordered_map<std::string, std::vector<std::string>> loadedRequests;
@@ -137,7 +132,6 @@ void FriendList::saveFriends() {
 }
 void FriendList::registerUser(const std::string& username) {
 
-
     // Vérifier si l'utilisateur existe déjà
     if (friends.find(username) != friends.end()) {
         std::cout << "Utilisateur " << username << " existe déjà. Aucun ajout effectué." << std::endl;
@@ -173,6 +167,7 @@ void FriendList::sendFriendRequest(const std::string& sender, const std::string&
     if (std::find(receiverRequests.begin(), receiverRequests.end(), sender) != receiverRequests.end()) {
         std::cout << "La demande d'ami a déjà été envoyée à " << receiver << "." << std::endl;
         return;
+        
     }
 
     // Ajouter l'expéditeur à la liste des demandes en attente du récepteur
@@ -220,36 +215,6 @@ void FriendList::rejectFriendRequest(const std::string& user, const std::string&
 
 }
 
-// Méthode pour lister les amis d'un utilisateur
-void FriendList::listFriends(const std::string& user) const {
-    auto it = friends.find(user);
-    if (it == friends.end() || it->second.empty()) {
-        std::cout << user << " n'a pas d'amis." << std::endl;
-        return;
-    }
-
-    std::cout << "Liste des amis de " << user << " : ";
-    for (const auto& friendName : it->second) {
-        std::cout << friendName << " ";
-    }
-    std::cout << std::endl;
-}
-
-// Méthode pour lister les demandes en attente pour un utilisateur
-void FriendList::listPendingRequests(const std::string& user) const {
-    auto it = requests.find(user);
-    if (it == requests.end() || it->second.empty()) {
-        std::cout << "Aucune demande d'ami en attente pour " << user << "." << std::endl;
-        return;
-    }
-
-    std::cout << "Demandes d'ami en attente pour " << user << " : ";
-    for (const auto& requester : it->second) {
-        std::cout << requester << " ";
-    }
-    std::cout << std::endl;
-}
-// Vérifie si un utilisateur existe dans la liste des amis
 bool FriendList::userExists(const std::string& username) const {
     return friends.find(username) != friends.end();
 }
@@ -282,6 +247,7 @@ void FriendList::removeFriend(const std::string& user, const std::string& friend
 }
 
 // Supprime une demande d'ami
+
 void FriendList::removeFriendRequest(const std::string& sender, const std::string& receiver) {
     if (requests.find(receiver) == requests.end()) {
         std::cout << "Aucune demande d'ami trouvée de " << sender << " à " << receiver << "." << std::endl;

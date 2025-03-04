@@ -27,8 +27,6 @@ public:
     void sendFriendRequest(const std::string& sender, const std::string& receiver);
     void acceptFriendRequest(const std::string& user, const std::string& friendToAccept);
     void rejectFriendRequest(const std::string& user, const std::string& friendToReject);
-    void listFriends(const std::string& user) const;
-    void listPendingRequests(const std::string& user) const;
     bool areFriends(const std::string& user1, const std::string& user2) const;
     bool userExists(const std::string& userId) const;
     void removeFriend(const std::string& user, const std::string& friendToRemove);

@@ -206,7 +206,7 @@ json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
     json menu = {
         {"title", "Liste de vos amis"},
         {"options", json::array()},
-        {"input", "Tapez 'del.pseudo' pour supprimer un ami ou 'del.all' pour tout supprimer."}
+        {"input", "Tapez 'del.pseudo' pour supprimer un ami ou 'del.all' pour tout supprimer:    "}
     };
 
     int index = 1;
@@ -223,14 +223,14 @@ json Menu::getAddFriendMenu() const {
     json menu = {
         {"title", "Ajouter un ami"},
         {"options", {
-            {"Veuillez insérer l'ID de l'ami à ajouter", ":"},
+            {"Veuillez insérer le pseudo de l'ami à ajouter", ":"},
         }},
         {"input", "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getRemoveFriendMenu() const {
+/*json Menu::getRemoveFriendMenu() const {
     json menu = {
         {"title", "Supprimer un ami"},
         {"options", {
@@ -239,14 +239,14 @@ json Menu::getRemoveFriendMenu() const {
         {"input", "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
-}
+}*/
 
 
 json Menu::getRequestsListMenu(const std::vector<std::string>& pendingRequests) const {
     json menu = {
-        {"title", "Liste des demandes d'amis"},
+        {"title", "Liste des demandes d'amis: "},
         {"options", json::array()},
-        {"input", ""}
+        {"input", "Tapez 'accept.pseudo' ou 'reject.pseudo' pour accepter ou refuser une demande d'amitie :    "}
     };
 
     int index = 1;

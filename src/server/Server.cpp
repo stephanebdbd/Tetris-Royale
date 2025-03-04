@@ -174,170 +174,133 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
 
 
 }
+/*        Friends,
+            AddFriend,
+            FriendList,
+            FriendRequestList, */
+//ces deux methodes ser  a 
+void Server::returnToMenu(int clientSocket, int clientId, MenuState state, const std::string& message, int sleepTime ) {
+    if (!message.empty()) {
+        sendMenuToClient(clientSocket, menu.displayMessage(message));
+        sleep(sleepTime);
+    }
+    clientStates[clientId] = state;
+    std::string currentUser = clientPseudo[clientId];
+
+    switch (state) {
+        case MenuState::Main:
+            sendMenuToClient(clientSocket, menu.getMainMenu1());
+            break;
+        case MenuState::FriendRequestList:
+            sendMenuToClient(clientSocket, menu.getRequestsListMenu(friendList->getRequestList(currentUser)));
+            break;
+        case MenuState::FriendList:
+            sendMenuToClient(clientSocket, menu.getFriendListMenu(friendList->getFriendList(currentUser)));
+            break;
+        default:
+            break;
+    }
+}
+
+
 void Server::keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action) {
     std::string currentUser = clientPseudo[clientId];
+
     if (action == "./ret") {
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
+        returnToMenu(clientSocket, clientId, MenuState::Main);
         return;
     }
 
-    // Vérifier si l'action est vide
     if (action.empty()) {
         return;
     }
 
     std::vector<std::string> requests = friendList->getRequestList(currentUser);
     if (requests.empty()) {
-        sendMenuToClient(clientSocket, menu.displayMessage("Vous n'avez aucune demande d'ami en attente."));
-        sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
         return;
     }
 
-    // Gestion des commandes "accept.all" et "reject.all"
     if (action == "accept.all" || action == "reject.all") {
+        bool accept = (action == "accept.all");
         for (const std::string& friend_request : requests) {
-            if (action == "accept.all") {
-                friendList->acceptFriendRequest(currentUser, friend_request);
-            } else {
-                friendList->rejectFriendRequest(currentUser, friend_request);
-            }
+            accept ? friendList->acceptFriendRequest(currentUser, friend_request)
+                   : friendList->rejectFriendRequest(currentUser, friend_request);
         }
 
-        sendMenuToClient(clientSocket, menu.displayMessage(
-            (action == "accept.all") ? 
-            "Toutes les demandes d'amis ont été acceptées avec succès !" : 
-            (action == "reject.all") ? 
-            "Toutes les demandes d'amis ont été rejetées avec succès !" : 
-            "Action inconnue."
-        ));
-        sleep(4);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
+        returnToMenu(clientSocket, clientId, MenuState::Main,
+            accept ? "Toutes les demandes d'amis ont été acceptées avec succès !" 
+                   : "Toutes les demandes d'amis ont été rejetées avec succès !", 4);
         return;
     }
 
-    // Vérification du format "accept.pseudo" ou "reject.pseudo"
     std::string prefix_accept = "accept.";
     std::string prefix_reject = "reject.";
-    
-    if (action.substr(0, prefix_accept.size()) == prefix_accept) {
-        std::string friend_request = action.substr(prefix_accept.size());
-        
-        if (!friendList->isPendingRequest(friend_request,currentUser)) {
-            sendMenuToClient(clientSocket, menu.displayMessage("Aucune demande d'ami en attente de '" + friend_request + "."));
-            sleep(3);
-            clientStates[clientId] = MenuState::Main;
-            sendMenuToClient(clientSocket, menu.getMainMenu1());
+    bool isAccept = action.rfind(prefix_accept, 0) == 0;
+    bool isReject = action.rfind(prefix_reject, 0) == 0;
+
+    if (isAccept || isReject) {
+        std::string friend_request = action.substr(isAccept ? prefix_accept.size() : prefix_reject.size());
+        if (!friendList->isPendingRequest(friend_request, currentUser)) {
+            returnToMenu(clientSocket, clientId, MenuState::Main, "Erreur : Aucune demande d'ami en attente de '" + friend_request + "'.");
             return;
         }
 
-        friendList->acceptFriendRequest(currentUser, friend_request);
-        sendMenuToClient(clientSocket, menu.displayMessage(" Demande d'ami acceptée avec " + friend_request + "."));
-        sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
-        
-    } 
-    else if (action.substr(0, prefix_reject.size()) == prefix_reject) {
-        std::string friend_request = action.substr(prefix_reject.size());
-        
-        if (!friendList->isPendingRequest(currentUser, friend_request)) {
-            sendMenuToClient(clientSocket, menu.displayMessage("⚠️ Erreur : Aucune demande d'ami en attente de '" + friend_request + "'."));
-            sleep(3);
-            clientStates[clientId] = MenuState::Main;
-            sendMenuToClient(clientSocket, menu.getMainMenu1());
-            return;
-        }
+        isAccept ? friendList->acceptFriendRequest(currentUser, friend_request)
+                 : friendList->rejectFriendRequest(currentUser, friend_request);
 
-        friendList->rejectFriendRequest(currentUser, friend_request);
-        sendMenuToClient(clientSocket, " Demande d'ami rejetée pour '" + friend_request + "'.");
-        sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
-    } 
-    else {
-        sendMenuToClient(clientSocket, menu.displayMessage("⚠️ Erreur : Format invalide. Utilisez 'accept.pseudo', 'accept.all', 'reject.pseudo' ou 'reject.all'."));
+        returnToMenu(clientSocket, clientId, MenuState::Main,
+            (isAccept ? "Demande d'ami acceptée avec " : "Demande d'ami rejetée pour '") + friend_request + "'.");
         return;
-        /*sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
-        return;*/
     }
 
+    returnToMenu(clientSocket, clientId, MenuState::Main, 
+                 "Erreur : Format invalide. Utilisez 'accept.pseudo', 'accept.all', 'reject.pseudo' ou 'reject.all'.");
 }
+
 
 void Server::keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action) {
     std::string currentUser = clientPseudo[clientId];
+
     if (action == "./ret") {
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
+        returnToMenu(clientSocket, clientId, MenuState::Main);
         return;
     }
-    // Vérifier si l'action est vide
+
     if (action.empty()) {
-        
-        /*sendMenuToClient(clientSocket, menu.displayMessage("Erreur : Aucune action spécifiée."));
-        sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());*/
         return;
     }
 
     std::vector<std::string> friends = friendList->getFriendList(currentUser);
     if (friends.empty()) {
-        sendMenuToClient(clientSocket, menu.displayMessage("Vous n'avez aucun ami dans votre liste."));
-        sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
+        returnToMenu(clientSocket, clientId, MenuState::Main, "Vous n'avez aucun ami dans votre liste.");
         return;
     }
 
-    // Gestion de "del.all"
     if (action == "del.all") {
         for (const std::string& friend_name : friends) {
             friendList->removeFriend(currentUser, friend_name);
         }
 
-        sendMenuToClient(clientSocket, menu.displayMessage("Tous vos amis ont été supprimés."));
-        sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
+        returnToMenu(clientSocket, clientId, MenuState::Main, "Tous vos amis ont été supprimés.");
         return;
     }
 
-    // Vérification du format "del.pseudo"
     std::string prefix_del = "del.";
-
-    if (action.substr(0, prefix_del.size()) == prefix_del) {
+    if (action.rfind(prefix_del, 0) == 0) {  // Vérifie si action commence par "del."
         std::string friend_name = action.substr(prefix_del.size());
 
         if (!friendList->areFriends(currentUser, friend_name)) {
-            sendMenuToClient(clientSocket, menu.displayMessage("Erreur : '" + friend_name + "' n'est pas dans votre liste d'amis."));
-            sleep(3);
-            clientStates[clientId] = MenuState::Main;
-            sendMenuToClient(clientSocket, menu.getMainMenu1());
+            returnToMenu(clientSocket, clientId, MenuState::Main, "Erreur : '" + friend_name + "' n'est pas dans votre liste d'amis.");
             return;
         }
 
         friendList->removeFriend(currentUser, friend_name);
-        sendMenuToClient(clientSocket, menu.displayMessage(friend_name + "' a été supprimé de votre liste d'amis."));
-        sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
-    } else {
-        sendMenuToClient(clientSocket, menu.displayMessage("Erreur : Format invalide. Utilisez 'del.pseudo' ou 'del.all'."));
-        sleep(3);
-        clientStates[clientId] = MenuState::Main;
-        sendMenuToClient(clientSocket, menu.getMainMenu1());
+        returnToMenu(clientSocket, clientId, MenuState::Main, friend_name + " a été supprimé de votre liste d'amis.");
         return;
     }
 
+    returnToMenu(clientSocket, clientId, MenuState::Main, "Erreur : Format invalide. Utilisez 'del.pseudo' ou 'del.all'.");
 }
-
-
 
 
 
@@ -521,11 +484,12 @@ void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const st
 }
 
 void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
+    friendList->registerUser(clientPseudo[clientId]);
     userManager->registerUser(clientPseudo[clientId], action);
-    //friendList->registerUser(clientPseudo[clientId]);
     sockToPseudo[clientSocket] = clientPseudo[clientId];
     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
     clientPseudo.erase(clientId);
+    
     clientStates[clientId] = MenuState::Main;
     sendMenuToClient(clientSocket, menu.getMainMenu1());
 }
@@ -548,6 +512,7 @@ void Server::keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::
 
 void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     if (userManager->authenticateUser(clientPseudo[clientId], action)) { // Si le mot de passe est correct
+        
         clientStates[clientId] = MenuState::Main;
         pseudoTosocket[clientPseudo[clientId]] = clientSocket;
         sockToPseudo[clientSocket] = clientPseudo[clientId];
