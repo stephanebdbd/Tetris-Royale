@@ -15,6 +15,9 @@ class Menu {
         json getLoginMenu2() const;
         json getLoginMenuFailed2() const;
         json getChatMenu() const;
+        json getCreateChatRoomMenu() const;
+        json getJoinChatRoomMenu(const std::vector<std::string>& chatRooms) const;
+        json getListChatRoomsMenu(const std::vector<std::string>& chatRooms) const;
         json getJoinOrCreateGame() const;
         json getGameMode() const;
 
@@ -23,7 +26,8 @@ class Menu {
         json getRemoveFriendMenu() const;
         json getFriendListMenu(const std::vector<std::string>& friends) const;
         json getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const;
-        json getGameOverMenu() const;        json getRequestsListMenu(const std::vector<std::string>& pendingRequests) const;
+        json getGameOverMenu() const;        
+        json getRequestsListMenu(const std::vector<std::string>& pendingRequests) const;
         json displayMessage(const std::string& message) const;
 
 };

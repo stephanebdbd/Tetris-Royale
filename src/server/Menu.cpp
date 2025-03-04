@@ -137,13 +137,55 @@ json Menu::getChatMenu() const {
         {"options", {
             {"1. ", "Créer une Room"},
             {"2. ", "Rejoindre une Room"},
-            {"3. ", "Lister les Rooms"},
+            {"3. ", "Lister mes Rooms"},
             {"4. ", "private chat"},
             {"5. ", "Retour"},
         }},
         {"input", "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getCreateChatRoomMenu() const {
+    json menu = {
+        {"title", "Créer une Room"},
+        {"options", {
+            {"Veuillez insérer le nom de la Room", ":"},
+        }},
+        {"input", "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getJoinChatRoomMenu(const std::vector<std::string>& chatRooms) const {
+    json menu = {
+        {"title", "Liste des Rooms"},
+        {"options", json::array()},
+        {"input", "Tapez 'join.nomRoom' pour rejoindre une Room."}
+    };
+
+    int index = 1;
+    for (const auto& room : chatRooms) {
+        menu["options"].push_back(std::to_string(index) + ". " + room);  // ✅ Ajout en tant que chaîne et non objet
+        index++;
+    }
+
+    return menu.dump() + "\n";  // Affichage formaté
+}
+
+json Menu::getListChatRoomsMenu(const std::vector<std::string>& chatRooms) const {
+    json menu = {
+        {"title", "Liste des Rooms"},
+        {"options", json::array()},
+        {"input", "Tapez 'join.nomRoom' pour rejoindre une Room."}
+    };
+
+    int index = 1;
+    for (auto& room : chatRooms) {
+        menu["options"].push_back(std::to_string(index) + ". " + room);  // ✅ Ajout en tant que chaîne et non objet
+        index++;
+    }
+    return menu.dump() + "\n";  // Affichage formaté
 }
 
 
@@ -169,7 +211,7 @@ json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
 
     int index = 1;
     for (const auto& user : friends) {
-        menu["options"].push_back(std::to_string(index) + ". " + user);  // ✅ Ajout en tant que chaîne et non objet
+        menu["options"].push_back(std::to_string(index) + ". " + user);
         index++;
     }
 

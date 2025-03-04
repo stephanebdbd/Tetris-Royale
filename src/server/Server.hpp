@@ -36,11 +36,8 @@ enum class MenuState {
             privateChat,
         Friends,
             AddFriend,
-            RemoveFriend,
             FriendList,
             FriendRequestList,
-            acceptFriendRequest,
-            rejectFriendRequest,
 };
 
 class Server {
@@ -107,14 +104,8 @@ public:
     bool getRunningChat(int clientId);
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
     std::unordered_map<int, std::string> getSocketPseudo() { return sockToPseudo; }
-    void keyInputAcceptFriendMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputRejectFriendMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputRemoveFriendMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputListFriendsMenu(int clientSocket, int clientId);
-    void keyInputListPendingRequestsMenu(int clientSocket, int clientId);
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
-    void clearMenu(int clientSocket, const std::string& functionName);
     void sendGameToPlayer(int clientSocket, int clientId);
 };
 
