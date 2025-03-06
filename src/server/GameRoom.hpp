@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include <thread>
-#include <array>
+#include <mutex>
 #include <vector>
 #include <unordered_map>
 #include <memory>
@@ -21,8 +21,9 @@ class GameRoom {
     GameModeName gameModeName;
     int maxPlayers;
     std::shared_ptr<GameMode> gameMode = nullptr;
+    mutable std::mutex mutex;
     bool started=false;
-    bool inProgress;
+    bool inProgress=false;
     int energyLimit;
     int speed;
     int amountOfPlayers=0;
@@ -64,17 +65,17 @@ public:
     bool getInProgress() const;
     int getRoomId() const;
     int getOwnerId() const;
-    bool getGameIsOver(int playerServerId) const { return games[players[playerServerId]]->getIsGameOver(); }
+    bool getGameIsOver(int playerServerId) const;
     void setOwnerId(int roomId);
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
-    bool getNeedToSendGame(int playerId) const { return games[players[playerId]]->getNeedToSendGame(); }
-    void setNeedToSendGame(bool needToSendGame, int playerId) { games[players[playerId]]->setNeedToSendGame(needToSendGame); }
+    bool getNeedToSendGame(int playerServerId) const;
+    void setNeedToSendGame(bool needToSendGame, int playerServerId);
     void setInsanceGameMode();
     void setRoomId(int roomId) { this->roomId = roomId; }
     void setHasStarted();
     bool getHasStarted() const { return started; }
-    void setGameIsOver(int playerServerId) { games[players[playerServerId]]->setGameOver(); }
+    void setGameIsOver(int playerServerId);
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
@@ -83,11 +84,12 @@ public:
     void keyInputchooseVictim(int playerId, int victim);
     void keyInputchooseMalusorBonus(int playerId, int malusOrBonus);
     void reinitializeMalusOrBonus(int playerId);
-    std::shared_ptr<Game> getGame(int playerId) { return games[players[playerId]]; }
+    std::shared_ptr<Game> getGame(int playerServerId);
     std::string convertUnicodeToText(const std::string& unicode);
     int convertStringToInt(const std::string& unicodeAction);
-    bool getCanUseMalusOrBonus(int PlayerServerId) const;
-    Score getScore(int PlayerServerId) const { return games[players[PlayerServerId]]->getScore(); }
+    bool getCanUseMalusOrBonus(int playerServerId) const;
+    std::shared_ptr<Score> getScore(int playerServerId) const;
+    int getPlayerId(int playerServerId) const;
 };
 
 #endif

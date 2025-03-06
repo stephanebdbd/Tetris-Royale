@@ -5,10 +5,10 @@
 
 class MalusRoyal {
     
-    TetraminoDisplacement& displacement;
+    std::shared_ptr<TetraminoDisplacement> displacement;
     
     public:
-        MalusRoyal(TetraminoDisplacement& displacement);
+        MalusRoyal(std::shared_ptr<TetraminoDisplacement> displacement);
         void reverseControl();
         void blockControl();
         void increaseSpeed();

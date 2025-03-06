@@ -4,7 +4,9 @@ TetraminoDisplacement::TetraminoDisplacement(Grid& grid)
     : grid(grid),
     currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
     dropTimer(1000), 
-    commandisBlocked(false), lightisBlocked(false) {}
+    commandisBlocked(false), lightisBlocked(false) {
+        std::cout << "TetraminoDisplacement created." << std::endl;
+    }
 
 TetraminoDisplacement& TetraminoDisplacement::operator=(const TetraminoDisplacement& displacement) {
     if(this != &displacement) {

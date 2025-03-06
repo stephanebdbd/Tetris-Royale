@@ -2,12 +2,13 @@
 #define BONUS_HPP
 
 #include <iostream>
+#include <memory>
 #include "Game.hpp"
 
 class Bonus {
-    TetraminoDisplacement& displacement;
+    std::shared_ptr<TetraminoDisplacement> displacement;
     public:
-        Bonus(TetraminoDisplacement& displacement);
+        Bonus(std::shared_ptr<TetraminoDisplacement> displacement);
         void MiniBlock();
         void decreaseSpeed();
 };

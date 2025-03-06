@@ -76,9 +76,6 @@ void Server::handleClient(int clientSocket, int clientId) {
             if (clientStates[clientId] == MenuState::Play) {
                 int roomId = clientGameRoomId[clientId];
                 gameRooms[roomId]->setGameIsOver(clientId);
-                if (!gameRooms[roomId]->getInProgress()){
-                    deleteGameRoom(roomId);
-                }
             }
             clientStates.erase(clientId); // Supprimer l'état des menus du client
             close(clientSocket); // Fermer la connexion
@@ -204,7 +201,7 @@ void Server::loopGame(int clientSocket, int clientId) {
     }
     clientStates[clientId] = MenuState::GameOver;
     if (gameRooms[gameRoomId]->getGameModeName() == GameModeName::Endless)
-        userManager->updateHighscore(clientPseudo[clientId], gameRooms[gameRoomId]->getScore(clientId).getScore());
+        userManager->updateHighscore(clientPseudo[clientId], gameRooms[gameRoomId]->getScore(clientId)->getScore());
     deleteGameRoom(gameRoomId);
     clientGameRoomId[clientId] = -1;
     sendMenuToClient(clientSocket, menu.getGameOverMenu());
@@ -398,7 +395,7 @@ void Server::sendGameToPlayer(int clientSocket, int clientId) {
 
     json message;
     
-    message["score"] = game->getScore().scoreToJson();
+    message["score"] = game->getScore()->scoreToJson();
     message["grid"] = game->getGrid().gridToJson();
     message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 

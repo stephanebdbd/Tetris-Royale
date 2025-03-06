@@ -4,8 +4,7 @@
 
 
 GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxPlayers)
-    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers),
-    inProgress(false) {
+    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers), mutex() {
     setGameMode(gameModeName);
     if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1))
     maxPlayers = 1;
@@ -52,6 +51,7 @@ bool GameRoom::getIsFull() const {
 }
 
 void GameRoom::setHasStarted(){
+    std::lock_guard<std::mutex> lock(mutex);
     started = true;
     inProgress = true;
 }
@@ -140,6 +140,7 @@ void GameRoom::keyInputchooseVictim(int playerId, int victim) {
 }
 
 void GameRoom::endGame() {
+    std::lock_guard<std::mutex> lock(mutex);
     inProgress = false;
 }
 
@@ -149,7 +150,10 @@ void GameRoom::applyFeatureMode(int playerId) {
     gameMode->featureMode(games[victim]/*, malusOrBonus*/);
 }
 
-void GameRoom::setInProgress(bool status) { this->inProgress = status; }
+void GameRoom::setInProgress(bool status) {
+    std::lock_guard<std::mutex> lock(mutex);
+    this->inProgress = status;
+}
 
 void GameRoom::setSpeed(int speed) { this->speed = speed; }
 
@@ -173,7 +177,10 @@ void GameRoom::addViewer(int viewerId) {
     viewersId.push_back(viewerId);
 }
 
-bool GameRoom::getInProgress() const { return inProgress; }
+bool GameRoom::getInProgress() const {
+    std::lock_guard<std::mutex> lock(mutex);
+    return inProgress;
+}
 
 int GameRoom::getRoomId() const { return roomId; }
 
@@ -220,11 +227,15 @@ void GameRoom::shiftPlayers(int index) {
 }
 
 std::string GameRoom::convertUnicodeToText(const std::string& unicodeAction) {
+    if (unicodeToText.empty()) 
+        return "///";
     auto action = unicodeToText.find(unicodeAction);
     return (action != unicodeToText.end()) ? action->second : "///"; 
 }
 
 int GameRoom::convertStringToInt(const std::string& unicodeAction) {
+    if (stringToIntegers.empty()) 
+        return -1;
     auto action = stringToIntegers.find(unicodeAction);
     return (action != stringToIntegers.end()) ? action->second : -1;
 }
@@ -235,7 +246,7 @@ void GameRoom::keyInputGame(int playerId, const std::string& unicodeAction) {
 }
 
 void GameRoom::input(int PlayerServerId, const std::string& unicodeAction) {
-    int playerId = players[PlayerServerId];
+    int playerId = getPlayerId(PlayerServerId);
     if (this->getIsFull()) {
         if (this->getCanUseMalusOrBonus(playerId)) {
             int action = this->convertStringToInt(unicodeAction);
@@ -252,4 +263,44 @@ void GameRoom::input(int PlayerServerId, const std::string& unicodeAction) {
     /*else if (amountOfPlayers < maxPlayers)
         this->inputLobby(playerId, unicodeAction);
     */
+}
+
+int GameRoom::getPlayerId(int playerServerId) const {
+    for (int i = 0; i < amountOfPlayers; ++i) {
+        if (players[i] == playerServerId)
+            return i;
+    }
+    return -1;
+}
+
+std::shared_ptr<Score> GameRoom::getScore(int playerServerId) const {
+    int playerId = getPlayerId(playerServerId);
+    return ((playerId != -1) && (playerId < amountOfPlayers)) ? games[playerId]->getScore() : nullptr;
+}
+
+std::shared_ptr<Game> GameRoom::getGame(int playerServerId) {
+    int playerId = getPlayerId(playerServerId);
+    return ((playerId != -1) && (playerId < amountOfPlayers)) ? games[playerId] : nullptr;
+}
+
+void GameRoom::setGameIsOver(int playerServerId) {
+    int playerId = getPlayerId(playerServerId);
+    if ((playerId != -1) && (playerId < amountOfPlayers))
+        games[playerId]->setGameOver();
+}
+
+void GameRoom::setNeedToSendGame(bool needToSendGame, int playerServerId) {
+    int playerId = getPlayerId(playerServerId);
+    if ((playerId != -1) && (playerId < amountOfPlayers))
+        games[playerId]->setNeedToSendGame(needToSendGame);
+}
+
+bool GameRoom::getNeedToSendGame(int playerServerId) const {
+    int playerId = getPlayerId(playerServerId);
+    return ((playerId != -1) && (playerId < amountOfPlayers)) ? games[playerId]->getNeedToSendGame() : false;
+}
+
+bool GameRoom::getGameIsOver(int playerServerId) const {
+    int playerId = getPlayerId(playerServerId);
+    return ((playerId != -1) && (playerId < amountOfPlayers)) ? games[playerId]->getIsGameOver() : false;
 }

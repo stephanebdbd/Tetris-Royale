@@ -11,8 +11,8 @@ class TetraminoDisplacement {
     
     Tetramino currentPiece;
     Timer dropTimer;
-    std::atomic<bool> gameOver=false;
-    std::atomic<bool> needToSendGame = true;
+    bool gameOver=false;
+    bool needToSendGame = true;
     bool commandisBlocked;
     bool lightisBlocked;
     bool bonus1Royal = false;
