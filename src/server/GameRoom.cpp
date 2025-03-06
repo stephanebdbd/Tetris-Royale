@@ -7,17 +7,34 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
     : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers),
     inProgress(false) {
     setGameMode(gameModeName);
-    if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1))
-    maxPlayers = 1;
-    else if ((gameModeName == GameModeName::Duel) && (maxPlayers != 2))
-        maxPlayers = 2;
-    else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers > 2))
-        maxPlayers = 3;
+    if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1)){
+        this->maxPlayers = 1;
+    }
+        
+    else if ((gameModeName == GameModeName::Duel) && (maxPlayers != 2)){
+        this->maxPlayers = 2;
+
+        std::cout << "maxPlayers = " <<maxPlayers<<std::endl;
+    }
+        
+    else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers > 2)){
+        this->maxPlayers = 3;
+    }
+        
     this->addPlayer(clientId);
     std::cout << "GameRoom #" << roomId << " created." << std::endl;
     std::thread gameRoomThread(&GameRoom::startGame, this);
     gameRoomThread.detach();
     }
+
+
+int GameRoom::trouverIndice(std::vector<int> vec, int valeur) const {
+    auto it = std::find(vec.begin(), vec.end(), valeur);
+    if (it != vec.end()) {
+        return std::distance(vec.begin(), it); // Retourne l'indice de l'élément trouvé
+    }
+    return -1; // Retourne -1 si l'élément n'est pas trouvé
+}
 
 void GameRoom::addPlayer(int playerId) {
     int currentAmount = players.size();
@@ -58,18 +75,26 @@ void GameRoom::setHasStarted(){
 }
 
 void GameRoom::startGame() {
+    std::cout << "amountPlayers1 = " <<amountOfPlayers<<std::endl;
+    std::cout << "maxPlayers1 = " <<maxPlayers<<std::endl;
     while(!this->getIsFull())
         continue;
 
+    std::cout << "amountPlayers2 = " <<amountOfPlayers<<std::endl;
+    std::cout << "maxPlayers2 = " <<maxPlayers<<std::endl;
+
     if (gameModeName == GameModeName::Duel) {
+        std::cout << "size of playersVictim = " <<playersVictim.size()<<std::endl;
         playersVictim[0] = 1;
         playersVictim[1] = 0;
+        std::cout << "blabla" <<std::endl;
     }
     
     this->setHasStarted();
     int countGameOvers = 0;
     
     while (inProgress) {
+        std::cout << "Ana GameRoom"<<std::endl;
         countGameOvers = 0;
         for (int i = 0; i < maxPlayers; ++i) {
             if (this->getGameIsOver(players[i]))
@@ -78,25 +103,67 @@ void GameRoom::startGame() {
                 games[i]->updateGame();
                 if (gameMode != nullptr) this->handleMalusOrBonus(i);
             }
+
+            //games[i]->updateGame();
+            //if (gameMode != nullptr) this->handleMalusOrBonus(i);
+
             amountOfPlayers = maxPlayers - countGameOvers;
         }
         if ((countGameOvers == maxPlayers-1) && (gameModeName != GameModeName::Endless)) 
             this->endGame();
         else if ((countGameOvers == 1) == (gameModeName == GameModeName::Endless))
             this->endGame();
+
+        std::cout << "rani mazal GameRoom"<<std::endl;
     }
+    std::cout << "salat GameRoom"<<std::endl;
+
+    /*if(this->getIsFull()){
+        if (gameModeName == GameModeName::Duel) {
+            std::cout << "size of playersVictim = " <<playersVictim.size()<<std::endl;
+            playersVictim[0] = 1;
+            playersVictim[1] = 0;
+            std::cout << "blabla" <<std::endl;
+        }
+        
+        this->setHasStarted();
+        int countGameOvers = 0;
+        
+        while (inProgress) {
+            std::cout << "Ana GameRoom"<<std::endl;
+            countGameOvers = 0;
+            for (int i = 0; i < maxPlayers; ++i) {
+                if (this->getGameIsOver(players[i]))
+                    countGameOvers++;
+                else {
+                    games[i]->updateGame();
+                    if (gameMode != nullptr) this->handleMalusOrBonus(i);
+                }
+                amountOfPlayers = maxPlayers - countGameOvers;
+            }
+            if ((countGameOvers == maxPlayers-1) && (gameModeName != GameModeName::Endless)) 
+                this->endGame();
+            else if ((countGameOvers == 1) == (gameModeName == GameModeName::Endless))
+                this->endGame();
+
+            std::cout << "rani mazal GameRoom"<<std::endl;
+        }
+        std::cout << "salat GameRoom"<<std::endl;
+    }*/
+
+    
 }
 
 void GameRoom::handleMalusOrBonus(int playerId) {
     if (gameModeName == GameModeName::Royal_Competition) {
-        energyOrClearedLines[playerId] += games[playerId]->getLinesCleared();;
+        energyOrClearedLines[playerId] += games[trouverIndice(players, playerId)]->getLinesCleared();;
         if ((energyOrClearedLines[playerId] >= energyLimit) && (playersMalusOrBonus[playerId] != -1) && (playersVictim[playerId] != -1)) {
             this->applyFeatureMode(playerId);
             this->reinitializeMalusOrBonus(playerId);
         }
     }
     else if ((gameModeName == GameModeName::Duel) || (gameModeName == GameModeName::Classic)) {
-        playersMalusOrBonus[playerId] = games[playerId]->getLinesCleared();
+        playersMalusOrBonus[playerId] = games[trouverIndice(players, playerId)]->getLinesCleared();
         if (playersMalusOrBonus[playerId] > 1) {
             if (gameModeName == GameModeName::Duel){
                 this->applyFeatureMode(playerId);
@@ -145,6 +212,7 @@ void GameRoom::endGame() {
 }
 
 void GameRoom::applyFeatureMode(int playerId) {
+    //khsha n9adoha 3la wd l erreur dyal addressage
     int victim = playersVictim[playerId];
     //int malusOrBonus = playersMalusOrBonus[playerId];
     gameMode->featureMode(games[victim]/*, malusOrBonus*/);
@@ -232,7 +300,7 @@ int GameRoom::convertStringToInt(const std::string& unicodeAction) {
 
 void GameRoom::keyInputGame(int playerId, const std::string& unicodeAction) {
     std::string action = convertUnicodeToText(unicodeAction);
-    games[playerId]->moveTetramino(action);
+    games[trouverIndice(players, playerId)]->moveTetramino(action);
 }
 
 void GameRoom::input(int PlayerServerId, const std::string& unicodeAction) {
@@ -253,4 +321,38 @@ void GameRoom::input(int PlayerServerId, const std::string& unicodeAction) {
     /*else if (amountOfPlayers < maxPlayers)
         this->inputLobby(playerId, unicodeAction);
     */
+}
+
+std::pair<std::string,int> GameRoom::extractNumber(const std::string& action){
+    /*size_t pos_parametre = action.find(' ');
+    std::string parametre = action.substr(0, pos_parametre);
+    size_t pos_number = pos_parametre + 2;
+    std::string number = action.substr(pos_number);
+    return {parametre, std::stoi(number)};*/
+
+    if (action.rfind("\\speed", 0) == 0) { // Vérifie si l'action commence par "\speed"
+        size_t pos_number = 6; // La position du premier caractère après "\speed"
+        std::string number = action.substr(pos_number);
+        return {"Speed", std::stoi(number)};
+    }
+    return {"", 0};
+
+
+}
+void GameRoom::inputLobby(const std::string& action){
+
+    int number = std::stoi(action.substr(1));
+    this->setMaxPlayers(number);
+    /*auto [parametre, number] = extractNumber(action);
+    std::cout<<"hello"<<std::endl;
+    if(parametre == "Speed"){
+        std::cout<<"Speed : "<<number<<std::endl;
+        setSpeed(number);
+        games[playerId]->setSpeed(this->speed);
+
+    }else if(parametre == "MaxPlayers"){
+        this->setMaxPlayers(number);
+    }else if(parametre == "EnergyLimit"){
+        this->setEnergyLimit(number);
+    }*/
 }
