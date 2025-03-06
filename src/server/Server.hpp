@@ -39,7 +39,7 @@ class Server {
     std::vector<std::shared_ptr<GameRoom>> gameRooms;
     std::unique_ptr<ServerChat> chat;
     
-    int gameRoomIdCounter=0;
+    int gameRoomIdMax=0;
     
     
     //chaque client aura sa game
@@ -73,7 +73,6 @@ public:
     void sendChatModeToClient(int clientSocket);
     void receiveInputFromClient(int clientSocket, int clientId);
     void deleteGameRoom(int roomId);
-    void sendGameToClient(int clientSocket, int clientId);
     void sendInputToGameRoom(int clientId, const std::string& action);
     void shiftGameRooms(int index);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);

@@ -2,6 +2,7 @@
 #define TETRAMINODISPLACEMENT_HPP
 
 #include <iostream>
+#include <atomic>
 #include "Timer.hpp"
 #include "Tetramino.hpp"
 
@@ -10,8 +11,8 @@ class TetraminoDisplacement {
     
     Tetramino currentPiece;
     Timer dropTimer;
-    bool gameOver=false;
-    bool needToSendGame = true;
+    std::atomic<bool> gameOver=false;
+    std::atomic<bool> needToSendGame = true;
     bool commandisBlocked;
     bool lightisBlocked;
     bool bonus1Royal = false;

@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include <thread>
+#include <array>
+#include <vector>
 #include <unordered_map>
 #include <memory>
 #include <sys/socket.h>
@@ -24,11 +26,11 @@ class GameRoom {
     int energyLimit;
     int speed;
     int amountOfPlayers=0;
-    std::vector<int> energyOrClearedLines;
-    std::vector<int> playersVictim;
-    std::vector<int> playersMalusOrBonus;
-    std::vector<int> players;
-    std::vector<std::shared_ptr<Game>> games;
+    std::array<int, 9> energyOrClearedLines;
+    std::array<int, 9> playersVictim;
+    std::array<int, 9> playersMalusOrBonus;
+    std::array<int, 9> players;
+    std::array<std::shared_ptr<Game>, 9> games;
 
     std::vector<int> viewersId;
     std::unordered_map<std::string, std::string> unicodeToText = {

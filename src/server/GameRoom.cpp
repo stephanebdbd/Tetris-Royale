@@ -20,30 +20,29 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
     }
 
 void GameRoom::addPlayer(int playerId) {
-    int currentAmount = players.size();
-    if (currentAmount < maxPlayers) {
-        players.push_back(playerId);
-        games.push_back(std::make_shared<Game>(10, 20));
-        energyOrClearedLines.push_back(0);
-        playersVictim.push_back(-1);
-        playersMalusOrBonus.push_back(-1);
+    if (amountOfPlayers < maxPlayers) {
+        players[playerId] = playerId;
+        games[playerId] = std::make_shared<Game>(10, 20);
+        energyOrClearedLines[playerId] = 0;
+        playersVictim[playerId] = -1;
+        playersMalusOrBonus[playerId] = -1;
+        amountOfPlayers++;
     }
-    amountOfPlayers++;
 }
 
 bool GameRoom::removePlayer(int playerId) {
-    auto it = std::find(players.begin(), players.end(), playerId);
-    if (it != players.end()) {
-        int index = std::distance(players.begin(), it);
-        players.erase(players.begin() + index);
-        games.erase(games.begin() + index);
-        energyOrClearedLines.erase(energyOrClearedLines.begin() + index);
-        playersVictim.erase(playersVictim.begin() + index);
-        playersMalusOrBonus.erase(playersMalusOrBonus.begin() + index);
-        amountOfPlayers--;
-        if ((index < amountOfPlayers-1) && (amountOfPlayers > 1))
-            this->shiftPlayers(index);
-        return true;
+    for (int idx=0; idx < amountOfPlayers ; idx++) {
+        if (players[idx] == playerId) {
+            players[idx] = -1;
+            games[idx] = nullptr;
+            energyOrClearedLines[idx] = 0;
+            playersVictim[idx] = -1;
+            playersMalusOrBonus[idx] = -1;
+            if (idx == amountOfPlayers-1)
+                this->shiftPlayers(idx);
+            amountOfPlayers--;
+            return true;
+        }
     }
     return false;
 }
@@ -213,11 +212,11 @@ void GameRoom::shiftPlayers(int index) {
         playersVictim[i] = playersVictim[i + 1];
         playersMalusOrBonus[i] = playersMalusOrBonus[i + 1];
     }
-    players.pop_back();
-    games.pop_back();
-    energyOrClearedLines.pop_back();
-    playersVictim.pop_back();
-    playersMalusOrBonus.pop_back();
+    players[maxPlayers - 1] = -1;
+    games[maxPlayers - 1] = nullptr;
+    energyOrClearedLines[maxPlayers - 1] = -1;
+    playersVictim[maxPlayers - 1] = -1;
+    playersMalusOrBonus[maxPlayers - 1] = -1;
 }
 
 std::string GameRoom::convertUnicodeToText(const std::string& unicodeAction) {
