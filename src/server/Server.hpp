@@ -23,9 +23,16 @@ enum class MenuState {
         Game, 
             JoinOrCreateGame,
                 CreateGame,
+                    ChooseGameMode,
+                        Endless,
+                        Duel,
+                        Classic,
+                        Royal_Competition,
                 JoinGame,
-                    Play,
-                    GameOver,
+                    Settings,
+                    Lobby,
+                        Play,
+                        GameOver,
         classement,
         chat
 };
@@ -68,7 +75,7 @@ public:
     void keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode=GameModeName::Endless);
+    void keyInputGameModeMenu(int clientId, GameModeName gameMode=GameModeName::Endless);
     //void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void sendChatModeToClient(int clientSocket);
     void receiveInputFromClient(int clientSocket, int clientId);
@@ -81,6 +88,14 @@ public:
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     void clearMenu(int clientSocket, const std::string& functionName);
     void sendGameToPlayer(int clientSocket, int clientId);
+    void keyInputChooseGameModeMenu(int clientSocket, int clientId, const std::string& action);
+    void keyinputLobbyParametreMenu(int clientSocket, int clientId, const std::string& action);
+    void SendInputLobby(int clientId, const std::string& action);
+    std::string getMode(int clientId);
+    int getMaxPlayers(int clientId);
+    int getAmountOfPlayers(int clientId);
+    void startGame(int clientSocket, int clientId);
+
 };
 
 #endif 

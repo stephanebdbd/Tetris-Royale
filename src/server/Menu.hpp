@@ -22,6 +22,9 @@ class Menu {
         json getListFriendsMenu(const std::vector<int>& friends) const;
         json getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const;
         json getGameOverMenu() const;
+        json getGameModeMenu() const;
+        json getLobbyMenu1() const;
+        json getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPlayers) const;
 
 };
 
