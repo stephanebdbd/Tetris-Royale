@@ -58,34 +58,42 @@ public:
     void setInProgress(bool status);
     void setSpeed(int speed);
     bool setGameMode(GameModeName gameMode);
+    //GameModeName getGameModeName() const {return gameModeName;}
+    //int getAmountOfPlayers() const {return amountOfPlayers;}
+    int trouverIndice(std::vector<int> vec, int valeur) const;
+
+
     void addViewer(int viewerId);
     bool getInProgress() const;
     int getRoomId() const;
     int getOwnerId() const;
-    bool getGameIsOver(int playerServerId) const { return games[players[playerServerId]]->getIsGameOver(); }
+    //bool getGameIsOver(int playerServerId) const { return games[players[playerServerId]]->getIsGameOver(); }
+    bool getGameIsOver(int playerServerId) const { return games[trouverIndice(players, playerServerId)]->getIsGameOver(); }
+
     void setOwnerId(int roomId);
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
-    bool getNeedToSendGame(int playerId) const { return games[players[playerId]]->getNeedToSendGame(); }
-    void setNeedToSendGame(bool needToSendGame, int playerId) { games[players[playerId]]->setNeedToSendGame(needToSendGame); }
+    bool getNeedToSendGame(int playerId) const { return games[trouverIndice(players, playerId)]->getNeedToSendGame(); }
+    void setNeedToSendGame(bool needToSendGame, int playerId) { games[trouverIndice(players, playerId)]->setNeedToSendGame(needToSendGame); }
     void setInsanceGameMode();
     void setRoomId(int roomId) { this->roomId = roomId; }
     void setHasStarted();
     bool getHasStarted() const { return started; }
-    void setGameIsOver(int playerServerId) { games[players[playerServerId]]->setGameOver(); }
+    void setGameIsOver(int playerServerId) { games[trouverIndice(players, playerServerId)]->setGameOver(); }
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
-    //void inputLobby(int playerId, const std::string& action);
+    void inputLobby(const std::string& action);
+    std::pair<std::string,int> extractNumber(const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);
     void keyInputchooseMalusorBonus(int playerId, int malusOrBonus);
     void reinitializeMalusOrBonus(int playerId);
-    std::shared_ptr<Game> getGame(int playerId) { return games[players[playerId]]; }
+    std::shared_ptr<Game> getGame(int playerId) { return games[trouverIndice(players, playerId)]; }
     std::string convertUnicodeToText(const std::string& unicode);
     int convertStringToInt(const std::string& unicodeAction);
     bool getCanUseMalusOrBonus(int PlayerServerId) const;
-    Score getScore(int PlayerServerId) const { return games[players[PlayerServerId]]->getScore(); }
+    Score getScore(int PlayerServerId) const { return games[trouverIndice(players, PlayerServerId)]->getScore(); }
 };
 
 #endif
