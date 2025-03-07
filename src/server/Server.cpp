@@ -148,17 +148,25 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         keyInputGameOverMenu(clientSocket, clientId, action);
         return;
     }
+    if (clientStates[clientId] == MenuState::Lobby) {
+        //keyinputLobbyParametreMenu(clientSocket, clientId, action);
+        return;
+    }
+    if (clientStates[clientId] == MenuState::Settings){
+        //sendMenuToClient(clientSocket, menu.getLobbyMenu2(action));
+        //keyinputLobbyParametreMenu(clientSocket, clientId, action);
+        return;
+    }
 }
 
-void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode) {
+void Server::keyInputGameModeMenu(int clientSocket, int clientId) {
     //création de la gameRoom (partie Endless pour l'instant)
     clientStates[clientId] = MenuState::Play;
     clientGameRoomId[clientId] = gameRoomIdCounter;
-    std::shared_ptr<GameRoom> gameRoom = std::make_shared<GameRoom>(gameRoomIdCounter, clientId, gameMode);
+    std::shared_ptr<GameRoom> gameRoom = std::make_shared<GameRoom>(gameRoomIdCounter, clientId);
     gameRooms.push_back(gameRoom);
     
     gameRoomIdCounter++;
-    
     
     std::thread loopgame(&Server::loopGame, this, clientSocket, clientId, gameRoom);
     std::thread inputThread(&Server::receiveInputFromClient, this, clientSocket, clientId, gameRoom);
@@ -236,6 +244,7 @@ void Server::loopGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> 
             sendGameToPlayer(clientSocket, game);
             gameRoom->setNeedToSendGame(false, clientId);
         }
+
     }
     gameRoomThread.join();
     if (score != nullptr)
@@ -243,6 +252,20 @@ void Server::loopGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> 
     std::cout << "Game #" << gameRoomId << " ended." << std::endl;
 }
 
+/*
+void Server::keyinputLobbyParametreMenu(int clientSocket, int clientId, const std::string& action){
+    this->SendInputLobby(clientId, action);
+    sendMenuToClient(clientSocket, menu.getLobbyMenu2(getMaxPlayers(clientId), getMode(clientId), getAmountOfPlayers(clientId)));
+
+    if (getAmountOfPlayers(clientId) == getMaxPlayers(clientId)){
+        startGame(clientSocket, clientId);
+    }
+    
+
+    //this->keyInputGameModeMenu(clientSocket, clientId, action);
+}
+
+*/
 
 
 void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action) {
@@ -443,6 +466,9 @@ void Server::sendChatModeToClient(int clientSocket) {
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0);
 }
+
+
+
 
 int main() {
     // le client ne doit pas l'igniorer faudra sans doute faire un handler pour le SIGPIPE ? 

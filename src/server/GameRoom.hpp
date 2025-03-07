@@ -33,7 +33,7 @@ class GameRoom {
     std::vector<int> viewersId;
 public:
     GameRoom()=default;
-    GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxPlayers=1);
+    GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
     void addPlayer(int playerId);
     bool removePlayer(int playerId);
     bool getIsFull() const;
@@ -63,7 +63,8 @@ public:
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
-    //void inputLobby(int playerId, const std::string& action);
+    void inputLobby(const std::string& action);
+    std::pair<std::string,int> extractNumber(const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);
     void keyInputchooseMalusorBonus(int playerId, int malusOrBonus);

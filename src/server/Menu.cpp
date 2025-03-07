@@ -228,3 +228,55 @@ json Menu::getGameOverMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+json Menu::getGameModeMenu() const {
+    json menu = {
+        {"title", "Game Mode"},
+        {"options", {
+            {"1. ", "Endless"},
+            {"2. ", "Duel"},
+            {"3. ", "Classic"},
+            {"4. ", "Royal Competition"}
+        }},
+        {"input", "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getLobbyMenu1() const {
+    json menu = {
+        {"title", "Configuration des paramètres de la partie:"},
+        {"options", {
+            {"\\<number> ", "Nombre maximal de joueurs"}
+        }},
+
+        {"input", "entrez le paramètre: "}
+        
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPlayers) const {
+    
+    json menu = {
+        {"title", "La salle d'invitation et d'attente:"},
+        {"options", {
+            {"Joueurs Maximum: ", std::to_string(maxPlayers)},
+            {"Game Mode: ", mode},
+            {" "," \n"},
+
+            {"Nombre actuel de joueurs: ", std::to_string(amountOfPlayers)},
+            {" ", " \n"},
+
+            {"\\invite\\player\\<name> ", "Inviter un joueur"},
+            {"\\invite\\viewer\\<name> ", "Inviter un spectateur"},
+            {"\\quit ", "Quitter la partie"}
+
+        }},
+
+        {"input", "entrez le paramètre: "}
+        
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
