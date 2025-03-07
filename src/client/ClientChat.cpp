@@ -51,6 +51,7 @@ void ClientChat::run() {
 void ClientChat::sendChatMessages() {
     isChatting = true;
     std::string inputStr;
+    std::string constReceiver;
     int ch;
     while (true) {
         mtx.lock();
@@ -65,23 +66,51 @@ void ClientChat::sendChatMessages() {
         ch = getch();
         if (ch == 10) {  // Entrée
             if (inputStr.empty()) continue;
-            if (inputStr.size() < 2 || inputStr[0] != '.' || inputStr[1] != '/') {
+
+            if(constReceiver.empty() && inputStr.substr(0, 2) != "./"){
+                std::cerr << "Veuillez spécifier un destinataire !\n";
                 continue;
             }
+
+            //si le message est ./flush on affiche tous les messages enregistrés non affichés
+            if(inputStr == "./flush"){
+                if (FlushMemory()) {
+                    y = 1;
+                    continue;
+                }
+            }
+
+            //si le message est ./exit on envoie un message au serveur pour lui dire qu'on veut quitter le chat
             if(inputStr == "./exit"){
                 receiver = "server";
                 message = "exit";
-            }else{
+            }
+            //sinon on envoie un message normal (après avoir vérifié le format)
+            else{
                 size_t pos = inputStr.find(' ');
                 if (pos == std::string::npos) {
-                    std::cerr << "Format incorrect !\n";
-                    continue;
+                    if(inputStr.substr(0, 2) == "./"){
+                        constReceiver = inputStr.substr(2, pos - 2);
+                        inputStr.clear();
+                        continue;
+                    }else{
+                        message = inputStr;
+                    }
+                }else{
+                    receiver = inputStr.substr(2, pos - 2);
+                    message = inputStr.substr(pos + 1);
                 }
-                receiver = inputStr.substr(2, pos - 2);
-                message = inputStr.substr(pos + 1);
+                
             }
 
-            if (message.empty()) continue;
+            if(message.empty()){
+                std::cerr << "Veuillez spécifier un message !\n";
+                continue;
+            }
+
+            if(receiver.empty() && !constReceiver.empty()){
+                receiver = constReceiver;
+            }
             json msg_json = { {"receiver", receiver}, {"message", message} };
 
             if (!network.sendData(msg_json.dump(), clientSocket)) {
