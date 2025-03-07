@@ -10,7 +10,7 @@ void ClassicMode::featureMode(std::shared_ptr<Game> game){
     if(nbrMalus > 0){
         Malus malus(nbrMalus);
         std::shared_ptr<TetraminoDisplacement> displacement = game->getDisplacement();
-        Grid& grid = displacement->getGrid();
+        std::shared_ptr<Grid> grid = displacement->getGrid();
         malus.sendMalus(grid);
     }
 }

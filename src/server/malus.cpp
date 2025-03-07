@@ -20,18 +20,18 @@ void Malus:: createMalus(){
 }
 
 
-void Malus:: sendMalus(Grid &grid){
+void Malus::sendMalus(std::shared_ptr<Grid> grid){
     
-    int height = grid.getHeight();
-    int width = grid.getWidth();
-    grid.piecesUp(nbrLine);
+    int height = grid->getHeight();
+    int width = grid->getWidth();
+    grid->piecesUp(nbrLine);
 
     for(int y = 0; y < nbrLine ; y++){
         for(int x = 0; x < width; x++){
             
             if (malus[y][x] != ' '){
                 
-                grid.markCell(x+1, (height - 1) - y, Color(Type::GRAY));
+                grid->markCell(x+1, (height - 1) - y, Color(Type::GRAY));
             }
         }
     }

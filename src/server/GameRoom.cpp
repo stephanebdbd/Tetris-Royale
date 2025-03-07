@@ -4,7 +4,7 @@
 
 
 GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxPlayers)
-    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers), mutex() {
+    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers) {
     setGameMode(gameModeName);
     if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1))
     maxPlayers = 1;
@@ -14,8 +14,6 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
         maxPlayers = 3;
     this->addPlayer(clientId);
     std::cout << "GameRoom #" << roomId << " created." << std::endl;
-    std::thread gameRoomThread(&GameRoom::startGame, this);
-    gameRoomThread.detach();
     }
 
 void GameRoom::addPlayer(int playerId) {
@@ -51,7 +49,6 @@ bool GameRoom::getIsFull() const {
 }
 
 void GameRoom::setHasStarted(){
-    std::lock_guard<std::mutex> lock(mutex);
     started = true;
     inProgress = true;
 }
@@ -140,7 +137,6 @@ void GameRoom::keyInputchooseVictim(int playerId, int victim) {
 }
 
 void GameRoom::endGame() {
-    std::lock_guard<std::mutex> lock(mutex);
     inProgress = false;
 }
 
@@ -151,7 +147,6 @@ void GameRoom::applyFeatureMode(int playerId) {
 }
 
 void GameRoom::setInProgress(bool status) {
-    std::lock_guard<std::mutex> lock(mutex);
     this->inProgress = status;
 }
 
@@ -178,7 +173,6 @@ void GameRoom::addViewer(int viewerId) {
 }
 
 bool GameRoom::getInProgress() const {
-    std::lock_guard<std::mutex> lock(mutex);
     return inProgress;
 }
 

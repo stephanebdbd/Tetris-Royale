@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include <thread>
-#include <mutex>
 #include <vector>
 #include <unordered_map>
 #include <memory>
@@ -21,7 +20,6 @@ class GameRoom {
     GameModeName gameModeName;
     int maxPlayers;
     std::shared_ptr<GameMode> gameMode = nullptr;
-    mutable std::mutex mutex;
     bool started=false;
     bool inProgress=false;
     int energyLimit;

@@ -3,7 +3,7 @@
 #include <ncurses.h>
 
 Game::Game(int gridWidth, int gridHeight) //ajouter ce parametre apres , std::unique_ptr<GameMode> gameMode 
-    : grid(gridWidth, gridHeight), 
+    : grid(std::make_shared<Grid>(gridWidth, gridHeight)), 
       score(std::make_shared<Score>(gridWidth + 5, 2)), // Position du score à droite de la grille
       running(true),
       displacement(std::make_shared<TetraminoDisplacement>(grid))
@@ -34,7 +34,7 @@ void Game::run() {
 
         displacement->update();
         if (!gameOver){
-            linesCleared = grid.clearFullLines();
+            linesCleared = grid->clearFullLines();
             score->addScore(linesCleared);
         }
         else {
@@ -49,7 +49,7 @@ void Game::run() {
 
 void Game::updateGame() {
     displacement->update();
-    linesCleared = grid.clearFullLines();
+    linesCleared = grid->clearFullLines();
     score->addScore(linesCleared);
 }
 
@@ -61,7 +61,7 @@ void Game::showGame() {
         }
         malusCounter.reset();
     }
-    grid.draw();
+    grid->draw();
     displacement->drawPiece();
     score->display();
     
@@ -70,7 +70,7 @@ void Game::showGame() {
 void Game::showGameOver() {
     // Affichage immédiat du Game Over
     erase();
-    mvprintw(grid.getHeight() / 2, grid.getWidth() / 2 - 5, "GAME OVER");
+    mvprintw(grid->getHeight() / 2, grid->getWidth() / 2 - 5, "GAME OVER");
     refresh();
     nodelay(stdscr, FALSE); 
     getch(); 

@@ -2,6 +2,8 @@
 #define MALUS_HPP
 
 #include <vector>
+#include <memory>
+#include <iostream>
 #include "Grid.hpp"
 #include "Color.hpp"
 
@@ -14,7 +16,7 @@ class Malus {
     public:
         Malus(int nbrLine);
         void createMalus(); //creation de malus 
-        void sendMalus(Grid &grid);
+        void sendMalus(std::shared_ptr<Grid> grid);
   
 };
 

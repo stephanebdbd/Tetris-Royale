@@ -156,8 +156,7 @@ void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName g
     clientGameRoomId[clientId] = gameRoomIdMax;
     gameRooms.push_back(std::make_shared<GameRoom>(gameRoomIdMax, clientId, gameMode));
     gameRoomIdMax++;
-    std::thread toSendGameToClient(&Server::loopGame, this, clientSocket, clientId);
-    toSendGameToClient.detach();
+    loopGame(clientSocket, clientId);
 }
 
 void Server::deleteGameRoom(int roomId) {
@@ -184,6 +183,8 @@ void Server::sendInputToGameRoom(int clientId, const std::string& action) {
 
 void Server::loopGame(int clientSocket, int clientId) {
     int gameRoomId = clientGameRoomId[clientId];
+    std::thread gameRoomThread(&GameRoom::startGame, gameRooms[gameRoomId]);
+    gameRoomThread.detach();
     while (!gameRooms[gameRoomId]->getHasStarted())
         continue;
     std::cout << "Game #" << gameRoomId << " started." << std::endl;
@@ -396,7 +397,7 @@ void Server::sendGameToPlayer(int clientSocket, int clientId) {
     json message;
     
     message["score"] = game->getScore()->scoreToJson();
-    message["grid"] = game->getGrid().gridToJson();
+    message["grid"] = game->getGrid()->gridToJson();
     message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 
     std::string msg = message.dump() + "\n";

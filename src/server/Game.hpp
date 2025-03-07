@@ -11,7 +11,7 @@
 #include <iostream>
 
 class Game {
-    Grid grid;
+    std::shared_ptr<Grid> grid;
     std::shared_ptr<Score> score;
     
     int linesCleared;
@@ -28,7 +28,7 @@ class Game {
         void showGame();
         void showGameOver();
         void updateGame();
-        Grid& getGrid() { return grid; }
+        std::shared_ptr<Grid> getGrid() { return grid; }
         void moveTetramino(const std::string& action) { displacement->keyInputGameMenu(action); }
         std::shared_ptr<TetraminoDisplacement> getDisplacement() { return displacement; } 
         std::shared_ptr<Score> getScore() { return score; }

@@ -7,7 +7,7 @@
 #include "Tetramino.hpp"
 
 class TetraminoDisplacement {
-    Grid& grid;
+    std::shared_ptr<Grid> grid;
     
     Tetramino currentPiece;
     Timer dropTimer;
@@ -18,7 +18,7 @@ class TetraminoDisplacement {
     bool bonus1Royal = false;
     int ch;
 public:
-    TetraminoDisplacement(Grid& grid);
+    TetraminoDisplacement(std::shared_ptr<Grid>grid);
     TetraminoDisplacement(const TetraminoDisplacement& other) = default;
     TetraminoDisplacement& operator=(const TetraminoDisplacement& displacement);
     void keyInputGameMenu(const std::string& action);
@@ -33,7 +33,7 @@ public:
     bool getNeedToSendGame() const { return needToSendGame; }
     bool getIsGameOver() const { return gameOver; }
     void setGameOver() { this->gameOver = false; }
-    Grid& getGrid() { return grid; }
+    std::shared_ptr<Grid> getGrid() { return grid; }
     void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
     Tetramino& getCurrentPiece() { return currentPiece; }
     void setSpeed(int amount) { dropTimer.decreaseInterval(amount); }
