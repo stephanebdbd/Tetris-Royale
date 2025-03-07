@@ -2,7 +2,7 @@
 #define TETRAMINODISPLACEMENT_HPP
 
 #include <iostream>
-#include <atomic>
+#include <mutex>
 #include "Timer.hpp"
 #include "Tetramino.hpp"
 
@@ -11,10 +11,11 @@ class TetraminoDisplacement {
     
     Tetramino currentPiece;
     Timer dropTimer;
-    bool gameOver=false;
-    bool needToSendGame = true;
     bool commandisBlocked;
     bool lightisBlocked;
+    mutable std::mutex mutex;
+    bool gameOver=false;
+    bool needToSendGame = true;
     bool bonus1Royal = false;
     int ch;
 public:
@@ -30,9 +31,9 @@ public:
     void update();
     void drawPiece();
     void setNeedToSendGame(bool needToSendGame);
-    bool getNeedToSendGame() const { return needToSendGame; }
-    bool getIsGameOver() const { return gameOver; }
-    void setGameOver() { this->gameOver = false; }
+    bool getNeedToSendGame() const;
+    bool getIsGameOver() const;
+    void setGameOver();
     std::shared_ptr<Grid> getGrid() { return grid; }
     void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
     Tetramino& getCurrentPiece() { return currentPiece; }

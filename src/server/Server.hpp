@@ -37,9 +37,10 @@ class Server {
     std::atomic<int> clientIdCounter;
     std::unordered_map<int, int> clientGameRoomId;
     std::vector<std::shared_ptr<GameRoom>> gameRooms;
+    std::unordered_map<int, int*> gameOverAdress;
     std::unique_ptr<ServerChat> chat;
     
-    int gameRoomIdMax=0;
+    int gameRoomIdCounter=0;
     
     
     //chaque client aura sa game
@@ -59,7 +60,7 @@ public:
     void acceptClients();
     void handleClient(int clientSocket, int clientId);
     void stop();
-    void loopGame(int clientSocket, int clientId);
+    void loopGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom);
     void sendMenuToClient(int clientSocket, const std::string& screen);
     void keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputMainMenu(int clientSocket, int clientId, const std::string& action);
@@ -71,15 +72,14 @@ public:
     void keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode=GameModeName::Endless);
     //void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void sendChatModeToClient(int clientSocket);
-    void receiveInputFromClient(int clientSocket, int clientId);
+    void receiveInputFromClient(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom);
     void deleteGameRoom(int roomId);
     void sendInputToGameRoom(int clientId, const std::string& action);
-    void shiftGameRooms(int index);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     void clearMenu(int clientSocket, const std::string& functionName);
-    void sendGameToPlayer(int clientSocket, int clientId);
+    void sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game);
 };
 
 #endif 

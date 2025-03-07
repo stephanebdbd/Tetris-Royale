@@ -4,7 +4,7 @@ TetraminoDisplacement::TetraminoDisplacement(std::shared_ptr<Grid> grid)
     : grid(grid),
     currentPiece(grid->getWidth() / 2, 0, grid->getWidth(), grid->getHeight()), 
     dropTimer(1000), 
-    commandisBlocked(false), lightisBlocked(false) {
+    commandisBlocked(false), lightisBlocked(false), mutex() {
         std::cout << "TetraminoDisplacement created." << std::endl;
     }
 
@@ -94,10 +94,6 @@ void TetraminoDisplacement::update() {
     }
 }
 
-void TetraminoDisplacement::setNeedToSendGame(bool needToSendGame) {
-    this->needToSendGame = needToSendGame;
-}
-
 void TetraminoDisplacement::drawPiece() {
     if(lightisBlocked) return;
     currentPiece.draw();
@@ -124,4 +120,24 @@ void TetraminoDisplacement::random2x2MaskedBlock(){
     }
     grid->applyGravity();
 
+}
+
+void TetraminoDisplacement::setNeedToSendGame(bool needToSendGame) {
+    std::lock_guard<std::mutex> lock(mutex);
+    this->needToSendGame = needToSendGame;
+}
+
+bool TetraminoDisplacement::getNeedToSendGame() const {
+    std::lock_guard<std::mutex> lock(mutex);
+    return needToSendGame;
+}
+
+void TetraminoDisplacement::setGameOver() {
+    std::lock_guard<std::mutex> lock(mutex);
+    gameOver = true;
+}
+
+bool TetraminoDisplacement::getIsGameOver() const{
+    std::lock_guard<std::mutex> lock(mutex);
+    return gameOver;
 }

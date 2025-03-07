@@ -5,7 +5,6 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <unordered_map>
 #include <memory>
 #include <sys/socket.h>
 #include "Game.hpp"
@@ -32,19 +31,6 @@ class GameRoom {
     std::array<std::shared_ptr<Game>, 9> games;
 
     std::vector<int> viewersId;
-    std::unordered_map<std::string, std::string> unicodeToText = {
-        {"\u0005", "right"},
-        {"\u0004", "left"},
-        {"\u0003", "up"},
-        {"\u0002", "down"},
-        {" ", "drop"}
-    };
-    std::unordered_map<std::string, int> stringToIntegers = {
-        {"1", 1}, {"2", 2}, {"3", 3},
-        {"4", 4}, {"5", 5}, {"6", 6},
-        {"7", 7}, {"8", 8}, {"9", 9}
-    };
-
 public:
     GameRoom()=default;
     GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxPlayers=1);
@@ -63,7 +49,7 @@ public:
     bool getInProgress() const;
     int getRoomId() const;
     int getOwnerId() const;
-    bool getGameIsOver(int playerServerId) const;
+    bool getGameIsOver(int playerServerId, bool fromGameRoom=false) const;
     void setOwnerId(int roomId);
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
@@ -72,7 +58,7 @@ public:
     void setInsanceGameMode();
     void setRoomId(int roomId) { this->roomId = roomId; }
     void setHasStarted();
-    bool getHasStarted() const { return started; }
+    bool getHasStarted() const;
     void setGameIsOver(int playerServerId);
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }

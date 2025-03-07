@@ -1,5 +1,8 @@
 .vscode/
-src/client/io.hpp
-src/client/io.cpp
-src/server/io.hpp
-src/server/io.cpp
+src/*/*.o
+src/server/users.txt
+src/client/messages.json
+src/server/server.log
+src/server/serveur
+src/server/tetris
+src/client/client
