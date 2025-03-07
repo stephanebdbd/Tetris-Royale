@@ -3,6 +3,8 @@
 #include "Server.hpp"
 
 
+chatRoom::chatRoom(std::string room_name, int admin_id) : roomName(room_name), adminId(admin_id) {}
+
 
 void chatRoom::addClient(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(clientsMutex);
@@ -30,4 +32,24 @@ void chatRoom::broadcastMessage(const std::string& message, const std::string& s
         // send message to client
         chat.sendMessage(server->getPseudoSocket()[client], sender, message);
     }   
+}
+
+std::string chatRoom::getRoomName() const {
+    return roomName;
+}
+
+int chatRoom::getAdminId() const {
+    return adminId;
+}
+
+std::set<std::string> chatRoom::getClients() const {
+    return clients;
+}
+
+std::set<std::string> chatRoom::getReceivedReq() const {
+    return receivedReq;
+}
+
+std::set<std::string> chatRoom::getSentReq() const {
+    return sentReq;
 }

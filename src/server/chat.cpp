@@ -1,22 +1,21 @@
 #include "chat.hpp"
 #include "Server.hpp"
+#include <fstream>
 
 
-using json = nlohmann::json;
-
+bool ServerChat::messagesWaitForDisplay = false;
 
 void ServerChat::processClientChat(int clientSocket, int clientId, Server &server, MenuState state, std::string menu) {
     std::thread chatThread([this, clientSocket, clientId, &server, state, menu]() {
-        std::cout << "Chat process started for client " << clientSocket << std::endl;
+        std::string sender = server.getSocketPseudo()[clientSocket];
         char buffer[1024];
-
-        while (server.getRunningChat(clientId)) {
+        while (server.getRunningChat(clientSocket)) {
             memset(buffer, 0, sizeof(buffer));
             int bytes_received = recv(clientSocket, buffer, sizeof(buffer), 0);
 
             if (bytes_received <= 0) {
                 close(clientSocket);
-                server.setRunningChat(clientId, false);
+                server.setRunningChat(clientSocket, false);
             }
 
             try {
@@ -24,13 +23,16 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
                 std::cout <<  msg << std::endl;
                 if (msg.contains("receiver") && msg.contains("message") && !msg["receiver"].is_null() && !msg["message"].is_null() && msg["message"] != "exit") {
                     int receiver = server.getPseudoSocket()[msg["receiver"]];
-                    std::string sender = server.getSocketPseudo()[clientSocket];
                     std::string message = msg["message"];
-                    sendMessage(receiver, sender, message); 
+                    if(!server.getRunningChat(receiver)) {
+                        saveMessage(msg["receiver"].get<std::string>() + ".json", msg.dump());
+                    }else {
+                        sendMessage(receiver, sender, message);
+                    }
                 }else {
                     // gere l exit du client
                     std::cout << "Client " << clientSocket << " disconnected." << std::endl;
-                    server.setRunningChat(clientId, false);
+                    server.setRunningChat(clientSocket, false);
                     
                 }
             } catch (const std::exception& e) {
@@ -39,7 +41,6 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
         }
         server.setClientState(clientId, state);
         server.sendMenuToClient(clientSocket, menu);
-        std::cout << "Chat process ended for client " << clientSocket << std::endl;
     });
     chatThread.detach();
 }
@@ -52,6 +53,44 @@ void ServerChat::sendMessage(int clientSocket, std::string sender, const std::st
     send(clientSocket, msgStr.c_str(), msgStr.size(), 0);
 }
 
-std::string ServerChat::getChatMenu() const {
-    return "Vous êtes dans le chat. Tapez votre message et appuyez sur Entrée.\n";
+
+bool ServerChat::initMessageMemory(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.good()) {
+        std::ofstream newFile(filename);
+        if (newFile.is_open()) {
+            newFile.close();
+            return true;
+        }
+        std::cerr << "Erreur lors de la création du fichier messages.json." << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool ServerChat::saveMessage(const std::string& filename, const std::string& message) {
+    std::ofstream file(filename, std::ios::app);
+    if (file.is_open()) {
+        file << message << std::endl;
+        file.close();
+        messagesWaitForDisplay = true;
+        return true;
+    }
+    return false;
+}
+
+bool ServerChat::FlushMemory(const std::string& filename) {
+    std::ifstream file(filename);
+    if (file.is_open()) {
+        std::string line;
+        while (getline(file, line)) {
+            json message = json::parse(line);
+            std::cout << message.dump(4) << std::endl;
+        }
+        file.close();
+        std::ofstream clearFile(filename, std::ios::trunc);
+        messagesWaitForDisplay = false;
+        return true;
+    }
+    return false;
 }

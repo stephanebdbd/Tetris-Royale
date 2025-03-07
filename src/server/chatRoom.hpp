@@ -13,7 +13,8 @@ class Server;
 
 class chatRoom {
 private:
-    
+    std::string roomName;                                 // Nom de la salle
+    int adminId;                                          // Admin de la salle
     std::set<std::string> clients;                        // pseudo des clients dans la salle
     std::set<std::string> receivedReq;                    // pseudo des demandes reçues
     std::set<std::string> sentReq;                        // pseudo des demandes envoyées
@@ -21,7 +22,7 @@ private:
     std::mutex requestsMutex;                             // Mutex pour les demandes
 
 public:
-    chatRoom();  // Constructeur
+    chatRoom(std::string room_name, int admin_id);           // Constructeur
     ~chatRoom() = default;                                   // Destructeur
 
     void addClient(const std::string& pseudo);                                                             // Ajouter un client
@@ -30,6 +31,12 @@ public:
     void acceptClientRequest(const std::string& pseudo);                                                   // Accepter une demande de chat                                     
     void refuseClientRequest(const std::string& pseudo);                                                   // Refuser une demande de chat
     void broadcastMessage(const std::string& message, const std::string& sender, Server* server);          // Diffuser message
+    //getters 
+    std::string getRoomName() const;                                                                        // Obtenir le nom de la salle
+    int getAdminId() const;                                                                                 // Obtenir l'ID de l'admin
+    std::set<std::string> getClients() const;                                                               // Obtenir les clients
+    std::set<std::string> getReceivedReq() const;                                                           // Obtenir les demandes reçues
+    std::set<std::string> getSentReq() const;                                                               // Obtenir les demandes envoyées                                                                     // Définir l'ID de l'admin
 };
 
 #endif // chatRoom_HPP

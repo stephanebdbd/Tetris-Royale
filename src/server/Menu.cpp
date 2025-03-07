@@ -177,7 +177,7 @@ json Menu::getListChatRoomsMenu(const std::vector<std::string>& chatRooms) const
     json menu = {
         {"title", "Liste des Rooms"},
         {"options", json::array()},
-        {"input", "Tapez 'join.nomRoom' pour rejoindre une Room."}
+        {"input", "Tapez 'request' pour consulter les demandes d'amis."}
     };
 
     int index = 1;
@@ -188,6 +188,16 @@ json Menu::getListChatRoomsMenu(const std::vector<std::string>& chatRooms) const
     return menu.dump() + "\n";  // Affichage formaté
 }
 
+/*
+json Menu::getRequestChatRoomMenu(const std::vector<std::string>& chatRooms) const {
+    json menu = {
+        {"title", "Liste des demandes :"},
+        {"options", json::array()},
+        {"input", "Tapez 'accept.nomRoom' ou 'reject.nomRoom' pour accepter ou refuser une demande de chat."}
+    };
+    return menu.dump() + "\n";  // Affichage formaté
+}
+*/
 
 json Menu::getFriendMenu() const {
     json menu = {

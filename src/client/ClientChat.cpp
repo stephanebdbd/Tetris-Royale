@@ -5,11 +5,10 @@
 #include <mutex>
 #include <thread>
 
-using json = nlohmann::json;
-std::mutex mtx; // Mutex pour synchroniser l'accès aux fenêtres ncurses
 
+std::mutex mtx; // Mutex pour synchroniser l'accès aux fenêtres ncurses
 #define INPUT_HEIGHT 3  // Hauteur de la zone de saisie
-bool ClientChat::messagesWaitForDisplay = false;
+
 
 void ClientChat::run() {
     initscr();       // Initialise ncurses
@@ -32,12 +31,6 @@ void ClientChat::run() {
     scrollok(inputWin, TRUE);
     box(inputWin, 0, 0);
     wrefresh(inputWin);
-
-    if (!initMessageMemory()) {
-        std::cerr << "Erreur lors de l'initialisation de la mémoire des messages !\n";
-        endwin();
-        return;
-    }
 
     std::thread sendThread(&ClientChat::sendChatMessages, this);
     sendThread.join();  // Attendre la fin du thread avant de détruire l'objet
@@ -74,10 +67,8 @@ void ClientChat::sendChatMessages() {
 
             //si le message est ./flush on affiche tous les messages enregistrés non affichés
             if(inputStr == "./flush"){
-                if (FlushMemory()) {
-                    y = 1;
-                    continue;
-                }
+                receiver = "server";
+                message = "flush";
             }
 
             //si le message est ./exit on envoie un message au serveur pour lui dire qu'on veut quitter le chat
@@ -134,13 +125,8 @@ void ClientChat::sendChatMessages() {
 }
 
 void ClientChat::receiveChatMessages(const json& msg) {
-
-    //if (!isChatting)
-            saveMessage(msg.dump());
-    //else{
-            displayChatMessage(msg["sender"], msg["message"]);y++; //sinon on l'affiche directement
-    //}
-                
+    displayChatMessage(msg["sender"], msg["message"]);
+    y++;        
 }
 
 void ClientChat::displayChatMessage(std::string sender, const std::string& message) {
@@ -148,47 +134,6 @@ void ClientChat::displayChatMessage(std::string sender, const std::string& messa
     mvprintw(y, 1, "[%s] : %s", sender.c_str(), message.c_str());
     refresh();
     mtx.unlock();// Déverrouiller l'accès
-}
-
-bool ClientChat::initMessageMemory() {
-    std::ifstream file("messages.json");
-    if (!file.good()) {
-        std::ofstream newFile("messages.json");
-        if (newFile.is_open()) {
-            newFile.close();
-            return true;
-        }
-        std::cerr << "Erreur lors de la création du fichier messages.json." << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool ClientChat::saveMessage(const std::string& message) {
-    std::ofstream file("messages.json", std::ios::app);
-    if (file.is_open()) {
-        file << message << std::endl;
-        file.close();
-        messagesWaitForDisplay = true;
-        return true;
-    }
-    return false;
-}
-
-bool ClientChat::FlushMemory() {
-    std::ifstream file("messages.json");
-    if (file.is_open()) {
-        std::string line;
-        while (getline(file, line)) {
-            json message = json::parse(line);
-            std::cout << message.dump(4) << std::endl;
-        }
-        file.close();
-        std::ofstream clearFile("messages.json", std::ios::trunc);
-        messagesWaitForDisplay = false;
-        return true;
-    }
-    return false;
 }
 
 void ClientChat::setIsChatting(bool isChatting) {

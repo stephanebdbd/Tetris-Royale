@@ -28,9 +28,6 @@ class ClientChat{
         void receiveChatMessages(const json& msg);
         void displayChatMessage(std::string sender, const std::string& message);
 
-        static bool initMessageMemory();
-        static bool saveMessage(const std::string& message);
-        static bool FlushMemory();
 
         void setClientSocket(int clientSocket);
         void setIsChatting(bool isChatting);
