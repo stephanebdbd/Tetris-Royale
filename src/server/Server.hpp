@@ -37,7 +37,6 @@ class Server {
     std::atomic<int> clientIdCounter;
     std::unordered_map<int, int> clientGameRoomId;
     std::vector<std::shared_ptr<GameRoom>> gameRooms;
-    std::unordered_map<int, int*> gameOverAdress;
     std::unique_ptr<ServerChat> chat;
     
     int gameRoomIdCounter=0;
@@ -74,7 +73,7 @@ public:
     void sendChatModeToClient(int clientSocket);
     void receiveInputFromClient(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom);
     void deleteGameRoom(int roomId);
-    void sendInputToGameRoom(int clientId, const std::string& action);
+    void sendInputToGameRoom(int clientId, const std::string& action, std::shared_ptr<GameRoom> gameRoom);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
