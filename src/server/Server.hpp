@@ -61,7 +61,8 @@ class Server {
     std::unordered_map<int, MenuState> clientStates;      // id -> menu
     std::unordered_map<std::string, int> pseudoTosocket;  // pseudo -> socket
     std::unordered_map<int, std::string> sockToPseudo;    // socket -> pseudo
-    std::unordered_map<int, bool> runningChats;           // socket -> bool(chat en cours)
+    std::unordered_map<int, bool> runningChats;   
+    std::mutex clientPseudoMutex;        // socket -> bool(chat en cours)
    
 
     std::unique_ptr<UserManager> userManager;
@@ -119,6 +120,7 @@ public:
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
     void sendGameToPlayer(int clientSocket, int clientId);
+    std::string trim(const std::string& s) ;
 };
 
 #endif 

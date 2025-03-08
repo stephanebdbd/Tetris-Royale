@@ -1,4 +1,157 @@
 #include "FriendList.hpp"
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+
+// Constructeur par défaut qui délègue au constructeur avec paramètres
+FriendList::FriendList() : FriendList("friends.json", "requests.json") {}
+
+FriendList::FriendList(const std::string& friendsFilename, const std::string& requestsFilename)
+    : friendsFile(friendsFilename), requestsFile(requestsFilename) {
+    loadFriends();
+    loadRequests();
+}
+
+void FriendList::loadFriends() {
+    std::ifstream inputFile(friendsFile);
+    if (!inputFile) {
+        std::cerr << "Fichier " << friendsFile << " introuvable. Création d'un fichier vide." << std::endl;
+        saveFriends();
+        return;
+    }
+    try {
+        nlohmann::json j;
+        inputFile >> j;
+        if (j.is_object()) {
+            for (const auto& [user, friendList] : j.items()) {
+                friends[user] = friendList.get<std::vector<std::string>>();
+            }
+        }
+    } catch (const nlohmann::json::parse_error& e) {
+        std::cerr << "Erreur de parsing JSON (friends) : " << e.what() << std::endl;
+    }
+}
+
+void FriendList::saveFriends() {
+    std::ofstream outputFile(friendsFile);
+    if (!outputFile) {
+        std::cerr << "Erreur d'ouverture du fichier " << friendsFile << " pour l'écriture." << std::endl;
+        return;
+    }
+    nlohmann::json j(friends);
+    outputFile << j.dump(4);  // Formatage avec indentation
+}
+
+void FriendList::loadRequests() {
+    std::ifstream inputFile(requestsFile);
+    if (!inputFile) {
+        std::cerr << "Fichier " << requestsFile << " introuvable. Création d'un fichier vide." << std::endl;
+        saveRequests();
+        return;
+    }
+    try {
+        nlohmann::json j;
+        inputFile >> j;
+        if (j.is_object()) {
+            for (const auto& [user, requestList] : j.items()) {
+                requests[user] = requestList.get<std::vector<std::string>>();
+            }
+        }
+    } catch (const nlohmann::json::parse_error& e) {
+        std::cerr << "Erreur de parsing JSON (requests) : " << e.what() << std::endl;
+    }
+}
+
+void FriendList::saveRequests() {
+    std::ofstream outputFile(requestsFile);
+    if (!outputFile) {
+        std::cerr << "Erreur d'ouverture du fichier " << requestsFile << " pour l'écriture." << std::endl;
+        return;
+    }
+    nlohmann::json j(requests);
+    outputFile << j.dump(4);
+}
+
+void FriendList::registerUser(const std::string& username) {
+    if (!userExists(username)) {
+        friends[username] = {};
+        requests[username] = {};
+        saveFriends();
+        saveRequests();
+    }
+}
+
+void FriendList::sendFriendRequest(const std::string& sender, const std::string& receiver) {
+    if (userExists(receiver) && sender != receiver && !isPendingRequest(sender, receiver) && !areFriends(sender, receiver)) {
+        requests[receiver].push_back(sender);
+        saveRequests();
+    }
+}
+
+void FriendList::acceptFriendRequest(const std::string& user, const std::string& friendToAccept) {
+    auto& userRequests = requests[user];
+    auto it = std::find(userRequests.begin(), userRequests.end(), friendToAccept);
+    if (it != userRequests.end()) {
+        userRequests.erase(it);
+        friends[user].push_back(friendToAccept);
+        friends[friendToAccept].push_back(user);
+        saveFriends();
+        saveRequests();
+    }
+}
+
+void FriendList::rejectFriendRequest(const std::string& user, const std::string& friendToReject) {
+    auto& userRequests = requests[user];
+    auto it = std::find(userRequests.begin(), userRequests.end(), friendToReject);
+    if (it != userRequests.end()) {
+        userRequests.erase(it);
+        saveRequests();
+    }
+}
+
+bool FriendList::areFriends(const std::string& user1, const std::string& user2) const {
+    if (!userExists(user1) || !userExists(user2)) return false;
+    const auto& user1Friends = friends.at(user1);
+    return std::find(user1Friends.begin(), user1Friends.end(), user2) != user1Friends.end();
+}
+
+bool FriendList::userExists(const std::string& userId) const {
+    return friends.find(userId) != friends.end();
+}
+
+void FriendList::removeFriend(const std::string& user, const std::string& friendToRemove) {
+    if (areFriends(user, friendToRemove)) {
+        auto& userFriends = friends[user];
+        userFriends.erase(std::remove(userFriends.begin(), userFriends.end(), friendToRemove), userFriends.end());
+        auto& friendFriends = friends[friendToRemove];
+        friendFriends.erase(std::remove(friendFriends.begin(), friendFriends.end(), user), friendFriends.end());
+        saveFriends();
+    }
+}
+
+void FriendList::removeFriendRequest(const std::string& sender, const std::string& receiver) {
+    auto& receiverRequests = requests[receiver];
+    receiverRequests.erase(std::remove(receiverRequests.begin(), receiverRequests.end(), sender), receiverRequests.end());
+    saveRequests();
+}
+
+std::vector<std::string> FriendList::getFriendList(const std::string& user) const {
+    if (userExists(user)) return friends.at(user);
+    return {};
+}
+
+std::vector<std::string> FriendList::getRequestList(const std::string& user) const {
+    if (userExists(user)) return requests.at(user);
+    return {};
+}
+
+bool FriendList::isPendingRequest(const std::string& sender, const std::string& receiver) const {
+    if (!userExists(receiver)) return false;
+    const auto& receiverRequests = requests.at(receiver);
+    return std::find(receiverRequests.begin(), receiverRequests.end(), sender) != receiverRequests.end();
+}
+
+/*#include "FriendList.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -281,3 +434,4 @@ std::vector<std::string> FriendList::getRequestList(const std::string& user) con
     }
     return {}; // Retourne une liste vide si l'utilisateur n'a pas de demandes en attente
 }
+*/
