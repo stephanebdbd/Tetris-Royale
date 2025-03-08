@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "../common/json.hpp"
+#include "../common/jsonKeys.hpp"
 #include <ncurses.h>
 #include <unistd.h>
 #include <csignal>
@@ -86,12 +87,12 @@ void Server::handleClient(int clientSocket, int clientId) {
         try {
             json receivedData = json::parse(buffer);
 
-            if (!receivedData.contains("action") || !receivedData["action"].is_string()) {
+            if (!receivedData.contains(jsonKeys::ACTION) || !receivedData[jsonKeys::ACTION].is_string()) {
                 std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
                 return;
             }
 
-            std::string action = receivedData["action"];
+            std::string action = receivedData[jsonKeys::ACTION];
             handleMenu(clientSocket, clientId, action); // Gérer l'action du client
         } catch (json::parse_error& e) {
             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
@@ -207,7 +208,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId, std::shared_
         if (bytesReceived > 0) {
             try {
                 json receivedData = json::parse(buffer);
-                std::string action = receivedData["action"];
+                std::string action = receivedData[jsonKeys::ACTION];
                 
                 std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
                 if ((clientStates[clientId] == MenuState::Play) &&
@@ -450,9 +451,9 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
 void Server::sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game) {
     json message;
     
-    message["score"] = game->getScore()->scoreToJson();
-    message["grid"] = game->getGrid()->gridToJson();
-    message["tetraPiece"] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
+    message[jsonKeys::SCORE] = game->getScore()->scoreToJson();
+    message[jsonKeys::GRID] = game->getGrid()->gridToJson();
+    message[jsonKeys::TETRA_PIECE] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
@@ -462,7 +463,7 @@ void Server::sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game) {
 
 void Server::sendChatModeToClient(int clientSocket) {
     json message;
-    message["mode"] = "chat";
+    message[jsonKeys::MODE] = "chat";
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0);
 }

@@ -1,4 +1,5 @@
 #include "Grid.hpp"
+#include "../common/jsonKeys.hpp"  
 
 #include <ncurses.h>
 
@@ -100,19 +101,19 @@ int Grid::clearFullLines() {
 
 json Grid::gridToJson() const {
     json gridJson;
-    gridJson["width"] = width;
-    gridJson["height"] = height;
-    gridJson["cells"] = json::array();
+    gridJson[jsonKeys::WIDTH] = width;
+    gridJson[jsonKeys::HEIGHT] = height;
+    gridJson[jsonKeys::CELLS] = json::array();
 
     for (int y = 0; y < height; ++y) {
         json row = json::array();
         for (int x = 1; x <= width; ++x) {
             json cell;
-            cell["occupied"] = cells[y][x].isOccupied();
-            cell["color"] = cells[y][x].getColor().getId();
+            cell[jsonKeys::OCCUPIED] = cells[y][x].isOccupied();
+            cell[jsonKeys::COLOR] = cells[y][x].getColor().getId();
             row.push_back(cell);
         }
-        gridJson["cells"].push_back(row);
+        gridJson[jsonKeys::CELLS].push_back(row);
     }
     return gridJson;
 }

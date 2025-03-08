@@ -1,6 +1,8 @@
 #include "Client.hpp"
 
 #include "../common/json.hpp"
+#include "../common/jsonKeys.hpp"
+
 #include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -106,14 +108,14 @@ void Client::receiveDisplay() {
                     json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
 
                     // Si c'est une grille de jeu
-                    if (data.contains("grid")) {
+                    if (data.contains(jsonKeys::GRID)) {
                         isPlaying = true;
                         chatMode = false;
                         display.displayGame(data);
 
                     }
                     // Si c'est un message de chat
-                    else if (data.contains("mode") && data["mode"] == "chat") {
+                    else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
                         chatMode = true;
                         isPlaying = false;
                         // Lancer le chat dans un thread
