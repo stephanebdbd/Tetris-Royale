@@ -17,7 +17,7 @@ enum class MenuState;
 
 class ServerChat {
 private:
-    static bool messagesWaitForDisplay;
+    bool messagesWaitForDisplay = false;
 
 public:
     ServerChat() = default;
@@ -34,9 +34,9 @@ public:
     void sendMessage(int clientSocket, std::string sender, const std::string& message);
     
     // memoire pour stocker les messages si le client n'est pas en train de chatter
-    static bool initMessageMemory(const std::string& filename);
-    static bool saveMessage(const std::string& filename, const std::string& message);
-    static bool FlushMemory(const std::string& filename);
+    bool initMessageMemory(const std::string& filename);
+    void saveMessage(const std::string& filename, const std::string& message);
+    void FlushMemory(const std::string& filename);
 };
 
 #endif // SERVER_CHAT_HPP

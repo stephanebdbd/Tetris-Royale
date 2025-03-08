@@ -72,7 +72,7 @@ void Server::handleClient(int clientSocket, int clientId) {
 
     while (true) {
 
-        if(getRunningChat(clientId)) {
+        if(getRunningChat(clientSocket)) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
             continue;
         }
@@ -486,10 +486,13 @@ void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const st
 void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     friendList->registerUser(clientPseudo[clientId]);
     userManager->registerUser(clientPseudo[clientId], action);
+    chat->initMessageMemory("Messages/" + clientPseudo[clientId] + ".json");
+
     sockToPseudo[clientSocket] = clientPseudo[clientId];
     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
+
     clientPseudo.erase(clientId);
-    
+
     clientStates[clientId] = MenuState::Main;
     sendMenuToClient(clientSocket, menu.getMainMenu1());
 }
@@ -516,6 +519,7 @@ void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std
         clientStates[clientId] = MenuState::Main;
         pseudoTosocket[clientPseudo[clientId]] = clientSocket;
         sockToPseudo[clientSocket] = clientPseudo[clientId];
+        chat->initMessageMemory("Messages/" + clientPseudo[clientId] + ".json");
         sendMenuToClient(clientSocket, menu.getMainMenu1());
 
     } 
@@ -593,7 +597,7 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
     }
     else if(action == "4") {
         sendChatModeToClient(clientSocket);
-        setRunningChat(clientId, true);
+        setRunningChat(clientSocket, true);
         chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, menu.getChatMenu());
     }else if(action == "5") {
         clientStates[clientId] = MenuState::Main;
@@ -689,16 +693,16 @@ void Server::sendChatModeToClient(int clientSocket) {
     send(clientSocket, msg.c_str(), msg.size(), 0);
 }
 
-bool Server::getRunningChat(int clientId) {
-    auto it = runningChats.find(clientId);
+bool Server::getRunningChat(int clientSocket) {
+    auto it = runningChats.find(clientSocket);
     if (it != runningChats.end()) {
         return it->second;
     }
     return false;
 }
 
-void Server::setRunningChat(int clientId, bool value) {
-    runningChats[clientId] = value;
+void Server::setRunningChat(int clientSocket, bool value) {
+    runningChats[clientSocket] = value;
 }
 
 void Server::setClientState(int clientId, MenuState state) {

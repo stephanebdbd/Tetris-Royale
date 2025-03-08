@@ -46,6 +46,7 @@ void ClientChat::sendChatMessages() {
     std::string inputStr;
     std::string constReceiver;
     int ch;
+
     while (true) {
         mtx.lock();
         werase(inputWin);
@@ -83,9 +84,16 @@ void ClientChat::sendChatMessages() {
                     if(inputStr.substr(0, 2) == "./"){
                         constReceiver = inputStr.substr(2, pos - 2);
                         inputStr.clear();
+                        std::cout << constReceiver << std::endl;
                         continue;
                     }else{
+                        if(constReceiver.empty()){
+                            std::cerr << "Veuillez spécifier un destinataire !\n";
+                            continue;
+                        }
+                        receiver = constReceiver;
                         message = inputStr;
+                        std::cout << message << std::endl;
                     }
                 }else{
                     receiver = inputStr.substr(2, pos - 2);
@@ -99,11 +107,8 @@ void ClientChat::sendChatMessages() {
                 continue;
             }
 
-            if(receiver.empty() && !constReceiver.empty()){
-                receiver = constReceiver;
-            }
             json msg_json = { {"receiver", receiver}, {"message", message} };
-
+            std::cout << msg_json << std::endl;
             if (!network.sendData(msg_json.dump(), clientSocket)) {
                 std::cerr << "Erreur d'envoi du message !\n";
             }

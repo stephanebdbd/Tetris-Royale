@@ -105,7 +105,6 @@ void Client::receiveDisplay() {
 
                 try {
                     json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
-                    std::cout << "received : " << data << std::endl;
                     // Si c'est une grille de jeu
                     if (data.contains("grid")) {
                         isPlaying = true;
