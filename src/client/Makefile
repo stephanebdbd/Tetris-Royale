@@ -17,7 +17,6 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)
-	> messages.json
 
 run: $(TARGET)
 	./$(TARGET)

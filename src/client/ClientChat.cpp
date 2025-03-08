@@ -33,13 +33,14 @@ void ClientChat::run() {
     wrefresh(inputWin);
 
     std::thread sendThread(&ClientChat::sendChatMessages, this);
-    sendThread.join();  // Attendre la fin du thread avant de détruire l'objet
+    sendThread.join();  // Attendre la fin du thread d'envoi de messages
 
     delwin(displayWin);
     delwin(inputWin);
     echo(); // Réactiver l'affichage automatique des entrées utilisateur
-    endwin();
+    endwin(); // Terminer ncurses
 }
+
 
 void ClientChat::sendChatMessages() {
     isChatting = true;
@@ -79,29 +80,32 @@ void ClientChat::sendChatMessages() {
             }
             //sinon on envoie un message normal (après avoir vérifié le format)
             else{
-                size_t pos = inputStr.find(' ');
-                if (pos == std::string::npos) {
-                    if(inputStr.substr(0, 2) == "./"){
-                        constReceiver = inputStr.substr(2, pos - 2);
-                        inputStr.clear();
-                        std::cout << constReceiver << std::endl;
-                        continue;
-                    }else{
-                        if(constReceiver.empty()){
+                if(constReceiver.empty()){
+                    size_t pos = inputStr.find(' ');
+                    if (pos == std::string::npos) {
+                        if(inputStr.substr(0, 2) == "./"){
+                            constReceiver = inputStr.substr(2, pos - 2);
+                            inputStr.clear();
+                            continue;
+                        }else{
                             std::cerr << "Veuillez spécifier un destinataire !\n";
                             continue;
                         }
-                        receiver = constReceiver;
-                        message = inputStr;
-                        std::cout << message << std::endl;
+                    }else{
+                        receiver = inputStr.substr(2, pos - 2);
+                        message = inputStr.substr(pos + 1);
                     }
                 }else{
-                    receiver = inputStr.substr(2, pos - 2);
-                    message = inputStr.substr(pos + 1);
+                    if (inputStr.substr(0, 2) == "./") {
+                        int pos = inputStr.find(' ');
+                        receiver = inputStr.substr(2, pos - 2);
+                        message = inputStr.substr(pos + 1);
+                    }else{
+                        receiver = constReceiver;
+                        message = inputStr;
+                    }
                 }
-                
             }
-
             if(message.empty()){
                 std::cerr << "Veuillez spécifier un message !\n";
                 continue;

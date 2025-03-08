@@ -1,5 +1,1 @@
 .vscode/
-src/client/io.hpp
-src/client/io.cpp
-src/server/io.hpp
-src/server/io.cpp
