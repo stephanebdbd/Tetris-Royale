@@ -31,8 +31,7 @@ public:
     void processClientChat(int clientSocket, int clientId, Server &server, MenuState state, std::string menu);
     
     // envoi d'un message à un client
-    void sendMessage(int clientSocket, std::string sender, const std::string& message);
-    
+    void sendMessage(int clientSocket, std::string sender, const std::string& message, bool isOnline);
     // memoire pour stocker les messages si le client n'est pas en train de chatter
     bool initMessageMemory(const std::string& filename);
     void saveMessage(const std::string& filename, const std::string& message);

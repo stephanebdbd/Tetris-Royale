@@ -137,6 +137,15 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::chat:
             keyInputChatMenu(clientSocket, clientId, action);
             break;
+        case MenuState::CreateRoom:
+            keyInputCreateChatRoom(clientSocket, clientId, action);
+            break;
+        case MenuState::JoinRoom:
+            keyInputJoinChatRoom(clientSocket, clientId, action);
+            break;
+        case MenuState::ManageRooms:
+            keyInputManageMyRooms(clientSocket, clientId, action);
+            break;
         case MenuState::Friends:
             keyInputFriendsMenu(clientSocket, clientId, action);
             break;
@@ -149,7 +158,6 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::FriendRequestList:
             keyInputManageFriendRequests(clientSocket, clientId,action);
             break;
-
         case MenuState::JoinGame:
             keyInputGameModeMenu(clientSocket, clientId);
             break;
@@ -538,7 +546,7 @@ void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const st
 void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     friendList->registerUser(clientPseudo[clientId]);
     userManager->registerUser(clientPseudo[clientId], action);
-    chat->initMessageMemory("Messages/" + clientPseudo[clientId] + ".json");
+    chat->initMessageMemory("Clients/" + clientPseudo[clientId] + ".json");
 
     sockToPseudo[clientSocket] = clientPseudo[clientId];
     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
@@ -570,7 +578,7 @@ void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std
         clientStates[clientId] = MenuState::Main;
         pseudoTosocket[clientPseudo[clientId]] = clientSocket;
         sockToPseudo[clientSocket] = clientPseudo[clientId];
-        chat->initMessageMemory("Messages/" + clientPseudo[clientId] + ".json");
+        chat->initMessageMemory("Clients/" + clientPseudo[clientId] + ".json");
         sendMenuToClient(clientSocket, menu.getMainMenu1());
 
     } 
@@ -638,13 +646,17 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
 
 void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string& action) {
     if(action == "1") {
-        // a implémenter
+        clientStates[clientId] = MenuState::CreateRoom;
+        sendMenuToClient(clientSocket, menu.getCreateChatRoomMenu());
     }
     else if(action == "2") {
-        // a implémenter
+        clientStates[clientId] = MenuState::JoinRoom;
+        
+        //sendMenuToClient(clientSocket, menu.getJoinChatRoomMenu());
     }
     else if(action == "3") {
-        // a implémenter
+        clientStates[clientId] = MenuState::ManageRooms;
+        //sendMenuToClient(clientSocket, menu.getManageRoomsMenu());
     }
     else if(action == "4") {
         sendChatModeToClient(clientSocket);

@@ -2,6 +2,8 @@
 #include "Server.hpp"
 #include <fstream>
 
+#define CLIENTS "Clients"
+
 
 
 void ServerChat::processClientChat(int clientSocket, int clientId, Server &server, MenuState state, std::string menu) {
@@ -20,22 +22,21 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
 
             try {
                 json msg = json::parse(std::string(buffer, bytes_received));
-                std::cout << msg << std::endl;
+
                 if (msg.contains("receiver") && msg.contains("message") && !msg["receiver"].is_null() && !msg["message"].is_null() && msg["message"] != "exit") {
                     msg["sender"] = sender;
-                    if(server.getPseudoSocket().find(msg["receiver"]) == server.getPseudoSocket().end()) {
-                        sendMessage(clientSocket, "Server", "User not found.");
-                        if(initMessageMemory("Messages/" + msg["receiver"].get<std::string>() + ".json"))
-                            saveMessage("Messages/" + msg["receiver"].get<std::string>() + ".json", msg.dump() + "\n");
-                        continue;
+                    if(server.getNameChatRoomIndex().find(msg["receiver"]) != server.getNameChatRoomIndex().end()) {
+                        int roomIndex = server.getNameChatRoomIndex()[msg["receiver"]];
+                        server.getChatRooms()[roomIndex]->broadcastMessage(msg["message"], sender, server);
                     }
-                    int receiver = server.getPseudoSocket()[msg["receiver"]];
-                    std::string message = msg["message"];
-                    if(!server.getRunningChat(receiver)) {
-                        saveMessage("Messages/" + msg["receiver"].get<std::string>() + ".json", msg.dump() + "\n");
-                    }else {
-                        sendMessage(receiver, sender, message);
+                    if(server.getPseudoSocket().find(msg["receiver"]) != server.getPseudoSocket().end()) {
+                        int receiver = server.getPseudoSocket()[msg["receiver"]];
+                        std::string message = msg["message"];
+                        sendMessage(receiver, sender, message, server.getRunningChat(receiver));
+                    }else{
+                        sendMessage(clientSocket, sender, "User '"+ msg["receiver"].get<std::string>() +"' not found", server.getRunningChat(clientSocket));
                     }
+                    
                 }else {
                     if(msg["message"] == "exit") {
                         // gere l exit du client
@@ -43,7 +44,7 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
                         server.setRunningChat(clientSocket, false);
                     }else if(msg["message"] == "flush") {
                         // gere le flush de la memoire
-                        FlushMemory("Messages/" + sender + ".json");
+                        FlushMemory(CLIENTS + sender + ".json");
                     }else {
                         // gere les messages non conformes
                     }
@@ -60,12 +61,17 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
     });
     chatThread.detach();
 }
-void ServerChat::sendMessage(int clientSocket, std::string sender, const std::string& message) {
+
+void ServerChat::sendMessage(int clientSocket, std::string sender, const std::string& message, bool isOnline) {
     json msg;
     msg["sender"] = sender;
     msg["message"] = message;
     std::string msgStr = msg.dump() + "\n";
-    send(clientSocket, msgStr.c_str(), msgStr.size(), 0);
+    if(isOnline) {
+        send(clientSocket, msgStr.c_str(), msgStr.size(), 0);
+    }else {
+        saveMessage(CLIENTS + msg["receiver"].get<std::string>() + ".json", msg.dump() + "\n");
+    }
 }
 
 

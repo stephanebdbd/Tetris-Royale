@@ -117,6 +117,8 @@ public:
     bool getRunningChat(int clientSocket);
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
     std::unordered_map<int, std::string> getSocketPseudo() { return sockToPseudo; }
+    std::unordered_map<std::string, int> getNameChatRoomIndex() { return nameChatRoomIndex; }
+    std::vector<std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
     void sendGameToPlayer(int clientSocket, int clientId);
