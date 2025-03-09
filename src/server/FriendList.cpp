@@ -4,7 +4,7 @@
 #include <algorithm>
 
 // Constructeur par défaut qui délègue au constructeur avec paramètres
-FriendList::FriendList() : FriendList("friends.json", "requests.json") {}
+FriendList::FriendList() : FriendList("friends/friends.json", "friends/requests.json") {}
 
 FriendList::FriendList(const std::string& friendsFilename, const std::string& requestsFilename)
     : friendsFile(friendsFilename), requestsFile(requestsFilename) {

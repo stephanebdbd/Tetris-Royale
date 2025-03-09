@@ -2,6 +2,7 @@
 #define SERVER_CHAT_HPP
 
 #include "../common/json.hpp"
+#include "Data.hpp"
 
 #include <unordered_map>
 #include <thread>
@@ -15,7 +16,7 @@
 class Server;
 enum class MenuState;
 
-class ServerChat {
+class ServerChat{
 private:
     bool messagesWaitForDisplay = false;
 
@@ -32,10 +33,11 @@ public:
     
     // envoi d'un message à un client
     void sendMessage(int clientSocket, std::string sender, const std::string& message, bool isOnline);
+    
     // memoire pour stocker les messages si le client n'est pas en train de chatter
     bool initMessageMemory(const std::string& filename);
     void saveMessage(const std::string& filename, const std::string& message);
-    void FlushMemory(const std::string& filename);
+    void FlushMemory(const std::string& filename, Server &server);
 };
 
 #endif // SERVER_CHAT_HPP

@@ -1,101 +1,53 @@
 #include "chatRoom.hpp"
 #include <algorithm>
 #include <fstream>
+
 #include "Server.hpp"
 
 
-chatRoom::chatRoom(std::string room_name, int admin_id) : roomName(room_name), adminId(admin_id) {
-    filename = "chatRooms/" + roomName + ".json";
+chatRoom::chatRoom(std::string room_name, int admin_id) : filename("chatRooms/" + room_name + ".json"), roomName(room_name), adminId(admin_id) {
     init_chatRoom();
 }
-
 
 void chatRoom::init_chatRoom() {
     std::ifstream file(filename);
     if (!file.good()) {
+        // the file does not exist and we need to create it
         std::ofstream newFile(filename);
         if(newFile.is_open()) {
+            // create the file and write the data
             json j;
             j["roomName"] = roomName;
             j["adminId"] = adminId;
-            j["clients"] = std::set<std::string>();
+            j["clients"] = {};
             j["receivedReq"] = {};
             j["sentReq"] = {};
-            j["messages"] = {};
             newFile << j.dump(4);
             newFile.close();
             return;
         }
-    }else {
-        json j;
-        file >> j;
-        adminId = j["adminId"];
-        for (const auto& client : j["clients"]) {
-            clients.insert(client);
-        }
-        for (const auto& req : j["receivedReq"]) {
-            receivedReq.insert(req);
-        }
-        for (const auto& req : j["sentReq"]) {
-            sentReq.insert(req);
-        }
-        file.close();
     }
 }
 
 void chatRoom::addClient(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(clientsMutex);
-    clients.insert(pseudo);
-
 
     //ajouter dans le fichier de la room
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Error opening file: " << filename << std::endl;
-        return;
-    }
-    json j;
-    file >> j;
-    j["clients"].push_back(pseudo);
-    file.close();
+    saveData(filename, "clients", pseudo); 
 
     //ajouter dans le fichier du client
-    std::ifstream file2("Clients/" + pseudo + ".json");
-    if (!file2.is_open()) {
-        std::cerr << "Error opening file: " << "Clients/" + pseudo + ".json" << std::endl;
-        return;
-    }
-    json j2;
-    file2 >> j2;
-    j2["rooms"].push_back(roomName);
-    file2.close();
+    saveData(filename, "rooms", roomName);
 
 }
 
 void chatRoom::removeClient(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(clientsMutex);
-    clients.erase(pseudo);  // Corrected line
 
     //enlever du fichier de la room
-    std::ifstream file(filename); 
-    if (!file.is_open()) {
-        std::cerr << "Error opening file: " << filename << std::endl;
-        return;
-    }
-    json j;
-    file >> j;
-    j["clients"].erase(std::remove(j["clients"].begin(), j["clients"].end(), pseudo), j["clients"].end());
+    deleteData(filename, "clients", pseudo);
 
     //enlever du fichier du client
-    std::ifstream file2("Clients/" + pseudo + ".json");
-    if (!file2.is_open()) {
-        std::cerr << "Error opening file: " << "Clients/" + pseudo + ".json" << std::endl;
-        return;
-    }
-    json j2;
-    file2 >> j2;
-    j2["rooms"].erase(std::remove(j2["rooms"].begin(), j2["rooms"].end(), roomName), j2["rooms"].end());
-    file2.close();
+    deleteData(filename, "rooms", roomName);
 
 }
 
@@ -105,26 +57,19 @@ void chatRoom::acceptClientRequest(const std::string& pseudo) {
 
 void chatRoom::refuseClientRequest(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(requestsMutex);
-    receivedReq.erase(pseudo);  // Corrected line
+
     //enlever du fichier
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Error opening file: " << filename << std::endl;
-        return;
-    }
-    json j;
-    file >> j;
-    j["receivedReq"].erase(std::remove(j["receivedReq"].begin(), j["receivedReq"].end(), pseudo), j["receivedReq"].end());
-    file.close();
+    deleteData(filename, "receivedReq", pseudo);
 }
+
 
 void chatRoom::broadcastMessage(const std::string& message, const std::string& sender, Server& server) {
     std::lock_guard<std::mutex> lock(clientsMutex);
-    ServerChat chat;  // Initialize the chat object
-    for (auto& client : clients) {
-        // send message to client
+    ServerChat chat;
+    for (auto& client : loadData(filename, "clients")) {
+        //send message to client
         int receiverSocket = server.getPseudoSocket()[client];
-        chat.sendMessage(server.getPseudoSocket()[client], sender, message, server.getRunningChat(receiverSocket));
+        chat.sendMessage(receiverSocket, sender, message, server.getRunningChat(receiverSocket));
     }   
 }
 
@@ -137,13 +82,13 @@ int chatRoom::getAdminId() const {
 }
 
 std::set<std::string> chatRoom::getClients() const {
-    return clients;
+    return loadData(filename, "clients");
 }
 
 std::set<std::string> chatRoom::getReceivedReq() const {
-    return receivedReq;
+    return loadData(filename, "receivedReq");
 }
 
 std::set<std::string> chatRoom::getSentReq() const {
-    return sentReq;
+    return loadData(filename, "sentReq");
 }

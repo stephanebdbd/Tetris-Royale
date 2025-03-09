@@ -1,24 +1,25 @@
 #ifndef CHATROOM_HPP
 #define CHATROOM_HPP
 
-#include "chat.hpp"
 #include <unordered_map>
 #include <set>
 #include <mutex>
-#include <nlohmann/json.hpp>
+#include <algorithm>
+#include <fstream>
+
+#include "../common/json.hpp"
+#include "Data.hpp"
+
 
 
 class ServerChat;
 class Server;
 
-class chatRoom {
+class chatRoom : public Data {
 private:
-    std::string filename ;                                // Nom du fichier
+    std::string filename;                                // Nom du fichier
     std::string roomName;                                 // Nom de la salle
-    int adminId;                                          // Admin de la salle
-    std::set<std::string> clients;                        // pseudo des clients dans la salle
-    std::set<std::string> receivedReq;                    // pseudo des demandes reçues
-    std::set<std::string> sentReq;                        // pseudo des demandes envoyées
+    int adminId;                                          // ID de l'admin
     std::mutex clientsMutex;                              // Mutex pour les clients
     std::mutex requestsMutex;                             // Mutex pour les demandes
 
