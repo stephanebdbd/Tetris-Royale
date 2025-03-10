@@ -1,4 +1,5 @@
 #include "Tetramino.hpp"
+#include "../common/jsonKeys.hpp"
 
 #include <ncurses.h>
 #include <stdlib.h>
@@ -205,8 +206,8 @@ void Tetramino::fixToGrid(std::shared_ptr<Grid> grid, bool &gameOver) {
 json Tetramino::tetraminoToJson() const {
     json tetraminoJson;
 
-    tetraminoJson["x"] = position.x;
-    tetraminoJson["y"] = position.y;
+    tetraminoJson[jsonKeys::X] = position.x;
+    tetraminoJson[jsonKeys::Y] = position.y;
 
     json shapeJson = json::array();
     for (const auto& row : currentShape) {
@@ -216,8 +217,8 @@ json Tetramino::tetraminoToJson() const {
         }
         shapeJson.push_back(rowJson);
     }
-    tetraminoJson["shape"] = shapeJson;
-    tetraminoJson["shapeSymbol"] = shapeSymbols;
+    tetraminoJson[jsonKeys::SHAPE] = shapeJson;
+    tetraminoJson[jsonKeys::SHAPE_SYMBOL] = shapeSymbols;
 
     return tetraminoJson;
 }

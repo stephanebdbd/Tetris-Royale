@@ -3,13 +3,14 @@
 
 #include <ncurses.h>
 #include "../common/json.hpp"
+#include "../common/jsonKeys.hpp"
 
 void ClientDisplay::displayMenu(const json& data) {
     clear();
 
-    std::string title = data["title"];
-    json options = data["options"];
-    std::string input = data["input"];
+    std::string title = data[jsonKeys::TITLE];
+    json options = data[jsonKeys::OPTIONS];
+    std::string input = data[jsonKeys::INPUT];
 
     int y = 5;
     mvprintw(y++, 10, "%s", title.c_str());
@@ -25,26 +26,26 @@ void ClientDisplay::displayMenu(const json& data) {
 void ClientDisplay::displayGame(const json& data) {
     clear();
 
-    drawGrid(data["grid"]);
+    drawGrid(data[jsonKeys::GRID]);
 
-    drawTetramino(data["tetraPiece"]);
+    drawTetramino(data[jsonKeys::TETRA_PIECE]);
 
-    drawScore(data["score"]);
+    drawScore(data[jsonKeys::SCORE]);
 
     refresh();
 }
 
 void ClientDisplay::drawGrid(const json& grid) {
-    int width = grid["width"]; 
-    int height = grid["height"]; 
-    const json& cells = grid["cells"];
+    int width = grid[jsonKeys::WIDTH]; 
+    int height = grid[jsonKeys::HEIGHT]; 
+    const json& cells = grid[jsonKeys::CELLS];
 
     for(int y = 0; y < height; ++y) {
         for(int x = 0; x < width; ++x) {
             //voir si la cellule est occupée
-            bool occupied = cells[y][x]["occupied"];
+            bool occupied = cells[y][x][jsonKeys::OCCUPIED];
             if (occupied) {
-                int colorValue = cells[y][x]["color"];
+                int colorValue = cells[y][x][jsonKeys::COLOR];
                 Color color = Color(static_cast<Type>(colorValue)); // Convertir la valeur en Type pour l'enum
                 color.activate();
                 mvaddch(y, x + 1, '#');
@@ -64,10 +65,10 @@ void ClientDisplay::drawGrid(const json& grid) {
 
 void ClientDisplay::drawTetramino(const json& tetraPiece) {
     // Récupération des informations
-    int x = tetraPiece["x"];
-    int y = tetraPiece["y"];
-    std::vector<std::vector<std::string>> shape = tetraPiece["shape"];
-    int shapeSymbol = tetraPiece["shapeSymbol"];
+    int x = tetraPiece[jsonKeys::X];
+    int y = tetraPiece[jsonKeys::Y];
+    std::vector<std::vector<std::string>> shape = tetraPiece[jsonKeys::SHAPE];
+    int shapeSymbol = tetraPiece[jsonKeys::SHAPE_SYMBOL];
 
     Color color = Color::fromShapeSymbol(std::string(1, shapeSymbol));
 
@@ -83,8 +84,8 @@ void ClientDisplay::drawTetramino(const json& tetraPiece) {
 }
 
 void ClientDisplay::drawScore(const json& score) {
-    int scoreValue = score["score"];
+    int scoreValue = score[jsonKeys::SCORE];
     mvprintw(1, 13, "Score: %d", scoreValue);
-    int comboValue = score["combo"];
+    int comboValue = score[jsonKeys::COMBO];
     mvprintw(2, 13, "Combo: %d", comboValue);
 }
