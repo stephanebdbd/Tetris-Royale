@@ -305,18 +305,20 @@ json Menu::displayMessage(const std::string& message) const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getListFriendsMenu(const std::vector<int>& friends) const {
+json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
     json menu = {
-        {jsonKeys::TITLE, "Liste des amis"},
-        {jsonKeys::OPTIONS, {}},
-        {jsonKeys::INPUT, "Appuyez sur une touche pour revenir"}
+        {"title", "Liste de vos amis"},
+        {"options", json::array()},
+        {"input", "Tapez 'del.pseudo' pour supprimer un ami ou 'del.all' pour tout supprimer:    "}
     };
 
-    for (const auto& friendId : friends) {
-        menu[jsonKeys::OPTIONS].push_back({std::to_string(friendId)});
+    int index = 1;
+    for (const auto& user : friends) {
+        menu["options"].push_back(std::to_string(index) + ". " + user);
+        index++;
     }
 
-    return menu.dump() + "\n";  // Convertir en chaîne JSON
+    return menu.dump() + "\n";  // Affichage formaté
 }
 
 
