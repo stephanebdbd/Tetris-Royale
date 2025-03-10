@@ -43,7 +43,7 @@ bool chatRoom::isInKey(const std::string& key , const std::string& pseudo) const
         file >> j;
         file.close();
 
-        return j[key].find(pseudo) != j[key].end();
+        return std::find(j[key].begin(), j[key].end(), pseudo) != j[key].end();
     }catch (const std::exception& e) {
         std::cerr << "Error writing to file: " << e.what() << std::endl;
     }
