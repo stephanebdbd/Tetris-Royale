@@ -996,7 +996,7 @@ void Server::keyInputChoiceGameRoom(int clientId, const std::string& action){
             sendMenuToClient(pseudoTosocket[clientPseudo[cId]], menu.getLobbyMenu2(getMaxPlayers(cId), getMode(cId), getAmountOfPlayers(cId)));
             
         }
-        startGame(pseudoTosocket[clientPseudo[clientId]], clientId, gameRooms[roomNumber]);
+        //startGame(pseudoTosocket[clientPseudo[clientId]], clientId, gameRooms[roomNumber]);
 
         if (getAmountOfPlayers(clientId) == getMaxPlayers(clientId)){
             for(const auto& cId : gameRooms[roomNumber]->getPlayers()){
