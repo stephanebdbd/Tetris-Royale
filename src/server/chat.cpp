@@ -86,6 +86,7 @@ bool ServerChat::initMessageMemory(const std::string& filename) {
         if (newFile.is_open()) {
             json j;
             j["messages"] = json::array();
+            j["rooms"] = {};
             newFile << j.dump(4);
             newFile.close();
             return true;
@@ -149,4 +150,18 @@ void ServerChat::FlushMemory(const std::string& filename, Server &server) {
     } else {
         std::cerr << "Error opening file: " << filename << std::endl;
     }
+}
+
+std::vector<std::string> ServerChat::getMyRooms(const std::string& pseudo) {
+    std::vector<std::string> rooms;
+    std::ifstream file("Clients/" + pseudo + ".json");
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << "ChatRooms/" + pseudo + ".json" << std::endl;
+        return rooms;
+    }
+    json j;
+    file >> j;
+    rooms = j["rooms"];
+    file.close();
+    return rooms;
 }

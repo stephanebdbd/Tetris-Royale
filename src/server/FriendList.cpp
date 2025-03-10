@@ -4,10 +4,10 @@
 #include <algorithm>
 
 // Constructeur par défaut qui délègue au constructeur avec paramètres
-FriendList::FriendList() : FriendList("friends/friends.json", "friends/requests.json") {}
-
-FriendList::FriendList(const std::string& friendsFilename, const std::string& requestsFilename)
-    : friendsFile(friendsFilename), requestsFile(requestsFilename) {
+FriendList::FriendList() : friendsFile("Friends/friends.json"), requestsFile("Friends/requests.json") {
+    // Créer le répertoire "Friends" s'il n'existe pas
+    std::filesystem::create_directories("Friends");
+    // Charger les listes d'amis et de demandes d'amis
     loadFriends();
     loadRequests();
 }

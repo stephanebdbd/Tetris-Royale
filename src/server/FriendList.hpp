@@ -22,7 +22,6 @@ private:
 public:
     // Constructeurs
     FriendList();  // Constructeur par défaut
-    FriendList(const std::string& friendsFilename, const std::string& requestsFilename);
 
     // Méthodes
     void registerUser(const std::string& username);

@@ -38,6 +38,9 @@ public:
     bool initMessageMemory(const std::string& filename);
     void saveMessage(const std::string& filename, const std::string& message);
     void FlushMemory(const std::string& filename, Server &server);
+
+    //getter des données du fichier json du client
+    std::vector<std::string> getMyRooms(const std::string& pseudo);
 };
 
 #endif // SERVER_CHAT_HPP
