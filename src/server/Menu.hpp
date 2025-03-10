@@ -14,17 +14,28 @@ class Menu {
         json getLoginMenuFailed1() const;
         json getLoginMenu2() const;
         json getLoginMenuFailed2() const;
-        json getchatMenu() const;
+        json getChatMenu() const;
+        json getCreateChatRoomMenu() const;
+        json getJoinChatRoomMenu(const std::vector<std::string>& chatRooms) const;
+        json getListChatRoomsMenu(const std::vector<std::string>& chatRooms) const;
+        json getRequestChatRoomMenu(const std::vector<std::string>& chatRooms) const;
         json getJoinOrCreateGame() const;
+        json getGameMode() const;
+
         json getFriendMenu() const;
         json getAddFriendMenu() const;
         json getRemoveFriendMenu() const;
-        json getListFriendsMenu(const std::vector<int>& friends) const;
+        json getFriendListMenu(const std::vector<std::string>& friends) const;
         json getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const;
-        json getGameOverMenu() const;
+        json getGameOverMenu() const;        
+        json getRequestsListMenu(const std::vector<std::string>& pendingRequests) const;
+        json displayMessage(const std::string& message) const;
+
         json getGameModeMenu() const;
         json getLobbyMenu1() const;
         json getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPlayers) const;
+        json getGameRequestsListMenu(const std::vector<std::vector<std::string>>& pendingRequests) const;
+
 
 };
 
