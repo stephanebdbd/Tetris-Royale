@@ -11,7 +11,8 @@ LIBS = -lncurses -pthread -fsanitize=address
 
 # Fichiers source
 TETRIS_SRC = main.cpp Game.cpp Grid.cpp Tetramino.cpp Timer.cpp Score.cpp Color.cpp TetraminoDisplacement.cpp
-SERVEUR_SRC = $(filter-out main.cpp FriendList.cpp chat.cpp chatManager.cpp chatRoom.cpp, $(wildcard *.cpp))
+#SERVEUR_SRC = $(filter-out main.cpp FriendList.cpp chat.cpp chatManager.cpp chatRoom.cpp, $(wildcard *.cpp))
+SERVEUR_SRC = $(filter-out main.cpp, $(wildcard *.cpp))
 
 # Fichiers objets
 TETRIS_OBJECTS = $(TETRIS_SRC:.cpp=.o)

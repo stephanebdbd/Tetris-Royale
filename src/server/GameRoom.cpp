@@ -322,9 +322,11 @@ std::pair<std::string,int> GameRoom::extractNumber(const std::string& action){
 }
 
 void GameRoom::inputLobby(const std::string& action){
-
-    int number = std::stoi(action.substr(1));
-    this->setMaxPlayers(number);
+    if (action.rfind("\\invite", 0) != 0){
+        int number = std::stoi(action.substr(1));
+        this->setMaxPlayers(number);
+    }
+    
     /*auto [parametre, number] = extractNumber(action);
     std::cout<<"hello"<<std::endl;
     if(parametre == "Speed"){

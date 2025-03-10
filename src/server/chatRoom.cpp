@@ -3,7 +3,7 @@
 
 
 
-void chatRoom::addClient(int id) {
+/*void chatRoom::addClient(int id) {
     std::lock_guard<std::mutex> lock(clientsMutex);
     
 }
@@ -28,4 +28,4 @@ void chatRoom::broadcastMessage(const std::string& message, const std::string& s
 
 std::string chatRoom::getChatMenu() const {
     return "Vous êtes dans le chat. Tapez votre message et appuyez sur Entrée.\n";
-}
+}*/

@@ -145,6 +145,22 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         keyInputChatMenu(clientSocket, clientId, action);
         return;
     }
+    if(clientStates[clientId] == MenuState::Friends){
+        keyInputFriendsMenu(clientSocket, clientId, action);
+        return;
+    }
+    if(clientStates[clientId] == MenuState::AddFriend){
+        keyInputAddFriendMenu(clientSocket, clientId, action);
+        return;
+    }
+    if(clientStates[clientId] == MenuState::FriendList){
+        keyInputManageFriendlist(clientSocket, clientId, action);
+        return;
+    }
+    if(clientStates[clientId] == MenuState::FriendRequestList){
+        keyInputManageFriendRequests(clientSocket, clientId, action);
+        return;
+    }
     if (clientStates[clientId] == MenuState::Game)
         clientStates[clientId] = MenuState::JoinOrCreateGame;
     if (clientStates[clientId] == MenuState::JoinOrCreateGame){
@@ -248,81 +264,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
 
 }
 
-void Server::keyInputChoiceGameRoom(int clientId, const std::string& action){
-    if (action.find("accept.") == 0){
-        size_t pos = action.find(".");
-        std::string number = action.substr(pos+1, action.size());
-        int roomNumber = std::stoi(number);
-        clientGameRoomId[clientId] = roomNumber;
 
-        gameRooms[roomNumber]->addPlayer(clientId);
-        clientStates[clientId] = MenuState::Settings;
-
-        //sendMenuToClient(clientSocket, menu.getLobbyMenu2(getMaxPlayers(clientId), getMode(clientId), getAmountOfPlayers(clientId)));
-        for (const auto& cId : gameRooms[roomNumber]->getPlayers()){
-        
-            sendMenuToClient(pseudoTosocket[clientPseudo[cId]], menu.getLobbyMenu2(getMaxPlayers(cId), getMode(cId), getAmountOfPlayers(cId)));
-            
-        }
-        startGame(pseudoTosocket[clientPseudo[clientId]], clientId, gameRooms[roomNumber]);
-
-        if (getAmountOfPlayers(clientId) == getMaxPlayers(clientId)){
-            for(const auto& cId : gameRooms[roomNumber]->getPlayers()){
-                //startGame(pseudoTosocket[clientPseudo[cId]], cId, gameRooms[roomNumber]);
-                clientStates[cId] = MenuState::Play;
-            }
-
-            //startGame(pseudoTosocket[clientPseudo[clientId]], clientId, gameRooms[roomNumber]);
-            
-        }
-    }
-    
-
-    
-
-}
-
-
-void Server::SendInputLobby(int clientId, const std::string& action){
-    int gameRoomId = clientGameRoomId[clientId];
-    gameRooms[gameRoomId]->inputLobby(action);
-}
-
-std::string Server::getMode(int clientId){
-    int gameRoomId = clientGameRoomId[clientId];
-    GameModeName mode = gameRooms[gameRoomId]->getGameModeName();
-    std::string modestr;
-
-    switch(mode){
-        case GameModeName::Endless:
-            modestr = "Endless";
-            break;
-        case GameModeName::Duel:
-            modestr = "Duel";
-            break;
-        case GameModeName::Classic:
-            modestr = "Classic";
-            break;
-        case GameModeName::Royal_Competition:
-            modestr = "Royal Competition";
-            break;
-        default:
-            modestr = "";
-            break;
-
-    }
-    return modestr;
-}
-
-int Server::getMaxPlayers(int clientId){
-    int gameRoomId = clientGameRoomId[clientId];
-    return gameRooms[gameRoomId]->getMaxPlayers();
-}
-
-int Server::getAmountOfPlayers(int clientId){
-    int gameRoomId = clientGameRoomId[clientId];
-    return gameRooms[gameRoomId]->getAmountOfPlayers();
-}
 
 /*void Server::keyinputLobbyParametreMenu(int clientSocket, int clientId, const std::string& action){
     this->SendInputLobby(clientId, action);
@@ -377,16 +319,16 @@ void Server:: keyInputChooseGameModeMenu(int clientSocket, int clientId, const s
         clientStates[clientId] = MenuState::Settings;
         sendMenuToClient(clientSocket, menu.getLobbyMenu1());
         this->keyInputGameModeMenu(clientId, GameModeName::Classic);
-        int gameRoomId = clientGameRoomId[clientId];
-        startGame(clientSocket, clientId, gameRooms[gameRoomId]);
+        //int gameRoomId = clientGameRoomId[clientId];
+        //startGame(clientSocket, clientId, gameRooms[gameRoomId]);
     }
     else if(action == "4"){
         //royal competition
         clientStates[clientId] = MenuState::Settings;
         sendMenuToClient(clientSocket, menu.getLobbyMenu1());
         this->keyInputGameModeMenu(clientId, GameModeName::Royal_Competition);
-        int gameRoomId = clientGameRoomId[clientId];
-        startGame(clientSocket, clientId, gameRooms[gameRoomId]);
+        //int gameRoomId = clientGameRoomId[clientId];
+        //startGame(clientSocket, clientId, gameRooms[gameRoomId]);
     }
     /*else if(action == "5"){
         clientStates[clientId] = MenuState::JoinOrCreateGame;
@@ -836,7 +778,7 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
     else if(action == "4") {
         sendChatModeToClient(clientSocket);
         setRunningChat(clientId, true);
-        chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, menu.getChatMenu());
+        //chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, menu.getChatMenu());
     }else if(action == "5") {
         clientStates[clientId] = MenuState::Main;
         sendMenuToClient(clientSocket, menu.getMainMenu1());
@@ -1029,14 +971,89 @@ void Server::keyinputLobbyParametreMenu(int clientSocket, int clientId, const st
     }
 
     // Continuer la logique existante pour la gestion du lobby
-    this->SendInputLobby(clientId, action);
-    std::cout<<"hieeer"<<std::endl;
-    
+    this->SendInputLobby(clientId, action);    
     sendMenuToClient(clientSocket, menu.getLobbyMenu2(getMaxPlayers(clientId), getMode(clientId), getAmountOfPlayers(clientId)));
-    int gameRoomId = clientGameRoomId[clientId];
-    startGame(clientSocket, clientId, gameRooms[gameRoomId]);
+    //int gameRoomId = clientGameRoomId[clientId];
+    //startGame(clientSocket, clientId, gameRooms[gameRoomId]);
 
     
+}
+
+
+void Server::keyInputChoiceGameRoom(int clientId, const std::string& action){
+    if (action.find("accept.") == 0){
+        size_t pos = action.find(".");
+        std::string number = action.substr(pos+1, action.size());
+        int roomNumber = std::stoi(number);
+        clientGameRoomId[clientId] = roomNumber;
+
+        gameRooms[roomNumber]->addPlayer(clientId);
+        clientStates[clientId] = MenuState::Settings;
+
+        //sendMenuToClient(clientSocket, menu.getLobbyMenu2(getMaxPlayers(clientId), getMode(clientId), getAmountOfPlayers(clientId)));
+        for (const auto& cId : gameRooms[roomNumber]->getPlayers()){
+        
+            sendMenuToClient(pseudoTosocket[clientPseudo[cId]], menu.getLobbyMenu2(getMaxPlayers(cId), getMode(cId), getAmountOfPlayers(cId)));
+            
+        }
+        startGame(pseudoTosocket[clientPseudo[clientId]], clientId, gameRooms[roomNumber]);
+
+        if (getAmountOfPlayers(clientId) == getMaxPlayers(clientId)){
+            for(const auto& cId : gameRooms[roomNumber]->getPlayers()){
+                startGame(pseudoTosocket[clientPseudo[cId]], cId, gameRooms[roomNumber]);
+                //clientStates[cId] = MenuState::Play;
+            }
+
+            //startGame(pseudoTosocket[clientPseudo[clientId]], clientId, gameRooms[roomNumber]);
+            
+        }
+    }
+    
+
+    
+
+}
+
+
+void Server::SendInputLobby(int clientId, const std::string& action){
+    int gameRoomId = clientGameRoomId[clientId];
+    gameRooms[gameRoomId]->inputLobby(action);
+}
+
+std::string Server::getMode(int clientId){
+    int gameRoomId = clientGameRoomId[clientId];
+    GameModeName mode = gameRooms[gameRoomId]->getGameModeName();
+    std::string modestr;
+
+    switch(mode){
+        case GameModeName::Endless:
+            modestr = "Endless";
+            break;
+        case GameModeName::Duel:
+            modestr = "Duel";
+            break;
+        case GameModeName::Classic:
+            modestr = "Classic";
+            break;
+        case GameModeName::Royal_Competition:
+            modestr = "Royal Competition";
+            break;
+        default:
+            modestr = "";
+            break;
+
+    }
+    return modestr;
+}
+
+int Server::getMaxPlayers(int clientId){
+    int gameRoomId = clientGameRoomId[clientId];
+    return gameRooms[gameRoomId]->getMaxPlayers();
+}
+
+int Server::getAmountOfPlayers(int clientId){
+    int gameRoomId = clientGameRoomId[clientId];
+    return gameRooms[gameRoomId]->getAmountOfPlayers();
 }
 
 
