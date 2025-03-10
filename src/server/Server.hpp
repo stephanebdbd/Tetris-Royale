@@ -33,6 +33,12 @@ enum class MenuState {
             CreateRoom,
             JoinRoom,
             ManageRooms,
+                ManageRoom,
+                    AddMembre,
+                    RemoveMembre,
+                    RequestList,
+                    QuitRoom,
+                    DeleteRoom,
             PrivateChat,
         Friends,
             AddFriend,
@@ -97,6 +103,10 @@ public:
     void keyInputCreateChatRoom(int clientSocket, int clientId, const std::string& action);
     void keyInputJoinChatRoom(int clientSocket, int clientId, const std::string& action);
     void keyInputManageMyRooms(int clientSocket, int clientId, const std::string& action);
+    void keyInputManageRoom(int clientSocket, int clientId, const std::string& action);
+    void keyInputAddMembre(int clientSocket, int clientId, const std::string& action);
+    void keyInputRemoveMembre(int clientSocket, int clientId, const std::string& action);
+    void keyInputRequestList(int clientSocket, int clientId, const std::string& action);
     //friends
     void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);

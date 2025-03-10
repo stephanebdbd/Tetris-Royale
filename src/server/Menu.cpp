@@ -138,7 +138,7 @@ json Menu::getChatMenu() const {
             {"1. ", "Créer une Room"},
             {"2. ", "Rejoindre une Room"},
             {"3. ", "Lister mes Rooms"},
-            {"4. ", "private chat"},
+            {"4. ", "chat"},
             {"5. ", "Retour"},
         }},
         {"input", "Votre choix: "}
@@ -157,47 +157,102 @@ json Menu::getCreateChatRoomMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getJoinChatRoomMenu(const std::vector<std::string>& chatRooms) const {
+json Menu::getJoinChatRoomMenu() const {
     json menu = {
         {"title", "Liste des Rooms"},
         {"options", json::array()},
-        {"input", "Tapez 'join.nomRoom' pour rejoindre une Room."}
+        {"input", "Tapez le nom de la room à rejoindre ou './quit' pour quitter:    "}
     };
-
-    int index = 1;
-    for (const auto& room : chatRooms) {
-        menu["options"].push_back(std::to_string(index) + ". " + room);  // ✅ Ajout en tant que chaîne et non objet
-        index++;
-    }
 
     return menu.dump() + "\n";  // Affichage formaté
 }
 
-json Menu::getListChatRoomsMenu(const std::vector<std::string>& chatRooms) const {
+json Menu::getListe(const std::vector<std::string>& data, std::string title, const std::string& input) const {
     json menu = {
-        {"title", "Liste des Rooms"},
+        {"title", title},
         {"options", json::array()},
-        {"input", "Tapez 'request' pour consulter les demandes d'amis."}
+        {"input", input}
     };
 
     int index = 1;
-    for (auto& room : chatRooms) {
-        menu["options"].push_back(std::to_string(index) + ". " + room);  // ✅ Ajout en tant que chaîne et non objet
+    for (const auto& item : data) {
+        menu["options"].push_back(std::to_string(index) + ". " + item);
         index++;
     }
     return menu.dump() + "\n";  // Affichage formaté
 }
 
-/*
-json Menu::getRequestChatRoomMenu(const std::vector<std::string>& chatRooms) const {
-    json menu = {
-        {"title", "Liste des demandes :"},
-        {"options", json::array()},
-        {"input", "Tapez 'accept.nomRoom' ou 'reject.nomRoom' pour accepter ou refuser une demande de chat."}
-    };
-    return menu.dump() + "\n";  // Affichage formaté
+json Menu::getListeMembers(const std::vector<std::string>& data) const {
+    return getListe(data, "Liste des membres", "Taper './quit' pour quitter:  ");
 }
-*/
+
+json Menu::getManageChatRoomsMenu(const std::vector<std::string>& chatRooms) const {
+    return getListe(chatRooms, "Mes Rooms", "Tapez le nom d' une room pour la gérer ou './quit' pour quitter:    ");
+}
+
+json Menu::getManageRoomMenu(bool isAdmin) const {
+    json menu = {
+        {"title", "Gestion de la Room"},
+        {"options", {
+            {"1. ", "Lister les membres"},
+        }},
+        {"input", "Votre choix: "}
+    };
+    int i;
+    if(isAdmin){
+        menu["options"]["2. "] = "Ajouter un admin";
+        menu["options"]["3. "] = "Ajouter un membre";
+        menu["options"]["4. "] = "Supprimer un membre";
+        menu["options"]["5. "] = "Lister les demandes d'ajout";
+        menu["options"]["6. "] = "Supprimer la Room";
+        i = 7;
+    }else{
+        menu["options"]["2. "] = "Quitter la Room";
+        i = 3;
+    }
+    menu["options"][std::to_string(i) + ". "] = "Retour";
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+
+json Menu::getAddDeleteMemberMenu(std::string title, std::string input) const {
+    json menu = {
+        {"title", title},
+        {"options", {
+            {"Veuillez insérer le pseudo du membre", ":"},
+        }},
+        {"input", input}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getAddMembreMenu() const {
+    return getAddDeleteMemberMenu("Ajouter un membre", "Tapez 'add.pseudo' pour ajouter un membre ou 'quit' pour quitter:    ");
+}
+
+json Menu::getRemoveMembreMenu() const {
+    return getAddDeleteMemberMenu("Supprimer un membre", "Tapez 'remove.pseudo' pour supprimer un membre ou 'quit' pour quitter:    ");
+}
+
+json Menu::getListeRequests(const std::vector<std::string>& data) const {
+    return getListe(data, "Liste des demandes d'ajout", "Tapez 'accept.pseudo' ou 'reject.pseudo'  pour accepter ou refuser une demande d'amitie ou 'quit' pour quitter :    ");
+}
+
+json Menu::getQuitRoomMenu(bool isAdmin) const {
+    json menu = {
+        {"title", "Quitter la Room"},
+        {"options", {}},
+        {"input", "Votre choix: "}
+    };
+    if (isAdmin) {
+        menu["options"]["1. "] = "Supprimer la Room";
+    }else{
+        menu["options"]["1. "] = "Quitter la Room";
+    }
+    menu["options"]["2. "] = "Retour";
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
 
 json Menu::getFriendMenu() const {
     json menu = {
@@ -239,17 +294,6 @@ json Menu::getAddFriendMenu() const {
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
-
-/*json Menu::getRemoveFriendMenu() const {
-    json menu = {
-        {"title", "Supprimer un ami"},
-        {"options", {
-            {"Veuillez insérer l'ID de l'ami à supprimer", ":"},
-        }},
-        {"input", "Votre choix: "}
-    };
-    return menu.dump() + "\n";  // Convertir en chaîne JSON
-}*/
 
 
 json Menu::getRequestsListMenu(const std::vector<std::string>& pendingRequests) const {

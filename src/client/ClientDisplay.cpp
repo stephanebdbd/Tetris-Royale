@@ -3,6 +3,7 @@
 
 #include <ncurses.h>
 #include "../common/json.hpp"
+
 void ClientDisplay::displayMenu(const json& data) {
     clear();
 
@@ -13,43 +14,38 @@ void ClientDisplay::displayMenu(const json& data) {
         return;
     }
 
-    int y = 5; // Position verticale pour l'affichage
-
-    // Espacement avant chaque section pour aérer le menu
-    auto printSpace = [&y](int lines = 1) {
-        for (int i = 0; i < lines; ++i) {
-            mvprintw(y++, 10, " ");  // Ajouter une ligne vide pour espacement
-        }
-    };
-
-    // Afficher le titre avec un peu de design
-    std::string title = (data.contains("title") && data["title"].is_string()) ? data["title"] : "Titre non disponible";
-    mvprintw(y++, 10, "*** %s ***", title.c_str());
-    printSpace(1);  // Ajouter un espace après le titre
-
-    // Afficher le message par défaut (si présent)
-    if (data.contains("default") && data["default"].is_string()) {
-        mvprintw(y++, 10, "[*] %s", data["default"].get<std::string>().c_str());
+    // Récupérer le titre
+    std::string title;
+    if (data.contains("title") && data["title"].is_string()) {
+        title = data["title"];
+    } else {
+        title = "Titre non disponible";
     }
-    printSpace(1);  // Ajouter un espace après le message par défaut
 
-    // Afficher les options (tableau ou objet JSON)
+    // Afficher le titre
+    int y = 5;
+    mvprintw(y++, 10, "%s", title.c_str());
+
+    // Récupérer les options
     if (data.contains("options")) {
         json options = data["options"];
 
+        // Vérifier si les options sont un tableau ou un objet JSON
         if (options.is_array()) {
-            
-            printSpace(1);  // Ajouter un espace avant les options
+            // Cas 1 : Les options sont un tableau de chaînes
             for (const auto& option : options) {
                 if (option.is_string()) {
-                    mvprintw(y++, 10, "%s", option.get<std::string>().c_str());
+                    std::string line = option.get<std::string>();
+                    mvprintw(y++, 10, "%s", line.c_str());
                 }
             }
         } else if (options.is_object()) {
-            
-            printSpace(1);  // Ajouter un espace avant les options
+            // Cas 2 : Les options sont un objet JSON avec des paires clé-valeur
             for (const auto& [key, value] : options.items()) {
-                std::string line = key + " " + value.get<std::string>();
+                std::string line = key;
+                if (value.is_string()) {
+                    line += value.get<std::string>();
+                }
                 mvprintw(y++, 10, "%s", line.c_str());
             }
         } else {
@@ -58,23 +54,18 @@ void ClientDisplay::displayMenu(const json& data) {
     } else {
         mvprintw(y++, 10, "Aucune option disponible.");
     }
-    printSpace(1);  // Ajouter un espace après les options
 
-    // Afficher le message d'aide, si présent
-    if (data.contains("help") && data["help"].is_string()) {
-        mvprintw(y++, 10, "[?] %s", data["help"].get<std::string>().c_str());
+    // Récupérer et afficher l'invite de saisie
+    std::string input;
+    if (data.contains("input") && data["input"].is_string()) {
+        input = data["input"];
+    } else {
+        input = "Entrée non disponible";
     }
-    printSpace(1);  // Ajouter un espace après l'aide
-
-    // Afficher l'invite pour la saisie utilisateur
-    std::string input = (data.contains("input") && data["input"].is_string()) ? data["input"] : "Entrée non disponible";
-    mvprintw(y++, 10, "> %s", input.c_str());
-    printSpace(1);  // Ajouter un espace après l'invite de saisie
+    mvprintw(y++, 10, "%s", input.c_str());
 
     refresh();
 }
-
-
 
 void ClientDisplay::displayGame(const json& data) {
     clear();
