@@ -246,20 +246,35 @@ json Menu::getAddFriendMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }*/
 
+json Menu::displayMessage(const std::string& message) const {
+    json menu = {
+        {"title", message},
+        {"options", {
+            {"", "pour retourner au menu principal appyer sur q"},
+            {"2. ", "Annuler"}
+        }},
+        {"input", "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
 
 json Menu::getRequestsListMenu(const std::vector<std::string>& pendingRequests) const {
     json menu = {
-        {jsonKeys::TITLE, "Liste des amis"},
-        {jsonKeys::OPTIONS, {}},
-        {jsonKeys::INPUT, "Appuyez sur une touche pour revenir"}
+        {"title", "Liste des demandes d'amis: "},
+        {"options", json::array()},
+        {"input", "Tapez 'accept.pseudo' ou 'reject.pseudo' pour accepter ou refuser une demande d'amitie :    "}
     };
 
-    for (const auto& friendId : friends) {
-        menu[jsonKeys::OPTIONS].push_back({std::to_string(friendId)});
+    int index = 1;
+    for (const auto& user : pendingRequests) {
+        menu["options"].push_back(std::to_string(index) + ". " + user);  
+        index++;
     }
 
-    return menu.dump() + "\n";  // Convertir en chaîne JSON
+    return menu.dump() + "\n";
 }
+
 
 json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const {
     json menu = {

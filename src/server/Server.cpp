@@ -280,7 +280,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
 
 void Server::startGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom){
     std::cout << "Démarrage du jeu pour le client #" << clientId << "." << std::endl;
-    //clientStates[clientId] = MenuState::Play;
+    clientStates[clientId] = MenuState::Play;
     std::thread loopgame(&Server::loopGame, this, clientSocket, clientId, gameRoom);
     std::thread inputThread(&Server::receiveInputFromClient, this, clientSocket, clientId, gameRoom);
     
@@ -864,7 +864,7 @@ void Server::sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game) {
 }
 
 //recuperer les inputs du client
-void Server::receiveInputFromClient(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom) {
+/*void Server::receiveInputFromClient(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom) {
     char buffer[1024];
     while ((clientStates[clientId] != MenuState::Play) || (!gameRoom->getHasStarted())){
         //std::cout << "yalahwi" << std::endl;
@@ -895,7 +895,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId, std::shared_
     }
     std::cout << "fini les entrées" << std::endl;
 
-}
+}*/
 
 
 
