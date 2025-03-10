@@ -75,6 +75,8 @@ public:
     bool getCanUseMalusOrBonus(int playerServerId) const;
     std::shared_ptr<Score> getScore(int playerServerId) const;
     int getPlayerId(int playerServerId) const;
+
+    std::array<int, 9> getPlayers() const { return players; }
 };
 
 #endif
