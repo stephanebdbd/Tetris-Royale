@@ -1,1 +1,8 @@
 .vscode/
+src/*/*.o
+src/server/users.txt
+src/client/messages.json
+src/server/server.log
+src/server/serveur
+src/server/tetris
+src/client/client

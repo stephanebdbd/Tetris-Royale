@@ -3,10 +3,10 @@
 #include <ncurses.h>
 
 Game::Game(int gridWidth, int gridHeight) //ajouter ce parametre apres , std::unique_ptr<GameMode> gameMode 
-    : grid(gridWidth, gridHeight), 
-      score(gridWidth + 5, 2), // Position du score à droite de la grille
+    : grid(std::make_shared<Grid>(gridWidth, gridHeight)), 
+      score(std::make_shared<Score>(gridWidth + 5, 2)), // Position du score à droite de la grille
       running(true),
-      displacement(grid)
+      displacement(std::make_shared<TetraminoDisplacement>(grid))
       //gameMode(gameMode) il faut l ajouter apres
       {}
 
@@ -27,20 +27,20 @@ void Game::run() {
     curs_set(0);
     nodelay(stdscr, TRUE); // Permet à getch de ne pas bloquer l'exécution
     keypad(stdscr, TRUE);  // Active la gestion des touches fléchées
-    bool gameOver = displacement.getIsGameOver();
+    bool gameOver = displacement->getIsGameOver();
     while (running && !gameOver) { 
         erase(); // Efface uniquement le contenu sans supprimer l'affichage
         showGame();
 
-        displacement.update();
+        displacement->update();
         if (!gameOver){
-            linesCleared = grid.clearFullLines();
-            score.addScore(linesCleared);
+            linesCleared = grid->clearFullLines();
+            score->addScore(linesCleared);
         }
         else {
             running = false;
         }
-        gameOver = displacement.getIsGameOver();
+        gameOver = displacement->getIsGameOver();
     }
 
     showGameOver();
@@ -48,9 +48,9 @@ void Game::run() {
 }
 
 void Game::updateGame() {
-    displacement.update();
-    linesCleared = grid.clearFullLines();
-    score.addScore(linesCleared);
+    displacement->update();
+    linesCleared = grid->clearFullLines();
+    score->addScore(linesCleared);
 }
 
 void Game::showGame() {
@@ -61,16 +61,16 @@ void Game::showGame() {
         }
         malusCounter.reset();
     }
-    grid.draw();
-    displacement.drawPiece();
-    score.display();
+    grid->draw();
+    displacement->drawPiece();
+    score->display();
     
 }
 
 void Game::showGameOver() {
     // Affichage immédiat du Game Over
     erase();
-    mvprintw(grid.getHeight() / 2, grid.getWidth() / 2 - 5, "GAME OVER");
+    mvprintw(grid->getHeight() / 2, grid->getWidth() / 2 - 5, "GAME OVER");
     refresh();
     nodelay(stdscr, FALSE); 
     getch(); 
@@ -80,6 +80,6 @@ void Game::showGameOver() {
 }
 
 void Game::setGameOver() {
-    displacement.setGameOver();
+    displacement->setGameOver();
     this->showGameOver();
 }

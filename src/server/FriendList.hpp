@@ -10,8 +10,10 @@ class FriendList {
 private:
     std::unordered_map<std::string, std::vector<std::string>> friends;
     std::unordered_map<std::string, std::vector<std::string>> requests;
+    std::unordered_map<std::string, std::vector<std::vector<std::string>>> gameInvitations;
     std::string friendsFile;
     std::string requestsFile;
+    std::string gameInvitationsFile;
 
     // Chargement et sauvegarde des données
     void loadFriends();
@@ -35,6 +37,13 @@ public:
     std::vector<std::string> getFriendList(const std::string& user) const;
     std::vector<std::string> getRequestList(const std::string& user) const;
     bool isPendingRequest(const std::string& sender, const std::string& receiver) const;
+
+    void sendInvitationToFriend(const std::string& sender, const std::string& receiver, const std::string& status, const int room); 
+    void saveGameInvitations();
+    std::unordered_map<std::string, std::vector<std::vector<std::string>>> loadGameInvitations();
+    std::vector<std::vector<std::string>> getListGameRequest(const std::string& user);
+
+
 };
 
 #endif // FRIENDLIST_HPP

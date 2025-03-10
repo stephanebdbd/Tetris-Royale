@@ -4,46 +4,50 @@
 
 
 GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxPlayers)
-    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers),
-    inProgress(false) {
+    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers) {
     setGameMode(gameModeName);
-    if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1))
-    maxPlayers = 1;
-    else if ((gameModeName == GameModeName::Duel) && (maxPlayers != 2))
-        maxPlayers = 2;
-    else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers > 2))
-        maxPlayers = 3;
+    if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1)){
+        this->maxPlayers = 1;
+    }
+        
+    else if ((gameModeName == GameModeName::Duel) && (maxPlayers != 2)){
+        this->maxPlayers = 2;
+
+        std::cout << "maxPlayers = " <<maxPlayers<<std::endl;
+    }
+        
+    else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers > 2)){
+        this->maxPlayers = 3;
+    }
+        
     this->addPlayer(clientId);
     std::cout << "GameRoom #" << roomId << " created." << std::endl;
-    std::thread gameRoomThread(&GameRoom::startGame, this);
-    gameRoomThread.detach();
     }
 
 void GameRoom::addPlayer(int playerId) {
-    int currentAmount = players.size();
-    if (currentAmount < maxPlayers) {
-        players.push_back(playerId);
-        games.push_back(std::make_shared<Game>(10, 20));
-        energyOrClearedLines.push_back(0);
-        playersVictim.push_back(-1);
-        playersMalusOrBonus.push_back(-1);
+    if (amountOfPlayers < maxPlayers) {
+        players[amountOfPlayers] = playerId;
+        games[playerId] = nullptr;
+        energyOrClearedLines[amountOfPlayers] = 0;
+        playersVictim[amountOfPlayers] = -1;
+        playersMalusOrBonus[amountOfPlayers] = -1;
+        amountOfPlayers++;
     }
-    amountOfPlayers++;
 }
 
 bool GameRoom::removePlayer(int playerId) {
-    auto it = std::find(players.begin(), players.end(), playerId);
-    if (it != players.end()) {
-        int index = std::distance(players.begin(), it);
-        players.erase(players.begin() + index);
-        games.erase(games.begin() + index);
-        energyOrClearedLines.erase(energyOrClearedLines.begin() + index);
-        playersVictim.erase(playersVictim.begin() + index);
-        playersMalusOrBonus.erase(playersMalusOrBonus.begin() + index);
-        amountOfPlayers--;
-        if ((index < amountOfPlayers-1) && (amountOfPlayers > 1))
-            this->shiftPlayers(index);
-        return true;
+    for (int idx=0; idx < amountOfPlayers ; idx++) {
+        if (players[idx] == playerId) {
+            players[idx] = -1;
+            games[idx] = nullptr;
+            energyOrClearedLines[idx] = 0;
+            playersVictim[idx] = -1;
+            playersMalusOrBonus[idx] = -1;
+            if (idx == amountOfPlayers-1)
+                this->shiftPlayers(idx);
+            amountOfPlayers--;
+            return true;
+        }
     }
     return false;
 }
@@ -57,33 +61,53 @@ void GameRoom::setHasStarted(){
     inProgress = true;
 }
 
+bool GameRoom::getHasStarted() const {
+    return started;
+}
+
 void GameRoom::startGame() {
+    std::cout << "amountPlayers1 = " <<amountOfPlayers<<std::endl;
+    std::cout << "maxPlayers1 = " <<maxPlayers<<std::endl;
     while(!this->getIsFull())
         continue;
 
+    std::cout << "amountPlayers2 = " <<amountOfPlayers<<std::endl;
+    std::cout << "maxPlayers2 = " <<maxPlayers<<std::endl;
+
     if (gameModeName == GameModeName::Duel) {
+        std::cout << "size of playersVictim = " <<playersVictim.size()<<std::endl;
         playersVictim[0] = 1;
         playersVictim[1] = 0;
+        std::cout << "blabla" <<std::endl;
     }
+
+    for (int idx=0; idx < amountOfPlayers; idx++)
+        games[idx] = std::make_shared<Game>(10, 20);
     
     this->setHasStarted();
     int countGameOvers = 0;
     
-    while (inProgress) {
+    while (this->getInProgress()) {
         countGameOvers = 0;
         for (int i = 0; i < maxPlayers; ++i) {
-            if (this->getGameIsOver(players[i]))
+            if (this->getGameIsOver(i, true)){
                 countGameOvers++;
+            }
             else {
                 games[i]->updateGame();
                 if (gameMode != nullptr) this->handleMalusOrBonus(i);
             }
+
+            //games[i]->updateGame();
+            //if (gameMode != nullptr) this->handleMalusOrBonus(i);
+
             amountOfPlayers = maxPlayers - countGameOvers;
         }
         if ((countGameOvers == maxPlayers-1) && (gameModeName != GameModeName::Endless)) 
             this->endGame();
         else if ((countGameOvers == 1) == (gameModeName == GameModeName::Endless))
             this->endGame();
+
     }
 }
 
@@ -150,7 +174,9 @@ void GameRoom::applyFeatureMode(int playerId) {
     gameMode->featureMode(games[victim]/*, malusOrBonus*/);
 }
 
-void GameRoom::setInProgress(bool status) { this->inProgress = status; }
+void GameRoom::setInProgress(bool status) {
+    this->inProgress = status;
+}
 
 void GameRoom::setSpeed(int speed) { this->speed = speed; }
 
@@ -174,7 +200,9 @@ void GameRoom::addViewer(int viewerId) {
     viewersId.push_back(viewerId);
 }
 
-bool GameRoom::getInProgress() const { return inProgress; }
+bool GameRoom::getInProgress() const {
+    return inProgress;
+}
 
 int GameRoom::getRoomId() const { return roomId; }
 
@@ -213,21 +241,40 @@ void GameRoom::shiftPlayers(int index) {
         playersVictim[i] = playersVictim[i + 1];
         playersMalusOrBonus[i] = playersMalusOrBonus[i + 1];
     }
-    players.pop_back();
-    games.pop_back();
-    energyOrClearedLines.pop_back();
-    playersVictim.pop_back();
-    playersMalusOrBonus.pop_back();
+    players[maxPlayers - 1] = -1;
+    games[maxPlayers - 1] = nullptr;
+    energyOrClearedLines[maxPlayers - 1] = -1;
+    playersVictim[maxPlayers - 1] = -1;
+    playersMalusOrBonus[maxPlayers - 1] = -1;
 }
 
 std::string GameRoom::convertUnicodeToText(const std::string& unicodeAction) {
-    auto action = unicodeToText.find(unicodeAction);
-    return (action != unicodeToText.end()) ? action->second : "///"; 
+    switch (unicodeAction[0]) {
+        case '\u0005':
+            return "right";
+        case '\u0004':
+            return "left";
+        case '\u0003':
+            return "up";
+        case '\u0002':
+            return "down";
+        case ' ':
+            return "drop";
+        default:
+            break;
+        }
+    return "///";
 }
 
 int GameRoom::convertStringToInt(const std::string& unicodeAction) {
-    auto action = stringToIntegers.find(unicodeAction);
-    return (action != stringToIntegers.end()) ? action->second : -1;
+    int action = -1;
+    try {
+        action = std::stoi(unicodeAction);
+    }
+    catch (std::invalid_argument& e) {
+        std::cerr << "Invalid argument: " << e.what() << std::endl;
+    }
+    return ((action > 0) && (action < 10)) ? action : -1;
 }
 
 void GameRoom::keyInputGame(int playerId, const std::string& unicodeAction) {
@@ -236,15 +283,17 @@ void GameRoom::keyInputGame(int playerId, const std::string& unicodeAction) {
 }
 
 void GameRoom::input(int PlayerServerId, const std::string& unicodeAction) {
-    int playerId = players[PlayerServerId];
-    if (this->getIsFull()) {
+    int playerId = getPlayerId(PlayerServerId);
+    if (playerId == -1)
+        return;
+    if (this->getHasStarted()) {
         if (this->getCanUseMalusOrBonus(playerId)) {
             int action = this->convertStringToInt(unicodeAction);
             if (action != -1) {
                 if ((playersMalusOrBonus[playerId] == -1) && (gameModeName == GameModeName::Royal_Competition))
-                this->keyInputchooseMalusorBonus(playerId, action);
+                    this->keyInputchooseMalusorBonus(playerId, action);
                 else
-                this->keyInputchooseVictim(playerId, action);
+                    this->keyInputchooseVictim(playerId, action);
             }
         }
         else
@@ -253,4 +302,85 @@ void GameRoom::input(int PlayerServerId, const std::string& unicodeAction) {
     /*else if (amountOfPlayers < maxPlayers)
         this->inputLobby(playerId, unicodeAction);
     */
+}
+
+std::pair<std::string,int> GameRoom::extractNumber(const std::string& action){
+    /*size_t pos_parametre = action.find(' ');
+    std::string parametre = action.substr(0, pos_parametre);
+    size_t pos_number = pos_parametre + 2;
+    std::string number = action.substr(pos_number);
+    return {parametre, std::stoi(number)};*/
+
+    if (action.rfind("\\speed", 0) == 0) { // Vérifie si l'action commence par "\speed"
+        size_t pos_number = 6; // La position du premier caractère après "\speed"
+        std::string number = action.substr(pos_number);
+        return {"Speed", std::stoi(number)};
+    }
+    return {"", 0};
+
+
+}
+
+void GameRoom::inputLobby(const std::string& action){
+    if (action.rfind("\\invite", 0) != 0){
+        int number = std::stoi(action.substr(1));
+        this->setMaxPlayers(number);
+    }
+    
+    /*auto [parametre, number] = extractNumber(action);
+    std::cout<<"hello"<<std::endl;
+    if(parametre == "Speed"){
+        std::cout<<"Speed : "<<number<<std::endl;
+        setSpeed(number);
+        games[playerId]->setSpeed(this->speed);
+
+    }else if(parametre == "MaxPlayers"){
+        this->setMaxPlayers(number);
+    }else if(parametre == "EnergyLimit"){
+        this->setEnergyLimit(number);
+    }*/
+}
+
+std::shared_ptr<Score> GameRoom::getScore(int playerServerId) const {
+    int playerId = getPlayerId(playerServerId);
+    return ((playerId != -1) && (playerId < amountOfPlayers)) ? games[playerId]->getScore() : nullptr;
+}
+
+std::shared_ptr<Game> GameRoom::getGame(int playerServerId) {
+    int playerId = getPlayerId(playerServerId);
+    return ((playerId != -1) && (playerId < amountOfPlayers)) ? games[playerId] : nullptr;
+}
+
+void GameRoom::setGameIsOver(int playerServerId) {
+    int playerId = getPlayerId(playerServerId);
+    if ((playerId != -1) && (playerId < amountOfPlayers))
+    games[playerId]->setGameOver();
+}
+
+void GameRoom::setNeedToSendGame(bool needToSendGame, int playerServerId) {
+    int playerId = getPlayerId(playerServerId);
+    if ((playerId != -1) && (playerId < amountOfPlayers))
+    games[playerId]->setNeedToSendGame(needToSendGame);
+}
+
+bool GameRoom::getNeedToSendGame(int playerServerId) const {
+    int playerId = getPlayerId(playerServerId);
+    return ((playerId != -1) && (playerId < amountOfPlayers)) ? games[playerId]->getNeedToSendGame() : false;
+}
+
+int GameRoom::getPlayerId(int playerServerId) const {
+    if (amountOfPlayers == 0)
+        return -1;
+    if ((amountOfPlayers == 1) || (players[0] == playerServerId))
+        return 0;
+    for (int i = 1; i < amountOfPlayers; ++i) {
+        if (players[i] == playerServerId)
+            return i;
+    }
+    return -1;
+}
+
+bool GameRoom::getGameIsOver(int playerServerId, bool fromGameRoom) const {
+    int playerId = (fromGameRoom) ? playerServerId : getPlayerId(playerServerId);
+    return ((playerId != -1) && (playerId < amountOfPlayers)) ? games[playerId]->getIsGameOver() : false;
 }

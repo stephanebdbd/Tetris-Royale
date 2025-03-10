@@ -1,4 +1,5 @@
 #include "Score.hpp"
+#include "../common/jsonKeys.hpp"
 
 #include <ncurses.h>
 
@@ -27,7 +28,7 @@ int Score::getCombo() const {
 
 json Score::scoreToJson() const {
     json scoreJson;
-    scoreJson["score"] = score;
-    scoreJson["combo"] = combo;
+    scoreJson[jsonKeys::SCORE] = score;
+    scoreJson[jsonKeys::COMBO] = combo;
     return scoreJson;
 }

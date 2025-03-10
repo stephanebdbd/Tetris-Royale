@@ -1,10 +1,12 @@
 #include "TetraminoDisplacement.hpp"
 
-TetraminoDisplacement::TetraminoDisplacement(Grid& grid)
+TetraminoDisplacement::TetraminoDisplacement(std::shared_ptr<Grid> grid)
     : grid(grid),
-    currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
+    currentPiece(grid->getWidth() / 2, 0, grid->getWidth(), grid->getHeight()), 
     dropTimer(1000), 
-    commandisBlocked(false), lightisBlocked(false) {}
+    commandisBlocked(false), lightisBlocked(false), mutex() {
+        std::cout << "TetraminoDisplacement created." << std::endl;
+    }
 
 TetraminoDisplacement& TetraminoDisplacement::operator=(const TetraminoDisplacement& displacement) {
     if(this != &displacement) {
@@ -85,15 +87,11 @@ void TetraminoDisplacement::update() {
                     dropTimer.decreaseInterval(5); // Diminue le temps d'attente entre chaque chute
                 }
                 
-                currentPiece.reset(grid.getWidth() / 2, 0);
+                currentPiece.reset(grid->getWidth() / 2, 0);
             }
         }
         dropTimer.reset();
     }
-}
-
-void TetraminoDisplacement::setNeedToSendGame(bool needToSendGame) {
-    this->needToSendGame = needToSendGame;
 }
 
 void TetraminoDisplacement::drawPiece() {
@@ -106,20 +104,40 @@ void TetraminoDisplacement::setBlockCommand(bool block) {
 }
 void TetraminoDisplacement::setlightBlocked(bool block){
     lightisBlocked = block;
-    grid.setLightBlocked(block);
+    grid->setLightBlocked(block);
 }
 void TetraminoDisplacement::random2x2MaskedBlock(){
-    int x = rand()%(grid.getWidth() -1);
-    int y = grid.heightPieces() + rand()%(grid.getHeight() -1);
+    int x = rand()%(grid->getWidth() -1);
+    int y = grid->heightPieces() + rand()%(grid->getHeight() -1);
     for(int i = 0; i<2 ;i++){
         for(int j = 0; j<2 ;j++){
             int x_clean = x+i;
             int y_clean = y+j;
-            grid.clearCell(x_clean, y_clean);
-            grid.markCell(x_clean, y_clean, grid.getColor(x_clean, y_clean - 1));
+            grid->clearCell(x_clean, y_clean);
+            grid->markCell(x_clean, y_clean, grid->getColor(x_clean, y_clean - 1));
         }
         
     }
-    grid.applyGravity();
+    grid->applyGravity();
 
+}
+
+void TetraminoDisplacement::setNeedToSendGame(bool needToSendGame) {
+    std::lock_guard<std::mutex> lock(mutex);
+    this->needToSendGame = needToSendGame;
+}
+
+bool TetraminoDisplacement::getNeedToSendGame() const {
+    std::lock_guard<std::mutex> lock(mutex);
+    return needToSendGame;
+}
+
+void TetraminoDisplacement::setGameOver() {
+    std::lock_guard<std::mutex> lock(mutex);
+    gameOver = true;
+}
+
+bool TetraminoDisplacement::getIsGameOver() const{
+    std::lock_guard<std::mutex> lock(mutex);
+    return gameOver;
 }

@@ -144,11 +144,7 @@ std::set<std::string> chatRoom::getSentReq() const {
 }
 
 void chatRoom::saveData(const std::string& filename, const std::string& key, const std::string& value) {
-    std::cout << "         ---------------------------------         " << std::endl;
-    std::cout << "Saving data to file: " << filename << std::endl;
-    std::cout << "Key: " << key << std::endl;
-    std::cout << "Value: " << value << std::endl;
-    std::cout << "         ---------------------------------         " << std::endl;
+
     try{
         std::ifstream file(filename);
         if (!file.is_open()) {
@@ -193,11 +189,7 @@ std::set<std::string> chatRoom::loadData(const std::string& filename, const std:
 }
 
 void chatRoom::deleteData(const std::string& filename, const std::string& key, const std::string& value) {
-    std::cout << "         ---------------------------------         " << std::endl;
-    std::cout << "Deleting data from file: " << filename << std::endl;
-    std::cout << "Key: " << key << std::endl;
-    std::cout << "Value: " << value << std::endl;
-    std::cout << "         ---------------------------------         " << std::endl;
+
     try{
         std::ifstream file(filename);
         if (!file.is_open()) {

@@ -11,15 +11,15 @@
 #include <iostream>
 
 class Game {
-    Grid grid;
-    Score score;
+    std::shared_ptr<Grid> grid;
+    std::shared_ptr<Score> score;
     
     int linesCleared;
     bool running;
     
     bool malus5Royal = false;
     
-    TetraminoDisplacement displacement;
+    std::shared_ptr<TetraminoDisplacement> displacement;
     
     public:
         Game(int gridWidth, int gridHeight);
@@ -28,15 +28,15 @@ class Game {
         void showGame();
         void showGameOver();
         void updateGame();
-        Grid& getGrid() { return grid; }
-        void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
-        TetraminoDisplacement& getDisplacement() { return displacement; } 
-        Score& getScore() { return score; }
+        std::shared_ptr<Grid> getGrid() { return grid; }
+        void moveTetramino(const std::string& action) { displacement->keyInputGameMenu(action); }
+        std::shared_ptr<TetraminoDisplacement> getDisplacement() { return displacement; } 
+        std::shared_ptr<Score> getScore() { return score; }
         int getLinesCleared() const { return linesCleared; }
-        void setNeedToSendGame(bool needToSendGame) { displacement.setNeedToSendGame(needToSendGame); }
-        bool getNeedToSendGame() const { return displacement.getNeedToSendGame(); }
-        Tetramino& getCurrentPiece() { return displacement.getCurrentPiece(); }
-        bool getIsGameOver() const { return displacement.getIsGameOver(); }
+        void setNeedToSendGame(bool needToSendGame) { displacement->setNeedToSendGame(needToSendGame); }
+        bool getNeedToSendGame() const { return displacement->getNeedToSendGame(); }
+        Tetramino& getCurrentPiece() { return displacement->getCurrentPiece(); }
+        bool getIsGameOver() const { return displacement->getIsGameOver(); }
         void setGameOver() ;
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
 

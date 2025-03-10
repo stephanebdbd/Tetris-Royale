@@ -1,6 +1,8 @@
 #include "Tetramino.hpp"
+#include "../common/jsonKeys.hpp"
 
 #include <ncurses.h>
+#include <stdlib.h>
 
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
     : position{startX, startY}, gridWidth(w), gridHeight(h) {
@@ -69,18 +71,18 @@ void Tetramino::selectRandomShape() {
     }
 }
 
-void Tetramino::moveDown(Grid &grid) {
+void Tetramino::moveDown(std::shared_ptr<Grid> grid) {
     if (canMoveDown(grid)) {
         position.y++;
     }
 }
 
 // Vérifie si la pièce peut descendre
-bool Tetramino::canMoveDown(const Grid &grid) const {
+bool Tetramino::canMoveDown(const std::shared_ptr<Grid> grid) const {
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
             if (currentShape[y][x] != ' ') {
-                if (position.y + y + 1 >= gridHeight || grid.isCellOccupied(position.x + x, position.y + y + 1)) {
+                if (position.y + y + 1 >= gridHeight || grid->isCellOccupied(position.x + x, position.y + y + 1)) {
                     return false;
                 }
             }
@@ -89,24 +91,24 @@ bool Tetramino::canMoveDown(const Grid &grid) const {
     return true;
 }
 
-void Tetramino::moveLeft(Grid &grid) {
+void Tetramino::moveLeft(std::shared_ptr<Grid> grid) {
     if (canMove(grid, -1, 0)) { // Vérifie si on peut bouger d'une case à gauche
         position.x--; // Déplacer la pièce à gauche
     }
 }
 
-void Tetramino::moveRight(Grid &grid) {
+void Tetramino::moveRight(std::shared_ptr<Grid> grid) {
     if (canMove(grid, 1, 0)) { // Vérifie si on peut bouger d'une case à droite
         position.x++; // Déplacer la pièce à droite
     }
 }
 
-bool Tetramino::canMove(const Grid& grid, int dx, int dy) const {
+bool Tetramino::canMove(std::shared_ptr<Grid> grid, int dx, int dy) const {
     for (int y = 0; y < 4; ++y) { 
         for (int x = 0; x < 4; ++x) { 
                 int newX = position.x + x + dx; 
                 int newY = position.y + y + dy;
-                if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
+                if (newX < 1 || newX >= grid->getWidth() + 1 || newY >= grid->getHeight() || grid->isCellOccupied(newX, newY)) {
                     if (currentShape[y][x] != ' '){
                         return false; // Collision détectée
                     }
@@ -116,13 +118,13 @@ bool Tetramino::canMove(const Grid& grid, int dx, int dy) const {
     return true; // Aucun obstacle, déplacement possible
 }
 
-void Tetramino::dropTetrimino(Grid &grid) {
+void Tetramino::dropTetrimino(std::shared_ptr<Grid> grid) {
     while (canMoveDown(grid)) {
         moveDown(grid);
     }
 }
 
-void Tetramino::rotate(const Grid &grid) {
+void Tetramino::rotate(const std::shared_ptr<Grid> grid) {
     if (!canRotate(grid)) {
         return;
     }
@@ -139,7 +141,7 @@ void Tetramino::rotate(const Grid &grid) {
     currentShape = newShape;
 }
 
-bool Tetramino::canRotate(const Grid &grid) {
+bool Tetramino::canRotate(const std::shared_ptr<Grid> grid) {
     // Créer une copie de la forme actuelle pour vérifier la rotation
     std::array<std::array<char, 4>, 4> tempShape = currentShape;
     
@@ -156,7 +158,7 @@ bool Tetramino::canRotate(const Grid &grid) {
             int newX = position.x + x;
             int newY = position.y + y;
             if (tempShape[y][x] != ' ') {
-                if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
+                if (newX < 1 || newX >= grid->getWidth() + 1 || newY >= grid->getHeight() || grid->isCellOccupied(newX, newY)) {
                     return false;
                 }
             }
@@ -184,7 +186,7 @@ Color Tetramino::chooseColor(char shapeSymbol) const {
 
 
 // Fixer la pièce à sa position 
-void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
+void Tetramino::fixToGrid(std::shared_ptr<Grid> grid, bool &gameOver) {
     Color cellColor = chooseColor(shapeSymbols);
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
@@ -195,7 +197,7 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
                     gameOver = true; // Déclencher le game over
                     return;
                 }
-                grid.markCell(gridX, gridY, cellColor);
+                grid->markCell(gridX, gridY, cellColor);
             }
         }
     }
@@ -204,8 +206,8 @@ void Tetramino::fixToGrid(Grid &grid, bool &gameOver) {
 json Tetramino::tetraminoToJson() const {
     json tetraminoJson;
 
-    tetraminoJson["x"] = position.x;
-    tetraminoJson["y"] = position.y;
+    tetraminoJson[jsonKeys::X] = position.x;
+    tetraminoJson[jsonKeys::Y] = position.y;
 
     json shapeJson = json::array();
     for (const auto& row : currentShape) {
@@ -215,8 +217,8 @@ json Tetramino::tetraminoToJson() const {
         }
         shapeJson.push_back(rowJson);
     }
-    tetraminoJson["shape"] = shapeJson;
-    tetraminoJson["shapeSymbol"] = shapeSymbols;
+    tetraminoJson[jsonKeys::SHAPE] = shapeJson;
+    tetraminoJson[jsonKeys::SHAPE_SYMBOL] = shapeSymbols;
 
     return tetraminoJson;
 }

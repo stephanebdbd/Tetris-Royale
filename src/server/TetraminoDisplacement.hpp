@@ -2,22 +2,24 @@
 #define TETRAMINODISPLACEMENT_HPP
 
 #include <iostream>
+#include <mutex>
 #include "Timer.hpp"
 #include "Tetramino.hpp"
 
 class TetraminoDisplacement {
-    Grid& grid;
+    std::shared_ptr<Grid> grid;
     
     Tetramino currentPiece;
     Timer dropTimer;
-    bool gameOver=false;
-    bool needToSendGame = true;
     bool commandisBlocked;
     bool lightisBlocked;
+    mutable std::mutex mutex;
+    bool gameOver=false;
+    bool needToSendGame = true;
     bool bonus1Royal = false;
     int ch;
 public:
-    TetraminoDisplacement(Grid& grid);
+    TetraminoDisplacement(std::shared_ptr<Grid>grid);
     TetraminoDisplacement(const TetraminoDisplacement& other) = default;
     TetraminoDisplacement& operator=(const TetraminoDisplacement& displacement);
     void keyInputGameMenu(const std::string& action);
@@ -29,10 +31,10 @@ public:
     void update();
     void drawPiece();
     void setNeedToSendGame(bool needToSendGame);
-    bool getNeedToSendGame() const { return needToSendGame; }
-    bool getIsGameOver() const { return gameOver; }
-    void setGameOver() { this->gameOver = false; }
-    Grid& getGrid() { return grid; }
+    bool getNeedToSendGame() const;
+    bool getIsGameOver() const;
+    void setGameOver();
+    std::shared_ptr<Grid> getGrid() { return grid; }
     void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
     Tetramino& getCurrentPiece() { return currentPiece; }
     void setSpeed(int amount) { dropTimer.decreaseInterval(amount); }
