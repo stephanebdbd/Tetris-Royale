@@ -743,8 +743,8 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
     else if (action == "2") {
         clientStates[clientId] = MenuState::JoinGame;
         std::string currentUser = clientPseudo[clientId];
-        //std::vector<std::vector<std::string>> invitations = friendList->getListGameRequest(currentUser);
-        //sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
+        std::vector<std::vector<std::string>> invitations = friendList->getListGameRequest(currentUser);
+        sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
         // Rejoindre une partie
     }
     else if (action == "3") {
