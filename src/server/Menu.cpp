@@ -131,14 +131,14 @@ json Menu::getJoinOrCreateGame() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getchatMenu() const {
+json Menu::getChatMenu() const {
     json menu = {
         {"title", "Menu du chat"},
         {"options", {
             {"1. ", "Créer une Room"},
             {"2. ", "Rejoindre une Room"},
-            {"3. ", "Lister les Rooms"},
-            {"4. ", "private message"},
+            {"3. ", "Lister mes Rooms"},
+            {"4. ", "private chat"},
             {"5. ", "Retour"},
         }},
         {"input", "Votre choix: "}
@@ -146,33 +146,101 @@ json Menu::getchatMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+json Menu::getCreateChatRoomMenu() const {
+    json menu = {
+        {"title", "Créer une Room"},
+        {"options", {
+            {"Veuillez insérer le nom de la Room", ":"},
+        }},
+        {"input", "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getJoinChatRoomMenu(const std::vector<std::string>& chatRooms) const {
+    json menu = {
+        {"title", "Liste des Rooms"},
+        {"options", json::array()},
+        {"input", "Tapez 'join.nomRoom' pour rejoindre une Room."}
+    };
+
+    int index = 1;
+    for (const auto& room : chatRooms) {
+        menu["options"].push_back(std::to_string(index) + ". " + room);  // ✅ Ajout en tant que chaîne et non objet
+        index++;
+    }
+
+    return menu.dump() + "\n";  // Affichage formaté
+}
+
+json Menu::getListChatRoomsMenu(const std::vector<std::string>& chatRooms) const {
+    json menu = {
+        {"title", "Liste des Rooms"},
+        {"options", json::array()},
+        {"input", "Tapez 'request' pour consulter les demandes d'amis."}
+    };
+
+    int index = 1;
+    for (auto& room : chatRooms) {
+        menu["options"].push_back(std::to_string(index) + ". " + room);  // ✅ Ajout en tant que chaîne et non objet
+        index++;
+    }
+    return menu.dump() + "\n";  // Affichage formaté
+}
+
+/*
+json Menu::getRequestChatRoomMenu(const std::vector<std::string>& chatRooms) const {
+    json menu = {
+        {"title", "Liste des demandes :"},
+        {"options", json::array()},
+        {"input", "Tapez 'accept.nomRoom' ou 'reject.nomRoom' pour accepter ou refuser une demande de chat."}
+    };
+    return menu.dump() + "\n";  // Affichage formaté
+}
+*/
 
 json Menu::getFriendMenu() const {
     json menu = {
         {"title", "Gestion des amis"},
         {"options", {
             {"1. ", "Ajouter un ami"},
-            {"2. ", "Supprimer un ami"},
-            {"3. ", "Lister les amis"},
+            {"2. ", "liste des amis"},
+            {"3. ", "liste des demandes d'amis"},
             {"4. ", "Retour"}
         }},
         {"input", "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
+    json menu = {
+        {"title", "Liste de vos amis"},
+        {"options", json::array()},
+        {"input", "Tapez 'del.pseudo' pour supprimer un ami ou 'del.all' pour tout supprimer:    "}
+    };
+
+    int index = 1;
+    for (const auto& user : friends) {
+        menu["options"].push_back(std::to_string(index) + ". " + user);
+        index++;
+    }
+
+    return menu.dump() + "\n";  // Affichage formaté
+}
+
 
 json Menu::getAddFriendMenu() const {
     json menu = {
         {"title", "Ajouter un ami"},
         {"options", {
-            {"Veuillez insérer l'ID de l'ami à ajouter", ":"},
+            {"Veuillez insérer le pseudo de l'ami à ajouter", ":"},
         }},
         {"input", "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getRemoveFriendMenu() const {
+/*json Menu::getRemoveFriendMenu() const {
     json menu = {
         {"title", "Supprimer un ami"},
         {"options", {
@@ -181,19 +249,33 @@ json Menu::getRemoveFriendMenu() const {
         {"input", "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
-}
+}*/
 
-json Menu::getListFriendsMenu(const std::vector<int>& friends) const {
+
+json Menu::getRequestsListMenu(const std::vector<std::string>& pendingRequests) const {
     json menu = {
-        {"title", "Liste des amis"},
-        {"options", {}},
-        {"input", "Appuyez sur une touche pour revenir"}
+        {"title", "Liste des demandes d'amis: "},
+        {"options", json::array()},
+        {"input", "Tapez 'accept.pseudo' ou 'reject.pseudo' pour accepter ou refuser une demande d'amitie :    "}
     };
 
-    for (const auto& friendId : friends) {
-        menu["options"].push_back({std::to_string(friendId)});
+    int index = 1;
+    for (const auto& user : pendingRequests) {
+        menu["options"].push_back(std::to_string(index) + ". " + user);  
+        index++;
     }
 
+    return menu.dump() + "\n";
+}
+json Menu::displayMessage(const std::string& message) const {
+    json menu = {
+        {"title", message},
+        {"options", {
+            {"", "pour retourner au menu principal appyer sur q"},
+            {"2. ", "Annuler"}
+        }},
+        {"input", "Votre choix: "}
+    };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
@@ -260,13 +342,9 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
     json menu = {
         {"title", "La salle d'invitation et d'attente:"},
         {"options", {
-            {"Joueurs Maximum: ", std::to_string(maxPlayers)},
             {"Game Mode: ", mode},
-            {" "," \n"},
-
+            {"Joueurs Maximum: ", std::to_string(maxPlayers)},
             {"Nombre actuel de joueurs: ", std::to_string(amountOfPlayers)},
-            {" ", " \n"},
-
             {"\\invite\\player\\<name> ", "Inviter un joueur"},
             {"\\invite\\viewer\\<name> ", "Inviter un spectateur"},
             {"\\quit ", "Quitter la partie"}
@@ -280,3 +358,19 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
 }
 
 
+json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& pendingRequests) const {
+    json menu = {
+        {"title", "Liste des demandes du rejoindre un jeu: "},
+        {"options", json::array()},
+        {"input", "Tapez 'accept.<Number Room>' pour accepter une demande :    "}
+    };
+
+    int index = 1;
+    for (const auto& invitation : pendingRequests) {
+        menu["options"].push_back(std::to_string(index) + ". " + "Vous êtes invités par '"+invitation[0]+
+        "' en tant que '"+invitation[1]+"' dans la GameRoom '"+invitation[2]+"'");  
+        index++;
+    }
+
+    return menu.dump() + "\n";
+}
