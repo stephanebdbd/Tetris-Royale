@@ -259,7 +259,7 @@ void Server:: keyInputChooseGameModeMenu(int clientSocket, int clientId, const s
         //Duel
         clientStates[clientId] = MenuState::Settings;
         sendMenuToClient(clientSocket, menu.getLobbyMenu2(2, "Duel", 1));
-        this->keyInputGameModeMenu(clientId, GameModeName::Duel);
+        this->keyInputGameModeMenu(clientSocket, clientId, GameModeName::Duel);
         //int gameRoomId = clientGameRoomId[clientId];
         //startGame(clientSocket, clientId, gameRooms[gameRoomId]);
         
@@ -268,7 +268,7 @@ void Server:: keyInputChooseGameModeMenu(int clientSocket, int clientId, const s
         //classic
         clientStates[clientId] = MenuState::Settings;
         sendMenuToClient(clientSocket, menu.getLobbyMenu1());
-        this->keyInputGameModeMenu(clientId, GameModeName::Classic);
+        this->keyInputGameModeMenu(clientSocket, clientId, GameModeName::Classic);
         //int gameRoomId = clientGameRoomId[clientId];
         //startGame(clientSocket, clientId, gameRooms[gameRoomId]);
     }
@@ -276,7 +276,7 @@ void Server:: keyInputChooseGameModeMenu(int clientSocket, int clientId, const s
         //royal competition
         clientStates[clientId] = MenuState::Settings;
         sendMenuToClient(clientSocket, menu.getLobbyMenu1());
-        this->keyInputGameModeMenu(clientId, GameModeName::Royal_Competition);
+        this->keyInputGameModeMenu(clientSocket, clientId, GameModeName::Royal_Competition);
         //int gameRoomId = clientGameRoomId[clientId];
         //startGame(clientSocket, clientId, gameRooms[gameRoomId]);
     }
