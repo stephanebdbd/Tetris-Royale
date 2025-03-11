@@ -107,7 +107,7 @@ public:
     void keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
     //game
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputGameModeMenu(int clientId, GameModeName gameMode=GameModeName::Endless);
+    void keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode=GameModeName::Endless);
     //chat
     void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void sendChatModeToClient(int clientSocket);
@@ -149,7 +149,7 @@ public:
     std::string getMode(int clientId);
     int getMaxPlayers(int clientId);
     int getAmountOfPlayers(int clientId);
-    void startGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom);
+    //void startGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom);
 
     void keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status);
     void keyInputChoiceGameRoom(int clientId, const std::string& action);

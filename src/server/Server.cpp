@@ -228,7 +228,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
     //this->keyInputGameModeMenu(clientSocket, clientId, action);
 }*/
 
-void Server::startGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom){
+/*void Server::startGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom){
     std::cout << "Démarrage du jeu pour le client #" << clientId << "." << std::endl;
     clientStates[clientId] = MenuState::Play;
     std::thread loopgame(&Server::loopGame, this, clientSocket, clientId, gameRoom);
@@ -242,7 +242,7 @@ void Server::startGame(int clientSocket, int clientId, std::shared_ptr<GameRoom>
     clientStates[clientId] = MenuState::GameOver;
     sendMenuToClient(clientSocket, menu.getGameOverMenu());
 
-}
+}*/
 
 void Server:: keyInputChooseGameModeMenu(int clientSocket, int clientId, const std::string& action){
     if(action == "1"){
@@ -250,9 +250,9 @@ void Server:: keyInputChooseGameModeMenu(int clientSocket, int clientId, const s
         std::cout << "Client #" << clientId << " a sélectionné Endless." << std::endl;
         //clientStates[clientId] = MenuState::Play;
         //sendMenuToClient(clientSocket, menu.getLobbyMenu());
-        this->keyInputGameModeMenu(clientId);
-        int gameRoomId = clientGameRoomId[clientId];
-        startGame(clientSocket, clientId, gameRooms[gameRoomId]);
+        this->keyInputGameModeMenu(clientSocket, clientId);
+        //int gameRoomId = clientGameRoomId[clientId];
+        //startGame(clientSocket, clientId, gameRooms[gameRoomId]);
 
     }
     else if(action == "2"){
@@ -492,14 +492,27 @@ void Server::keyInputAddFriendMenu(int clientSocket, int clientId, const std::st
 }
 
 
-void Server::keyInputGameModeMenu(int clientId, GameModeName gameMode) {
+void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode) {
     //création de la gameRoom (partie Endless pour l'instant)
-    //clientStates[clientId] = MenuState::Play;
+    clientStates[clientId] = MenuState::Play;
     std::cout << "Création de la GameRoom pour le client #" << clientId << " avec le mode " << static_cast<int>(gameMode) << "." << std::endl;
     clientGameRoomId[clientId] = gameRoomIdCounter;
     std::shared_ptr<GameRoom> gameRoom = std::make_shared<GameRoom>(gameRoomIdCounter, clientId, gameMode);
     gameRooms.push_back(gameRoom);
     gameRoomIdCounter++;
+
+    std::cout << "Démarrage du jeu pour le client #" << clientId << "." << std::endl;
+    //clientStates[clientId] = MenuState::Play;
+    std::thread loopgame(&Server::loopGame, this, clientSocket, clientId, gameRoom);
+    std::thread inputThread(&Server::receiveInputFromClient, this, clientSocket, clientId, gameRoom);
+    
+    loopgame.join();
+    inputThread.join();
+
+    deleteGameRoom(gameRoom->getRoomId());
+    
+    clientStates[clientId] = MenuState::GameOver;
+    sendMenuToClient(clientSocket, menu.getGameOverMenu());
 }
 
 
@@ -1051,7 +1064,7 @@ void Server::keyInputChoiceGameRoom(int clientId, const std::string& action){
         }
         //startGame(pseudoTosocket[clientPseudo[clientId]], clientId, gameRooms[roomNumber]);
 
-        if (getAmountOfPlayers(clientId) == getMaxPlayers(clientId)){
+        /*if (getAmountOfPlayers(clientId) == getMaxPlayers(clientId)){
             for(const auto& cId : gameRooms[roomNumber]->getPlayers()){
                 startGame(pseudoTosocket[clientPseudo[cId]], cId, gameRooms[roomNumber]);
                 //clientStates[cId] = MenuState::Play;
@@ -1059,7 +1072,7 @@ void Server::keyInputChoiceGameRoom(int clientId, const std::string& action){
 
             //startGame(pseudoTosocket[clientPseudo[clientId]], clientId, gameRooms[roomNumber]);
             
-        }
+        }*/
     }
     
 
