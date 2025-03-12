@@ -18,21 +18,21 @@ class GameRoom {
     int ownerId;
     GameModeName gameModeName;
     int maxPlayers;
-    std::shared_ptr<GameMode> gameMode = nullptr;
     bool started=false;
     bool inProgress=false;
-    int energyLimit;
-    int speed;
+    int energyLimit=25;
+    int speed=0;
+    int gameModeIndex=-1;
     int amountOfPlayers=0;
-    std::array<int, 9> energyOrClearedLines;
-    std::array<int, 9> playersVictim;
-    std::array<int, 9> playersMalusOrBonus;
-    std::array<int, 9> players;
-    std::array<std::shared_ptr<Game>, 9> games;
+    std::vector<std::shared_ptr<GameMode>> gameModes;
+    std::vector<int> energyOrClearedLines;
+    std::vector<int> playersVictim;
+    std::vector<int> playersMalusOrBonus;
+    std::vector<int> players;
+    std::vector<Game> games;
 
     std::vector<int> viewersId;
 public:
-    GameRoom()=default;
     GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
     void addPlayer(int playerId);
     bool removePlayer(int playerId);
@@ -44,7 +44,7 @@ public:
     void applyFeatureMode(int playerId);
     void setInProgress(bool status);
     void setSpeed(int speed);
-    bool setGameMode(GameModeName gameMode);
+    void setGameMode(GameModeName gameMode);
     void addViewer(int viewerId);
     bool getInProgress() const;
     int getRoomId() const;
@@ -55,10 +55,10 @@ public:
     int getMaxPlayers() const;
     bool getNeedToSendGame(int playerServerId) const;
     void setNeedToSendGame(bool needToSendGame, int playerServerId);
-    void setInsanceGameMode();
     void setRoomId(int roomId) { this->roomId = roomId; }
     void setHasStarted();
     bool getHasStarted() const;
+    bool getSettingsDone() const;
     void setGameIsOver(int playerServerId);
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
@@ -69,14 +69,18 @@ public:
     void keyInputchooseVictim(int playerId, int victim);
     void keyInputchooseMalusorBonus(int playerId, int malusOrBonus);
     void reinitializeMalusOrBonus(int playerId);
-    std::shared_ptr<Game> getGame(int playerServerId);
+    Game& getGame(int playerServerId);
     std::string convertUnicodeToText(const std::string& unicode);
     int convertStringToInt(const std::string& unicodeAction);
     bool getCanUseMalusOrBonus(int playerServerId) const;
-    std::shared_ptr<Score> getScore(int playerServerId) const;
+    std::optional<Score> getScore(int playerServerId);
     int getPlayerId(int playerServerId) const;
+    void setEnergyLimit(int NewEnergyLimit);
+    int getEnergyLimit() const;
+    int getScoreValue(int playerServerId) const;
 
-    std::array<int, 9> getPlayers() const { return players; }
+    std::vector<int> getPlayers() const { return players; }
+    int getSpeed() const { return speed; }
 };
 
 #endif

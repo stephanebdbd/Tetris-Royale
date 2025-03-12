@@ -64,7 +64,7 @@ class Server {
     std::atomic<int> chatRoomIdCounter;
     std::unordered_map<int, int> clientGameRoomId;
     std::unordered_map<std::string, int> nameChatRoomIndex;
-    std::vector<std::shared_ptr<GameRoom>> gameRooms;  
+    std::vector<GameRoom> gameRooms;  
     std::vector<std::shared_ptr<chatRoom>> chatRooms;
     std::shared_ptr<ServerChat> chat;
     std::shared_ptr<FriendList> friendList;
@@ -126,7 +126,7 @@ public:
     void receiveInputFromClient(int clientSocket, int clientId);
     void deleteGameRoom(int roomId);
     //void sendGameToClient(int clientSocket, int clientId);
-    void sendInputToGameRoom(int clientId, const std::string& action, std::shared_ptr<GameRoom> gameRoom);
+    void sendInputToGameRoom(int clientId, const std::string& action, GameRoom& gameRoom);
     void shiftGameRooms(int index);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
@@ -141,7 +141,7 @@ public:
     std::vector<std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
-    void sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game);
+    void sendGameToPlayer(int clientSocket, Game& game);
     std::string trim(const std::string& s);
     void keyInputChooseGameModeMenu(int clientSocket, int clientId, const std::string& action);
     void keyinputLobbyParametreMenu(int clientSocket, int clientId, const std::string& action);

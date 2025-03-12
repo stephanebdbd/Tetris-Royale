@@ -5,7 +5,6 @@
 
 Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {}
 
-
 // Marquer une cellule comme occupée
 void Grid::markCell(int x, int y, const Color& color) {
     if ( !cells[y][x].isOccupied() && y >= 0 && y < height && x >= 1 && x <= width + 1) {

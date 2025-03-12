@@ -10,7 +10,7 @@ class Timer {
     int interval;
 
     public:
-        Timer(int ms);
+        Timer(int ms=1000);
         bool hasElapsed();
         void reset();
         void decreaseInterval(int amount);    

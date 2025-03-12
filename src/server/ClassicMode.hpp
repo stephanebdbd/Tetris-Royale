@@ -12,7 +12,7 @@ class ClassicMode : public GameMode{
 
     public:
         ClassicMode();
-        void featureMode(std::shared_ptr<Game> game) override;
+        void featureMode(Game& game) override;
         GameModeName getNameMode() override { return GameModeName::Classic; }
         int getNbrMalus(int nbrLineComplet) const;
 };

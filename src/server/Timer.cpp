@@ -15,7 +15,5 @@ void Timer::reset() {
 }
 
 void Timer::decreaseInterval(int amount) {
-    if (interval > 100) {
-        interval -= amount;
-    }
+    interval -= amount;
 }

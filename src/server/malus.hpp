@@ -16,7 +16,7 @@ class Malus {
     public:
         Malus(int nbrLine);
         void createMalus(); //creation de malus 
-        void sendMalus(std::shared_ptr<Grid> grid);
+        void sendMalus(Grid& grid);
   
 };
 

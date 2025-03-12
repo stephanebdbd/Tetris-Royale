@@ -9,36 +9,38 @@
 #include "malus.hpp"
 #include "GameMode.hpp"
 #include <iostream>
+#include <optional>
 
 class Game {
-    std::shared_ptr<Grid> grid;
-    std::shared_ptr<Score> score;
+    Grid grid;
+    std::optional<Score> score;
     
     int linesCleared;
     bool running;
     
     bool malus5Royal = false;
     
-    std::shared_ptr<TetraminoDisplacement> displacement;
+    TetraminoDisplacement displacement = TetraminoDisplacement(grid);
     
     public:
-        Game(int gridWidth, int gridHeight);
-        Game& operator=(const Game& game);
+        Game(int gridWidth, int gridHeight, int speed=1000);
+
         void run();
         void showGame();
         void showGameOver();
         void updateGame();
-        std::shared_ptr<Grid> getGrid() { return grid; }
-        void moveTetramino(const std::string& action) { displacement->keyInputGameMenu(action); }
-        std::shared_ptr<TetraminoDisplacement> getDisplacement() { return displacement; } 
-        std::shared_ptr<Score> getScore() { return score; }
+        Grid& getGrid() { return grid; }
+        void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
+        TetraminoDisplacement& getDisplacement() { return displacement; } 
+        std::optional<Score> getScore() const { return score; }
         int getLinesCleared() const { return linesCleared; }
-        void setNeedToSendGame(bool needToSendGame) { displacement->setNeedToSendGame(needToSendGame); }
-        bool getNeedToSendGame() const { return displacement->getNeedToSendGame(); }
-        Tetramino& getCurrentPiece() { return displacement->getCurrentPiece(); }
-        bool getIsGameOver() const { return displacement->getIsGameOver(); }
-        void setGameOver() ;
+        void setNeedToSendGame(bool needToSendGame) { displacement.setNeedToSendGame(needToSendGame); }
+        bool getNeedToSendGame() const { return displacement.getNeedToSendGame(); }
+        Tetramino& getCurrentPiece() { return displacement.getCurrentPiece(); }
+        bool getIsGameOver() const { return displacement.getIsGameOver(); }
+        void setGameOver();
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
+        void setSpeed(int speed);
 
 };
 
