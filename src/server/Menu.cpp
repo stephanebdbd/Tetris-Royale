@@ -200,17 +200,15 @@ json Menu::getManageRoomMenu(bool isAdmin) const {
     };
     int i;
     if(isAdmin){
-        menu[jsonKeys::OPTIONS]["2. "] = "Ajouter un admin";
-        menu[jsonKeys::OPTIONS]["3. "] = "Ajouter un membre";
-        menu[jsonKeys::OPTIONS]["4. "] = "Supprimer un membre";
-        menu[jsonKeys::OPTIONS]["5. "] = "Lister les demandes d'ajout";
-        menu[jsonKeys::OPTIONS]["6. "] = "Supprimer la Room";
-        i = 7;
+        menu[jsonKeys::OPTIONS]["2. "] = "Ajouter un membre";
+        menu[jsonKeys::OPTIONS]["3. "] = "Ajouter un admin";
+        menu[jsonKeys::OPTIONS]["4. "] = "les demandes d'ajout";
+        i = 5;
     }else{
-        menu[jsonKeys::OPTIONS]["2. "] = "Quitter la Room";
-        i = 3;
+        i = 2;
     }
-    menu[jsonKeys::OPTIONS][std::to_string(i) + ". "] = "Retour";
+    menu[jsonKeys::OPTIONS][std::to_string(i) + ". "] = "Quitter la Room";
+    menu[jsonKeys::OPTIONS][std::to_string(i+1) + ". "] = "Retour";
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
@@ -227,24 +225,24 @@ json Menu::getAddDeleteMemberMenu(std::string title, std::string input) const {
 }
 
 json Menu::getAddMembreMenu() const {
-    return getAddDeleteMemberMenu("Ajouter un membre", "Tapez 'add.pseudo' pour ajouter un membre ou 'quit' pour quitter:    ");
+    return getAddDeleteMemberMenu("Ajouter un membre", "Tapez 'pseudo' pour ajouter un membre ou 'quit' pour quitter: ");
 }
 
-json Menu::getRemoveMembreMenu() const {
-    return getAddDeleteMemberMenu("Supprimer un membre", "Tapez 'remove.pseudo' pour supprimer un membre ou 'quit' pour quitter:    ");
+json Menu::getAddAdmin() const{
+    return getAddDeleteMemberMenu("Ajouter un admin", "Tapez 'pseudo' pour ajouter un membre ou 'quit' pour quitter: ");
 }
 
 json Menu::getListeRequests(const std::vector<std::string>& data) const {
     return getListe(data, "Liste des demandes d'ajout", "Tapez 'accept.pseudo' ou 'reject.pseudo'  pour accepter ou refuser une demande d'amitie ou 'quit' pour quitter :    ");
 }
 
-json Menu::getQuitRoomMenu(bool isAdmin) const {
+json Menu::getQuitRoomMenu(bool isAdmin, bool lastAdmin) const {
     json menu = {
         {jsonKeys::TITLE, "Quitter la Room"},
         {jsonKeys::OPTIONS, {}},
         {jsonKeys::INPUT, "Votre choix: "}
     };
-    if (isAdmin) {
+    if (isAdmin && lastAdmin) {
         menu[jsonKeys::OPTIONS]["1. "] = "Supprimer la Room";
     }else{
         menu[jsonKeys::OPTIONS]["1. "] = "Quitter la Room";

@@ -16,7 +16,7 @@
 class Server;
 enum class MenuState;
 
-class ServerChat{
+class ServerChat : public virtual Data {
 private:
     bool messagesWaitForDisplay = false;
 

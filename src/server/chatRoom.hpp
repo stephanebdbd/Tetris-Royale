@@ -2,19 +2,20 @@
 #define CHATROOM_HPP
 
 #include <unordered_map>
-#include <set>
+#include <vector>
 #include <mutex>
 #include <algorithm>
 #include <fstream>
 
 #include "../common/json.hpp"
+#include "Data.hpp"
 
 
 
 class ServerChat;
 class Server;
 
-class chatRoom{
+class chatRoom : public virtual Data {
 private:
     std::string filename;                                // Nom du fichier
     std::string roomName;                                 // Nom de la salle
@@ -41,16 +42,10 @@ public:
     void broadcastMessage(const std::string& message, const std::string& sender, Server& server);          // Diffuser message
     //getters 
     std::string getRoomName() const;                                                                        // Obtenir le nom de la salle
-    std::set<std::string> getadminPseudo() const;                                                                                 // Obtenir l'ID de l'admin
-    std::set<std::string> getClients() const;                                                               // Obtenir les clients
-    std::set<std::string> getReceivedReq() const;                                                           // Obtenir les demandes reçues
-    std::set<std::string> getSentReq() const;                                                               // Obtenir les demandes envoyées                                                                     // Définir l'ID de l'admin
-    // saveData
-    void saveData(const std::string& filename, const std::string& key, const std::string& value);
-    // loadData
-    std::set<std::string> loadData(const std::string& filename, const std::string& key) const;
-    // deleteData
-    void deleteData(const std::string& filename, const std::string& key, const std::string& value);
+    std::vector<std::string> getadminPseudo() const;                                                                                 // Obtenir l'ID de l'admin
+    std::vector<std::string> getClients() const;                                                               // Obtenir les clients
+    std::vector<std::string> getReceivedReq() const;                                                           // Obtenir les demandes reçues
+    std::vector<std::string> getSentReq() const;                                                               // Obtenir les demandes envoyées                                                                     // Définir l'ID de l'admin
 };
 
 #endif // chatRoom_HPP

@@ -129,8 +129,8 @@ void ClientChat::sendChatMessages() {
             inputStr += static_cast<char>(ch);
         }
     }
+    y = 1;
     isChatting = false;
-    std::cout << "Fin du thread d'envoi de messages !" << std::endl;
 }
 
 void ClientChat::receiveChatMessages(const json& msg) {

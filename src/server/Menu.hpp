@@ -27,9 +27,9 @@ class Menu {
         json getManageRoomMenu(bool isAdmin) const;
         json getAddDeleteMemberMenu(std::string title, std::string input) const;
         json getAddMembreMenu() const;
-        json getRemoveMembreMenu() const;
+        json getAddAdmin() const;
         json getListeRequests(const std::vector<std::string>& data) const;
-        json getQuitRoomMenu(bool isAdmin) const;
+        json getQuitRoomMenu(bool isAdmin, bool lastAdmin) const;
 
         //game
         json getJoinOrCreateGame() const;

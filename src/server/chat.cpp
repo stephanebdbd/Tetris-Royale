@@ -22,15 +22,14 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
                 json msg = json::parse(std::string(buffer, bytes_received));
                 if (msg.contains("receiver") && !msg["receiver"].is_null() && msg.contains("message") && !msg["message"].is_null() && msg["message"] != "exit") {
                     msg["sender"] = sender;
-
                     //si la room existe
-                    if(server.getNameChatRoomIndex().find(msg["receiver"]) != server.getNameChatRoomIndex().end()) {
-                        //int chatRoomIndex = server.getNameChatRoomIndex()[msg["receiver"]];
-                        //server.getChatRooms()[chatRoomIndex].broadcastMessage(msg["message"], sender, server);
+                    if(server.getChatRooms().find(msg["receiver"]) != server.getChatRooms().end()) {
+                        server.getChatRooms()[msg["receiver"]]->broadcastMessage(msg["message"], sender, server);
                         continue;
                     }
                     //si le receiver est connecté
                     if(server.getPseudoSocket().find(msg["receiver"]) != server.getPseudoSocket().end()) {
+                        //FlushMemory(CLIENTS + msg["receiver"].get<std::string>() + ".json", server);
                         int receiver = server.getPseudoSocket()[msg["receiver"]];
                         std::string message = msg["message"];
                         sendMessage(receiver, sender, message, server.getRunningChat(receiver));
