@@ -73,40 +73,51 @@ bool GameRoom::getSettingsDone() const {
 }
 
 void GameRoom::startGame() {
-    while(!getIsFull())
-        continue;
+
+    while(!getIsFull()) continue;
 
     if (gameModeName == GameModeName::Duel) {
+        playersVictim.resize(maxPlayers);
         playersVictim[0] = 1;
         playersVictim[1] = 0;
     }
 
-    for (int idx=0; idx < amountOfPlayers; idx++)
+    for (int idx = 0; idx < maxPlayers; idx++) {
         games.push_back(Game(10, 20, getSpeed()));
-    
-    setHasStarted();
-    int countGameOvers = 0;
+    }
 
-    while (getInProgress()) {
+    readyToPlay = true;
+    setHasStarted();
+
+    inProgress = true;
+    
+    int countGameOvers = 0;
+    while (inProgress) {
         countGameOvers = 0;
+
         for (int i = 0; i < maxPlayers; ++i) {
-            if (getGameIsOver(i, true)){
+
+            if (getGameIsOver(i, true)) {
                 countGameOvers++;
             }
             else {
                 games[i].updateGame();
-                if (gameModeName != GameModeName::Endless) handleMalusOrBonus(i);
+                if (gameModeName != GameModeName::Endless)
+                    handleMalusOrBonus(i);
             }
 
             amountOfPlayers = maxPlayers - countGameOvers;
         }
-        if ((countGameOvers == maxPlayers-1) && (gameModeName != GameModeName::Endless)) 
-            endGame();
-        else if ((countGameOvers == 1) == (gameModeName == GameModeName::Endless))
-            endGame();
 
+        // Conditions de fin
+        if ((countGameOvers == maxPlayers - 1) && (gameModeName != GameModeName::Endless)) {
+            endGame();
+        } else if ((countGameOvers == 1) == (gameModeName == GameModeName::Endless)) {
+            endGame();
+        }
     }
 }
+
 
 void GameRoom::handleMalusOrBonus(int playerId) {
     if (gameModeName == GameModeName::Royal_Competition) {

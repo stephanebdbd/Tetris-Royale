@@ -32,6 +32,7 @@ class GameRoom {
     std::vector<Game> games;
 
     std::vector<int> viewersId;
+
 public:
     GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
     void addPlayer(int playerId);
@@ -81,6 +82,8 @@ public:
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }
+
+    bool readyToPlay = false;
 };
 
 #endif

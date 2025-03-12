@@ -86,6 +86,7 @@ class Server {
     Menu menu;
     void returnToMenu(int clientSocket, int clientId, MenuState state, const std::string& message = "", int sleepTime = 3);
 
+    bool readyToPlay = false;
 
 public:
     Server(int port);

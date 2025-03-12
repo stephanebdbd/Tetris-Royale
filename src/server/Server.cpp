@@ -580,37 +580,57 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
 }
 
 void Server::loopGame(int clientSocket, int clientId) {
-    GameRoom& gameRoom = gameRooms[clientGameRoomId[clientId]];
+    int gameRoomId = clientGameRoomId[clientId];
+
+    // ✅ On vérifie que l'index est valide dans le vector
+    if (gameRoomId < 0 || gameRoomId >= static_cast<int>(gameRooms.size())) {
+        std::cerr << "No such gameRoom for clientId " << clientId << ", gameRoomId: " << gameRoomId << std::endl;
+        return;
+    }
+
+    GameRoom& gameRoom = gameRooms[gameRoomId];
+
+    std::cout << "Starting loopGame for clientId " << clientId 
+              << " in gameRoomId " << gameRoomId << std::endl;
+
     std::thread gameRoomThread(&GameRoom::startGame, std::ref(gameRoom));
-    while (!gameRoom.getHasStarted()) continue;
+
+    // attend que le GameRoom soit prêt à jouer
+    while (!gameRoom.readyToPlay) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
     std::cout << "Game #" << gameRoom.getRoomId() << " started." << std::endl;
+
     while (gameRoom.getInProgress()) { 
-        if ((gameRoom.getGameIsOver(clientId))){
+        bool isOver = gameRoom.getGameIsOver(clientId);
+
+        if (isOver) {
             if (gameRoom.getGameModeName() == GameModeName::Endless)
                 break;
-            else if ((gameRoom.getAmountOfPlayers() < 2))
+            else if (gameRoom.getAmountOfPlayers() < 2)
                 break;
         }
+
         if (gameRoom.getNeedToSendGame(clientId)) { 
             sendGameToPlayer(clientSocket, gameRoom.getGame(clientId));
             gameRoom.setNeedToSendGame(false, clientId);
         }
-
     }
+
     if (gameRoomThread.joinable())
         gameRoomThread.join();
-    
+
     if (gameRoom.getGameModeName() == GameModeName::Endless) {
         userManager->updateHighscore(clientPseudo[clientId], gameRoom.getScoreValue(clientId));
     }
 
-    
     clientStates[clientId] = MenuState::GameOver;
     sendMenuToClient(clientSocket, menu.getGameOverMenu());
-    
-    std::cout << "Game #" << gameRoom.getRoomId() << " ended." << std::endl;
 
+    std::cout << "Game #" << gameRoom.getRoomId() << " ended." << std::endl;
 }
+
 
 /*void Server::sendGameToClient(int clientSocket, int clientId) { //TODO: Deplacer le main pour faire un fichier game ??? 
     int gameRoomId = clientGameRoomId[clientId];
