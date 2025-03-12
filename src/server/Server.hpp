@@ -94,7 +94,7 @@ public:
     void acceptClients();
     void handleClient(int clientSocket, int clientId);
     void stop();
-    void loopGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom);
+    void loopGame(int clientSocket, int clientId);
 
     void sendMenuToClient(int clientSocket, const std::string& screen);
     //welcome & main
@@ -123,7 +123,7 @@ public:
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
 
 
-    void receiveInputFromClient(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom);
+    void receiveInputFromClient(int clientSocket, int clientId);
     void deleteGameRoom(int roomId);
     //void sendGameToClient(int clientSocket, int clientId);
     void sendInputToGameRoom(int clientId, const std::string& action, std::shared_ptr<GameRoom> gameRoom);
@@ -149,7 +149,7 @@ public:
     std::string getMode(int clientId);
     int getMaxPlayers(int clientId);
     int getAmountOfPlayers(int clientId);
-    //void startGame(int clientSocket, int clientId, std::shared_ptr<GameRoom> gameRoom);
+    //void startGame(int clientSocket, int clientId);
 
     void keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status);
     void keyInputChoiceGameRoom(int clientId, const std::string& action);
