@@ -52,6 +52,7 @@ public:
     bool getInProgress() const;
     int getRoomId() const;
     int getOwnerId() const;
+    void setOwnerId(int clientId);
     bool getGameIsOver(int playerServerId, bool fromGameRoom=false) const;
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
@@ -65,8 +66,7 @@ public:
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
-    void inputLobby(const std::string& action);
-    std::pair<std::string,int> extractNumber(const std::string& action);
+    void inputLobby(int clientId, const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);
     void keyInputchooseMalusorBonus(int playerId, int malusOrBonus);
