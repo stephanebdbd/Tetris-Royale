@@ -23,12 +23,12 @@ void Data::writeFile(const std::string& filename, const json& j) const {
 
 
 // Méthodes de gestion des données
-void Data::saveData(const std::string& filename, const std::string& dataLoc, const std::string& data) const {
-    std::cout << "Saving data to " << dataLoc << " : " << data << std::endl;
+void Data::saveData(const std::string& filename, const std::string& key, const std::string& value) const {
+    std::cout << "Saving value to " << key << " : " << value << std::endl;
     try {
         json j = openFile(filename);
 
-        j[dataLoc].push_back(data);
+        j[key].emplace_back(value);
 
         writeFile(filename, j);
     } catch (const std::exception& e) {
@@ -37,11 +37,12 @@ void Data::saveData(const std::string& filename, const std::string& dataLoc, con
 }
 
 
-void Data::deleteData(const std::string& filename, const std::string& dataLoc, const std::string& data) const {
+void Data::deleteData(const std::string& filename, const std::string& key, const std::string& value) const {
+    std::cout << "Deleting value from " << key << " : " << value << std::endl;
     try {
         json j = openFile(filename);
 
-        j[dataLoc].erase(std::remove(j[dataLoc].begin(), j[dataLoc].end(), data), j[dataLoc].end());
+        j[key].erase(std::remove(j[key].begin(), j[key].end(), value), j[key].end());
         
         writeFile(filename, j);
     } catch (const std::exception& e) {
@@ -49,14 +50,26 @@ void Data::deleteData(const std::string& filename, const std::string& dataLoc, c
     }
 }
 
-std::vector<std::string> Data::loadData(const std::string& filename, const std::string& dataLoc) const {
-    std::vector<std::string> data;
+std::vector<std::string> Data::loadData(const std::string& filename, const std::string& key) const {
+    std::vector<std::string> value;
     try {
         json j = openFile(filename);
         
-        data = j[dataLoc];
+        value = j[key].get<std::vector<std::string>>();
     } catch (const std::exception& e) {
         std::cerr << "Error reading from file(load): " << e.what() << std::endl;
     }
-    return data;
+    return value;
+}
+bool Data::isInKey(const std::string& filename, const std::string& key, const std::string& pseudo) const {
+    try {
+        json j = openFile(filename);
+        if (j.contains(key)) {
+            return std::find(j[key].begin(), j[key].end(), pseudo) != j[key].end();
+        }
+        return false;
+    } catch (const std::exception& e) {
+        std::cerr << "Error checking in key (isInKey): " << e.what() << std::endl;
+    }
+    return false;
 }

@@ -10,10 +10,9 @@ chatRoom::chatRoom(std::string room_name, std::string admin_pseudo) : filename("
 }
 
 void chatRoom::init_chatRoom() {
-
+    
     std::ifstream file(filename);
     if (!file.good()) {
-        // the file does not exist and we need to create it
         std::ofstream newFile(filename);
         if(newFile.is_open()) {
             // create the file and write the data
@@ -21,8 +20,8 @@ void chatRoom::init_chatRoom() {
             j["roomName"] = roomName;
             j["adminPseudo"] = {adminPseudo};
             j["clients"] = {};
-            j["receivedReq"] = {};
-            j["sentReq"] = {};
+            j["receivedReq"] = json::array();
+            j["sentReq"] = json::array();
             newFile << j.dump(4);
             newFile.close();
             addClient(adminPseudo);
@@ -32,7 +31,7 @@ void chatRoom::init_chatRoom() {
     
 }
 
-bool chatRoom::isInKey(const std::string& key , const std::string& pseudo) const {
+/*bool chatRoom::isInKey(const std::string& key , const std::string& pseudo) const {
     try{
         std::ifstream file(filename);
         if (!file.is_open()) {
@@ -49,13 +48,19 @@ bool chatRoom::isInKey(const std::string& key , const std::string& pseudo) const
     }
     return false;
 }
+*/
+
 
 bool chatRoom::isClient(const std::string& pseudo) const {
-    return isInKey("clients", pseudo);
+    return isInKey(filename,"clients", pseudo);
 }
 
 bool chatRoom::isAdmin(const std::string& pseudo) const {
-    return isInKey("adminPseudo", pseudo);
+    return isInKey(filename,"adminPseudo", pseudo);
+}
+
+bool chatRoom::isInReceivedReq(const std::string& pseudo) const {
+    return isInKey(filename,"receivedReq", pseudo);
 }
 
 void chatRoom::addAdmin(const std::string& pseudo) {
@@ -66,7 +71,6 @@ void chatRoom::addClient(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(clientsMutex);
     saveData(filename, "clients", pseudo);
     saveData("Clients/" + pseudo + ".json", "rooms", roomName);
-    deleteData(filename, "receivedReq", pseudo);
 }
 
 void chatRoom::removeClient(const std::string& pseudo) {
@@ -75,13 +79,23 @@ void chatRoom::removeClient(const std::string& pseudo) {
     deleteData("Clients/" + pseudo + ".json", "rooms", roomName);
 
 }
+void chatRoom::removeAdmin(const std::string& pseudo) {
+    deleteData(filename, "adminPseudo", pseudo);
+    deleteData("Clients/" + pseudo + ".json", "rooms", roomName);
+}
+
 
 void chatRoom::addReceivedRequest(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(requestsMutex);
     saveData(filename, "receivedReq", pseudo);
 }   
 
-
+void chatRoom::acceptClientRequest(const std::string& pseudo) {
+    std::lock_guard<std::mutex> lock(requestsMutex);
+    //ajouter au fichier
+    addClient(pseudo);
+    deleteData(filename, "receivedReq", pseudo);
+}
 
 void chatRoom::refuseClientRequest(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(requestsMutex);
@@ -121,4 +135,16 @@ std::vector<std::string> chatRoom::getReceivedReq() const {
 
 std::vector<std::string> chatRoom::getSentReq() const {
     return loadData(filename, "sentReq");
+}
+
+void chatRoom::deleteRoomFile() {
+    for(auto& client : loadData(filename, "clients")) {
+        removeClient(client);
+    }
+    if (std::filesystem::exists(filename)) {
+        std::filesystem::remove(filename);
+        std::cout << "File " << filename << " deleted." << std::endl;
+    } else {
+        std::cerr << "File " << filename << " not found." << std::endl;
+    }
 }

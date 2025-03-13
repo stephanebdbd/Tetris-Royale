@@ -49,6 +49,9 @@ enum class MenuState {
                     AddAdmin,
                     RoomRequestList,
                     QuitRoom,
+                    ConfirmDeleteRoom,
+                    ConfirmQuitRoom,
+                    
             PrivateChat,
         Friends,
             AddFriend,
@@ -119,6 +122,9 @@ public:
     void keyInputAddAdmin(int clientSocket, int clientId, const std::string& action);
     void keyInputRequestList(int clientSocket, int clientId, const std::string& action);
     void keyInputQuitRoom(int clientSocket, int clientId, const std::string& action);
+    void loadChatRooms();
+    void keyInputConfirmDeleteRoom(int clientSocket, int clientId, const std::string& action);
+
     //friends
     void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
