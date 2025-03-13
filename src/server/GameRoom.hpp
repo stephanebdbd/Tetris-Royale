@@ -19,8 +19,8 @@ class GameRoom {
     int ownerId;
     GameModeName gameModeName;
     int maxPlayers;
-    std::atomic<bool> started=false;
-    bool inProgress=false;
+    bool started;
+    bool inProgress;
     int energyLimit=25;
     int speed=0;
     int gameModeIndex=-1;
@@ -31,9 +31,7 @@ class GameRoom {
     std::vector<int> playersMalusOrBonus;
     std::vector<int> players;
     std::vector<Game> games;
-
     std::vector<int> viewersId;
-
 public:
     GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
     void addPlayer(int playerId);
@@ -78,12 +76,9 @@ public:
     int getPlayerId(int playerServerId) const;
     void setEnergyLimit(int NewEnergyLimit);
     int getEnergyLimit() const;
-    bool verifyVectors() const;
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }
-
-    bool readyToPlay = false;
 };
 
 #endif

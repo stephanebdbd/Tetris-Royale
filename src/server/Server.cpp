@@ -565,11 +565,8 @@ void Server::sendInputToGameRoom(int clientId, const std::string& action, std::s
 //recuperer les inputs du client
 void Server::receiveInputFromClient(int clientSocket, int clientId) {
     auto& gameRoom = gameRooms[clientGameRoomId[clientId]];
-    std::cout << "Dans la réception des entrées : " << gameRoom << std::endl;
     char buffer[1024];
-    while (!gameRoom->getHasStarted()) {
-        //std::cout << "RIFC started : " << std::boolalpha << gameRoom->getHasStarted() << std::endl;
-    }
+    std::cout << "Dans la réception des entrées du client " << gameRoom << std::endl;
     std::cout << "reception des entrées du client " << clientId << std::endl;
     while (true) {
         memset(buffer, 0, sizeof(buffer));
@@ -578,15 +575,15 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
             try {
                 json receivedData = json::parse(buffer);
                 std::string action = receivedData[jsonKeys::ACTION];
-                
+
                 std::cout << "Action reçue du client " << clientId << " : " << action << std::endl;
                 if ((clientStates[clientId] == MenuState::Play) && (!gameRoom->getGameIsOver(clientId))
                 && gameRoom->getInProgress())
                     sendInputToGameRoom(clientId, action, gameRoom);
-                else {
+                else 
                     handleMenu(clientSocket, clientId, action);
+                if (gameRoom->getGameIsOver(clientId) && gameRoom->getHasStarted() && !gameRoom->getInProgress())
                     break;
-                }
             }
             catch (json::parse_error& e) {
                 std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
@@ -597,6 +594,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
 }
 
 void Server::loopGame(int clientSocket, int clientId) {
+    std::cout << "Dans loopGame" << std::endl;
     if (clientGameRoomId.find(clientId) == clientGameRoomId.end()) {
         std::cerr << "Erreur: GameRoom introuvable pour le client #" << clientId << std::endl;
         return;
@@ -616,7 +614,7 @@ void Server::loopGame(int clientSocket, int clientId) {
               << " in gameRoomId " << gameRoomId << std::endl;
 
     // attend que le GameRoom soit prêt à jouer
-    while (!gameRoom->readyToPlay) {
+    while (!gameRoom->getHasStarted()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 

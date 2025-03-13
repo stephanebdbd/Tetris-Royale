@@ -94,13 +94,11 @@ void GameRoom::startGame() {
         std::cout << "Game idx#" << idx << " created at " << &games[idx] << std::endl;
     }
     std::cout << "Done !!!! " << std::endl;
-    readyToPlay = true;
-    setHasStarted();
 
-    inProgress = true;
+    setHasStarted();
     
     int countGameOvers = 0;
-    while (inProgress) {
+    while (getInProgress()) {
         countGameOvers = 0;
 
         for (int i = 0; i < maxPlayers; ++i) {
@@ -358,8 +356,6 @@ bool GameRoom::getNeedToSendGame(int playerServerId) const {
 }
 
 int GameRoom::getPlayerId(int playerServerId) const {
-    if (verifyVectors())
-        return -1;
     if ((gameModeName == GameModeName::Endless) || (players[0] == playerServerId))
         return 0;
     for (int i = 1; i < maxPlayers; ++i) {
@@ -388,19 +384,4 @@ void GameRoom::setEnergyLimit(int newEnergyLimit) {
 
 int GameRoom::getEnergyLimit() const {
     return energyLimit;
-}
-
-bool GameRoom::verifyVectors() const {
-    int gamesSize = games.size(), playersSize = players.size();
-    if (gamesSize != maxPlayers){
-        std::cerr << "Erreur: Nombre de `Game` créés différent du nombre de joueurs. " << std::endl;
-        std::cerr << "gamesSize = " << gamesSize << " maxPlayers = " << maxPlayers << std::endl;
-        return true;
-    }
-    if (playersSize != maxPlayers){
-        std::cerr << "Erreur: Nombre de joueurs différent du nombre de joueurs max." << std::endl;
-        std::cerr << "playersSize = " << playersSize << " maxPlayers = " << maxPlayers << std::endl;
-        return true;
-    }
-    return false;
 }
