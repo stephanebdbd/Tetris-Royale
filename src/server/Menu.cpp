@@ -297,7 +297,7 @@ json Menu::getAddFriendMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Ajouter un ami"},
         {jsonKeys::OPTIONS, {
-            {"Veuillez insérer l'ID de l'ami à ajouter", ":"},
+            {"Veuillez insérer le pseudo de l'ami à ajouter", ":"},
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -324,7 +324,7 @@ json Menu::displayMessage(const std::string& message) const {
     json menu = {
         {jsonKeys::TITLE, message},
         {jsonKeys::OPTIONS, {}},
-        {jsonKeys::INPUT, "Votre choix: "}
+        {jsonKeys::INPUT, ""}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }

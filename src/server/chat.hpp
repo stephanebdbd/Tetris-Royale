@@ -16,7 +16,7 @@
 class Server;
 enum class MenuState;
 
-class ServerChat : public virtual Data {
+class ServerChat{
 private:
     bool messagesWaitForDisplay = false;
 
@@ -35,6 +35,8 @@ public:
     void sendMessage(int clientSocket, std::string sender, const std::string& message, bool isOnline);
     
     // memoire pour stocker les messages si le client n'est pas en train de chatter
+    json openFile(const std::string& filename);
+    void writeFile(const std::string& filename, const json& j);
     bool initMessageMemory(const std::string& filename);
     void saveMessage(const std::string& filename, const std::string& message);
     void FlushMemory(const std::string& filename, Server &server);

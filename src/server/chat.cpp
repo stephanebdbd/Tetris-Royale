@@ -74,6 +74,28 @@ void ServerChat::sendMessage(int clientSocket, std::string sender, const std::st
     }
 }
 
+json ServerChat::openFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.good()) {
+        std::cerr << "Error opening file " << filename << std::endl;
+        return json();
+    }
+    json j;
+    file >> j;
+    file.close();
+    return j;
+}
+
+void ServerChat::writeFile(const std::string& filename, const json& j) {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file " << filename << std::endl;
+        return;
+    }
+    file << j.dump(4);
+    file.close();
+}
+
 
 bool ServerChat::initMessageMemory(const std::string& filename) {
     std::ifstream file(filename);
