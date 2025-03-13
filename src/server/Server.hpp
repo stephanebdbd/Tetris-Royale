@@ -153,7 +153,9 @@ public:
     //void startGame(int clientSocket, int clientId);
 
     void keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status);
-    void keyInputChoiceGameRoom(int clientId, const std::string& action);
+    void keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action);
+
+    void start_game(int clientSocket, int clientId);
 
 };
 
