@@ -16,7 +16,6 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
     else if ((gameModeName == GameModeName::Duel) && (maxPlayers != 2)){
         maxPlayers = 2;
 
-        std::cout << "maxPlayers = " <<maxPlayers<<std::endl;
     }
         
     else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers < 2)){
@@ -91,9 +90,7 @@ void GameRoom::startGame() {
     }
     for (int idx = 0; idx < maxPlayers; idx++) {
         games.emplace_back(10, 20, getSpeed());
-        std::cout << "Game idx#" << idx << " created at " << &games[idx] << std::endl;
     }
-    std::cout << "Done !!!! " << std::endl;
 
     setHasStarted();
     
@@ -185,7 +182,6 @@ void GameRoom::endGame() {
 void GameRoom::applyFeatureMode(int playerId) {
     if (gameModeName != GameModeName::Endless){
         int victim = playersVictim[playerId];
-        std::cout << "victim = " << victim << std::endl;
         //int malusOrBonus = playersMalusOrBonus[playerId];
         gameModes[gameModeIndex]->featureMode(games[victim]/*, malusOrBonus*/);
     }

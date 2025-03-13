@@ -933,7 +933,6 @@ void Server::sendGameToPlayer(int clientSocket, Game& game, Score& score) {
 /*void Server::receiveInputFromClient(int clientSocket, int clientId) {
     char buffer[1024];
     while ((clientStates[clientId] != MenuState::Play) || (!gameRoom->getHasStarted())){
-        //std::cout << "yalahwi" << std::endl;
         //keyinputLobbyParametreMenu(clientSocket, clientId, action);
         continue;
     }
