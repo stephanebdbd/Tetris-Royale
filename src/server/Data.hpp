@@ -16,81 +16,14 @@ public:
     // Destructeur de la classe Data
     ~Data() = default;
 
+    json openFile(const std::string& filename) const;
+    void writeFile(const std::string& filename, const json& j) const;
     // Méthodes de gestion des données
-    template <typename T>
-    void saveData(const std::string& filename, const std::string& dataLoc, const T& data) const {
-        std::cout << "Saving data to " << dataLoc << " : " << data << std::endl;
-        try {
-            std::ifstream file(filename);
-            if (!file.is_open()) {
-                std::cerr << "Error opening file: " << filename << std::endl;
-                return;
-            }
-            json j;
-            file >> j;
-            file.close();
+    virtual bool isInKey(const std::string& filename, const std::string& key, const std::string& pseudo) const;
 
-            j[dataLoc].push_back(data);
-
-            std::ofstream outFile(filename, std::ios::trunc);
-            if (!outFile.is_open()) {
-                std::cerr << "Error opening file: " << filename << std::endl;
-                return;
-            }
-            outFile << j.dump(4);
-            outFile.close();
-        } catch (const std::exception& e) {
-            std::cerr << "Error writing to file: " << e.what() << std::endl;
-        }
-    }
-
-    template <typename T>
-    void deleteData(const std::string& filename, const std::string& dataLoc, const T& data) const {
-        try {
-            std::ifstream file(filename);
-            if (!file.is_open()) {
-                std::cerr << "Error opening file: " << filename << std::endl;
-                return;
-            }
-            json j;
-            file >> j;
-            file.close();
-
-            j[dataLoc].erase(std::remove(j[dataLoc].begin(), j[dataLoc].end(), data), j[dataLoc].end());
-            
-            std::ofstream outFile(filename, std::ios::trunc);
-            if (!outFile.is_open()) {
-                std::cerr << "Error opening file: " << filename << std::endl;
-                return;
-            }
-            outFile << j.dump(4);
-            outFile.close();
-        } catch (const std::exception& e) {
-            std::cerr << "Error writing to file: " << e.what() << std::endl;
-        }
-    }
-
-    std::set<std::string> loadData(const std::string& filename, const std::string& dataLoc) const {
-        std::set<std::string> data;
-        try {
-            std::ifstream file(filename);
-            if (!file.is_open()) {
-                std::cerr << "Error opening file: " << filename << std::endl;
-                return data;
-            }
-            json j;
-            file >> j;
-            data = j[dataLoc].get<std::set<std::string>>();
-            file.close();
-        } catch (const std::exception& e) {
-            std::cerr << "Error reading from file: " << e.what() << std::endl;
-        }
-        return data;
-    }
-
-    // Setter et getter
-    void setFilename(const std::string& filename);
-    std::string getFilename() const;
+    virtual void saveData(const std::string& filename, const std::string& key, const std::string& value) const;
+    virtual void deleteData(const std::string& filename, const std::string& key, const std::string& value) const;
+    virtual std::vector<std::string> loadData(const std::string& filename, const std::string& key) const;
 };
 
 #endif // DATA_HPP

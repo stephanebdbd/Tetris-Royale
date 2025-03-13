@@ -44,11 +44,14 @@ enum class MenuState {
             JoinRoom,
             ManageRooms,
                 ManageRoom,
+                    ListRoomMembres,
                     AddMembre,
-                    RemoveMembre,
-                    RequestList,
+                    AddAdmin,
+                    RoomRequestList,
                     QuitRoom,
-                    DeleteRoom,
+                    ConfirmDeleteRoom,
+                    ConfirmQuitRoom,
+                    
             PrivateChat,
         Friends,
             AddFriend,
@@ -61,11 +64,9 @@ class Server {
     int serverSocket;
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::atomic<int> clientIdCounter;
-    std::atomic<int> chatRoomIdCounter;
     std::unordered_map<int, int> clientGameRoomId;
-    std::unordered_map<std::string, int> nameChatRoomIndex;
     std::vector<std::shared_ptr<GameRoom>> gameRooms;  
-    std::vector<std::shared_ptr<chatRoom>> chatRooms;
+    std::unordered_map<std::string, std::shared_ptr<chatRoom>> chatRooms;
     std::shared_ptr<ServerChat> chat;
     std::shared_ptr<FriendList> friendList;
     
@@ -77,7 +78,8 @@ class Server {
     std::unordered_map<int, MenuState> clientStates;      // id -> menu
     std::unordered_map<std::string, int> pseudoTosocket;  // pseudo -> socket
     std::unordered_map<int, std::string> sockToPseudo;    // socket -> pseudo
-    std::unordered_map<int, bool> runningChats;   
+    std::unordered_map<int, bool> runningChats; 
+    std::unordered_map<int, std::string> roomToManage;    // id -> room
     std::mutex clientPseudoMutex;        // socket -> bool(chat en cours)
    
 
@@ -115,9 +117,14 @@ public:
     void keyInputJoinChatRoom(int clientSocket, int clientId, const std::string& action);
     void keyInputManageMyRooms(int clientSocket, int clientId, const std::string& action);
     void keyInputManageRoom(int clientSocket, int clientId, const std::string& action);
+    void keyInputListMembres(int clientSocket, int clientId, const std::string& action);
     void keyInputAddMembre(int clientSocket, int clientId, const std::string& action);
-    void keyInputRemoveMembre(int clientSocket, int clientId, const std::string& action);
+    void keyInputAddAdmin(int clientSocket, int clientId, const std::string& action);
     void keyInputRequestList(int clientSocket, int clientId, const std::string& action);
+    void keyInputQuitRoom(int clientSocket, int clientId, const std::string& action);
+    void loadChatRooms();
+    void keyInputConfirmDeleteRoom(int clientSocket, int clientId, const std::string& action);
+
     //friends
     void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
@@ -137,8 +144,7 @@ public:
     bool getRunningChat(int clientSocket);
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
     std::unordered_map<int, std::string> getSocketPseudo() { return sockToPseudo; }
-    std::unordered_map<std::string, int> getNameChatRoomIndex() { return nameChatRoomIndex; }
-    std::vector<std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }
+    std::unordered_map<std::string, std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
     void sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game);
