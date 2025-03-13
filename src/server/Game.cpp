@@ -2,9 +2,9 @@
 
 #include <ncurses.h>
 
-Game::Game(int gridWidth, int gridHeight, int speed) //ajouter ce parametre apres , std::unique_ptr<GameMode> gameMode 
+Game::Game(int gridWidth, int gridHeight, Score& score, int speed)
     : grid(gridWidth, gridHeight), 
-      score(std::in_place, gridWidth + 5, 2),
+      score(score),
       running(true)
       {displacement.setSpeed(speed);}
 
@@ -22,7 +22,7 @@ void Game::run() {
         displacement.update();
         if (!gameOver){
             linesCleared = grid.clearFullLines();
-            score->addScore(linesCleared);
+            score.addScore(linesCleared);
         }
         else {
             running = false;
@@ -37,7 +37,7 @@ void Game::run() {
 void Game::updateGame() {
     displacement.update();
     linesCleared = grid.clearFullLines();
-    score->addScore(linesCleared);
+    score.addScore(linesCleared);
 }
 
 void Game::showGame() {
@@ -50,7 +50,7 @@ void Game::showGame() {
     }
     grid.draw();
     displacement.drawPiece();
-    score->display();
+    score.display();
     
 }
 
@@ -73,4 +73,8 @@ void Game::setGameOver() {
 
 void Game::setSpeed(int speed) {
     displacement.setSpeed(speed);
+}
+
+bool Game::getIsGameOver() const {
+    return displacement.getIsGameOver();
 }

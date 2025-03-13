@@ -121,6 +121,8 @@ void TetraminoDisplacement::setGameOver() {
 }
 
 bool TetraminoDisplacement::getIsGameOver() const{
+    if (gameOver)
+        std::cout << "Appel de getIsGameOver() -> gameOver = " << gameOver << std::endl;
     return gameOver;
 }
 

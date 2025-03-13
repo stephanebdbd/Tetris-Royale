@@ -2,6 +2,7 @@
 #define SCORE_HPP
 
 #include "../common/json.hpp"
+#include <iostream>
 
 class Score {
     int score, combo;

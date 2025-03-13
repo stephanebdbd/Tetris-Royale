@@ -85,9 +85,12 @@ void Server::handleClient(int clientSocket, int clientId) {
             if (clientStates[clientId] == MenuState::Play) {
                 int roomId = clientGameRoomId[clientId];
                 if ((roomId != -1)) {
-                    gameRooms[roomId].setGameIsOver(clientId);
-                    if (!gameRooms[roomId].getInProgress())
+                    if (gameRooms[roomId].getInProgress() || gameRooms[roomId].getGameModeName() == GameModeName::Endless) {
+                        gameRooms[roomId].endGame();
                         deleteGameRoom(roomId);
+                    }
+                    else if (!gameRooms[roomId].getHasStarted()) 
+                        gameRooms[roomId].removePlayer(clientId);
                 }
             }
             clientStates.erase(clientId); // Supprimer l'état des menus du client
@@ -496,19 +499,29 @@ void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName g
     //création de la gameRoom (partie Endless pour l'instant)
     clientStates[clientId] = MenuState::Play;
     std::cout << "Création de la GameRoom pour le client #" << clientId << " avec le mode " << static_cast<int>(gameMode) << "." << std::endl;
-    clientGameRoomId[clientId] = gameRoomIdCounter;
-    gameRooms.push_back(GameRoom(gameRoomIdCounter, clientId, gameMode));
+    int gameRoomIndex = gameRooms.size();
+    clientGameRoomId[clientId] = gameRoomIndex;
+    gameRooms.emplace_back(gameRoomIdCounter, clientId, gameMode);
+    GameRoom& gameRoom = gameRooms[gameRoomIndex];
+    
+    if (gameRoomIndex != gameRoomIdCounter) {
+        std::cerr << "Erreur: L'index de la GameRoom ne correspond pas à l'ID de la GameRoom." << std::endl;
+        return;
+    }
+
     gameRoomIdCounter++;
-
-
+    
     std::cout << "Démarrage du jeu pour le client #" << clientId << "." << std::endl;
+
+    std::thread gameRoomThread(&GameRoom::startGame, std::ref(gameRoom));
     std::thread loopgame(&Server::loopGame, this, clientSocket, clientId);
     std::thread inputThread(&Server::receiveInputFromClient, this, clientSocket, clientId);
     
     loopgame.join();
     inputThread.join();
+    gameRoomThread.join();
 
-    deleteGameRoom(clientGameRoomId[clientId]);
+    deleteGameRoom(gameRoom.getRoomId());
 }
 
 
@@ -539,7 +552,9 @@ void Server::shiftGameRooms(int index) {
         GameRoom& next = gameRooms[i + 1];
         current = next;
         current.setRoomId(i);
-    }   
+        for (auto& id : current.getPlayers())
+            clientGameRoomId[id] = i;
+    }
 }
 
 void Server::sendInputToGameRoom(int clientId, const std::string& action, GameRoom& gameRoom) {
@@ -580,11 +595,15 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
 }
 
 void Server::loopGame(int clientSocket, int clientId) {
+    if (clientGameRoomId.find(clientId) == clientGameRoomId.end()) {
+        std::cerr << "Erreur: GameRoom introuvable pour le client #" << clientId << std::endl;
+        return;
+    }
+
     int gameRoomId = clientGameRoomId[clientId];
 
-    // ✅ On vérifie que l'index est valide dans le vector
-    if (gameRoomId < 0 || gameRoomId >= static_cast<int>(gameRooms.size())) {
-        std::cerr << "No such gameRoom for clientId " << clientId << ", gameRoomId: " << gameRoomId << std::endl;
+    if (gameRoomId >= static_cast<int>(gameRooms.size())) {
+        std::cerr << "Erreur: GameRoom #" << gameRoomId << " introuvable." << std::endl;
         return;
     }
 
@@ -592,8 +611,6 @@ void Server::loopGame(int clientSocket, int clientId) {
 
     std::cout << "Starting loopGame for clientId " << clientId 
               << " in gameRoomId " << gameRoomId << std::endl;
-
-    std::thread gameRoomThread(&GameRoom::startGame, std::ref(gameRoom));
 
     // attend que le GameRoom soit prêt à jouer
     while (!gameRoom.readyToPlay) {
@@ -603,23 +620,16 @@ void Server::loopGame(int clientSocket, int clientId) {
     std::cout << "Game #" << gameRoom.getRoomId() << " started." << std::endl;
 
     while (gameRoom.getInProgress()) { 
-        bool isOver = gameRoom.getGameIsOver(clientId);
 
-        if (isOver) {
-            if (gameRoom.getGameModeName() == GameModeName::Endless)
-                break;
-            else if (gameRoom.getAmountOfPlayers() < 2)
-                break;
+        if (gameRoom.getGameIsOver(clientId)) {
+            if (!gameRoom.getInProgress()) break;
         }
 
         if (gameRoom.getNeedToSendGame(clientId)) { 
-            sendGameToPlayer(clientSocket, gameRoom.getGame(clientId));
+            sendGameToPlayer(clientSocket, gameRoom.getGame(clientId), gameRoom.getScore(clientId));
             gameRoom.setNeedToSendGame(false, clientId);
         }
     }
-
-    if (gameRoomThread.joinable())
-        gameRoomThread.join();
 
     if (gameRoom.getGameModeName() == GameModeName::Endless) {
         userManager->updateHighscore(clientPseudo[clientId], gameRoom.getScoreValue(clientId));
@@ -906,10 +916,10 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
-void Server::sendGameToPlayer(int clientSocket, Game& game) {
+void Server::sendGameToPlayer(int clientSocket, Game game, Score score) {
     json message;
     
-    message[jsonKeys::SCORE] = game.getScore()->scoreToJson();
+    message[jsonKeys::SCORE] = score.scoreToJson();
     message[jsonKeys::GRID] = game.getGrid().gridToJson();
     message[jsonKeys::TETRA_PIECE] = game.getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
 

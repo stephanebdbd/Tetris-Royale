@@ -33,22 +33,30 @@ void GameRoom::addPlayer(int playerId) {
         energyOrClearedLines.push_back(0);
         playersVictim.push_back(-1);
         playersMalusOrBonus.push_back(-1);
+        std::cout << "Joueur #" << players[amountOfPlayers] << " ajouté dans la GameRoom " << getRoomId() << std::endl;
         amountOfPlayers++;
     }
 }
 
 bool GameRoom::removePlayer(int playerId) {
-    for (int idx=0; idx < amountOfPlayers ; idx++) {
+    for (int idx=0; idx < maxPlayers ; idx++) {
         if (players[idx] == playerId) {
             amountOfPlayers--;
-            players.erase(players.begin() + idx);
-            energyOrClearedLines.erase(energyOrClearedLines.begin() + idx);
-            playersVictim.erase(playersVictim.begin() + idx);
-            playersMalusOrBonus.erase(playersMalusOrBonus.begin() + idx);
+            if (idx != amountOfPlayers)
+                shiftPlayers(idx);
+            players.pop_back();
+            energyOrClearedLines.pop_back();
+            playersVictim.pop_back();
+            playersMalusOrBonus.pop_back();
             return true;
         }
     }
     return false;
+}
+
+void GameRoom::shiftPlayers(int index){
+    for (int i = index; i < maxPlayers - 1; ++i)
+        players[i] = players[i + 1];
 }
 
 bool GameRoom::getIsFull() const {
@@ -77,13 +85,18 @@ void GameRoom::startGame() {
     while(!getIsFull()) continue;
 
     if (gameModeName == GameModeName::Duel) {
-        playersVictim.resize(maxPlayers);
         playersVictim[0] = 1;
         playersVictim[1] = 0;
     }
 
     for (int idx = 0; idx < maxPlayers; idx++) {
-        games.push_back(Game(10, 20, getSpeed()));
+        scores.push_back(Score(15, 2));
+        games.push_back(Game(10, 20, std::ref(scores[idx]), getSpeed()));
+    }
+
+    if (verifyVectors()){
+        endGame();
+        return;
     }
 
     readyToPlay = true;
@@ -112,7 +125,7 @@ void GameRoom::startGame() {
         // Conditions de fin
         if ((countGameOvers == maxPlayers - 1) && (gameModeName != GameModeName::Endless)) {
             endGame();
-        } else if ((countGameOvers == 1) == (gameModeName == GameModeName::Endless)) {
+        } else if ((countGameOvers == 1) && (gameModeName == GameModeName::Endless)) {
             endGame();
         }
     }
@@ -223,8 +236,6 @@ bool GameRoom::getInProgress() const {
 
 int GameRoom::getRoomId() const { return roomId; }
 
-void GameRoom::setOwnerId(int clientId) { ownerId = clientId; }
-
 int GameRoom::getOwnerId() const { return ownerId; }
 
 void GameRoom::setMaxPlayers(int max) { maxPlayers = max; }
@@ -265,8 +276,8 @@ void GameRoom::keyInputGame(int playerId, const std::string& unicodeAction) {
     games[playerId].moveTetramino(action);
 }
 
-void GameRoom::input(int PlayerServerId, const std::string& unicodeAction) {
-    int playerId = getPlayerId(PlayerServerId);
+void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
+    int playerId = getPlayerId(playerServerId);
     if (playerId == -1)
         return;
     if (getHasStarted()) {
@@ -324,14 +335,14 @@ void GameRoom::inputLobby(const std::string& action){
     }*/
 }
 
-std::optional<Score> GameRoom::getScore(int playerServerId) {
+Score& GameRoom::getScore(int playerServerId) {
     int playerId = getPlayerId(playerServerId);
-    return games[playerId].getScore();
+    return std::ref(scores[playerId]);
 }
 
 Game& GameRoom::getGame(int playerServerId) {
     int playerId = getPlayerId(playerServerId);
-    return games[playerId];
+    return std::ref(games[playerId]);
 }
 
 void GameRoom::setGameIsOver(int playerServerId) {
@@ -352,26 +363,37 @@ bool GameRoom::getNeedToSendGame(int playerServerId) const {
 }
 
 int GameRoom::getPlayerId(int playerServerId) const {
-    if (amountOfPlayers == 0)
+    if (verifyVectors())
         return -1;
-    if ((amountOfPlayers == 1) || (players[0] == playerServerId))
+    if ((gameModeName == GameModeName::Endless) || (players[0] == playerServerId))
         return 0;
-    for (int i = 1; i < amountOfPlayers; ++i) {
+    for (int i = 1; i < maxPlayers; ++i) {
         if (players[i] == playerServerId)
             return i;
     }
+    std::cerr << "Erreur: Joueur " << playerServerId << " non trouvé dans le vecteur players." << std::endl;
     return -1;
 }
 
 bool GameRoom::getGameIsOver(int playerServerId, bool fromGameRoom) const {
     int playerId = (fromGameRoom) ? playerServerId : getPlayerId(playerServerId);
+    
+    if (playerId < 0 || playerId >= static_cast<int>(games.size())) {
+        std::cerr << "Erreur: Tentative d'accès à un index invalide dans `games` (" 
+                  << playerId << ")." << std::endl;
+        return true;
+    }
+
     return games[playerId].getIsGameOver();
 }
 
 int GameRoom::getScoreValue(int playerServerId) const {
     int playerId = getPlayerId(playerServerId);
-    std::optional<Score> score = games[playerId].getScore();
-    return score->getScore();
+    if (playerId < 0 || playerId >= static_cast<int>(scores.size())) {
+        std::cerr << "Erreur: Indice playerId invalide (" << playerId << ")." << std::endl;
+        return -1;  // Ou une autre valeur par défaut
+    }
+    return scores[playerId].getScore();
 }
 
 void GameRoom::setEnergyLimit(int newEnergyLimit) {
@@ -381,4 +403,24 @@ void GameRoom::setEnergyLimit(int newEnergyLimit) {
 
 int GameRoom::getEnergyLimit() const {
     return energyLimit;
+}
+
+bool GameRoom::verifyVectors() const {
+    int gamesSize = games.size(), scoresSize = scores.size(), playersSize = players.size();
+    if (gamesSize != maxPlayers){
+        std::cerr << "Erreur: Nombre de `Game` créés différent du nombre de joueurs. " << std::endl;
+        std::cerr << "gamesSize = " << gamesSize << " maxPlayers = " << maxPlayers << std::endl;
+        return true;
+    }
+        if (scoresSize != maxPlayers){
+        std::cerr << "Erreur: Nombre de `Score` créés différent du nombre de joueurs." << std::endl;
+        std::cerr << "scoresSize = " << scoresSize << " maxPlayers = " << maxPlayers << std::endl;
+        return true;
+    }
+        if (playersSize != maxPlayers){
+        std::cerr << "Erreur: Nombre de joueurs différent du nombre de joueurs max." << std::endl;
+        std::cerr << "playersSize = " << playersSize << " maxPlayers = " << maxPlayers << std::endl;
+        return true;
+    }
+    return false;
 }

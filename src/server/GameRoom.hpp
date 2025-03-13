@@ -30,6 +30,7 @@ class GameRoom {
     std::vector<int> playersMalusOrBonus;
     std::vector<int> players;
     std::vector<Game> games;
+    std::vector<Score> scores;
 
     std::vector<int> viewersId;
 
@@ -51,7 +52,6 @@ public:
     int getRoomId() const;
     int getOwnerId() const;
     bool getGameIsOver(int playerServerId, bool fromGameRoom=false) const;
-    void setOwnerId(int roomId);
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
     bool getNeedToSendGame(int playerServerId) const;
@@ -74,11 +74,12 @@ public:
     std::string convertUnicodeToText(const std::string& unicode);
     int convertStringToInt(const std::string& unicodeAction);
     bool getCanUseMalusOrBonus(int playerServerId) const;
-    std::optional<Score> getScore(int playerServerId);
+    Score& getScore(int playerServerId);
     int getPlayerId(int playerServerId) const;
     void setEnergyLimit(int NewEnergyLimit);
     int getEnergyLimit() const;
     int getScoreValue(int playerServerId) const;
+    bool verifyVectors() const;
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }

@@ -13,7 +13,7 @@
 
 class Game {
     Grid grid;
-    std::optional<Score> score;
+    Score score;
     
     int linesCleared;
     bool running;
@@ -23,7 +23,7 @@ class Game {
     TetraminoDisplacement displacement = TetraminoDisplacement(grid);
     
     public:
-        Game(int gridWidth, int gridHeight, int speed=1000);
+        Game(int gridWidth, int gridHeight, Score& score, int speed=1000);
 
         void run();
         void showGame();
@@ -31,13 +31,12 @@ class Game {
         void updateGame();
         Grid& getGrid() { return grid; }
         void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
-        TetraminoDisplacement& getDisplacement() { return displacement; } 
-        std::optional<Score> getScore() const { return score; }
+        TetraminoDisplacement& getDisplacement() { return displacement; }
         int getLinesCleared() const { return linesCleared; }
         void setNeedToSendGame(bool needToSendGame) { displacement.setNeedToSendGame(needToSendGame); }
         bool getNeedToSendGame() const { return displacement.getNeedToSendGame(); }
         Tetramino& getCurrentPiece() { return displacement.getCurrentPiece(); }
-        bool getIsGameOver() const { return displacement.getIsGameOver(); }
+        bool getIsGameOver() const;
         void setGameOver();
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
         void setSpeed(int speed);
