@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 #include <memory>
+#include <atomic>
 #include <sys/socket.h>
 #include "Game.hpp"
 #include "GameMode.hpp"
@@ -18,7 +19,7 @@ class GameRoom {
     int ownerId;
     GameModeName gameModeName;
     int maxPlayers;
-    bool started=false;
+    std::atomic<bool> started=false;
     bool inProgress=false;
     int energyLimit=25;
     int speed=0;

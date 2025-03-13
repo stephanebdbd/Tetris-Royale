@@ -81,6 +81,7 @@ bool GameRoom::getSettingsDone() const {
 }
 
 void GameRoom::startGame() {
+    std::cout << "Let's create GameRoom #" << roomId << " !" << std::endl;
 
     while(!getIsFull()) continue;
 
@@ -88,17 +89,18 @@ void GameRoom::startGame() {
         playersVictim[0] = 1;
         playersVictim[1] = 0;
     }
-
     for (int idx = 0; idx < maxPlayers; idx++) {
         scores.push_back(Score(15, 2));
         games.push_back(Game(10, 20, std::ref(scores[idx]), getSpeed()));
+        std::cout << "Game idx#" << idx << " created." << std::endl;
     }
-
+    std::cout << "Done !!!! " << std::endl;
+    /*
     if (verifyVectors()){
         endGame();
         return;
     }
-
+    */
     readyToPlay = true;
     setHasStarted();
 
@@ -363,8 +365,8 @@ bool GameRoom::getNeedToSendGame(int playerServerId) const {
 }
 
 int GameRoom::getPlayerId(int playerServerId) const {
-    if (verifyVectors())
-        return -1;
+    //if (verifyVectors())
+    //    return -1;
     if ((gameModeName == GameModeName::Endless) || (players[0] == playerServerId))
         return 0;
     for (int i = 1; i < maxPlayers; ++i) {
@@ -377,10 +379,9 @@ int GameRoom::getPlayerId(int playerServerId) const {
 
 bool GameRoom::getGameIsOver(int playerServerId, bool fromGameRoom) const {
     int playerId = (fromGameRoom) ? playerServerId : getPlayerId(playerServerId);
-    
-    if (playerId < 0 || playerId >= static_cast<int>(games.size())) {
-        std::cerr << "Erreur: Tentative d'accès à un index invalide dans `games` (" 
-                  << playerId << ")." << std::endl;
+    int gamesSize = games.size();
+    if ((playerId < 0 ) || (playerId >= gamesSize)) {
+        std::cerr << "Erreur: Tentative d'accès à un index invalide dans `games` : " << playerId << " et gamesSize : " << gamesSize << std::endl;
         return true;
     }
 
