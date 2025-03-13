@@ -300,42 +300,35 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
     */
 }
 
-std::pair<std::string,int> GameRoom::extractNumber(const std::string& action){
-    /*size_t pos_parametre = action.find(' ');
-    std::string parametre = action.substr(0, pos_parametre);
-    size_t pos_number = pos_parametre + 2;
-    std::string number = action.substr(pos_number);
-    return {parametre, std::stoi(number)};*/
 
-    if (action.rfind("\\speed", 0) == 0) { // Vérifie si l'action commence par "\speed"
-        size_t pos_number = 6; // La position du premier caractère après "\speed"
-        std::string number = action.substr(pos_number);
-        return {"Speed", std::stoi(number)};
+
+void GameRoom::inputLobby(int clientId, const std::string& action){
+    if (action.rfind("/max", 0) == 0){
+        int number = std::stoi(action.substr(5));
+        this->setMaxPlayers(number);
     }
-    return {"", 0};
 
+    else if(action.rfind("accept.", 0) == 0){
+        this->addPlayer(clientId);
+    }
 
-}
-
-void GameRoom::inputLobby(const std::string& action){
-    if (action.rfind("\\invite", 0) != 0){
-        int number = std::stoi(action.substr(1));
-        setMaxPlayers(number);
+    else if(action.rfind("/quit", 0) == 0){
+        if(this->removePlayer(clientId)){
+            //si le joueur est le propriétaire de la salle, on change le propriétaire
+            if ((amountOfPlayers > 0) && (this->getOwnerId() == clientId)){
+                this->setOwnerId(players[0]);
+                std::cout << "New owner: " << players[0] << std::endl;
+                
+            }
+            std::cout<<"owner from GamerRoom : "<<this->getOwnerId()<<std::endl;
+        }
+        
     }
     
-    /*auto [parametre, number] = extractNumber(action);
-    std::cout<<"hello"<<std::endl;
-    if(parametre == "Speed"){
-        std::cout<<"Speed : "<<number<<std::endl;
-        setSpeed(number);
-        games[playerId].setSpeed(speed);
-
-    }else if(parametre == "MaxPlayers"){
-        setMaxPlayers(number);
-    }else if(parametre == "EnergyLimit"){
-        setEnergyLimit(number);
-    }*/
+   
 }
+
+void GameRoom::setOwnerId(int clientId) { ownerId = clientId; }
 
 Score& GameRoom::getScore(int playerServerId) {
     int playerId = getPlayerId(playerServerId);
