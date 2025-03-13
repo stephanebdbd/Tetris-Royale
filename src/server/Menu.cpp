@@ -358,7 +358,8 @@ json Menu::getGameModeMenu() const {
             {"1. ", "Endless"},
             {"2. ", "Duel"},
             {"3. ", "Classic"},
-            {"4. ", "Royal Competition"}
+            {"4. ", "Royal Competition"},
+            {"5. ", "Retour"}
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -369,7 +370,8 @@ json Menu::getLobbyMenu1() const {
     json menu = {
         {jsonKeys::TITLE, "Configuration des paramètres de la partie:"},
         {jsonKeys::OPTIONS, {
-            {"\\<number> ", "Nombre maximal de joueurs"}
+            {"/max/<number> ", "Nombre maximal de joueurs"},
+            {"/quit ", "Quitter la partie"}
         }},
 
         {jsonKeys::INPUT, "entrez le paramètre: "}
@@ -386,9 +388,9 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
             {"Game Mode: ", mode},
             {"Joueurs Maximum: ", std::to_string(maxPlayers)},
             {"Nombre actuel de joueurs: ", std::to_string(amountOfPlayers)},
-            {"\\invite\\player\\<name> ", "Inviter un joueur"},
-            {"\\invite\\viewer\\<name> ", "Inviter un spectateur"},
-            {"\\quit ", "Quitter la partie"}
+            {"/invite/player/<name> ", "Inviter un joueur"},
+            {"/invite/viewer/<name> ", "Inviter un spectateur"},
+            {"/quit ", "Quitter la partie"}
 
         }},
 
@@ -403,7 +405,7 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
     json menu = {
         {jsonKeys::TITLE, "Liste des demandes du rejoindre un jeu: "},
         {jsonKeys::OPTIONS, json::array()},
-        {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande :    "}
+        {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande ou '/ret' pour faire un retour:    "}
     };
 
     int index = 1;
@@ -415,3 +417,4 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
 
     return menu.dump() + "\n";
 }
+
