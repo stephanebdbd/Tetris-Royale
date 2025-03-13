@@ -31,7 +31,6 @@ class GameRoom {
     std::vector<int> playersMalusOrBonus;
     std::vector<int> players;
     std::vector<Game> games;
-    std::vector<Score> scores;
 
     std::vector<int> viewersId;
 
@@ -79,7 +78,6 @@ public:
     int getPlayerId(int playerServerId) const;
     void setEnergyLimit(int NewEnergyLimit);
     int getEnergyLimit() const;
-    int getScoreValue(int playerServerId) const;
     bool verifyVectors() const;
 
     std::vector<int> getPlayers() const { return players; }

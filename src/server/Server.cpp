@@ -508,7 +508,8 @@ void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName g
         return;
     }
     
-    auto gameRoom = gameRooms[gameRoomIndex];
+    auto& gameRoom = gameRooms[gameRoomIndex];
+    std::cout << "Dans keyInputGameModeMenu : " << gameRoom << std::endl;
     gameRoomIdCounter++;
     
     std::cout << "Démarrage du jeu pour le client #" << clientId << "." << std::endl;
@@ -548,8 +549,8 @@ void Server::deleteGameRoom(int roomId) {
 void Server::shiftGameRooms(int index) {
     int size = gameRooms.size();
     for (int i = index; i < size - 1; ++i) {
-        auto current = gameRooms[i];
-        auto next = gameRooms[i + 1];
+        auto& current = gameRooms[i];
+        auto& next = gameRooms[i + 1];
         current = next;
         current->setRoomId(i);
         for (auto& id : current->getPlayers())
@@ -563,7 +564,8 @@ void Server::sendInputToGameRoom(int clientId, const std::string& action, std::s
 
 //recuperer les inputs du client
 void Server::receiveInputFromClient(int clientSocket, int clientId) {
-    auto gameRoom = gameRooms[clientGameRoomId[clientId]];
+    auto& gameRoom = gameRooms[clientGameRoomId[clientId]];
+    std::cout << "Dans la réception des entrées : " << gameRoom << std::endl;
     char buffer[1024];
     while (!gameRoom->getHasStarted()) {
         //std::cout << "RIFC started : " << std::boolalpha << gameRoom->getHasStarted() << std::endl;
@@ -607,7 +609,8 @@ void Server::loopGame(int clientSocket, int clientId) {
         return;
     }
 
-    auto gameRoom = gameRooms[gameRoomId];
+    auto& gameRoom = gameRooms[gameRoomId];
+    std::cout << "Dans loopGame : " << gameRoom << std::endl;
 
     std::cout << "Starting loopGame for clientId " << clientId 
               << " in gameRoomId " << gameRoomId << std::endl;
@@ -632,7 +635,8 @@ void Server::loopGame(int clientSocket, int clientId) {
     }
 
     if (gameRoom->getGameModeName() == GameModeName::Endless) {
-        userManager->updateHighscore(clientPseudo[clientId], gameRoom->getScoreValue(clientId));
+        Score& score = gameRoom->getScore(clientId);
+        userManager->updateHighscore(clientPseudo[clientId], score.getScore());
     }
 
     clientStates[clientId] = MenuState::GameOver;
@@ -916,7 +920,7 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
-void Server::sendGameToPlayer(int clientSocket, Game game, Score score) {
+void Server::sendGameToPlayer(int clientSocket, Game& game, Score& score) {
     json message;
     
     message[jsonKeys::SCORE] = score.scoreToJson();

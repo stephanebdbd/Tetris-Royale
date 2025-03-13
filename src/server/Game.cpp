@@ -1,12 +1,14 @@
 #include "Game.hpp"
-
 #include <ncurses.h>
 
-Game::Game(int gridWidth, int gridHeight, Score& score, int speed)
+Game::Game(int gridWidth, int gridHeight, int speed)
     : grid(gridWidth, gridHeight), 
-      score(score),
+      score(gridWidth+5, 2),
       running(true)
-      {displacement.setSpeed(speed);}
+      {
+    displacement.setSpeed(speed);
+    std::cout << "Game created at : " << this << std::endl;
+}
 
 void Game::run() {
     initscr();
@@ -77,4 +79,13 @@ void Game::setSpeed(int speed) {
 
 bool Game::getIsGameOver() const {
     return displacement.getIsGameOver();
+}
+
+Grid& Game::getGrid()  {
+    std::cout << "getGrid called : " << &grid << std::endl;
+    return grid;
+}
+
+Score& Game::getScore() {
+    return score;
 }

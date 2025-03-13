@@ -24,7 +24,7 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
     }
         
     addPlayer(clientId);
-    std::cout << "GameRoom #" << roomId << " created." << std::endl;
+    std::cout << "GameRoom #" << roomId << " created at " << this << std::endl;
 }
 
 void GameRoom::addPlayer(int playerId) {
@@ -81,7 +81,7 @@ bool GameRoom::getSettingsDone() const {
 }
 
 void GameRoom::startGame() {
-    std::cout << "Let's create GameRoom #" << roomId << " !" << std::endl;
+    std::cout << "Let's create GameRoom #" << roomId << " at " << this << std::endl;
 
     while(!getIsFull()) continue;
 
@@ -90,17 +90,10 @@ void GameRoom::startGame() {
         playersVictim[1] = 0;
     }
     for (int idx = 0; idx < maxPlayers; idx++) {
-        scores.push_back(Score(15, 2));
-        games.push_back(Game(10, 20, std::ref(scores[idx]), getSpeed()));
-        std::cout << "Game idx#" << idx << " created." << std::endl;
+        games.emplace_back(10, 20, getSpeed());
+        std::cout << "Game idx#" << idx << " created at " << &games[idx] << std::endl;
     }
     std::cout << "Done !!!! " << std::endl;
-    /*
-    if (verifyVectors()){
-        endGame();
-        return;
-    }
-    */
     readyToPlay = true;
     setHasStarted();
 
@@ -339,12 +332,12 @@ void GameRoom::inputLobby(const std::string& action){
 
 Score& GameRoom::getScore(int playerServerId) {
     int playerId = getPlayerId(playerServerId);
-    return std::ref(scores[playerId]);
+    return games[playerId].getScore();
 }
 
 Game& GameRoom::getGame(int playerServerId) {
     int playerId = getPlayerId(playerServerId);
-    return std::ref(games[playerId]);
+    return games[playerId];
 }
 
 void GameRoom::setGameIsOver(int playerServerId) {
@@ -365,8 +358,8 @@ bool GameRoom::getNeedToSendGame(int playerServerId) const {
 }
 
 int GameRoom::getPlayerId(int playerServerId) const {
-    //if (verifyVectors())
-    //    return -1;
+    if (verifyVectors())
+        return -1;
     if ((gameModeName == GameModeName::Endless) || (players[0] == playerServerId))
         return 0;
     for (int i = 1; i < maxPlayers; ++i) {
@@ -388,15 +381,6 @@ bool GameRoom::getGameIsOver(int playerServerId, bool fromGameRoom) const {
     return games[playerId].getIsGameOver();
 }
 
-int GameRoom::getScoreValue(int playerServerId) const {
-    int playerId = getPlayerId(playerServerId);
-    if (playerId < 0 || playerId >= static_cast<int>(scores.size())) {
-        std::cerr << "Erreur: Indice playerId invalide (" << playerId << ")." << std::endl;
-        return -1;  // Ou une autre valeur par défaut
-    }
-    return scores[playerId].getScore();
-}
-
 void GameRoom::setEnergyLimit(int newEnergyLimit) {
     if (newEnergyLimit < 15)
         energyLimit = newEnergyLimit;
@@ -407,18 +391,13 @@ int GameRoom::getEnergyLimit() const {
 }
 
 bool GameRoom::verifyVectors() const {
-    int gamesSize = games.size(), scoresSize = scores.size(), playersSize = players.size();
+    int gamesSize = games.size(), playersSize = players.size();
     if (gamesSize != maxPlayers){
         std::cerr << "Erreur: Nombre de `Game` créés différent du nombre de joueurs. " << std::endl;
         std::cerr << "gamesSize = " << gamesSize << " maxPlayers = " << maxPlayers << std::endl;
         return true;
     }
-        if (scoresSize != maxPlayers){
-        std::cerr << "Erreur: Nombre de `Score` créés différent du nombre de joueurs." << std::endl;
-        std::cerr << "scoresSize = " << scoresSize << " maxPlayers = " << maxPlayers << std::endl;
-        return true;
-    }
-        if (playersSize != maxPlayers){
+    if (playersSize != maxPlayers){
         std::cerr << "Erreur: Nombre de joueurs différent du nombre de joueurs max." << std::endl;
         std::cerr << "playersSize = " << playersSize << " maxPlayers = " << maxPlayers << std::endl;
         return true;

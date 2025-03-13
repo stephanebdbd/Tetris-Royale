@@ -2,8 +2,7 @@
 
 
 int main() {
-    Score score(15, 2);
-    Game game(10, 20, score);
+    Game game(10, 20);
     game.run();
     return 0;
 }
