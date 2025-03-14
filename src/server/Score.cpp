@@ -19,8 +19,6 @@ void Score::display() const {
 }
 
 int Score::getScore() const {
-    std::cout << "Méthode getScore() appelée." << std::endl;
-    std::cout << "Score final : " << score << std::endl;
     return score;
 }
 

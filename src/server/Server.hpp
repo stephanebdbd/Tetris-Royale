@@ -142,7 +142,7 @@ public:
     std::vector<std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
-    void sendGameToPlayer(int clientSocket, Game game, Score score);
+    void sendGameToPlayer(int clientSocket, Game& game, Score& score);
     std::string trim(const std::string& s);
     void keyInputChooseGameModeMenu(int clientSocket, int clientId, const std::string& action);
     void keyinputLobbyParametreMenu(int clientSocket, int clientId, const std::string& action);
@@ -153,7 +153,9 @@ public:
     //void startGame(int clientSocket, int clientId);
 
     void keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status);
-    void keyInputChoiceGameRoom(int clientId, const std::string& action);
+    void keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action);
+
+    void start_game(int clientSocket, int clientId);
 
 };
 

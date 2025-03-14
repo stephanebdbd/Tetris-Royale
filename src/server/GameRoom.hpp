@@ -19,8 +19,8 @@ class GameRoom {
     int ownerId;
     GameModeName gameModeName;
     int maxPlayers;
-    std::atomic<bool> started=false;
-    bool inProgress=false;
+    bool started;
+    bool inProgress;
     int energyLimit=25;
     int speed=0;
     int gameModeIndex=-1;
@@ -31,10 +31,7 @@ class GameRoom {
     std::vector<int> playersMalusOrBonus;
     std::vector<int> players;
     std::vector<Game> games;
-    std::vector<Score> scores;
-
     std::vector<int> viewersId;
-
 public:
     GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
     void addPlayer(int playerId);
@@ -52,6 +49,7 @@ public:
     bool getInProgress() const;
     int getRoomId() const;
     int getOwnerId() const;
+    void setOwnerId(int clientId);
     bool getGameIsOver(int playerServerId, bool fromGameRoom=false) const;
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
@@ -65,8 +63,7 @@ public:
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
-    void inputLobby(const std::string& action);
-    std::pair<std::string,int> extractNumber(const std::string& action);
+    void inputLobby(int clientId, const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);
     void keyInputchooseMalusorBonus(int playerId, int malusOrBonus);
@@ -79,13 +76,9 @@ public:
     int getPlayerId(int playerServerId) const;
     void setEnergyLimit(int NewEnergyLimit);
     int getEnergyLimit() const;
-    int getScoreValue(int playerServerId) const;
-    bool verifyVectors() const;
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }
-
-    bool readyToPlay = false;
 };
 
 #endif

@@ -20,16 +20,17 @@ class Game {
     
     bool malus5Royal = false;
     
-    TetraminoDisplacement displacement = TetraminoDisplacement(grid);
+    TetraminoDisplacement displacement{grid};
     
     public:
-        Game(int gridWidth, int gridHeight, Score& score, int speed=1000);
+        Game(int gridWidth, int gridHeight, int speed=1000);
 
         void run();
         void showGame();
         void showGameOver();
         void updateGame();
-        Grid& getGrid() { return grid; }
+        Grid& getGrid();
+        Score& getScore();
         void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
         TetraminoDisplacement& getDisplacement() { return displacement; }
         int getLinesCleared() const { return linesCleared; }
@@ -40,7 +41,6 @@ class Game {
         void setGameOver();
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
         void setSpeed(int speed);
-
 };
 
 #endif

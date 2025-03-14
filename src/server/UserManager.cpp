@@ -40,7 +40,7 @@ int UserManager::getHighscore(const std::string& username) {
 // Met à jour le highscore si le nouveau score est plus élevé
 void UserManager::updateHighscore(const std::string& username, int score) {
     if (users.find(username) != users.end() && score > users[username].highscore) {
-        users[username].highscore = score;
+        users[username].highscore = score ;
         saveUsers();
     }
 }

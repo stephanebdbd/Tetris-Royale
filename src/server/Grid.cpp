@@ -3,7 +3,7 @@
 
 #include <ncurses.h>
 
-Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {}
+Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {std::cout << "Grid created at : " << this << std::endl;}
 
 // Marquer une cellule comme occupée
 void Grid::markCell(int x, int y, const Color& color) {
@@ -99,6 +99,7 @@ int Grid::clearFullLines() {
 
 
 json Grid::gridToJson() const {
+    std::cout << "gridToJson called : " << this << std::endl;
     json gridJson;
     gridJson[jsonKeys::WIDTH] = width;
     gridJson[jsonKeys::HEIGHT] = height;
