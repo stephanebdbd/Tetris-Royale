@@ -362,7 +362,6 @@ bool GameRoom::getGameIsOver(int playerServerId, bool fromGameRoom) const {
         std::cerr << "Erreur: Tentative d'accès à un index invalide dans `games` : " << playerId << " et gamesSize : " << gamesSize << std::endl;
         return true;
     }
-
     return games[playerId].getIsGameOver();
 }
 
