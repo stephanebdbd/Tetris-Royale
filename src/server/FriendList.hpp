@@ -1,4 +1,4 @@
-#ifndef FRIENDLIST_HPP
+/*#ifndef FRIENDLIST_HPP
 #define FRIENDLIST_HPP
 
 #include <string>
@@ -47,3 +47,4 @@ public:
 };
 
 #endif // FRIENDLIST_HPP
+*/

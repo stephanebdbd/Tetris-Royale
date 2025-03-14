@@ -1,10 +1,12 @@
 #include "Menu.hpp"
 #include "../common/jsonKeys.hpp"
 
+const std::string messageHelp = "Appuyez sur ./ret pour revenir en arrière et ./quit pour revenir au menu principal.";
 
 json Menu::getMainMenu0() const {
     json menu = {
         {jsonKeys::TITLE, "Bienvenue dans Tetris Royal !"},
+
         {jsonKeys::OPTIONS, {
             {"1. ", "Se connecter"},
             {"2. ", "Créer un compte"},
@@ -18,6 +20,7 @@ json Menu::getMainMenu0() const {
 json Menu::getMainMenu1() const {
     json menu = {
         {jsonKeys::TITLE, "Menu principal"},
+
         {jsonKeys::OPTIONS, {
             {"1. ", "Jouer"},
             {"2. ", "Amis"},
@@ -33,6 +36,7 @@ json Menu::getMainMenu1() const {
 json Menu::getRegisterMenu1() const {
     json menu = {
         {jsonKeys::TITLE, "Création de compte - Etape 1"},
+
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer votre pseudo", ":"},
 
@@ -45,6 +49,8 @@ json Menu::getRegisterMenu1() const {
 json Menu::getRegisterMenuFailed() const {
     json menu = {
         {jsonKeys::TITLE, "Création de compte - Etape 1"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"Pseudo déjà utilisé ! \n Veuillez ", ""},
             {"insérer", " votre pseudo : "},
@@ -57,6 +63,8 @@ json Menu::getRegisterMenuFailed() const {
 json Menu::getRegisterMenu2() const {
     json menu = {
         {jsonKeys::TITLE, "Création de compte - Etape 2"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer votre mot de passe", ":"},
         }},
@@ -68,6 +76,7 @@ json Menu::getRegisterMenu2() const {
 json Menu::getLoginMenu1() const {
     json menu = {
         {jsonKeys::TITLE, "Connexion au compte - Etape 1"},
+
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer votre pseudo", ":"},
 
@@ -80,6 +89,7 @@ json Menu::getLoginMenu1() const {
 json Menu::getLoginMenuFailed1() const {
     json menu = {
         {jsonKeys::TITLE, "Connexion au compte - Etape 1"},
+
         {jsonKeys::OPTIONS, {
             {"Aucun identifiant n'a été trouvé ! \n Veuillez ", ""},
             {"insérer", " votre pseudo : "},
@@ -92,6 +102,7 @@ json Menu::getLoginMenuFailed1() const {
 json Menu::getLoginMenu2() const {
     json menu = {
         {jsonKeys::TITLE, "Connexion au compte  - Etape 2"},
+
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer votre mot de passe", ":"},
 
@@ -104,6 +115,7 @@ json Menu::getLoginMenu2() const {
 json Menu::getLoginMenuFailed2() const {
     json menu = {
         {jsonKeys::TITLE, "Connexion au compte - Etape 2"},
+
         {jsonKeys::OPTIONS, {
             {"Mot de passe incorrect ! \n Veuillez ", ""},
             {"insérer", " votre mot de passe : "},
@@ -116,6 +128,7 @@ json Menu::getLoginMenuFailed2() const {
 json Menu::getJoinOrCreateGame() const {
     json menu = {
         {jsonKeys::TITLE, "Rejoindre ou créer une partie"},
+
         {jsonKeys::OPTIONS, {
             {"1. ", "créer"},
             {"2. ", "rejoindre"},
@@ -129,6 +142,8 @@ json Menu::getJoinOrCreateGame() const {
 json Menu::getChatMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Menu du chat"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"1. ", "Créer une Room"},
             {"2. ", "Rejoindre une Room"},
@@ -145,6 +160,8 @@ json Menu::getChatMenu() const {
 json Menu::getCreateChatRoomMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Créer une Room"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer le nom de la Room", ":"},
         }},
@@ -157,6 +174,8 @@ json Menu::getCreateChatRoomMenu() const {
 json Menu::getJoinChatRoomMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Joindre une Room"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer le nom de la Room", ":"},
         }},
@@ -174,6 +193,8 @@ json Menu::getInvitationsRoomsMenu(const std::vector<std::string>& invitations) 
 json Menu::getListe(const std::vector<std::string>& data, std::string title, const std::string& input) const {
     json menu = {
         {jsonKeys::TITLE, title},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, json::array()},
         {jsonKeys::INPUT, input}
     };
@@ -194,6 +215,8 @@ json Menu::getManageChatRoomsMenu(const std::vector<std::string>& chatRooms) con
     if (chatRooms.empty()) {
         json menu = {
             {jsonKeys::TITLE, "Mes Rooms"},
+            {jsonKeys::DEFAULT, messageHelp},
+            {jsonKeys::HELP, ""},
             {jsonKeys::OPTIONS, {
                 {"Vous n'avez aucun room à gérer.", ""}
             }},
@@ -205,35 +228,33 @@ json Menu::getManageChatRoomsMenu(const std::vector<std::string>& chatRooms) con
     }
 }
 json Menu::getManageRoomMenu(bool isAdmin, bool lastAdmin) const {
-    json menu = {
-        {jsonKeys::TITLE, "Gestion de la Room"},
-        {jsonKeys::OPTIONS, {
-            {"1. ", "Lister les membres"},
-        }},
-        {jsonKeys::INPUT, "Votre choix: "}
-    };
-    int i;
-    if(isAdmin){
-        menu[jsonKeys::OPTIONS]["2. "] = "Ajouter un membre";
-        menu[jsonKeys::OPTIONS]["3. "] = "Ajouter un admin";
-        menu[jsonKeys::OPTIONS]["4. "] = "les demandes d'ajout";
-        if(!lastAdmin){
-            menu[jsonKeys::OPTIONS]["5. "] = "Quitter la room";
-        }else{
-            menu[jsonKeys::OPTIONS]["5. "] = "Supprimer la room";
-        }
-        i = 5;
-    }else{
-        menu[jsonKeys::OPTIONS]["2. "] = "quitter la room";
-        i = 2;
+    json menu;
+    menu[jsonKeys::TITLE] = "Gestion de la Room";
+    menu[jsonKeys::DEFAULT] = messageHelp;
+    menu[jsonKeys::HELP] = "";
+    menu[jsonKeys::OPTIONS] = json::array({"1. Lister les membres"});
+
+    if (isAdmin) {
+        menu[jsonKeys::OPTIONS].push_back("2. Ajouter un membre");
+        menu[jsonKeys::OPTIONS].push_back("3. Ajouter un admin");
+        menu[jsonKeys::OPTIONS].push_back("4. Voir les demandes d'ajout");
+        menu[jsonKeys::OPTIONS].push_back(lastAdmin ? "5. Supprimer la room" : "5. Quitter la room");
+    } else {
+        menu[jsonKeys::OPTIONS].push_back("2. Quitter la room");
     }
-    menu[jsonKeys::OPTIONS][std::to_string(i+1) + ". "] = "Retour";
+
+    menu[jsonKeys::OPTIONS].push_back(std::to_string(menu[jsonKeys::OPTIONS].size() + 1) + ". Retour");
+    menu[jsonKeys::INPUT] = "Votre choix: ";
+    
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
+
 
 json Menu::getAddMemberAdminMenu(std::string title, std::string input) const {
     json menu = {
         {jsonKeys::TITLE, title},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer le pseudo du membre", ":"},
         }},
@@ -258,6 +279,8 @@ json Menu::getListeRequests(const std::vector<std::string>& data) const {
 json Menu::getDeleteRoomConfirmationMenu(const std::string& roomName) const {
     json menu = {
         {jsonKeys::TITLE, "Confirmation de suppression"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"Vous êtes sûr de vouloir supprimer la room '" + roomName + "' ? (oui/non)", ""}
         }},
@@ -270,6 +293,8 @@ json Menu::getDeleteRoomConfirmationMenu(const std::string& roomName) const {
 json Menu::getQuitRoomConfirmationMenu(const std::string& roomName) const {
     json menu = {
         {jsonKeys::TITLE, "Confirmation de quitter la room"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"Vous êtes sûr de vouloir quitter la room '" + roomName + "' ? (oui/non)", ""}
         }},
@@ -285,6 +310,8 @@ json Menu::getQuitRoomConfirmationMenu(const std::string& roomName) const {
 json Menu::getFriendMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Créer une Room"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, {
             {"1. ", "Ajouter un ami"},
             {"2. ", "liste des amis"},
@@ -300,9 +327,13 @@ json Menu::getFriendMenu() const {
 json Menu::getAddFriendMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Ajouter un ami"},
+        {jsonKeys::DEFAULT, "Appuyez sur ./ret pour revenir au menu principal."},
+        {jsonKeys::HELP , "Pour ajouter un ami, veuillez insérer son pseudo."},
+        
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer le pseudo de l'ami à ajouter", ":"},
         }},
+        
         {jsonKeys::INPUT, "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
@@ -312,6 +343,8 @@ json Menu::getAddFriendMenu() const {
 json Menu::getRequestsListMenu(const std::vector<std::string>& pendingRequests) const {
     json menu = {
         {jsonKeys::TITLE, "Liste des demandes d'amis: "},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, ""},
         {jsonKeys::OPTIONS, json::array()},
         {jsonKeys::INPUT, "Tapez 'accept.pseudo' ou 'reject.pseudo' pour accepter ou refuser une demande d'amitie :    "}
     };
@@ -335,9 +368,11 @@ json Menu::displayMessage(const std::string& message) const {
 
 json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
     json menu = {
-        {"title", "Liste de vos amis"},
-        {"options", json::array()},
-        {"input", "Tapez 'del.pseudo' pour supprimer un ami ou 'del.all' pour tout supprimer:    "}
+        {jsonKeys::TITLE, "Liste de vos amis"},
+        {jsonKeys::DEFAULT, messageHelp},
+        {jsonKeys::HELP, "Tapez 'del.pseudo' pour supprimer un ami ou 'del.all' pour tout supprimer:    "},
+        {jsonKeys::OPTIONS, json::array()},
+        {jsonKeys::INPUT, ""}
     };
 
     int index = 1;
@@ -353,6 +388,8 @@ json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
 json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const {
     json menu = {
         {jsonKeys::TITLE, "Classement des meilleurs joueurs"},
+
+        
         {jsonKeys::OPTIONS, json::object()},  // car avec array la key commence a 0
         {jsonKeys::INPUT, "Appuyez sur la touche \"1\" pour revenir au menu principal : "}
     };
@@ -370,6 +407,7 @@ json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& rankin
 json Menu::getGameOverMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Game Over"},
+
         {jsonKeys::OPTIONS, {
             {"1. ", "Rejouer"},
             {"2. ", "Retour au menu principal"}
@@ -382,6 +420,7 @@ json Menu::getGameOverMenu() const {
 json Menu::getGameModeMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Game Mode"},
+
         {jsonKeys::OPTIONS, {
             {"1. ", "Endless"},
             {"2. ", "Duel"},
@@ -396,6 +435,7 @@ json Menu::getGameModeMenu() const {
 json Menu::getLobbyMenu1() const {
     json menu = {
         {jsonKeys::TITLE, "Configuration des paramètres de la partie:"},
+
         {jsonKeys::OPTIONS, {
             {"\\<number> ", "Nombre maximal de joueurs"}
         }},
@@ -410,6 +450,7 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
     
     json menu = {
         {jsonKeys::TITLE, "La salle d'invitation et d'attente:"},
+
         {jsonKeys::OPTIONS, {
             {"Game Mode: ", mode},
             {"Joueurs Maximum: ", std::to_string(maxPlayers)},
@@ -430,8 +471,9 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
 json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& pendingRequests) const {
     json menu = {
         {jsonKeys::TITLE, "Liste des demandes du rejoindre un jeu: "},
+        {jsonKeys::HELP,"Tapez 'accept.<Number Room>' pour accepter une demande :    "},
         {jsonKeys::OPTIONS, json::array()},
-        {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande :    "}
+        {jsonKeys::INPUT, ""}
     };
 
     int index = 1;
