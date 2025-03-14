@@ -12,7 +12,7 @@ class TetraminoDisplacement {
     Timer dropTimer;
     bool commandisBlocked;
     bool lightisBlocked;
-    bool gameOver=false;
+    bool gameOver = false;
     bool needToSendGame = true;
     bool bonus1Royal = false;
     int ch;

@@ -19,8 +19,11 @@ class GameRoom {
     int ownerId;
     GameModeName gameModeName;
     int maxPlayers;
-    bool started;
-    bool inProgress;
+    bool started = false;
+    bool inProgress = false;
+    bool ownerQuit = false;
+    bool canGetGames = false;
+    bool canPlay = false;
     int energyLimit=25;
     int speed=0;
     int gameModeIndex=-1;
@@ -30,7 +33,7 @@ class GameRoom {
     std::vector<int> playersVictim;
     std::vector<int> playersMalusOrBonus;
     std::vector<int> players;
-    std::vector<Game> games;
+    std::vector<std::shared_ptr<Game>> games;
     std::vector<int> viewersId;
 public:
     GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
@@ -56,7 +59,7 @@ public:
     bool getNeedToSendGame(int playerServerId) const;
     void setNeedToSendGame(bool needToSendGame, int playerServerId);
     void setRoomId(int roomId) { this->roomId = roomId; }
-    void setHasStarted();
+    void setToStartGame();
     bool getHasStarted() const;
     bool getSettingsDone() const;
     void setGameIsOver(int playerServerId);
@@ -68,14 +71,22 @@ public:
     void keyInputchooseVictim(int playerId, int victim);
     void keyInputchooseMalusorBonus(int playerId, int malusOrBonus);
     void reinitializeMalusOrBonus(int playerId);
-    Game& getGame(int playerServerId);
+    std::shared_ptr<Game> getGame(int playerServerId);
     std::string convertUnicodeToText(const std::string& unicode);
+    int convertSettingToInt(const std::string& unicodeAction, std::size_t length);
     int convertStringToInt(const std::string& unicodeAction);
     bool getCanUseMalusOrBonus(int playerServerId) const;
     Score& getScore(int playerServerId);
     int getPlayerId(int playerServerId) const;
     void setEnergyLimit(int NewEnergyLimit);
     int getEnergyLimit() const;
+    void setOwnerQuit();
+    bool getOwnerQuit() const;
+    int getGameModeIndex() const { return gameModeIndex; }
+    bool getCanGetGames() const;
+    void setCanGetGames();
+    bool getCanPlay() const;
+    void setCanPlay();
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }

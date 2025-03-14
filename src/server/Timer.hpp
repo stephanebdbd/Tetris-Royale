@@ -13,7 +13,8 @@ class Timer {
         Timer(int ms=1000);
         bool hasElapsed();
         void reset();
-        void decreaseInterval(int amount);    
+        void decreaseInterval(int amount);  
+        void setInterval(int ms);  
 };
 
 #endif

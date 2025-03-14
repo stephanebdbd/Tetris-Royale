@@ -4,12 +4,14 @@
 
 RoyalMode::RoyalMode() : energie(0){}
 
-void RoyalMode::featureMode(Game& game){
+void RoyalMode::featureMode(std::shared_ptr<Game> game, int malusOrBonus){
 
-    MalusRoyal malus(game.getDisplacement());
-    Bonus bonus(game.getDisplacement());
+    std::cout << "Malus or Bonus : " << malusOrBonus << std::endl;
+    
+    MalusRoyal malus(game->getDisplacement());
+    Bonus bonus(game->getDisplacement());
 
-    int linesCleared = game.getLinesCleared();
+    int linesCleared = game->getLinesCleared();
     energie += 20 * linesCleared;
     if(energie >= 100){
         if(chosenMalus){

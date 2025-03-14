@@ -17,3 +17,7 @@ void Timer::reset() {
 void Timer::decreaseInterval(int amount) {
     interval -= amount;
 }
+
+void Timer::setInterval(int ms) {
+    interval = ms;
+}
