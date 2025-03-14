@@ -87,6 +87,7 @@ public:
     void setCanGetGames();
     bool getCanPlay() const;
     void setCanPlay();
+    int getEnergyOfPlayer(int playerServerId) const;
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }
