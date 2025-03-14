@@ -507,6 +507,7 @@ void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName g
     }
     
     auto gameRoom = gameRooms[gameRoomIndex];
+    std::cout << "Dans keyInputGameModeMenu : " << gameRoom << std::endl;
     gameRoomIdCounter++;
     
     std::cout << "Démarrage du jeu pour le client #" << clientId << "." << std::endl;
@@ -515,8 +516,8 @@ void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName g
     std::thread loopgame(&Server::loopGame, this, clientSocket, clientId);
     std::thread inputThread(&Server::receiveInputFromClient, this, clientSocket, clientId);
     
-    loopgame.join();
     inputThread.join();
+    loopgame.join();
     gameRoomThread.join();
 
     deleteGameRoom(gameRoom->getRoomId());
@@ -534,9 +535,9 @@ void Server::start_game(int clientSocket, int clientId){
 
 std::string Server::trim(const std::string& s) {
     const char* whitespace = " \t\n\r";
-    size_t start = s.find_first_not_of(whitespace);
+    std::size_t start = s.find_first_not_of(whitespace);
     if (start == std::string::npos) return "";
-    size_t end = s.find_last_not_of(whitespace);
+    std::size_t end = s.find_last_not_of(whitespace);
     return s.substr(start, end - start + 1);
 }
 
@@ -573,6 +574,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     auto gameRoom = gameRooms[clientGameRoomId[clientId]];
     char buffer[1024];
 
+    std::cout << "Dans la réception des entrées du client " << gameRoom << std::endl;
     std::cout << "reception des entrées du client " << clientId << std::endl;
     while (true) {
         memset(buffer, 0, sizeof(buffer));
@@ -600,6 +602,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
 }
 
 void Server::loopGame(int clientSocket, int clientId) {
+    std::cout << "Dans loopGame" << std::endl;
     if (clientGameRoomId.find(clientId) == clientGameRoomId.end()) {
         std::cerr << "Erreur: GameRoom introuvable pour le client #" << clientId << std::endl;
         return;
@@ -613,12 +616,13 @@ void Server::loopGame(int clientSocket, int clientId) {
     }
 
     auto gameRoom = gameRooms[gameRoomId];
+    std::cout << "Dans loopGame : " << gameRoom << std::endl;
 
     std::cout << "Starting loopGame for clientId " << clientId 
               << " in gameRoomId " << gameRoomId << std::endl;
 
     // attend que le GameRoom soit prêt à jouer
-    while (!gameRoom->readyToPlay) {
+    while (!gameRoom->getHasStarted()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
@@ -637,7 +641,8 @@ void Server::loopGame(int clientSocket, int clientId) {
     }
 
     if (gameRoom->getGameModeName() == GameModeName::Endless) {
-        userManager->updateHighscore(clientPseudo[clientId], gameRoom->getScoreValue(clientId));
+        Score& score = gameRoom->getScore(clientId);
+        userManager->updateHighscore(clientPseudo[clientId], score.getScore());
     }
 
     clientStates[clientId] = MenuState::GameOver;
@@ -921,7 +926,7 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
-void Server::sendGameToPlayer(int clientSocket, Game game, Score score) {
+void Server::sendGameToPlayer(int clientSocket, Game& game, Score& score) {
     json message;
     
     message[jsonKeys::SCORE] = score.scoreToJson();
@@ -936,7 +941,6 @@ void Server::sendGameToPlayer(int clientSocket, Game game, Score score) {
 /*void Server::receiveInputFromClient(int clientSocket, int clientId) {
     char buffer[1024];
     while ((clientStates[clientId] != MenuState::Play) || (!gameRoom->getHasStarted())){
-        //std::cout << "yalahwi" << std::endl;
         //keyinputLobbyParametreMenu(clientSocket, clientId, action);
         continue;
     }
@@ -1048,13 +1052,13 @@ void Server::keyinputLobbyParametreMenu(int clientSocket, int clientId, const st
     // Vérifier si l'action commence par \invite
     if (action.find("/invite") == 0) {
         // Extraire le statut et le receiver de l'action
-        size_t firstBackSlash = action.find('/', std::string("/invite").size());  // Trouver le premier \ après \invite
+        std::size_t firstBackSlash = action.find('/', std::string("/invite").size());  // Trouver le premier \ après \invite
         if (firstBackSlash == std::string::npos) {
             // Si le format est incorrect, retourner sans faire rien
             return;
         }
 
-        size_t secondBackSlash = action.find('/', firstBackSlash + 1);  // Trouver le deuxième \ après le statut
+        std::size_t secondBackSlash = action.find('/', firstBackSlash + 1);  // Trouver le deuxième \ après le statut
         if (secondBackSlash == std::string::npos) {
             // Si le format est incorrect, retourner sans faire rien
             return;
@@ -1111,7 +1115,7 @@ void Server::keyinputLobbyParametreMenu(int clientSocket, int clientId, const st
 
 void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action){
     if (action.find("accept.") == 0){
-        size_t pos = action.find(".");
+        std::size_t pos = action.find(".");
         std::string number = action.substr(pos+1, action.size());
         int roomNumber = std::stoi(number);
         clientGameRoomId[clientId] = roomNumber;

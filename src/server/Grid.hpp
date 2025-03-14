@@ -5,6 +5,7 @@
 #include "Color.hpp"
 #include "../common/json.hpp"
 #include <vector>
+#include <iostream>
 
 class Grid {
     int width, height;
