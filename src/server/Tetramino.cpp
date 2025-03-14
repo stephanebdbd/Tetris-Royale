@@ -72,6 +72,7 @@ void Tetramino::selectRandomShape() {
 }
 
 void Tetramino::moveDown(Grid& grid) {
+    std::cout << "Tetramino::moveDown of grid : " << &grid << std::endl;
     if (canMoveDown(grid)) {
         position.y++;
     }

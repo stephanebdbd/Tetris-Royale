@@ -531,6 +531,7 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     std::cout << "Dans la réception des entrées du client " << gameRoom << std::endl;
     std::cout << "reception des entrées du client " << clientId << std::endl;
     while (true) {
+        while ((clientStates[clientId] == MenuState::Play) && !gameRoom->getCanPlay()) continue;  // La partie commencera juste après la boucle
         memset(buffer, 0, sizeof(buffer));
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); 
         if (bytesReceived > 0) {
@@ -554,6 +555,8 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
                     }
                 if ((clientStates[clientId] == MenuState::JoinOrCreateGame) || (clientStates[clientId] == MenuState::GameOver))
                     break;
+                if (gameRoom->getSettingsDone() && (clientId == gameRoom->getOwnerId()) && (clientStates[clientId] == MenuState::Settings))
+                    ownerStartsGame(gameRoom);
             }
             catch (json::parse_error& e) {
                 std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
@@ -596,20 +599,16 @@ void Server::loopGame(int clientSocket, int clientId) {
         auto game = gameRoom->getGame(clientId);
         Score& score = game->getScore();
 
-        if (clientId == gameRoom->getOwnerId())
-            ownerStartsGame(gameRoom);
-        else {
-            while (!gameRoom->getHasStarted()) continue;
-        }
+        while (!gameRoom->getCanPlay()) continue;
 
         while (gameRoom->getInProgress()) { 
 
             if (gameRoom->getGameIsOver(clientId)) {
+                std::cout << "Game #" << gameRoom->getRoomId() << " is over for player #" << gameRoom->getPlayerId(clientId) << std::endl; 
                 if (!gameRoom->getInProgress()) break;
             }
 
             if (gameRoom->getNeedToSendGame(clientId)) {
-                std::cout << "Sending game to player #" << gameRoom->getPlayerId(clientId) << std::endl;
                 sendGameToPlayer(clientSocket, game, score);
                 gameRoom->setNeedToSendGame(false, clientId);
             }

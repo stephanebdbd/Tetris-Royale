@@ -101,10 +101,13 @@ void GameRoom::startGame() {
 
     setCanGetGames();
 
-    
     while (!getHasStarted()) continue;
-    
+
     int countGameOvers = 0;
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+    setCanPlay();
 
     while (getInProgress()) {
     
@@ -116,6 +119,7 @@ void GameRoom::startGame() {
                 countGameOvers++;
 
             else {
+                std::cout << "Game #" << i << " at " << games[i].get() << std::endl;
                 games[i]->updateGame();
                 /*if (getGameModeName() != GameModeName::Endless)
                     handleMalusOrBonus(i);
@@ -252,6 +256,10 @@ void GameRoom::setCanGetGames() { canGetGames = true; }
 
 bool GameRoom::getCanGetGames() const { return canGetGames; }
 
+void GameRoom::setCanPlay() { canPlay = true; }
+
+bool GameRoom::getCanPlay() const { return canPlay; }
+
 void GameRoom::setMaxPlayers(int max) {
     if ((getGameModeName() != GameModeName::Endless) && (getGameModeName() != GameModeName::Duel)){
         if ((max > 2) && (max < 10) && (getAmountOfPlayers() <= max))
@@ -382,6 +390,7 @@ std::shared_ptr<Game> GameRoom::getGame(int playerServerId) {
 }
 
 void GameRoom::setGameIsOver(int playerServerId) {
+    std::cout << "GameRoom #" << roomId << " received game over from player #" << playerServerId << std::endl;
     int playerId = getPlayerId(playerServerId);
     if ((playerId != -1) && (playerId < getAmountOfPlayers()))
     games[playerId]->setGameOver();

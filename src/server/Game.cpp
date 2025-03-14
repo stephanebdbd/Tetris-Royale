@@ -82,7 +82,6 @@ bool Game::getIsGameOver() const {
 }
 
 Grid& Game::getGrid()  {
-    std::cout << "getGrid called : " << &grid << std::endl;
     return grid;
 }
 

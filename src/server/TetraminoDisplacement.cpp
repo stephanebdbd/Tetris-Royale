@@ -5,7 +5,6 @@ TetraminoDisplacement::TetraminoDisplacement(Grid& grid, int speed)
     currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
     dropTimer(speed), 
     commandisBlocked(false), lightisBlocked(false) {
-        std::cout << "Grid received at : " << &grid << std::endl;
         std::cout << "TetraminoDisplacement created." << std::endl;
 }
 
@@ -121,7 +120,9 @@ void TetraminoDisplacement::setGameOver() {
     gameOver = true;
 }
 
-bool TetraminoDisplacement::getIsGameOver() const {
+bool TetraminoDisplacement::getIsGameOver() const{
+    //if (gameOver)
+        //std::cout << "Appel de getIsGameOver() -> gameOver = " << gameOver << std::endl;
     return gameOver;
 }
 

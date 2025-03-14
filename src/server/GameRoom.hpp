@@ -23,6 +23,7 @@ class GameRoom {
     bool inProgress = false;
     bool ownerQuit = false;
     bool canGetGames = false;
+    bool canPlay = false;
     int energyLimit=25;
     int speed=0;
     int gameModeIndex=-1;
@@ -84,6 +85,8 @@ public:
     int getGameModeIndex() const { return gameModeIndex; }
     bool getCanGetGames() const;
     void setCanGetGames();
+    bool getCanPlay() const;
+    void setCanPlay();
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }

@@ -100,7 +100,6 @@ int Grid::clearFullLines() {
 
 
 json Grid::gridToJson() const {
-    std::cout << "gridToJson called : " << this << std::endl;
     json gridJson;
     gridJson[jsonKeys::WIDTH] = width;
     gridJson[jsonKeys::HEIGHT] = height;
