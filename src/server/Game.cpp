@@ -31,9 +31,7 @@ void Game::run() {
         }
         gameOver = displacement.getIsGameOver();
     }
-
     showGameOver();
-   
 }
 
 void Game::updateGame() {
@@ -64,8 +62,7 @@ void Game::showGameOver() {
     nodelay(stdscr, FALSE); 
     getch(); 
 
-    endwin(); // Restaure le terminal à son état initial
-    
+    endwin(); // Restaure le terminal à son état initial  
 }
 
 void Game::setGameOver() {

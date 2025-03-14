@@ -12,7 +12,6 @@ void Bonus::MiniBlock(){
 
     
     displacement.setCurrentPiece(miniBlock);
-
 }
 
 void Bonus::decreaseSpeed(){

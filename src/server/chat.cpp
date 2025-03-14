@@ -35,27 +35,32 @@ void ServerChat::processClientChat(int clientSocket, int clientId, Server &serve
                         std::string message = msg["message"];
                         sendMessage(receiver, sender, message, server.getRunningChat(receiver));
                         continue;
-                    }else {
+                    }
+                    else {
                         sendMessage(clientSocket, "Server", "User not found.", server.getRunningChat(clientSocket));
                         if(initMessageMemory(CLIENTS + msg["receiver"].get<std::string>() + ".json"))
                             saveMessage(CLIENTS + msg["receiver"].get<std::string>() + ".json", msg.dump()+ "\n");
                         continue;
                     }
-                }else {
+                }
+                else {
                     if(msg["message"] == "exit") {
                         // gere l exit du client
                         std::cout << "Client " << clientSocket << " disconnected." << std::endl;
                         server.setRunningChat(clientSocket, false);
-                    }else if(msg["message"] == "flush") {
+                    }
+                    else if(msg["message"] == "flush") {
                         // gere le flush de la memoire
                         FlushMemory(CLIENTS + sender + ".json", server);
-                    }else {
+                    }
+                    else {
                         // gere les messages non conformes
                     }
                     
                     
                 }
-            } catch (const std::exception& e) {
+            } 
+            catch (const std::exception& e) {
                 std::cerr << "Error: " << e.what() << std::endl;
             }
         }
@@ -73,7 +78,8 @@ void ServerChat::sendMessage(int clientSocket, std::string sender, const std::st
     std::string msgStr = msg.dump() + "\n";
     if(isOnline) {
         send(clientSocket, msgStr.c_str(), msgStr.size(), 0);
-    }else {
+    }
+    else {
         saveMessage(CLIENTS + msg["receiver"].get<std::string>() + ".json", msg.dump() + "\n");
     }
 }
@@ -120,7 +126,8 @@ void ServerChat::saveMessage(const std::string& filename, const std::string& mes
         outFile.close();
 
         std::cout << "Message saved in " << filename << std::endl;
-    } catch (const std::exception& e) {
+    } 
+    catch (const std::exception& e) {
         std::cerr << "Error writing to file: " << e.what() << std::endl;
     }
 }
@@ -147,7 +154,8 @@ void ServerChat::FlushMemory(const std::string& filename, Server &server) {
         } else {
             std::cerr << "Error opening file: " << filename << std::endl;
         }
-    } else {
+    } 
+    else {
         std::cerr << "Error opening file: " << filename << std::endl;
     }
 }

@@ -17,14 +17,14 @@ class UserManager {
     void loadUsers();
     void saveUsers();
 
-public:
-    UserManager(const std::string& filename);
-    bool userNotExists(const std::string& username) const;
-    bool registerUser(const std::string& username, const std::string& password);
-    bool authenticateUser(const std::string& username, const std::string& password);
-    int getHighscore(const std::string& username);
-    void updateHighscore(const std::string& username, int score);
-    std::vector<std::pair<std::string, int>> getRanking() const;
+    public:
+        UserManager(const std::string& filename);
+        bool userNotExists(const std::string& username) const;
+        bool registerUser(const std::string& username, const std::string& password);
+        bool authenticateUser(const std::string& username, const std::string& password);
+        int getHighscore(const std::string& username);
+        void updateHighscore(const std::string& username, int score);
+        std::vector<std::pair<std::string, int>> getRanking() const;
 };
 
 #endif

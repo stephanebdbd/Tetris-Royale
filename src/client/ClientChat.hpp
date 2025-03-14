@@ -11,13 +11,12 @@
  * @brief A class representing a client chat.
  */
 class ClientChat{
-    private:
-        int clientSocket;                    ///< The client socket.
-        ClientNetwork network;               ///< The client network.
-        bool isChatting;                     ///< A boolean indicating if the client is chatting.
-        static bool messagesWaitForDisplay;  ///< A boolean indicating if the message is waiting for display.
-        int y = 1;                            ///< The y position of the chat message.
-        WINDOW * inputWin, *displayWin;       ///< The input and display window.
+    int clientSocket;                    ///< The client socket.
+    ClientNetwork network;               ///< The client network.
+    bool isChatting;                     ///< A boolean indicating if the client is chatting.
+    static bool messagesWaitForDisplay;  ///< A boolean indicating if the message is waiting for display.
+    int y = 1;                            ///< The y position of the chat message.
+    WINDOW * inputWin, *displayWin;       ///< The input and display window.
 
     public:
 

@@ -10,8 +10,8 @@ struct Coord {
 
 // Classe représentant une cellule de la grille
 class Cell { 
-        bool occupied;
-        Color color;
+    bool occupied;
+    Color color;
 
     public:
         bool isOccupied() const { return occupied; }

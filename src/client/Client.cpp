@@ -11,7 +11,8 @@
 #include <fstream>
 
 
-Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1), stopInputThread(false) {}
+Client::Client(const std::string& serverIP, int port) : 
+serverIP(serverIP), port(port), clientSocket(-1), stopInputThread(false) {}
 
 void Client::run() {
     if (!network.connectToServer(serverIP, port, clientSocket)) {
@@ -28,7 +29,6 @@ void Client::run() {
     while (true) {
         receiveDisplay();
     }
-
     network.disconnect(clientSocket);
     delwin(stdscr);
     endwin();
@@ -40,7 +40,6 @@ void Client::handleUserInput() {
     std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
     
     while (true) {
-        
         if (chatMode) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
             continue;
@@ -74,10 +73,11 @@ void Client::handleUserInput() {
                     controller.sendInput(inputBuffer, clientSocket);
                     inputBuffer.clear();
                 }
-            }else if (ch == KEY_BACKSPACE || ch == 127) { // Gestion de la touche Backspace
+            }
+            else if (ch == KEY_BACKSPACE || ch == 127) { // Gestion de la touche Backspace
                 if (!inputBuffer.empty()) {
                     inputBuffer.pop_back(); // Supprime le dernier caractère
-                    clrtoeol();
+                    clrtoeol(); 
                     refresh();
                 }
             }
@@ -138,7 +138,6 @@ void Client::receiveDisplay() {
                 } catch (json::parse_error& e) {
                     std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;
                 }
-
                 pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer
             }
         }

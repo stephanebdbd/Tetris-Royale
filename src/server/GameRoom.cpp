@@ -308,8 +308,7 @@ void GameRoom::inputLobby(int clientId, const std::string& action){
                 
             }
             std::cout<<"owner from GamerRoom : "<<this->getOwnerId()<<std::endl;
-        }
-        
+        } 
     }
     
    

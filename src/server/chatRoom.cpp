@@ -10,7 +10,6 @@ chatRoom::chatRoom(std::string room_name, std::string admin_pseudo) : filename("
 }
 
 void chatRoom::init_chatRoom() {
-
     std::ifstream file(filename);
     if (!file.good()) {
         // the file does not exist and we need to create it
@@ -44,7 +43,8 @@ bool chatRoom::isInKey(const std::string& key , const std::string& pseudo) const
         file.close();
 
         return std::find(j[key].begin(), j[key].end(), pseudo) != j[key].end();
-    }catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::cerr << "Error writing to file: " << e.what() << std::endl;
     }
     return false;
@@ -79,7 +79,8 @@ void chatRoom::addAdmin(const std::string& pseudo) {
         std::ofstream file2(filename);
         file2 << j.dump(4);
         file2.close();
-    }catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::cerr << "Error writing to file: " << e.what() << std::endl;
     }
 }
@@ -164,7 +165,8 @@ void chatRoom::saveData(const std::string& filename, const std::string& key, con
         std::ofstream file2(filename);
         file2 << j.dump(4);
         file2.close();
-    }catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::cerr << "Error writing to file: " << e.what() << std::endl;
     }
 }
@@ -182,7 +184,8 @@ std::set<std::string> chatRoom::loadData(const std::string& filename, const std:
         file.close();
 
         return std::set<std::string>(j[key].begin(), j[key].end());
-    }catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::cerr << "Error writing to file: " << e.what() << std::endl;
     }
     return data;
@@ -210,7 +213,8 @@ void chatRoom::deleteData(const std::string& filename, const std::string& key, c
         std::ofstream file2(filename);
         file2 << j.dump(4);
         file2.close();
-    }catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::cerr << "Error writing to file: " << e.what() << std::endl;
     }
 }

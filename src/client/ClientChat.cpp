@@ -59,7 +59,7 @@ void ClientChat::sendChatMessages() {
         std::string receiver, message;
 
         ch = getch();
-        if (ch == 10) {  // Entrée
+        if (ch == 10) {  // (= \n), touche Entrée
             if (inputStr.empty()) continue;
 
             if(constReceiver.empty() && inputStr.substr(0, 2) != "./"){
