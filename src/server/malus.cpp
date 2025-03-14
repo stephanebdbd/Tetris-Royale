@@ -4,13 +4,12 @@
 #include <ctime> // pour time()
 #include <ncurses.h>
 
-using namespace std ;
 Malus::Malus(int nbrLine): nbrLine(nbrLine) {
     line = std::vector<char>(10, '#');
     createMalus();
 }
 
-void Malus:: createMalus(){
+void Malus::createMalus(){
     std::srand(std::time(0));
     int nbrbloc = std::rand() % 10;
     line[nbrbloc] = ' ';
@@ -37,7 +36,3 @@ void Malus::sendMalus(Grid& grid){
     }
 
 }
-
-
-
-
