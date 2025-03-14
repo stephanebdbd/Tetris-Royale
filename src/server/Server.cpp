@@ -613,7 +613,7 @@ void Server::loopGame(int clientSocket, int clientId) {
         while (gameRoom->getInProgress()) { 
 
             if (gameRoom->getGameIsOver(clientId)) {
-                if (!gameRoom->getInProgress()) break;
+                if (!gameRoom->getInProgress()) break; 
             }
 
             if (gameRoom->getNeedToSendGame(clientId)) {

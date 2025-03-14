@@ -128,9 +128,9 @@ void GameRoom::startGame() {
 
             else {
                 games[i]->updateGame();
-                /*if (getGameModeName() != GameModeName::Endless)
+                if (getGameModeName() != GameModeName::Endless)
                     handleMalusOrBonus(i);
-                */
+                
             }
 
             amountOfPlayers = getMaxPlayers() - countGameOvers;

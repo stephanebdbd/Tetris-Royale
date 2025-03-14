@@ -381,6 +381,13 @@ json Menu::getLobbyMenu1() const {
 }
 
 json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPlayers) const {
+    std::string cmd = "";
+    std::string desc = "";
+    if (mode == "Royal Competition"){
+        cmd = "/energy/<energy> (inférieure à 15) ";
+        desc = "déterminer l'énergie à atteindre";
+    }
+
     
     json menu = {
         {jsonKeys::TITLE, "La salle d'invitation et d'attente:"},
@@ -390,6 +397,8 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
             {"Nombre actuel de joueurs: ", std::to_string(amountOfPlayers)},
             {"/invite/player/<name> ", "Inviter un joueur"},
             {"/invite/viewer/<name> ", "Inviter un spectateur"},
+            {"/speed/<vitesse> (supérieure à 100) ", "déterminer la vitesse du jeu"},
+            {cmd, desc},
             {"/quit ", "Quitter la partie"}
 
         }},
@@ -416,5 +425,17 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
     }
 
     return menu.dump() + "\n";
+}
+
+json Menu::getWinGameMenu() const {
+    json menu = {
+        {jsonKeys::TITLE, "YOU WIN!!"},
+        {jsonKeys::OPTIONS, {
+            {"1. ", "Rejouer"},
+            {"2. ", "Retour au menu principal"}
+        }},
+        {jsonKeys::INPUT, "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
