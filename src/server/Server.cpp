@@ -508,7 +508,7 @@ void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName g
         return;
     }
     
-    auto& gameRoom = gameRooms[gameRoomIndex];
+    auto gameRoom = gameRooms[gameRoomIndex];
     std::cout << "Dans keyInputGameModeMenu : " << gameRoom << std::endl;
     gameRoomIdCounter++;
     
@@ -518,8 +518,8 @@ void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName g
     std::thread loopgame(&Server::loopGame, this, clientSocket, clientId);
     std::thread inputThread(&Server::receiveInputFromClient, this, clientSocket, clientId);
     
-    loopgame.join();
     inputThread.join();
+    loopgame.join();
     gameRoomThread.join();
 
     deleteGameRoom(gameRoom->getRoomId());
@@ -549,8 +549,8 @@ void Server::deleteGameRoom(int roomId) {
 void Server::shiftGameRooms(int index) {
     int size = gameRooms.size();
     for (int i = index; i < size - 1; ++i) {
-        auto& current = gameRooms[i];
-        auto& next = gameRooms[i + 1];
+        auto current = gameRooms[i];
+        auto next = gameRooms[i + 1];
         current = next;
         current->setRoomId(i);
         for (auto& id : current->getPlayers())
@@ -564,7 +564,7 @@ void Server::sendInputToGameRoom(int clientId, const std::string& action, std::s
 
 //recuperer les inputs du client
 void Server::receiveInputFromClient(int clientSocket, int clientId) {
-    auto& gameRoom = gameRooms[clientGameRoomId[clientId]];
+    auto gameRoom = gameRooms[clientGameRoomId[clientId]];
     char buffer[1024];
     std::cout << "Dans la réception des entrées du client " << gameRoom << std::endl;
     std::cout << "reception des entrées du client " << clientId << std::endl;
@@ -607,7 +607,7 @@ void Server::loopGame(int clientSocket, int clientId) {
         return;
     }
 
-    auto& gameRoom = gameRooms[gameRoomId];
+    auto gameRoom = gameRooms[gameRoomId];
     std::cout << "Dans loopGame : " << gameRoom << std::endl;
 
     std::cout << "Starting loopGame for clientId " << clientId 
