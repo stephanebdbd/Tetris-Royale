@@ -288,14 +288,14 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
 }
 
 std::pair<std::string,int> GameRoom::extractNumber(const std::string& action){
-    /*size_t pos_parametre = action.find(' ');
+    /*std::size_t pos_parametre = action.find(' ');
     std::string parametre = action.substr(0, pos_parametre);
-    size_t pos_number = pos_parametre + 2;
+    std::size_t pos_number = pos_parametre + 2;
     std::string number = action.substr(pos_number);
     return {parametre, std::stoi(number)};*/
 
     if (action.rfind("\\speed", 0) == 0) { // Vérifie si l'action commence par "\speed"
-        size_t pos_number = 6; // La position du premier caractère après "\speed"
+        std::size_t pos_number = 6; // La position du premier caractère après "\speed"
         std::string number = action.substr(pos_number);
         return {"Speed", std::stoi(number)};
     }

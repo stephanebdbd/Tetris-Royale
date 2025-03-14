@@ -528,9 +528,9 @@ void Server::keyInputGameModeMenu(int clientSocket, int clientId, GameModeName g
 
 std::string Server::trim(const std::string& s) {
     const char* whitespace = " \t\n\r";
-    size_t start = s.find_first_not_of(whitespace);
+    std::size_t start = s.find_first_not_of(whitespace);
     if (start == std::string::npos) return "";
-    size_t end = s.find_last_not_of(whitespace);
+    std::size_t end = s.find_last_not_of(whitespace);
     return s.substr(start, end - start + 1);
 }
 
@@ -1043,13 +1043,13 @@ void Server::keyinputLobbyParametreMenu(int clientSocket, int clientId, const st
     // Vérifier si l'action commence par \invite
     if (action.find("\\invite") == 0) {
         // Extraire le statut et le receiver de l'action
-        size_t firstBackSlash = action.find('\\', std::string("\\invite").size());  // Trouver le premier \ après \invite
+        std::size_t firstBackSlash = action.find('\\', std::string("\\invite").size());  // Trouver le premier \ après \invite
         if (firstBackSlash == std::string::npos) {
             // Si le format est incorrect, retourner sans faire rien
             return;
         }
 
-        size_t secondBackSlash = action.find('\\', firstBackSlash + 1);  // Trouver le deuxième \ après le statut
+        std::size_t secondBackSlash = action.find('\\', firstBackSlash + 1);  // Trouver le deuxième \ après le statut
         if (secondBackSlash == std::string::npos) {
             // Si le format est incorrect, retourner sans faire rien
             return;
@@ -1078,7 +1078,7 @@ void Server::keyinputLobbyParametreMenu(int clientSocket, int clientId, const st
 
 void Server::keyInputChoiceGameRoom(int clientId, const std::string& action){
     if (action.find("accept.") == 0){
-        size_t pos = action.find(".");
+        std::size_t pos = action.find(".");
         std::string number = action.substr(pos+1, action.size());
         int roomNumber = std::stoi(number);
         clientGameRoomId[clientId] = roomNumber;
