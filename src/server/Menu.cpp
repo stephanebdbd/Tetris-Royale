@@ -339,7 +339,7 @@ json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& rankin
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getGameOverMenu() const {
+json Menu::getEndGameMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Game Over"},
         {jsonKeys::OPTIONS, {
@@ -405,7 +405,7 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
     json menu = {
         {jsonKeys::TITLE, "Liste des demandes du rejoindre un jeu: "},
         {jsonKeys::OPTIONS, json::array()},
-        {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande ou '/ret' pour faire un retour:    "}
+        {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande ou '/quit' pour faire un retour:    "}
     };
 
     int index = 1;

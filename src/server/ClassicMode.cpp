@@ -2,14 +2,16 @@
 
 ClassicMode::ClassicMode(){}
 
-void ClassicMode::featureMode(Game& game){
+void ClassicMode::featureMode(std::shared_ptr<Game> game, int malusOrBonus){
 
-    int linesCleared = game.getLinesCleared();
+    std::cout << "Malus or Bonus : " << malusOrBonus << std::endl;
+    
+    int linesCleared = game->getLinesCleared();
     int nbrMalus = getNbrMalus(linesCleared); // nombre du malus à envoyer
 
     if(nbrMalus > 0){
         Malus malus(nbrMalus);
-        malus.sendMalus(game.getGrid());
+        malus.sendMalus(game->getGrid());
     }
 }
 

@@ -16,6 +16,7 @@ void Grid::markCell(int x, int y, const Color& color) {
 // Vérifier si une cellule est occupée
 bool Grid::isCellOccupied(int x, int y) const {
     if (x < 1 || x > width + 1 || y >= height) {
+        std::cerr << "Cellule hors des limites de la grille. x : " << x << " et y : " << y << std::endl;
         return true; // Hors des limites de la grille
     }
     return cells[y][x].isOccupied(); // Vérifier si la cellule est occupée
