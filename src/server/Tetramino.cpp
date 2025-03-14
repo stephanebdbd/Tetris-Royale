@@ -71,18 +71,19 @@ void Tetramino::selectRandomShape() {
     }
 }
 
-void Tetramino::moveDown(std::shared_ptr<Grid> grid) {
+void Tetramino::moveDown(Grid& grid) {
+    std::cout << "Tetramino::moveDown of grid : " << &grid << std::endl;
     if (canMoveDown(grid)) {
         position.y++;
     }
 }
 
 // Vérifie si la pièce peut descendre
-bool Tetramino::canMoveDown(const std::shared_ptr<Grid> grid) const {
+bool Tetramino::canMoveDown(const Grid& grid) const {
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
             if (currentShape[y][x] != ' ') {
-                if (position.y + y + 1 >= gridHeight || grid->isCellOccupied(position.x + x, position.y + y + 1)) {
+                if (position.y + y + 1 >= gridHeight || grid.isCellOccupied(position.x + x, position.y + y + 1)) {
                     return false;
                 }
             }
@@ -91,24 +92,24 @@ bool Tetramino::canMoveDown(const std::shared_ptr<Grid> grid) const {
     return true;
 }
 
-void Tetramino::moveLeft(std::shared_ptr<Grid> grid) {
+void Tetramino::moveLeft(Grid& grid) {
     if (canMove(grid, -1, 0)) { // Vérifie si on peut bouger d'une case à gauche
         position.x--; // Déplacer la pièce à gauche
     }
 }
 
-void Tetramino::moveRight(std::shared_ptr<Grid> grid) {
+void Tetramino::moveRight(Grid& grid) {
     if (canMove(grid, 1, 0)) { // Vérifie si on peut bouger d'une case à droite
         position.x++; // Déplacer la pièce à droite
     }
 }
 
-bool Tetramino::canMove(std::shared_ptr<Grid> grid, int dx, int dy) const {
+bool Tetramino::canMove(const Grid& grid, int dx, int dy) const {
     for (int y = 0; y < 4; ++y) { 
         for (int x = 0; x < 4; ++x) { 
                 int newX = position.x + x + dx; 
                 int newY = position.y + y + dy;
-                if (newX < 1 || newX >= grid->getWidth() + 1 || newY >= grid->getHeight() || grid->isCellOccupied(newX, newY)) {
+                if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
                     if (currentShape[y][x] != ' '){
                         return false; // Collision détectée
                     }
@@ -118,13 +119,13 @@ bool Tetramino::canMove(std::shared_ptr<Grid> grid, int dx, int dy) const {
     return true; // Aucun obstacle, déplacement possible
 }
 
-void Tetramino::dropTetrimino(std::shared_ptr<Grid> grid) {
+void Tetramino::dropTetrimino(Grid& grid) {
     while (canMoveDown(grid)) {
         moveDown(grid);
     }
 }
 
-void Tetramino::rotate(const std::shared_ptr<Grid> grid) {
+void Tetramino::rotate(const Grid& grid) {
     if (!canRotate(grid)) {
         return;
     }
@@ -141,7 +142,7 @@ void Tetramino::rotate(const std::shared_ptr<Grid> grid) {
     currentShape = newShape;
 }
 
-bool Tetramino::canRotate(const std::shared_ptr<Grid> grid) {
+bool Tetramino::canRotate(const Grid& grid) {
     // Créer une copie de la forme actuelle pour vérifier la rotation
     std::array<std::array<char, 4>, 4> tempShape = currentShape;
     
@@ -158,7 +159,7 @@ bool Tetramino::canRotate(const std::shared_ptr<Grid> grid) {
             int newX = position.x + x;
             int newY = position.y + y;
             if (tempShape[y][x] != ' ') {
-                if (newX < 1 || newX >= grid->getWidth() + 1 || newY >= grid->getHeight() || grid->isCellOccupied(newX, newY)) {
+                if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
                     return false;
                 }
             }
@@ -186,7 +187,7 @@ Color Tetramino::chooseColor(char shapeSymbol) const {
 
 
 // Fixer la pièce à sa position 
-void Tetramino::fixToGrid(std::shared_ptr<Grid> grid, bool &gameOver) {
+void Tetramino::fixToGrid(Grid& grid, bool &gameOver) {
     Color cellColor = chooseColor(shapeSymbols);
     for (int y = 0; y < 4; ++y) {
         for (int x = 0; x < 4; ++x) {
@@ -194,10 +195,11 @@ void Tetramino::fixToGrid(std::shared_ptr<Grid> grid, bool &gameOver) {
                 int gridX = position.x + x;
                 int gridY = position.y + y;
                 if (gridY <= 1) { // Si la pièce est en dehors de la grille
+                    std::cout << "Game Over From Tetramino" << std::endl;
                     gameOver = true; // Déclencher le game over
                     return;
                 }
-                grid->markCell(gridX, gridY, cellColor);
+                grid.markCell(gridX, gridY, cellColor);
             }
         }
     }

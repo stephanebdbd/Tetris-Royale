@@ -4,8 +4,10 @@
 
 RoyalMode::RoyalMode() : energie(0){}
 
-void RoyalMode::featureMode(std::shared_ptr<Game> game){
+void RoyalMode::featureMode(std::shared_ptr<Game> game, int malusOrBonus){
 
+    std::cout << "Malus or Bonus : " << malusOrBonus << std::endl;
+    
     MalusRoyal malus(game->getDisplacement());
     Bonus bonus(game->getDisplacement());
 

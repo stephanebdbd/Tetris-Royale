@@ -19,7 +19,7 @@ class RoyalMode : public GameMode{
     public:
         RoyalMode();
         void applyMalusBonus(MalusRoyal malus, Bonus bonus);
-        void featureMode(std::shared_ptr<Game> game) override;
+        void featureMode(std::shared_ptr<Game> game, int malusOrBonus) override;
         void choiceMalus(int nbre, MalusRoyal malus);
         void choiceBonus(int nbre, Bonus bonus);
         void setMalus(bool malus){chosenMalus = malus;}

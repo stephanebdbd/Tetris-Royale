@@ -46,7 +46,7 @@ class Menu {
         json getRequestsListMenu(const std::vector<std::string>& pendingRequests) const;
         
         json getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const;
-        json getGameOverMenu() const;        
+        json getEndGameMenu() const;        
         
         json displayMessage(const std::string& message) const;
         

@@ -2,16 +2,14 @@
 
 ClassicMode::ClassicMode(){}
 
-void ClassicMode::featureMode(std::shared_ptr<Game> game){
+void ClassicMode::featureMode(std::shared_ptr<Game> game, int malusOrBonus){
 
-    int linesCleared = game->getLinesCleared();
-    int nbrMalus = getNbrMalus(linesCleared); // nombre du malus à envoyer
+    
+    int nbrMalus = getNbrMalus(malusOrBonus); // nombre du malus à envoyer
 
     if(nbrMalus > 0){
         Malus malus(nbrMalus);
-        std::shared_ptr<TetraminoDisplacement> displacement = game->getDisplacement();
-        std::shared_ptr<Grid> grid = displacement->getGrid();
-        malus.sendMalus(grid);
+        malus.sendMalus(game->getGrid());
     }
 }
 
