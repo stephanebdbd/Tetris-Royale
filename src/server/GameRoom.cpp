@@ -10,6 +10,9 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
     gameModes.emplace_back(std::make_shared<RoyalMode>());
 
     setGameMode(gameModeName);
+    if (gameModeName == GameModeName::Endless)
+        setSpeed(1000);
+
     if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1)){
         this->maxPlayers = 1;
     }
@@ -82,20 +85,24 @@ bool GameRoom::getSettingsDone() const {
 void GameRoom::startGame() {
     std::cout << "Let's create GameRoom #" << roomId << " at " << this << std::endl;
 
-    while(!(getSettingsDone() || getOwnerQuit())) continue;
+    if (getGameModeName() != GameModeName::Endless) {
+        while(!(getSettingsDone() || getOwnerQuit())) continue;
 
-    if (getOwnerQuit()) {
-        endGame();
-        return;
+        if (getOwnerQuit()) {
+            endGame();
+            return;
+        }
+
+        if (getGameModeName() == GameModeName::Duel) {
+            playersVictim[0] = 1;
+            playersVictim[1] = 0;
+        }
     }
 
-    if (getGameModeName() == GameModeName::Duel) {
-        playersVictim[0] = 1;
-        playersVictim[1] = 0;
-    }
+    int speed = getSpeed();
 
     for (int idx = 0; idx < getMaxPlayers(); idx++){
-        games.emplace_back(std::make_shared<Game>(10, 20, getSpeed()));
+        games.emplace_back(std::make_shared<Game>(10, 20, speed));
         std::cout << "Game #" << idx << " created at " << &games[idx] << std::endl;
     }
 
@@ -105,7 +112,8 @@ void GameRoom::startGame() {
 
     int countGameOvers = 0;
     
-    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    if (getGameModeName() != GameModeName::Endless)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 
     setCanPlay();
 
@@ -119,7 +127,6 @@ void GameRoom::startGame() {
                 countGameOvers++;
 
             else {
-                std::cout << "Game #" << i << " at " << games[i].get() << std::endl;
                 games[i]->updateGame();
                 /*if (getGameModeName() != GameModeName::Endless)
                     handleMalusOrBonus(i);
@@ -211,6 +218,7 @@ void GameRoom::setInProgress(bool status) {
 }
 
 void GameRoom::setSpeed(int newSpeed) {
+    std::cout << "Speed: " << newSpeed << std::endl;
     if (newSpeed > 100)
         this->speed = newSpeed;    
 }
@@ -404,6 +412,8 @@ void GameRoom::setNeedToSendGame(bool needToSendGame, int playerServerId) {
 
 bool GameRoom::getNeedToSendGame(int playerServerId) const {
     int playerId = getPlayerId(playerServerId);
+    if (games[playerId]->getNeedToSendGame())
+        std::cout << "Player #" << playerId << " needs to get game." << std::endl;
     return games[playerId]->getNeedToSendGame();
 }
 

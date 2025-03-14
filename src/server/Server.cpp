@@ -550,13 +550,15 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
                 else{
                     if ((!gameRoom->getGameIsOver(clientId)) && gameRoom->getInProgress())
                         sendInputToGameRoom(clientId, action, gameRoom);
-                    if (gameRoom->getGameIsOver(clientId) && gameRoom->getHasStarted() && !gameRoom->getInProgress())
-                        break;
                     }
                 if ((clientStates[clientId] == MenuState::JoinOrCreateGame) || (clientStates[clientId] == MenuState::GameOver))
                     break;
-                if (gameRoom->getSettingsDone() && (clientId == gameRoom->getOwnerId()) && (clientStates[clientId] == MenuState::Settings))
-                    ownerStartsGame(gameRoom);
+                if ((gameRoom.get() == nullptr))
+                    break;
+                if (gameRoom->getCanGetGames() && gameRoom->getGameIsOver(clientId) && gameRoom->getHasStarted() && !gameRoom->getInProgress())
+                    break;
+                if (gameRoom->getRoomId() != clientGameRoomId[clientId])
+                    break;
             }
             catch (json::parse_error& e) {
                 std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
@@ -599,12 +601,18 @@ void Server::loopGame(int clientSocket, int clientId) {
         auto game = gameRoom->getGame(clientId);
         Score& score = game->getScore();
 
+        if (clientId == gameRoom->getOwnerId() && (gameRoom->getGameModeName() != GameModeName::Endless))
+            ownerStartsGame(gameRoom);
+        else if (gameRoom->getGameModeName() == GameModeName::Endless)
+            gameRoom->setToStartGame();
+
         while (!gameRoom->getCanPlay()) continue;
+
+        std::cout << "Game #" << gameRoom->getRoomId() << " started." << std::endl;
 
         while (gameRoom->getInProgress()) { 
 
             if (gameRoom->getGameIsOver(clientId)) {
-                std::cout << "Game #" << gameRoom->getRoomId() << " is over for player #" << gameRoom->getPlayerId(clientId) << std::endl; 
                 if (!gameRoom->getInProgress()) break;
             }
 

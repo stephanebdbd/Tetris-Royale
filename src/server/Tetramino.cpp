@@ -195,6 +195,7 @@ void Tetramino::fixToGrid(Grid& grid, bool &gameOver) {
                 int gridX = position.x + x;
                 int gridY = position.y + y;
                 if (gridY <= 1) { // Si la pièce est en dehors de la grille
+                    std::cout << "Game Over From Tetramino" << std::endl;
                     gameOver = true; // Déclencher le game over
                     return;
                 }

@@ -127,6 +127,6 @@ bool TetraminoDisplacement::getIsGameOver() const{
 }
 
 void TetraminoDisplacement::setSpeed(int newSpeed) {
-    dropTimer.decreaseInterval(newSpeed);
+    dropTimer.setInterval(newSpeed);
     dropTimer.reset();
 }
