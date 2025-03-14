@@ -22,6 +22,7 @@ class Menu {
         json getChatMenu() const;
         json getCreateChatRoomMenu() const;
         json getJoinChatRoomMenu() const;
+        json getInvitationsRoomsMenu(const std::vector<std::string>& invitations) const;
         json getListe(const std::vector<std::string>& data, std::string title, const std::string& input) const;
         json getListeMembers(const std::vector<std::string>& data) const;
         json getManageChatRoomsMenu(const std::vector<std::string>& chatRooms) const;

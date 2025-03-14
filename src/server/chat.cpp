@@ -104,7 +104,10 @@ bool ServerChat::initMessageMemory(const std::string& filename) {
         if (newFile.is_open()) {
             json j;
             j["messages"] = json::array();
+            j["friends"] = json::array();
+            j["friendRequests"] = json::array();
             j["rooms"] = json::array();
+            j["roomRequests"] = json::array();
             newFile << j.dump(4);
             newFile.close();
             return true;
@@ -149,10 +152,34 @@ void ServerChat::FlushMemory(const std::string& filename, Server &server) {
     }
 }
 
+std::vector<std::string> ServerChat::getMyFriends(const std::string& pseudo) {
+    std::vector<std::string> friends;
+    json j = openFile(CLIENTS + pseudo + ".json");
+    friends = j["friends"];
+
+    return friends;
+}
+
+std::vector<std::string> ServerChat::getMyFriendRequests(const std::string& pseudo) {
+    std::vector<std::string> friendRequests;
+    json j = openFile(CLIENTS + pseudo + ".json");
+    friendRequests = j["friendRequests"];
+
+    return friendRequests;
+}
+
 std::vector<std::string> ServerChat::getMyRooms(const std::string& pseudo) {
     std::vector<std::string> rooms;
     json j = openFile(CLIENTS + pseudo + ".json");
     rooms = j["rooms"];
 
     return rooms;
+}
+
+std::vector<std::string> ServerChat::getMyRoomRequests(const std::string& pseudo) {
+    std::vector<std::string> roomRequests;
+    json j = openFile(CLIENTS + pseudo + ".json");
+    roomRequests = j["roomRequests"];
+
+    return roomRequests;
 }

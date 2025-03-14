@@ -42,7 +42,10 @@ public:
     void FlushMemory(const std::string& filename, Server &server);
 
     //getter des données du fichier json du client
+    std::vector<std::string> getMyFriends(const std::string& pseudo);
+    std::vector<std::string> getMyFriendRequests(const std::string& pseudo);
     std::vector<std::string> getMyRooms(const std::string& pseudo);
+    std::vector<std::string> getMyRoomRequests(const std::string& pseudo);
 };
 
 #endif // SERVER_CHAT_HPP

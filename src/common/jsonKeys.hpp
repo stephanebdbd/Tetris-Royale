@@ -2,6 +2,8 @@
 #define JSONKEYS_HPP
 
 namespace jsonKeys {
+    constexpr char DEFAULT[]= "default";
+    constexpr char HELP[]= "help";
     constexpr char TITLE[] = "title";
     constexpr char OPTIONS[] = "options";
     constexpr char INPUT[] = "input";

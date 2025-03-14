@@ -29,20 +29,18 @@ public:
     ~chatRoom() = default;                                               // Destructeur
 
     void init_chatRoom();                                               // Initialiser la salle
-    //bool isInKey(const std::string& key , const std::string& pseudo) const; // Vérifier si un client est dans la salle
     bool isClient(const std::string& pseudo) const;                     // Vérifier si un client est dans la salle
     bool isAdmin(const std::string& pseudo) const;                      // Vérifier si un client est admin
     bool isInReceivedReq(const std::string& pseudo) const;              // Vérifier si une demande est reçue
-    void addAdmin(const std::string& pseudo);                           // Ajouter un admin
-    void removeAdmin(const std::string& pseudo);                        // Supprimer un admin
-    void addClient(const std::string& pseudo);                          // Ajouter un client
-    void removeClient(const std::string& pseudo);                       // Supprimer un client
-    void addReceivedRequest(const std::string& pseudo);                 // Ajouter une demande reçue
-    //a faire  ##################################################
-    //void sendRequestToClient(const std::string& pseudo, const std::string& message);                     // Envoi d'une demande de chat                           
-    //############################################################
-    void acceptClientRequest(const std::string& pseudo);                                                  // Accepter une demande de chat
-    void refuseClientRequest(const std::string& pseudo);                                                   // Refuser une demande de chat
+    void addAdmin(const std::string& pseudo) const;                           // Ajouter un admin
+    void removeAdmin(const std::string& pseudo) const;                        // Supprimer un admin
+    void addClient(const std::string& pseudo) const;                          // Ajouter un client
+    void addReceivedRequest(const std::string& pseudo) const;                 // Ajouter une demande reçue
+    void removeClient(const std::string& pseudo) const;                       // Supprimer un client            // Ajouter une demande reçue
+    void sendRequestToClient(const std::string& pseudo) const;                       // Envoi d'une demande de chat                           
+    void acceptClientRequest(const std::string& pseudo) const;                                                   // Accepter une demande de chat
+    void refuseClientRequest(const std::string& pseudo) const;                                                   // Refuser une demande de chat
+    void invitationResponse(const std::string& pseudo, bool accepted=true)const;                                           // Refuser une demande de chat
     // Diffuser message                                                   
     void broadcastMessage(const std::string& message, const std::string& sender, Server& server);
     //supprimer la room

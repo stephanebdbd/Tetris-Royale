@@ -24,7 +24,7 @@ void Data::writeFile(const std::string& filename, const json& j) const {
 
 // Méthodes de gestion des données
 void Data::saveData(const std::string& filename, const std::string& key, const std::string& value) const {
-    std::cout << "Saving value to " << key << " : " << value << std::endl;
+    std::lock_guard<std::mutex> lock(saveMutex);
     try {
         json j = openFile(filename);
 
@@ -38,7 +38,7 @@ void Data::saveData(const std::string& filename, const std::string& key, const s
 
 
 void Data::deleteData(const std::string& filename, const std::string& key, const std::string& value) const {
-    std::cout << "Deleting value from " << key << " : " << value << std::endl;
+    std::lock_guard<std::mutex> lock(deleteMutex);
     try {
         json j = openFile(filename);
 
@@ -51,6 +51,7 @@ void Data::deleteData(const std::string& filename, const std::string& key, const
 }
 
 std::vector<std::string> Data::loadData(const std::string& filename, const std::string& key) const {
+    std::lock_guard<std::mutex> lock(loadMutex);
     std::vector<std::string> value;
     try {
         json j = openFile(filename);
@@ -62,6 +63,7 @@ std::vector<std::string> Data::loadData(const std::string& filename, const std::
     return value;
 }
 bool Data::isInKey(const std::string& filename, const std::string& key, const std::string& pseudo) const {
+    std::lock_guard<std::mutex> lock(searchMutex);
     try {
         json j = openFile(filename);
         if (j.contains(key)) {

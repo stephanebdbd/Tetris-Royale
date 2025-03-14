@@ -132,9 +132,10 @@ json Menu::getChatMenu() const {
         {jsonKeys::OPTIONS, {
             {"1. ", "Créer une Room"},
             {"2. ", "Rejoindre une Room"},
-            {"3. ", "Gerer mes Rooms"},
-            {"4. ", "chat"},
-            {"5. ", "Retour"},
+            {"3. ", "Invitations en attente"},
+            {"4. ", "Gerer mes Rooms"},
+            {"5. ", "chat"},
+            {"6. ", "Retour"},
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -166,6 +167,9 @@ json Menu::getJoinChatRoomMenu() const {
 }
 
 
+json Menu::getInvitationsRoomsMenu(const std::vector<std::string>& invitations) const {
+    return getListe(invitations, "Invitations en attente:", "Tapez 'accept.roomName' ou 'reject.roomName' ou './quit' : ");
+}
 
 json Menu::getListe(const std::vector<std::string>& data, std::string title, const std::string& input) const {
     json menu = {

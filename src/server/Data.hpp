@@ -7,8 +7,14 @@ using json = nlohmann::json;
 #include <set>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 
 class Data {
+private:
+    mutable std::mutex saveMutex;
+    mutable std::mutex deleteMutex;
+    mutable std::mutex loadMutex;
+    mutable std::mutex searchMutex;
 public:
     // Constructeur de la classe Data
     Data() = default;
