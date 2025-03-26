@@ -10,3 +10,8 @@ src/server/tetris
 src/client/client
 src/server/users.txt
 src/server/gameInvitations.txt
+src/server/DATABASE/*
+src/server/*.json
+src/server/*.txt
+src/server/DataManager.*
+src/server/notification.*
