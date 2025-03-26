@@ -6,10 +6,10 @@
 #include "Game.hpp"
 
 class Bonus {
-    std::shared_ptr<TetraminoDisplacement> displacement;
+    TetraminoDisplacement displacement;
     public:
-        Bonus(std::shared_ptr<TetraminoDisplacement> displacement);
-        void MiniBlock();
+        Bonus(TetraminoDisplacement& displacement);
+        void miniBlock();
         void decreaseSpeed();
 };
 

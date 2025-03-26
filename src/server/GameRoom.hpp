@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 #include <memory>
+#include <atomic>
 #include <sys/socket.h>
 #include "Game.hpp"
 #include "GameMode.hpp"
@@ -18,21 +19,23 @@ class GameRoom {
     int ownerId;
     GameModeName gameModeName;
     int maxPlayers;
-    std::shared_ptr<GameMode> gameMode = nullptr;
-    bool started=false;
-    bool inProgress=false;
-    int energyLimit;
-    int speed;
+    bool started = false;
+    bool inProgress = false;
+    bool ownerQuit = false;
+    bool canGetGames = false;
+    bool canPlay = false;
+    int energyLimit=25;
+    int speed=0;
+    int gameModeIndex=-1;
     int amountOfPlayers=0;
-    std::array<int, 9> energyOrClearedLines;
-    std::array<int, 9> playersVictim;
-    std::array<int, 9> playersMalusOrBonus;
-    std::array<int, 9> players;
-    std::array<std::shared_ptr<Game>, 9> games;
-
+    std::vector<std::shared_ptr<GameMode>> gameModes;
+    std::vector<int> energyOrClearedLines;
+    std::vector<int> playersVictim;
+    std::vector<int> playersMalusOrBonus;
+    std::vector<int> players;
+    std::vector<std::shared_ptr<Game>> games;
     std::vector<int> viewersId;
 public:
-    GameRoom()=default;
     GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
     void addPlayer(int playerId);
     bool removePlayer(int playerId);
@@ -44,39 +47,50 @@ public:
     void applyFeatureMode(int playerId);
     void setInProgress(bool status);
     void setSpeed(int speed);
-    bool setGameMode(GameModeName gameMode);
+    void setGameMode(GameModeName gameMode);
     void addViewer(int viewerId);
     bool getInProgress() const;
     int getRoomId() const;
     int getOwnerId() const;
+    void setOwnerId(int clientId);
     bool getGameIsOver(int playerServerId, bool fromGameRoom=false) const;
-    void setOwnerId(int roomId);
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
     bool getNeedToSendGame(int playerServerId) const;
     void setNeedToSendGame(bool needToSendGame, int playerServerId);
-    void setInsanceGameMode();
     void setRoomId(int roomId) { this->roomId = roomId; }
-    void setHasStarted();
+    void setToStartGame();
     bool getHasStarted() const;
+    bool getSettingsDone() const;
     void setGameIsOver(int playerServerId);
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
-    void inputLobby(const std::string& action);
-    std::pair<std::string,int> extractNumber(const std::string& action);
+    void inputLobby(int clientId, const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);
     void keyInputchooseMalusorBonus(int playerId, int malusOrBonus);
     void reinitializeMalusOrBonus(int playerId);
     std::shared_ptr<Game> getGame(int playerServerId);
     std::string convertUnicodeToText(const std::string& unicode);
+    int convertSettingToInt(const std::string& unicodeAction, std::size_t length);
     int convertStringToInt(const std::string& unicodeAction);
     bool getCanUseMalusOrBonus(int playerServerId) const;
-    std::shared_ptr<Score> getScore(int playerServerId) const;
+    Score& getScore(int playerServerId);
     int getPlayerId(int playerServerId) const;
+    void setEnergyLimit(int NewEnergyLimit);
+    int getEnergyLimit() const;
+    void setOwnerQuit();
+    bool getOwnerQuit() const;
+    int getGameModeIndex() const { return gameModeIndex; }
+    bool getCanGetGames() const;
+    void setCanGetGames();
+    bool getCanPlay() const;
+    void setCanPlay();
+    int getEnergyOfPlayer(int playerServerId) const;
 
-    std::array<int, 9> getPlayers() const { return players; }
+    std::vector<int> getPlayers() const { return players; }
+    int getSpeed() const { return speed; }
 };
 
 #endif

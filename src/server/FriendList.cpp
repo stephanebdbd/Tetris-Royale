@@ -163,7 +163,7 @@ void FriendList::saveGameInvitations(){
 
     for (const auto& [sender, receivers] : gameInvitations) {
         file << sender << ":";
-        for (size_t i = 0; i < receivers.size(); ++i) {
+        for (std::size_t i = 0; i < receivers.size(); ++i) {
             file << receivers[i][0] << "." << receivers[i][1] << "." << receivers[i][2];
             if (i < receivers.size() - 1) file << ",";
         }
@@ -207,6 +207,54 @@ void FriendList::sendInvitationToFriend(const std::string& sender, const std::st
 std::vector<std::vector<std::string>> FriendList:: getListGameRequest(const std::string& user) {
     return gameInvitations[user];
 }
+
+
+std::unordered_map<std::string, std::vector<std::vector<std::string>>> FriendList::loadGameInvitations() {
+    std::unordered_map<std::string, std::vector<std::vector<std::string>>> invitToGame;
+    std::ifstream file(gameInvitationsFile);
+    
+    if (!file.is_open()) {
+        std::cerr << "Erreur : Impossible d'ouvrir le fichier " << gameInvitationsFile << " pour lecture." << std::endl;
+        return invitToGame; // Retourner une liste vide si le fichier ne peut pas être ouvert
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::size_t colonPos = line.find(':');   // Trouver la position du ":" sebder:  receiver.status
+        std::size_t dotPos = line.find('.');    // Trouver la position du "."
+        
+        if (colonPos != std::string::npos && dotPos != std::string::npos) {
+            std::string sender = line.substr(0, colonPos); // Récupérer le sender
+            std::string receiverList = line.substr(colonPos + 1);  // Récupérer la liste des invitations
+
+            std::vector<std::vector<std::string>> senderGameInvitations;
+            
+            // Analyser la liste des invitations (séparées par des virgules)
+            std::size_t pos = 0;
+            while ((pos = receiverList.find(',')) != std::string::npos) {
+                std::string invitation = receiverList.substr(0, pos);  // Extraire l'invitation avant la virgule
+                std::size_t dotPos = invitation.find(".");  // Trouver le "."     oumaima: ali.observer
+                std::size_t dot1Pos = invitation.find(".", dotPos + 1);  // Trouver le "."
+                if (dotPos != std::string::npos) {
+                    std::string receiver = invitation.substr(0, dotPos); // Receiver avant le "."
+                    std::string status = invitation.substr(dotPos + 1, dot1Pos - dotPos - 1); // Status après le "."
+                    std::string room = invitation.substr(dot1Pos + 1); // Receiver après le "."
+                    senderGameInvitations.push_back({receiver, status, room});  // Ajouter la paire à la liste
+                }
+                
+                receiverList.erase(0, pos + 1);  // Supprimer l'invitation traitée
+            }
+
+            // Ajouter l'ensemble des invitations pour le sender dans le map
+            invitToGame[sender] = senderGameInvitations;
+        }
+    }
+
+    file.close();
+    return invitToGame;
+}
+
+
 
 
 std::unordered_map<std::string, std::vector<std::vector<std::string>>> FriendList::loadGameInvitations() {
