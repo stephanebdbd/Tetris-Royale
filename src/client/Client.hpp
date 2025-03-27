@@ -28,8 +28,6 @@ public:
         void run();
         void receiveDisplay();
         void handleUserInput();
-        void displayMenu(const json& data);
-
 };
 
 #endif

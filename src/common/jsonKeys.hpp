@@ -2,8 +2,6 @@
 #define JSONKEYS_HPP
 
 namespace jsonKeys {
-    constexpr char DEFAULT[]= "default";
-    constexpr char HELP[]= "help";
     constexpr char TITLE[] = "title";
     constexpr char OPTIONS[] = "options";
     constexpr char INPUT[] = "input";
@@ -22,6 +20,7 @@ namespace jsonKeys {
     constexpr char TETRA_PIECE[] = "tetraPiece";
     constexpr char SHAPE[] = "shape";
     constexpr char SHAPE_SYMBOL[] = "shapeSymbol";
+    constexpr char Notif[] = "notif";
 }
 
 #endif

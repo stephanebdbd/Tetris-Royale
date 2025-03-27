@@ -8,10 +8,11 @@ src/server/Friends/*
 src/server/serveur
 src/server/tetris
 src/client/client
-src/server/users.txt
-src/server/gameInvitations.txt
-src/server/DATABASE/*
+src/server/users.json
 src/server/*.json
-src/server/*.txt
-src/server/DataManager.*
+src/server/DATABASE/*.sql
+src/server/DATABASE/*.db
 src/server/notification.*
+src/server/DataManager.*
+src/server/ChatRooms/*
+src/server/Clients/*

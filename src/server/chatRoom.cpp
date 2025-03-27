@@ -5,11 +5,11 @@
 #include "Server.hpp"
 
 
-chatRoom::chatRoom(std::string room_name, std::string admin_pseudo) : filename("ChatRooms/" + room_name + ".json"), roomName(room_name), adminPseudo(admin_pseudo) {
-    init_chatRoom();
+chatRoom::chatRoom(std::string room_name, std::string prop_pseudo) : filename("ChatRooms/" + room_name + ".json"), roomName(room_name){
+    init_chatRoom(prop_pseudo);
 }
 
-void chatRoom::init_chatRoom() {
+void chatRoom::init_chatRoom(std::string propPseudo) {
     
     std::ifstream file(filename);
     if (!file.good()) {
@@ -18,13 +18,14 @@ void chatRoom::init_chatRoom() {
             // create the file and write the data
             json j;
             j["roomName"] = roomName;
-            j["adminPseudo"] = {adminPseudo};
+            j["proprietaire"] = propPseudo;
+            j["adminPseudo"] = {propPseudo};
             j["clients"] = {};
             j["receivedReq"] = json::array();
             j["sentReq"] = json::array();
             newFile << j.dump(4);
             newFile.close();
-            addClient(adminPseudo);
+            addClient(propPseudo);
             return;
         }
     }
@@ -110,7 +111,7 @@ void chatRoom::broadcastMessage(const std::string& message, const std::string& s
         //send message to client
         if (client != sender) {
             int receiverSocket = server.getPseudoSocket()[client];
-            chat.sendMessage(receiverSocket, sender, message, server.getRunningChat(receiverSocket));
+            chat.sendMessage(receiverSocket, sender, client, message, server.getRunningChat(receiverSocket));
         }
     }
 }

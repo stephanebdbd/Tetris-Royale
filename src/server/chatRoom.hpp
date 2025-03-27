@@ -19,7 +19,6 @@ class chatRoom : public Data {
 private:
     std::string filename;                                 // Nom du fichier
     std::string roomName;                                 // Nom de la salle
-    std::string adminPseudo;                              // Pseudo de l'admin
     std::mutex clientsMutex;                              // Mutex pour les clients
     std::mutex requestsMutex;                             // Mutex pour les demandes
 
@@ -28,7 +27,7 @@ public:
     chatRoom(std::string room_name, std::string admin_pseudo);           // Constructeur
     ~chatRoom() = default;                                               // Destructeur
 
-    void init_chatRoom();                                               // Initialiser la salle
+    void init_chatRoom(std::string propPseudo);                                               // Initialiser la salle
     bool isClient(const std::string& pseudo) const;                     // Vérifier si un client est dans la salle
     bool isAdmin(const std::string& pseudo) const;                      // Vérifier si un client est admin
     bool isInReceivedReq(const std::string& pseudo) const;              // Vérifier si une demande est reçue

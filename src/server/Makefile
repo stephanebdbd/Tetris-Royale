@@ -35,6 +35,10 @@ $(TARGET1): $(SERVEUR_OBJECTS)
 # Nettoyage des fichiers objets et exécutables
 clean:
 	rm -f $(TARGET0) $(TETRIS_OBJECTS) $(TARGET1) $(SERVEUR_OBJECTS) server.log
+	> users.json
+	> gameInvitations.json
+	rm -rf ChatRooms
+	rm -rf Clients
 
 # Exécuter "serveur" après compilation
 run: $(TARGET1)

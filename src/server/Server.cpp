@@ -12,7 +12,7 @@
 
 Server::Server(int port) 
     : port(port), serverSocket(-1), clientIdCounter(0){
-        userManager = std::make_unique<UserManager>("data.json", "gameInvitations.json");
+        userManager = std::make_unique<UserManager>();
     }
 
 
@@ -144,6 +144,10 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
     }
     if (clientStates[clientId] == MenuState::chat) {
         keyInputChatMenu(clientSocket, clientId, action);
+        return;
+    }
+    if(clientStates[clientId] == MenuState::PrivateChat){
+        keyInputPrivateChat(clientSocket, clientId, action);
         return;
     }
     if (clientStates[clientId] == MenuState::CreateRoom) {
@@ -281,6 +285,9 @@ void Server::returnToMenu(int clientSocket, int clientId, MenuState state, const
         case MenuState::chat:
             sendMenuToClient(clientSocket, menu.getChatMenu());
             break;
+        case MenuState::PrivateChat:
+            sendMenuToClient(clientSocket, menu.getPrivateChatMenu());
+            break;
         case MenuState::CreateRoom:
             sendMenuToClient(clientSocket, menu.getCreateChatRoomMenu());
             break;
@@ -298,6 +305,9 @@ void Server::returnToMenu(int clientSocket, int clientId, MenuState state, const
             break;
         case MenuState::AddMembre:
             sendMenuToClient(clientSocket, menu.getAddMembreMenu());
+            break;
+        case MenuState::AddAdmin:
+            sendMenuToClient(clientSocket, menu.getAddAdmin());
             break;
         case MenuState::RoomRequestList:
             sendMenuToClient(clientSocket, menu.getListeRequests(chatRooms[currentRoom]->getReceivedReq()));
@@ -326,13 +336,6 @@ void Server::returnToMenu(int clientSocket, int clientId, MenuState state, const
         case MenuState::Welcome:
             sendMenuToClient(clientSocket, menu.getMainMenu0()); 
             break;
-        /*case MenuState::RegisterPassword:
-            sendMenuToClient(clientSocket, menu.getRegisterPasswordMenu());
-            break;
-        case MenuState::LoginPassword:*/
-
-
-
         default: 
             break;
     }
@@ -457,6 +460,8 @@ void Server::keyInputFriendsMenu(int clientSocket, int clientId, const std::stri
     else if (action == "4") {
         returnToMenu(clientSocket, clientId, MenuState::Main);
         sendMenuToClient(clientSocket, menu.getMainMenu1());
+    }else{
+        sendMenuToClient(clientSocket, menu.getFriendMenu());
     }
 
 }
@@ -723,7 +728,7 @@ void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::stri
 }
 
 void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "./ret") {  
+    if (action == "/quit") {  
         returnToMenu(clientSocket, clientId, MenuState::Welcome);
     }
     if (userManager->userNotExists(action)) { 
@@ -733,28 +738,21 @@ void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const st
         sendMenuToClient(clientSocket, menu.getRegisterMenu2());
     } 
     else {
-        returnToMenu(clientSocket, clientId, MenuState::RegisterPseudo,"Erreur : Ce pseudo existe déjà. Veuillez en choisir un autre.");
+        sendMenuToClient(clientSocket, menu.getRegisterMenu1());
     }
 }
 
 void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "./ret") {  
-        returnToMenu(clientSocket, clientId, MenuState::Welcome);
-    }
     userManager->registerUser(clientPseudo[clientId], action);
-    chat->initMessageMemory("Clients/" + clientPseudo[clientId] + ".json");
+    chat->initMessageMemory(clientPseudo[clientId]);
     sockToPseudo[clientSocket] = clientPseudo[clientId];
     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
-    returnToMenu(clientSocket, clientId, MenuState::Main);
-    /*clientStates[clientId] = MenuState::Main;
-    sendMenuToClient(clientSocket, menu.getMainMenu1());*/
+    clientStates[clientId] = MenuState::Main;
+    sendMenuToClient(clientSocket, menu.getMainMenu1());
 }
 
 
 void Server::keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "./ret") {  
-        returnToMenu(clientSocket, clientId, MenuState::Welcome);
-    }
     std::cout << "Pseudo: " << action << std::endl;
     if (!userManager->userNotExists(action)) { // Si le pseudo existe
         std::cout << "Pseudo existe" << std::endl;
@@ -763,20 +761,13 @@ void Server::keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::
         sendMenuToClient(clientSocket, menu.getLoginMenu2());
     } 
     else {
-        std::cout << "Pseudo n'existe pas" << std::endl;
-        // si pseudo n'existe pas on annule et on retourne à l'étape 1 (dc dmd de pseudo)
-        returnToMenu(clientSocket, clientId, MenuState::RegisterPseudo,"Ce pseudo existe n'existe. Si vous etes pas inscrit, vous pouvez vous inscrire en appuyant './ret' en s'incrirons");
-
-        //clientStates[clientId] = MenuState::RegisterPseudo;
-        //sendMenuToClient(clientSocket, menu.getLoginMenuFailed1());
+        clientStates[clientId] = MenuState::RegisterPseudo;
+        sendMenuToClient(clientSocket, menu.getLoginMenuFailed1());
     }
 }
 
 
 void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action) {
-    if (action == "./ret") {  
-        returnToMenu(clientSocket, clientId, MenuState::Welcome);
-    }
     if (userManager->authenticateUser(clientPseudo[clientId], action)) { // Si le mot de passe est correct
         clientStates[clientId] = MenuState::Main;
         pseudoTosocket[clientPseudo[clientId]] = clientSocket;
@@ -786,7 +777,7 @@ void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std
     } 
     else {
         // Si le mot de passe est incorrect, on retourne à l'étape 2 (dmd de mdp)
-        returnToMenu(clientSocket, clientId, MenuState::LoginPassword,"Erreur : Mot de passe incorrect. Veuillez réessayer.");
+        sendMenuToClient(clientSocket, menu.getLoginMenuFailed2());
     }
 }
 
@@ -839,8 +830,8 @@ void Server::keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const 
     else if (action == "2") {
         clientStates[clientId] = MenuState::JoinGame;
         std::string currentUser = clientPseudo[clientId];
-        std::vector<std::vector<std::string>> invitations = friendList->getListGameRequest(currentUser);
-        sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
+        //std::vector<std::vector<std::string>> invitations = friendList->getListGameRequest(currentUser);
+        //sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
         // Rejoindre une partie
     }
     else if (action == "3") {
@@ -876,29 +867,59 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
         sendMenuToClient(clientSocket, menu.getManageChatRoomsMenu(chat->getMyRooms(sockToPseudo[clientSocket])));
     }
     else if(action == "5") {
-        sendChatModeToClient(clientSocket);
-        setRunningChat(clientSocket, true);
-        chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, menu.getChatMenu());
-    }
-    else if(action == "6" || action == "./quit" || action == "./ret") {
+        clientStates[clientId] = MenuState::PrivateChat;
+        sendMenuToClient(clientSocket, menu.getPrivateChatMenu());
+        }
+    else if(action == "6" || action == "/quit" || action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::Main);
         
+    }else{
+        sendMenuToClient(clientSocket, menu.getChatMenu());
     }
 }
 
+void Server::keyInputPrivateChat(int clientSocket, int clientId, const std::string& action){
+    if(action == "/quit"){
+        returnToMenu(clientSocket, clientId, MenuState::chat);
+    }
+    else if(action.empty()){
+        sendMenuToClient(clientSocket, menu.getPrivateChatMenu());
+    }
+    //si c'est une room et qui est un membre de la room
+    else if(chatRooms.find(action) != chatRooms.end()){
+        if(chatRooms[action]->isClient(sockToPseudo[clientSocket])){
+            receiverOfMessages[clientId] = action;
+            sendChatModeToClient(clientSocket);
+            setRunningChat(clientSocket, true);
+            chat->processClientChat(clientSocket, clientId, receiverOfMessages[clientId], true, *this, MenuState::chat, menu.getChatMenu());
+        }else{
+            returnToMenu(clientSocket, clientId, MenuState::PrivateChat, "You are not a member of this room.");
+        }
+    }
+    //sinon verifier si c'est un user et si c'est un ami
+    else{
+        if(userManager->userNotExists(action)){
+            returnToMenu(clientSocket, clientId, MenuState::PrivateChat, "User does not exist.");
+        }else if( !userManager->areFriends(sockToPseudo[clientSocket], action)){
+            returnToMenu(clientSocket, clientId, MenuState::PrivateChat, "You are not friends with this user.");
+        }else{
+            receiverOfMessages[clientId] = action;
+            sendChatModeToClient(clientSocket);
+            setRunningChat(clientSocket, true);
+            chat->processClientChat(clientSocket, clientId, receiverOfMessages[clientId], false, *this, MenuState::chat, menu.getChatMenu());
+        }
+    }
+}
 
 void Server::keyInputCreateChatRoom(int clientSocket, int clientId, const std::string& action) {
-    if(action == "./quit") {
-        returnToMenu(clientSocket, clientId, MenuState::Main);
-    }
-    else if(action == "./ret") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::chat);
     }
     else if(action.empty()) {
         sendMenuToClient(clientSocket, menu.getCreateChatRoomMenu());
     }
     else if(chatRooms.find(action) != chatRooms.end()){
-        returnToMenu(clientSocket, clientId, MenuState::chat, "Room name already exists.");
+        returnToMenu(clientSocket, clientId, MenuState::CreateRoom, "Room name already exists.");
     }
     else{
         chatRooms[action] = std::make_shared<chatRoom>(action, sockToPseudo[clientSocket]);
@@ -908,24 +929,21 @@ void Server::keyInputCreateChatRoom(int clientSocket, int clientId, const std::s
 }
 
 void Server::keyInputJoinChatRoom(int clientSocket, int clientId, const std::string& action) {
-    if(action == "./quit") {
-        returnToMenu(clientSocket, clientId, MenuState::Main);
-    }
-    else if(action == "./ret") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::chat);
     }
 
     else if(action.empty()) {
-        returnToMenu(clientSocket, clientId, MenuState::chat);
+        returnToMenu(clientSocket, clientId, MenuState::JoinRoom);
     }
     else if(chatRooms.find(action) == chatRooms.end()){
-        returnToMenu(clientSocket, clientId, MenuState::chat, "Room name does not exist.");
+        returnToMenu(clientSocket, clientId, MenuState::JoinRoom, "Room name does not exist.");
     }
     else if(chatRooms[action]->isClient(sockToPseudo[clientSocket])){
-        returnToMenu(clientSocket, clientId, MenuState::chat, "You are already a member in this room");
+        returnToMenu(clientSocket, clientId, MenuState::JoinRoom, "You are already a member in this room");
     }
     else if(chatRooms[action]->isInReceivedReq(sockToPseudo[clientSocket])){
-        returnToMenu(clientSocket, clientId, MenuState::chat, "You already sent a request to join this room");
+        returnToMenu(clientSocket, clientId, MenuState::JoinRoom, "You already sent a request to join this room");
     }
     else{
         chatRooms[action]->addReceivedRequest(sockToPseudo[clientSocket]);
@@ -935,7 +953,7 @@ void Server::keyInputJoinChatRoom(int clientSocket, int clientId, const std::str
 
 void Server::keyInputRoomsRequest(int clientSocket, int clientId, const std::string& action) {
     auto requests = chat->getMyRoomRequests(sockToPseudo[clientSocket]);
-    if(action == "./quit") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::chat);
     }
     else if(action.empty()) {
@@ -970,10 +988,7 @@ void Server::keyInputRoomsRequest(int clientSocket, int clientId, const std::str
 
 void Server::keyInputManageMyRooms(int clientSocket, int clientId, const std::string& action) {
     std::vector<std::string> myRooms = chat->getMyRooms(sockToPseudo[clientSocket]);
-    if(action == "./quit") {
-        returnToMenu(clientSocket, clientId, MenuState::Main);
-    }
-    else if(action == "./ret") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::chat);
     }
     else if(action.empty()) {
@@ -989,71 +1004,71 @@ void Server::keyInputManageMyRooms(int clientSocket, int clientId, const std::st
     }
 }
 
-void Server::keyInputManageRoom(int clientSocket, int clientId, const std::string& action) {
-    std::string roomName = roomToManage[clientId];
-    if(action == "./quit") {
-        returnToMenu(clientSocket, clientId, MenuState::Main);
-    }
-    else if(action == "1") {
-        clientStates[clientId] = MenuState::ListRoomMembres;
-        sendMenuToClient(clientSocket, menu.getListeMembers(chatRooms[roomName]->getClients()));
-    }
-    bool isAdmin = chatRooms[roomName]->isAdmin(sockToPseudo[clientSocket]);
-    if(isAdmin) {
-        if(action == "2") {
-            clientStates[clientId] = MenuState::AddMembre;
-            sendMenuToClient(clientSocket, menu.getAddMembreMenu());
-        }
-        else if(action == "3") {
-            clientStates[clientId] = MenuState::AddAdmin;
-            sendMenuToClient(clientSocket, menu.getAddAdmin());
-        }
-        else if(action == "4") {
-            //les demandes d'ajout
-            clientStates[clientId] = MenuState::RoomRequestList;
-            sendMenuToClient(clientSocket, menu.getListeRequests(chatRooms[roomName]->getReceivedReq()));
-        }
-        //Supression de la room
-        else if(action == "5") {
-            if (chatRooms[roomName]->getClients().size() == 1) {
-                returnToMenu(clientSocket, clientId, MenuState::ConfirmDeleteRoom);
 
-            } else {
-                returnToMenu(clientSocket, clientId, MenuState::ConfirmQuitRoom );
+void Server::keyInputManageRoom(int clientSocket, int clientId, const std::string& action) {
+        std::string roomName = roomToManage[clientId];
+        if(action == "1"){
+            clientStates[clientId] = MenuState::ListRoomMembres;
+            sendMenuToClient(clientSocket, menu.getListeMembers(chatRooms[roomName]->getClients()));
+            return;
+        }
+        bool isAdmin = chatRooms[roomName]->isAdmin(sockToPseudo[clientSocket]);
+        if(isAdmin) {
+            if(action == "2") {
+                clientStates[clientId] = MenuState::AddMembre;
+                sendMenuToClient(clientSocket, menu.getAddMembreMenu());
             }
-        }else if(action == "6" || action == "./ret" ) {
-            //retour
-            returnToMenu(clientSocket, clientId, MenuState::ManageRooms);
+            else if(action == "3") {
+                clientStates[clientId] = MenuState::AddAdmin;
+                sendMenuToClient(clientSocket, menu.getAddAdmin());
+            }
+            else if(action == "4") {
+                //les demandes d'ajout
+                clientStates[clientId] = MenuState::RoomRequestList;
+                sendMenuToClient(clientSocket, menu.getListeRequests(chatRooms[roomName]->getReceivedReq()));
+            }
+            //Supression de la room
+            else if(action == "5") {
+                if (chatRooms[roomName]->getClients().size() == 1) {
+                    returnToMenu(clientSocket, clientId, MenuState::ConfirmDeleteRoom);
+
+                } else {
+                    returnToMenu(clientSocket, clientId, MenuState::ConfirmQuitRoom );
+                }
+            }else if(action == "6") {
+                //retour
+                returnToMenu(clientSocket, clientId, MenuState::ManageRooms);
+            }else{
+                sendMenuToClient(clientSocket, menu.getManageRoomMenu(isAdmin, chatRooms[roomName]->getadminPseudo().size() == 1));
+            }
         }
-    }
-    else {
-        if(action == "2") {
-            returnToMenu(clientSocket, clientId, MenuState::ConfirmQuitRoom );
-        }else if(action == "3" || action == "./ret" ) {
-            //retour
-            returnToMenu(clientSocket, clientId, MenuState::ManageRooms);
+        else {
+            if(action == "2") {
+                returnToMenu(clientSocket, clientId, MenuState::ConfirmQuitRoom );
+            }else if(action == "3") {
+                //retour
+                returnToMenu(clientSocket, clientId, MenuState::ManageRooms);
+            }else{
+                sendMenuToClient(clientSocket, menu.getManageRoomMenu(isAdmin, chatRooms[roomName]->getadminPseudo().size() == 1));
+            }
         }
-    }
 }
 void Server::keyInputConfirmDeleteRoom(int clientSocket, int clientId, const std::string& action) {
     std::string roomName = roomToManage[clientId];
     if (action == "oui") {
         chatRooms[roomName]->deleteRoomFile();
         chatRooms.erase(roomName);
-        returnToMenu(clientSocket, clientId, MenuState::ManageRooms, "Room '" + roomName + "' supprimée avec succès.");
+        returnToMenu(clientSocket, clientId, MenuState::chat, "Room '" + roomName + "' supprimée avec succès.");
     } else if (action == "non") {
-        returnToMenu(clientSocket, clientId, MenuState::ManageRooms, "Suppression de la room annulée.");
+        returnToMenu(clientSocket, clientId, MenuState::ManageRoom, "Suppression de la room annulée.");
     }
 }
 
 
 void Server::keyInputListMembres(int clientSocket, int clientId, const std::string& action) {
     std::string roomName = roomToManage[clientId];
-    if(action == "./ret") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::ManageRoom);
-    }
-    else if (action == "./quit") {
-        returnToMenu(clientSocket, clientId, MenuState::Main);
     }
     else if(action.rfind("del.", 0) == 0){
         std::string pseudo = action.substr(4);
@@ -1072,12 +1087,9 @@ void Server::keyInputListMembres(int clientSocket, int clientId, const std::stri
 
 void Server::keyInputAddMembre(int clientSocket, int clientId, const std::string& action) {
     std::string roomName = roomToManage[clientId];
-    if(action == "./quit") {
-        returnToMenu(clientSocket, clientId, MenuState::Main);
-    }
-    else if(action == "./ret") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::ManageRoom);
-        }
+    }
     else if(action.empty()) {
         returnToMenu(clientSocket, clientId, MenuState::AddMembre);
     }
@@ -1096,13 +1108,9 @@ void Server::keyInputAddMembre(int clientSocket, int clientId, const std::string
 
 void Server::keyInputAddAdmin(int clientSocket, int clientId, const std::string& action) {
     std::string roomName = roomToManage[clientId];
-    if(action == "./quit") {
-        returnToMenu(clientSocket, clientId, MenuState::Main);
-    }
-    else if(action == "./ret") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::ManageRoom);
-        }
-
+    }
     else if(action.empty()) {
         returnToMenu(clientSocket, clientId, MenuState::AddAdmin);
     }
@@ -1120,10 +1128,7 @@ void Server::keyInputAddAdmin(int clientSocket, int clientId, const std::string&
 
 void Server::keyInputRequestList(int clientSocket, int clientId, const std::string& action) {
     std::string roomName = roomToManage[clientId];
-    if(action == "./quit") {
-        returnToMenu(clientSocket, clientId, MenuState::Main);
-    }
-    else if(action == "./ret") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::ManageRoom);
         }
         else if(action.rfind("accept.", 0 || action.rfind("reject.", 0) == 0) == 0){
@@ -1151,10 +1156,10 @@ void Server::keyInputQuitRoom(int clientSocket, int clientId, const std::string&
     std::string roomName = roomToManage[clientId];
     std::string userPseudo = sockToPseudo[clientSocket];
 
-    if(action == "./quit") {
+    if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::Main);
     }
-    else if(action == "./ret") {
+    else if(action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::ManageRoom);
         }
 

@@ -51,7 +51,6 @@ enum class MenuState {
                     QuitRoom,
                     ConfirmDeleteRoom,
                     ConfirmQuitRoom,
-                    
             PrivateChat,
         Friends,
             AddFriend,
@@ -68,25 +67,26 @@ class Server {
     std::vector<std::shared_ptr<GameRoom>> gameRooms;  
     std::unordered_map<std::string, std::shared_ptr<chatRoom>> chatRooms;
     std::shared_ptr<ServerChat> chat;
-    //std::shared_ptr<FriendList> friendList;
     
     int gameRoomIdCounter=0;
     
     
     //chaque client aura sa game
-    std::unordered_map<int, std::string> clientPseudo;    // id -> pseudo
-    std::unordered_map<int, MenuState> clientStates;      // id -> menu
-    std::unordered_map<std::string, int> pseudoTosocket;  // pseudo -> socket
-    std::unordered_map<int, std::string> sockToPseudo;    // socket -> pseudo
-    std::unordered_map<int, bool> runningChats; 
-    std::unordered_map<int, std::string> roomToManage;    // id -> room
-    std::mutex clientPseudoMutex;        // socket -> bool(chat en cours)
-   
+    std::unordered_map<int, std::string> clientPseudo;            // id -> pseudo
+    std::unordered_map<int, MenuState> clientStates;              // id -> menu
+    std::unordered_map<std::string, int> pseudoTosocket;          // pseudo -> socket
+    std::unordered_map<int, std::string> sockToPseudo;            // socket -> pseudo
+    std::unordered_map<int, bool> runningChats;                   // socket -> bool(chat en cours)
+    std::unordered_map<int, std::string> roomToManage;            // id -> room
+    std::unordered_map<int, std::string> receiverOfMessages;       //id -> destinataire
+    std::mutex clientPseudoMutex;                                 // mutex pour pseudo
+    std::mutex clientStatesMutex;                                 // mutex pour menu
+    std::mutex clientsChatMutex;                                       //mutex pour chat
 
     std::unique_ptr<UserManager> userManager;
     
     Menu menu;
-    void returnToMenu(int clientSocket, int clientId, MenuState state, const std::string& message = "", int sleepTime = 3);
+    void returnToMenu(int clientSocket, int clientId, MenuState state, const std::string& message = "", int sleepTime = 2);
 
 public:
     Server(int port);
@@ -111,6 +111,7 @@ public:
     void keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode=GameModeName::Endless);
     //chat
     void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
+    void keyInputPrivateChat(int clientSocket, int clientId, const std::string& action);
     void sendChatModeToClient(int clientSocket);
     void keyInputCreateChatRoom(int clientSocket, int clientId, const std::string& action);
     void keyInputJoinChatRoom(int clientSocket, int clientId, const std::string& action);
