@@ -1,22 +1,15 @@
-TARGET = client
-
 CXX = g++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 
-LIBS = -lncurses -fsanitize=address
+OBJS = ClientChat.o Client.o ClientDisplay.o ClientNetwork.o Color.o Controller.o main.o SFMLGame.o
 
-SRC = $(wildcard *.cpp)
+all: client
 
-OBJECTS = $(SRC:.cpp=.o)
-
-$(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
+client: $(OBJS)
+	$(CXX) $(CXXFLAGS) -o client $(OBJS) -lncurses $(SFML_LIBS) -fsanitize=address
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OBJECTS)
-
-run: $(TARGET)
-	./$(TARGET)
+	rm -f *.o client

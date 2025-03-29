@@ -7,7 +7,7 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 all: client server
 
 client:
-	$(MAKE) -C $(CLIENT_DIR)
+	$(MAKE) -C $(CLIENT_DIR) SFML_LIBS="-lsfml-graphics -lsfml-window -lsfml-system"
 
 server:
 	$(MAKE) -C $(SERVER_DIR)
