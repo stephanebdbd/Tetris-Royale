@@ -15,7 +15,6 @@ class Cell {
 
     public:
         bool isOccupied() const { return occupied; }
-        //char getSymbol() const { return symbol; }
         Color getColor() const { return color; }
 
         void setOccupied(bool value) { occupied = value; }

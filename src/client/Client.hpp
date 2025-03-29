@@ -6,6 +6,8 @@
 #include "ClientNetwork.hpp"
 #include "ClientChat.hpp"
 
+#include <SFML/Window/Keyboard.hpp> 
+
 
 class Client {
 
@@ -26,9 +28,11 @@ private:
 public:
         Client(const std::string& serverIP, int port);
         void run();
+        bool connect();
         void receiveDisplay();
         void handleUserInput();
         void displayMenu(const json& data);
+        void sendSFMLInput(sf::Keyboard::Key key);
 
 };
 

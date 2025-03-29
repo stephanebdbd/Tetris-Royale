@@ -14,11 +14,10 @@
 Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1), stopInputThread(false) {}
 
 void Client::run() {
-    if (!network.connectToServer(serverIP, port, clientSocket)) {
+    if (!connect()) {
         std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
         return;
     }
-    chat.setClientSocket(clientSocket);
 
     // Lancer un thread pour écouter les touches et envoyer les inputs
     std::thread inputThread(&Client::handleUserInput, this);
@@ -32,6 +31,16 @@ void Client::run() {
     network.disconnect(clientSocket);
     delwin(stdscr);
     endwin();
+}
+
+bool Client::connect() {
+    if (!network.connectToServer(serverIP, port, clientSocket)) {
+        std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
+        return false;
+    }
+
+    chat.setClientSocket(clientSocket);
+    return true;
 }
 
 
@@ -74,7 +83,8 @@ void Client::handleUserInput() {
                     controller.sendInput(inputBuffer, clientSocket);
                     inputBuffer.clear();
                 }
-            }else if (ch == KEY_BACKSPACE || ch == 127) { // Gestion de la touche Backspace
+            }
+            else if (ch == KEY_BACKSPACE || ch == 127) { // Gestion de la touche Backspace
                 if (!inputBuffer.empty()) {
                     inputBuffer.pop_back(); // Supprime le dernier caractère
                     clrtoeol();
@@ -142,5 +152,33 @@ void Client::receiveDisplay() {
                 pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer
             }
         }
+    }
+}
+
+void Client::sendSFMLInput(sf::Keyboard::Key key) {
+    std::string action;
+    std::cout << "Key pressed: " << key << std::endl;
+
+    if (key == sf::Keyboard::Up) {
+        action = "UP";
+    }
+    else if (key == sf::Keyboard::Down) {
+        action = "DOWN";
+    }
+    else if (key == sf::Keyboard::Left) {
+        action = "LEFT";
+    }
+    else if (key == sf::Keyboard::Right) {
+        action = "RIGHT";
+    }
+    else if (key == sf::Keyboard::Space) {
+        action = " ";
+    }
+    else {
+        action = std::string(1, static_cast<char>(key));
+    }
+    
+    if (!action.empty()) {
+        controller.sendInput(action, clientSocket);
     }
 }

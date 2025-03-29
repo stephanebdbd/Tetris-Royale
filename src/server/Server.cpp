@@ -101,6 +101,8 @@ void Server::handleClient(int clientSocket, int clientId) {
         try {
             json receivedData = json::parse(buffer);
 
+            std::cout << "Client #" << clientId << " a envoyé: " << receivedData.dump() << std::endl;
+
             if (!receivedData.contains(jsonKeys::ACTION) || !receivedData[jsonKeys::ACTION].is_string()) {
                 std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
                 return;
