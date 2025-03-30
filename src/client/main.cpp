@@ -21,12 +21,17 @@ void lancerModeGraphique(Client& client) {
 }
 
 int main() {
+
+    int choix;
+    std::cout << "Choisissez le mode d'affichage :\n";
+    std::cout << "      1. Mode Terminal\n";
+    std::cout << "      2. Mode Graphique\n";
+    std::cout << "Entrez votre choix (1 ou 2) : ";
+    std::cin >> choix;
+
     std::ofstream serverLog("client.log");
     std::cout.rdbuf(serverLog.rdbuf());
     std::cerr.rdbuf(serverLog.rdbuf());
-
-    int choix;
-    std::cin >> choix;
 
     Client client("127.0.0.1", 12345);
 
