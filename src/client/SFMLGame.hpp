@@ -57,7 +57,7 @@ class SFMLGame {
 
     //handle events
     void handleTextFieldEvents(sf::Event& event);
-    void handleButtonEvents(sf::Event& event);
+    void handleButtonEvents();
     void handleEvents();
     void LoadResources();
     void cleanup();

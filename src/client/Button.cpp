@@ -46,11 +46,15 @@ bool Button::isMousePressed(const sf::RenderWindow& window) const {
     return isMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left);
 }
 
-void Button::setBackgroundColor() {
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-        shape.setFillColor(clickColor);
+void Button::setBackgroundColor(sf::RenderWindow& window) {
+    if(isMouseOver(window)) {
+        if (isMousePressed(window)) {
+            shape.setFillColor(clickColor);
+        } else {
+            shape.setFillColor(hoverColor);
+        }
     } else {
-        shape.setFillColor(hoverColor);
+        shape.setFillColor(originalColor);
     }
 }
 

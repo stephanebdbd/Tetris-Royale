@@ -12,7 +12,7 @@ class Button {
         void draw(sf::RenderWindow& window) const;
         bool isMouseOver(const sf::RenderWindow& window) const;
         bool isMousePressed(const sf::RenderWindow& window) const;
-        void setBackgroundColor();
+        void setBackgroundColor(sf::RenderWindow& window);
         void resetColor();
     
     private:

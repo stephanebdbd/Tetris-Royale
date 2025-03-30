@@ -47,42 +47,35 @@ void SFMLGame::handleTextFieldEvents(sf::Event& event) {
         text->handleInput(event);
     }
 }
-void SFMLGame::handleButtonEvents(sf::Event& event) {
+void SFMLGame::handleButtonEvents() {
     for (const auto& button : buttons) {
-        if(button->isMouseOver(*window)){
-            button->setBackgroundColor();
-            if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    //button->onClick();
-                }
-            }
-        }else{
-            button->resetColor();
-        }
+        button->setBackgroundColor(*window);
     }
 }
 
 void SFMLGame::run() {
-    if (!client.connect()) {
+    auto clientPtr = std::make_shared<Client>(client); // Wrap Client in a shared_ptr
+
+    if (!clientPtr->connect()) {
         std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
         return;
     }
     window->create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE);
     window->setFramerateLimit(60);
 
-    std::thread inputThread(&Client::handleUserInput, &client);
-    inputThread.detach();
-    
+    // Pass the shared_ptr by value to the thread
+    std::thread inputThread(&Client::handleUserInput, clientPtr);
+
     while (window->isOpen()) {
         handleEvents();
 
         window->clear(sf::Color::Black);
-        switch(currentState) {
+        switch (currentState) {
             case GameState::Welcome:
                 welcomeMenu();
                 break;
             case GameState::MainMenu:
-                //mainMenu();
+                // mainMenu();
                 break;
             // Other states...
             default:
@@ -90,6 +83,13 @@ void SFMLGame::run() {
         }
         window->display();
     }
+
+    // Wait for the thread to finish
+    if (inputThread.joinable()) {
+        inputThread.join();
+    }
+
+    // Cleanup resources
     cleanup();
 }
 
@@ -144,7 +144,6 @@ void SFMLGame::displayBackground(const std::string& backgroundPath) {
     }
     
     texture.setSmooth(true);
-    texture.setRepeated(true);
     
     sf::Sprite sprite(texture);
     
@@ -167,25 +166,22 @@ void SFMLGame::handleEvents() {
         if (event.type == sf::Event::Closed) {
             cleanup();
             window->close();
+            return;
         }
 
         // Gestion prioritaire des clics sur les TextField
         if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-            bool clickedOnTextField = false;
             for (const auto& text : texts) {
                 if (text->isMouseOver(*window)) {
                     text->setActive(true);
-                    clickedOnTextField = true;
                 } else {
                     text->setActive(false);
                 }
             }
-            // Ne traitez pas les boutons si un TextField est cliqué
-            if (!clickedOnTextField) {
-                handleButtonEvents(event);
-            }
+            
         }
-
+        // Gestion des événements de la souris pour les boutons
+        handleButtonEvents();
         // Gestion de la saisie texte
         if (event.type == sf::Event::TextEntered) {
             handleTextFieldEvents(event);
