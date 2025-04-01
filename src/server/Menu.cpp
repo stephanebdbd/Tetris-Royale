@@ -395,7 +395,8 @@ json Menu::getLobbyMenu1() const {
         {jsonKeys::TITLE, "Configuration des paramètres de la partie:"},
         {jsonKeys::OPTIONS, {
             {"/max/<number> ", "Nombre maximal de joueurs"},
-            {"/quit ", "Quitter la partie"}
+            {"/quit ", "Quitter la partie"},
+            {"/help", "Afficher le mode d'emploi"}
         }},
 
         {jsonKeys::INPUT, "entrez le paramètre: "}
@@ -423,6 +424,7 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
             {"/invite/viewer/<name> ", "Inviter un spectateur"},
             {"/speed/<vitesse> (supérieure à 100) ", "déterminer la vitesse du jeu"},
             {cmd, desc},
+            {"/help", "Afficher le mode d'emploi"},
             {"/quit ", "Quitter la partie"}
 
         }},
@@ -463,3 +465,48 @@ json Menu::getWinGameMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+json Menu::getHelp(/*const& string mode*/) const {
+    /*std::string cmd = "";
+    std::string desc = "";
+    if (mode == "Royal Competition"){
+        cmd = "/energy/<energy> (inférieure à 15) ";
+        desc = "déterminer l'énergie à atteindre";
+    }*/
+    json menu = {
+        {jsonKeys::TITLE, "Mode d'emploi de l'utilisation du chat"},
+        {jsonKeys::OPTIONS,
+    R"(
+    **DESCRIPTION**
+        Le chat vous permet en quelques commandes de modifier vos listes d'amis et de modifier les paramètres d'une partie à
+        laquelle vous participez. Le chat est disponible à partir de n'importe quel menu après connexion, en appuyant sur la
+        touche "c". On y quitte via la touche "esc".
+
+    **OPTIONS GÉNÉRALES**
+        /ban/<name>                   Ajoute le joueur <name> dans la liste de joueurs bloqués, avec qui vous ne pourrez pas jouer
+        /addfriend/<name>             Envoie une demande d'ami à l'utilisateur <name>
+        /deletefriend/<name>          Supprime l'ami <name> de votre liste d'amis
+        **PARAMÈTRES DE JEU**
+        DESCRIPTION
+        Ce chat est différent du chat général. Celui-ci sera disponible que dans le lobby d'une partie à laquelle vous
+        participez, en attendant d'avoir le nombre de joueurs demandés. Vous pourrez toujours profiter des options générales
+        (sauf au fait d'accéder au chat général) en plus de pouvoir discuter avec les joueurs connectés à la partie.
+        D'autres commandes pour modifier la partie sont expliquées ci-dessous.
+        
+        POUR LE PROPRIÉTAIRE DE LA PARTIE
+        /max/<number>              Permet de changer le nombre maximal de joueurs (Sauf pour le mode duel)
+        /speed/<level>             Change la vitesse de descente de tétraminos à la vitesse du niveau <level> (supérieure à 100)
+        )",
+        /*{cmd, desc},*/
+    R"(
+
+        POUR TOUT JOUEUR
+            /invite/player/<name>      Invite l'ami <name> à jouer
+            /invite/viewer/<name>      Invite l'ami <name> à regarder la partie
+            /quit                      Pour quitter une partie (le statut de propriétaire est transféré au plus ancien
+                                    participant s'il venait à partir)
+    )"
+    },
+        {jsonKeys::INPUT, "Tapez '/quit' pour quitter: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}

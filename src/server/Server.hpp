@@ -33,6 +33,7 @@ enum class MenuState {
                         Classic,
                         Royal_Competition,
                             Settings,
+                            Help,
                 JoinGame,
                     GameRequestList,
                         Play,
@@ -148,6 +149,7 @@ public:
     std::string trim(const std::string& s);
     void keyInputChooseGameModeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action, std::shared_ptr<GameRoom> gameRoom=nullptr);
+    void keyInputHelpMenu(int clientSocket, int clientId, const std::string& action);
     std::string getMode(int clientId);
     int getMaxPlayers(int clientId);
     int getAmountOfPlayers(int clientId);

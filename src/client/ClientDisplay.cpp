@@ -73,8 +73,8 @@ void ClientDisplay::drawTetramino(const json& tetraPiece) {
     Color color = Color::fromShapeSymbol(std::string(1, shapeSymbol));
 
     color.activate();
-    for (size_t row = 0; row < shape.size(); ++row) {
-        for (size_t col = 0; col < shape[row].size(); ++col) {
+    for (std::size_t row = 0; row < shape.size(); ++row) {
+        for (std::size_t col = 0; col < shape[row].size(); ++col) {
             if (shape[row][col][0] != ' '){
                 mvaddch(y + row, x + col, '#');
             }

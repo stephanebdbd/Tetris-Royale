@@ -4,6 +4,7 @@
 #include "../common/json.hpp"
 
 
+
 class ClientDisplay {
 
     public:

@@ -32,6 +32,7 @@ class Menu {
         json getListeRequests(const std::vector<std::string>& data) const;
         json getDeleteRoomConfirmationMenu(const std::string& roomName) const;
         //game
+        json getHelp() const;
         json getJoinOrCreateGame() const;
         json getGameMode() const;
         json getGameModeMenu() const;

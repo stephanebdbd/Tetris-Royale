@@ -10,3 +10,4 @@ src/server/tetris
 src/client/client
 src/server/users.txt
 src/server/gameInvitations.txt
+*.txt

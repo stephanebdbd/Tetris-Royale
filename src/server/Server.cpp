@@ -226,6 +226,10 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         keyInputLobbySettingsMenu(clientSocket, clientId, action);
         return;
     }
+    if (clientStates[clientId] == MenuState::Help){
+        keyInputHelpMenu(clientSocket, clientId, action);
+        return;
+    }
 }
 
 
@@ -1243,6 +1247,11 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
         // Appeler la méthode pour gérer l'envoi de la demande de jeu
         keyInputSendGameRequestMenu(clientSocket, clientId, receiver, status);        
     }
+
+    else if (action.find("/help") == 0){
+        clientStates[clientId] = MenuState::Help;
+        sendMenuToClient(clientSocket, menu.getHelp());
+    }
     
     else if (action.find("/quit") == 0){
         auto gameRoom = gameRooms[clientGameRoomId[clientId]];
@@ -1260,6 +1269,10 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
     
     if ((gameRoom != nullptr) && (!gameRoom->getHasStarted()))   //refresh le Lobby
         sendMenuToClient(clientSocket, menu.getLobbyMenu2(getMaxPlayers(clientId), getMode(clientId), getAmountOfPlayers(clientId)));
+}
+
+void Server::keyInputHelpMenu(int clientSocket, int clientId, const std::string& action) {
+
 }
 
 void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action){

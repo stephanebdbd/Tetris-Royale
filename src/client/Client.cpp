@@ -25,9 +25,8 @@ void Client::run() {
     inputThread.detach(); // Permet au thread de fonctionner indépendamment
 
     // Boucle principale pour recevoir et afficher le jeu
-    while (true) {
-        receiveDisplay();
-    }
+
+    receiveDisplay();
 
     network.disconnect(clientSocket);
     delwin(stdscr);
@@ -100,7 +99,7 @@ void Client::receiveDisplay() {
             received += std::string(buffer, bytesReceived);
 
             // Vérifier si un JSON complet est reçu (fini par un '\n') 
-            size_t pos = received.find("\n");
+            std::size_t pos = received.find("\n");
             while (pos != std::string::npos) {
                 std::string jsonStr = received.substr(0, pos);  // Extraire un JSON complet
                 received.erase(0, pos + 1);  // Supprimer le JSON traité
@@ -141,6 +140,14 @@ void Client::receiveDisplay() {
 
                 pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer
             }
+        }
+        else if (bytesReceived == 0) {
+            std::cerr << "Le serveur a fermé la connexion." << std::endl;
+            break;  // Le serveur a fermé la connexion
+        }
+        else {
+            std::cerr << "Erreur de réception: " << std::endl;
+            break;  // Erreur de réception
         }
     }
 }
