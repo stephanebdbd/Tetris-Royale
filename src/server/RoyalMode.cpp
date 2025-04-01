@@ -2,94 +2,50 @@
 #include "MalusRoyal.hpp"
 #include "Bonus.hpp"
 
-RoyalMode::RoyalMode() : energie(0){}
-
 void RoyalMode::featureMode(std::shared_ptr<Game> game, int malusOrBonus){
-
-    std::cout << "Malus or Bonus : " << malusOrBonus << std::endl;
-    
-    MalusRoyal malus(game->getDisplacement());
-    Bonus bonus(game->getDisplacement());
-
-    int linesCleared = game->getLinesCleared();
-    energie += 20 * linesCleared;
-    if(energie >= 100){
-        if(chosenMalus){
-            choiceMalus(nbre, malus);
-        }
-
-        if(chosenBonus){
-            choiceBonus(nbre, bonus);
-        }
-
+    if (malusOrBonus > 6) {
+        MalusRoyal malus(game->getDisplacement());
+        choiceMalus(malusOrBonus, malus);
     }
-
-    applyMalusBonus(malus, bonus);
+    else {
+        Bonus bonus(game->getDisplacement());
+        choiceBonus(malusOrBonus, bonus);
+    }
     
 }
 
 void RoyalMode::choiceMalus(int nbre, MalusRoyal malus){
     switch(nbre){
-        case 1: {
-            decreaseEnergie(60);
-            malus1counter = 3;
+        case 1:
+            malus.reverseControl();
             break;
-        }
-        case 2: {
+        case 2:
             malus.blockControl();
-            decreaseEnergie(50);
             break;
-        }
-        case 3: {
+        case 3:
             malus.increaseSpeed();
-            decreaseEnergie(30);
             break;
-        }
-        case 4: {
+        case 4:
             malus.clear2x2Block(); 
-            decreaseEnergie(40);
             break;
-        }
-        case 5: { 
+        case 5:
             malus.turnOffLight();
-            decreaseEnergie(70);
             break;
-        }
-        default: break;
+        default: 
+            break;
     }
-    setMalus(false);
 
 }
 
 void RoyalMode::choiceBonus(int nbre, Bonus bonus){
     switch(nbre){
-        case 1: {
+        case 6:
             bonus.decreaseSpeed(); 
-            decreaseEnergie(30);
             break;
-        }
-        case 2: {
-            decreaseEnergie(35);
-            bonus2counter = 2;
+        case 7:
+            bonus.miniBlock();
             break;
-            
-        }
-        default: break;
-    }
-    setBonus(false);
-
-}
-
-void RoyalMode::applyMalusBonus(MalusRoyal malus, Bonus bonus){
-    if (malus1counter > 0){
-        malus.reverseControl();
-        decreaseCounter(malus1counter);
-    }
-
-    if(bonus2counter > 0){
-        bonus.MiniBlock();
-        decreaseCounter(bonus2counter);
+        default:
+            break;
     }
 }
-
-

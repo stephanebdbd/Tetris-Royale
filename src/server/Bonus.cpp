@@ -2,7 +2,7 @@
 
 Bonus::Bonus(TetraminoDisplacement& displacement) : displacement(displacement){}
 
-void Bonus::MiniBlock(){
+void Bonus::miniBlock(){
     std::array<std::array<char, 4>, 4> miniBlock = {{
         {' ', ' ', ' ', ' '},
         {' ', '#', ' ', ' '},

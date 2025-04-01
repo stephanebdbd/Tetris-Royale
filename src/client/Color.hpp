@@ -5,7 +5,7 @@
 #include <string>
 
 enum class Type {
-    WHITE, RED, YELLOW, GREEN, CYAN, BLUE, MAGENTA, NONE
+    NONE, RED, YELLOW, GREEN, CYAN, BLUE, MAGENTA, WHITE, GRAY
 };
 
 class Color {

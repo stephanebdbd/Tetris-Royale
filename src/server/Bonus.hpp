@@ -9,7 +9,7 @@ class Bonus {
     TetraminoDisplacement displacement;
     public:
         Bonus(TetraminoDisplacement& displacement);
-        void MiniBlock();
+        void miniBlock();
         void decreaseSpeed();
 };
 

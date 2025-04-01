@@ -8,7 +8,7 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
     
     gameModes.emplace_back(std::make_shared<ClassicMode>());
     gameModes.emplace_back(std::make_shared<RoyalMode>());
-
+        
     setGameMode(gameModeName);
     if (gameModeName == GameModeName::Endless)
         setSpeed(1000);
@@ -128,9 +128,8 @@ void GameRoom::startGame() {
 
             else {
                 games[i]->updateGame();
-                /*if (getGameModeName() != GameModeName::Endless)
+                if (getGameModeName() != GameModeName::Endless)
                     handleMalusOrBonus(i);
-                */
             }
 
             amountOfPlayers = getMaxPlayers() - countGameOvers;
@@ -445,4 +444,9 @@ void GameRoom::setEnergyLimit(int newEnergyLimit) {
 
 int GameRoom::getEnergyLimit() const {
     return energyLimit;
+}
+
+int GameRoom::getEnergyOfPlayer(int playerServerId) const {
+    int playerId = getPlayerId(playerServerId);
+    return energyOrClearedLines[playerId];
 }
