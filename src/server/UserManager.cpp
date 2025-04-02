@@ -65,7 +65,7 @@ void UserManager::updateHighscore(const std::string& username, int newScore) {
 // Récupère le score élevé de l'utilisateur
 int UserManager::getHighScore(const std::string& username) const {
     if (usersData.contains(username)) {
-        return usersData.at(username).at("highScore");
+        return usersData[username]["highScore"];
     }
     return 0;
 }
@@ -175,8 +175,8 @@ std::vector<std::pair<std::string, int>> UserManager::getRanking() const {
     std::vector<std::pair<std::string, int>> ranking;
     // Parcours des utilisateurs et récupération des noms et scores
     for (const auto& [username, data] : usersData.items()) {
-        int highscore = data["highscore"];
-        ranking.push_back({username, highscore});
+        int score = data["highScore"];
+        ranking.emplace_back(username, score);
     }
 
     // Tri décroissant par rapport au highscore
