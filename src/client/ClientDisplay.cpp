@@ -24,13 +24,20 @@ void ClientDisplay::displayMenu(const json& data) {
 }
 
 void ClientDisplay::displayGame(const json& data) {
-    clear();
+    //clear();
+    for(int y = 0;y < 22; y++){
+        move(y,0);
+        clrtoeol();
+        
+    }
 
     drawGrid(data[jsonKeys::GRID]);
 
     drawTetramino(data[jsonKeys::TETRA_PIECE]);
 
     drawScore(data[jsonKeys::SCORE]);
+    
+    drawMessage(data[jsonKeys::MESSAGE_CIBLE]);
 
     refresh();
 }
@@ -88,4 +95,39 @@ void ClientDisplay::drawScore(const json& score) {
     mvprintw(1, 13, "Score: %d", scoreValue);
     int comboValue = score[jsonKeys::COMBO];
     mvprintw(2, 13, "Combo: %d", comboValue);
+    
+
+    }
+void ClientDisplay::drawMessage(const json& msg){
+    
+    if (msg[jsonKeys::CLEAR]){
+        move(22, 0);     
+        clrtoeol(); 
+            
+        move(23, 0);     
+        clrtoeol();
+    }
+    
+    
+
+    if(msg[jsonKeys::PROPOSITION_CIBLE]){
+        int id = msg[jsonKeys::CIBLE_ID];
+        mvprintw(22, 1, "Le joueur d'Id %d a été choisis comme joueur cible (Y/N)", id);
+    }
+    
+    else if(msg[jsonKeys::CHOICE_CIBLE])
+        mvprintw(22, 1, "Entrez l'Id du joueur choisis.");
+
+    else if(msg[jsonKeys::CHOICE_MALUS_BONUS])
+        mvprintw(22, 1, "Vous choisissez Malus ou Bonus.");
+
+    else if(msg[jsonKeys::CHOICE_MALUS])
+        mvprintw(22, 1, "MALUS");
+
+    else if(msg[jsonKeys::CHOICE_BONUS])
+        mvprintw(22, 1, "BONUS.");
+
+
+    
+    
 }

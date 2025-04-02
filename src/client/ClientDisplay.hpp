@@ -5,6 +5,7 @@
 
 
 class ClientDisplay {
+    
 
     public:
         void displayMenu(const json& data);
@@ -14,6 +15,7 @@ class ClientDisplay {
         void drawGrid(const json& grid);
         void drawTetramino(const json& tetraPiece);
         void drawScore(const json& score);
+        void drawMessage(const json& msg);
 };
 
 #endif

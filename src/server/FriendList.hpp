@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <nlohmann/json.hpp>
+#include "../common/json.hpp"
+
 
 class FriendList {
 private:
