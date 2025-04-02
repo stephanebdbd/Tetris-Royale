@@ -8,7 +8,7 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
     
     gameModes.emplace_back(std::make_shared<ClassicMode>());
     gameModes.emplace_back(std::make_shared<RoyalMode>());
-        
+
     setGameMode(gameModeName);
     if (gameModeName == GameModeName::Endless)
         setSpeed(1000);
@@ -35,6 +35,12 @@ void GameRoom::addPlayer(int playerId) {
         energyOrClearedLines.push_back(0);
         playersVictim.push_back(-1);
         playersMalusOrBonus.push_back(-1);
+        messageList.push_back(Cmessages);
+        playersActive.push_back(playerId);
+        applyMalus.push_back(false);
+        showmessage.push_back(true);
+        keyClear.push_back(false);
+
         std::cout << "Joueur #" << players[getAmountOfPlayers()] << " ajouté dans la GameRoom " << getRoomId() << std::endl;
         amountOfPlayers++;
     }
@@ -50,6 +56,11 @@ bool GameRoom::removePlayer(int playerId) {
             energyOrClearedLines.pop_back();
             playersVictim.pop_back();
             playersMalusOrBonus.pop_back();
+            messageList.pop_back();
+            playersActive.pop_back();
+            applyMalus.pop_back();
+            showmessage.pop_back();
+            keyClear.pop_back();
             return true;
         }
     }
@@ -123,13 +134,17 @@ void GameRoom::startGame() {
 
         for (int i = 0; i < getMaxPlayers(); ++i) {
 
-            if (getGameIsOver(i, true))
+            if (getGameIsOver(i, true)){
                 countGameOvers++;
+                playersActive.erase(playersActive.begin() + i);
+            }
+                
 
             else {
                 games[i]->updateGame();
                 if (getGameModeName() != GameModeName::Endless)
                     handleMalusOrBonus(i);
+                
             }
 
             amountOfPlayers = getMaxPlayers() - countGameOvers;
@@ -153,13 +168,24 @@ void GameRoom::handleMalusOrBonus(int playerId) {
         }
     }
     else if ((getGameModeName() == GameModeName::Duel) || (getGameModeName() == GameModeName::Classic)) {
-        playersMalusOrBonus[playerId] = games[playerId]->getLinesCleared();
-        if (playersMalusOrBonus[playerId] > 1) {
+        //playersMalusOrBonus[playerId] = games[playerId]->getLinesCleared();
+        int linesCleared = games[playerId]->getLinesCleared();
+        if (linesCleared > 1 || applyMalus[playerId]) {
             if (getGameModeName() == GameModeName::Duel){
+                playersMalusOrBonus[playerId] = linesCleared;
                 applyFeatureMode(playerId);
                 reinitializeMalusOrBonus(playerId);
             }
-            else if (playersVictim[playerId] != -1) {
+            else if(getGameModeName() == GameModeName::Classic && showmessage[playerId]) {
+                playersMalusOrBonus[playerId] = linesCleared;
+                std::cout<<"raha true"<<std::endl;
+                messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = true;
+                choiceVictimRandomly(playerId);
+                showmessage[playerId] = false;
+                
+            }
+            if (playersVictim[playerId] != -1) {
+                std::cout<<"hna ghadi nsift malus"<<std::endl;
                 applyFeatureMode(playerId);
                 reinitializeMalusOrBonus(playerId);
             } 
@@ -171,6 +197,8 @@ void GameRoom::reinitializeMalusOrBonus(int playerId) {
     energyOrClearedLines[playerId] = 0;
     playersMalusOrBonus[playerId] = -1;
     playersVictim[playerId] = -1;
+    showmessage[playerId] = true;
+    applyMalus[playerId] = false;
 }
 
 bool GameRoom::getCanUseMalusOrBonus(int playerId) const {
@@ -208,6 +236,10 @@ void GameRoom::applyFeatureMode(int playerId) {
     if (getGameModeName() != GameModeName::Endless){
         int victim = playersVictim[playerId];
         int malusOrBonus = playersMalusOrBonus[playerId];
+        
+        std::cout<<"victim ikram: "<<victim<<std::endl;
+        std::cout<<"malusOrBonus oumaima: "<<malusOrBonus<<std::endl;
+        std::cout<<"GameModeIndex: "<<getGameModeIndex()<<std::endl;
         gameModes[getGameModeIndex()]->featureMode(games[victim], malusOrBonus);
     }
 }
@@ -317,13 +349,45 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
         return;
     if (getHasStarted()) {
         if (getCanUseMalusOrBonus(playerId)) {
-            int action = convertStringToInt(unicodeAction);
-            if (action != -1) {
-                if ((playersMalusOrBonus[playerId] == -1) && (getGameModeName() == GameModeName::Royal_Competition))
-                    keyInputchooseMalusorBonus(playerId, action);
-                else
-                    keyInputchooseVictim(playerId, action);
+            
+            std::cout<<"unicodeAction: "<<unicodeAction<<std::endl;
+            if (unicodeAction == "N" || unicodeAction == "n") {
+                messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = false;
+                messageList[playerId][jsonKeys::CHOICE_CIBLE] = true;
+                keyClear[playerId] =  true;
             }
+
+            else if (unicodeAction == "Y" || unicodeAction == "y") {
+                messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = false;
+                //counteurClear[playerId] =  1;
+                playersVictim[playerId] = victimRandom;
+                std::cout<<"raha false"<<std::endl;
+                applyMalus[playerId] = true;
+                keyClear[playerId] = true;
+                    //messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = false;
+                    //messageList[playerId][jsonKeys::CHOICE_CIBLE] = true;
+            }
+
+            else{
+                int action = convertStringToInt(unicodeAction);
+                if (action != -1) {
+                    if ((playersMalusOrBonus[playerId] == -1) && (getGameModeName() == GameModeName::Royal_Competition))
+                        keyInputchooseMalusorBonus(playerId, action);
+                    else{
+                        keyInputchooseVictim(playerId, action);
+                        keyClear[playerId] = true;
+                        messageList[playerId][jsonKeys::CHOICE_CIBLE] = false;
+                        applyMalus[playerId] = true;
+                        
+                    }
+                        
+            
+
+                }
+            }
+            
+
+            
         }
         else
             keyInputGame(playerId, unicodeAction);
@@ -446,7 +510,34 @@ int GameRoom::getEnergyLimit() const {
     return energyLimit;
 }
 
-int GameRoom::getEnergyOfPlayer(int playerServerId) const {
+void GameRoom::choiceVictimRandomly(int playerId) {
+    while(true){
+        int possible = rand() % playersActive.size();
+        if (possible != playerId){
+            this->victimRandom = possible;
+            break;
+        }
+    }
+    
+}
+json GameRoom::messageToJson(int playerServerId) const {
     int playerId = getPlayerId(playerServerId);
-    return energyOrClearedLines[playerId];
+    //int targetId = rand() % playersVictim.size();
+    json smessage;
+    for (const auto& m : messageList[playerId]) {
+        smessage[m.first] = m.second;
+    }
+    smessage[jsonKeys::CIBLE_ID] = victimRandom;
+    if(keyClear[playerId]){
+        smessage[jsonKeys::CLEAR] = true;
+        keyClear[playerId] = false;
+    }
+        
+
+    
+    //smessage[jsonKeys::PROPOSITION_CIBLE] = true;
+
+
+    return smessage;
+    
 }

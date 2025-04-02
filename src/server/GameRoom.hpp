@@ -12,6 +12,7 @@
 #include "GameMode.hpp"
 #include "RoyalMode.hpp"
 #include "ClassicMode.hpp"
+#include "../common/jsonKeys.hpp"
 
 
 class GameRoom {
@@ -35,6 +36,26 @@ class GameRoom {
     std::vector<int> players;
     std::vector<std::shared_ptr<Game>> games;
     std::vector<int> viewersId;
+    using MessageMap = std::unordered_map<std::string, bool>;
+    MessageMap Cmessages = {
+    {jsonKeys::PROPOSITION_CIBLE, false},
+    {jsonKeys::CHOICE_CIBLE, false},  
+    {jsonKeys::CHOICE_MALUS_BONUS, false},  
+    {jsonKeys::CHOICE_MALUS, false},  
+    {jsonKeys::CHOICE_BONUS, false},
+    {jsonKeys::CLEAR, false}  
+}; 
+    std::vector<MessageMap> messageList;
+    std::vector<std::string> boolInputs = {"Y", "y", "N", "n"};
+    int victimRandom = -1;
+    std::vector<int> playersActive;
+    std::vector<bool> applyMalus;
+    std::vector<bool> showmessage;
+    mutable std::vector<int> keyClear;
+    //bool applyMalus = false;
+    //bool showmessage = true;
+
+    
 public:
     GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
     void addPlayer(int playerId);
@@ -87,10 +108,11 @@ public:
     void setCanGetGames();
     bool getCanPlay() const;
     void setCanPlay();
-    int getEnergyOfPlayer(int playerServerId) const;
-
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }
+    json messageToJson(int playerServerId)const;
+
+    void choiceVictimRandomly(int playerId);
 };
 
 #endif
