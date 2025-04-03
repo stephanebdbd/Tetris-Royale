@@ -77,7 +77,7 @@ bool GameRoom::getHasStarted() const {
 bool GameRoom::getSettingsDone() const {
     bool done = (getSpeed() > 100) && getIsFull();
     if (getGameModeName() == GameModeName::Royal_Competition)
-        done = done && (energyLimit < 15);
+        done = done && (energyLimit < 15) && (energyLimit > 0);
     return done;
 
 }

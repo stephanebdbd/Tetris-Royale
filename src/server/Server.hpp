@@ -127,10 +127,11 @@ public:
     //friends
     void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
-
+    
 
     void receiveInputFromClient(int clientSocket, int clientId);
     void deleteGameRoom(int roomId);
+    void extractDataBetweenSlashes(const std::string& toFind, const std::string& action, std::string& status, std::string& receiver);
     void sendInputToGameRoom(int clientId, const std::string& action, std::shared_ptr<GameRoom> gameRoom);
     void shiftGameRooms(int index);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);

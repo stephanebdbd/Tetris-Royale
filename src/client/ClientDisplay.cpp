@@ -2,6 +2,7 @@
 #include "Color.hpp"
 
 #include <ncurses.h>
+#include <iostream>
 #include "../common/json.hpp"
 #include "../common/jsonKeys.hpp"
 
@@ -9,17 +10,23 @@ void ClientDisplay::displayMenu(const json& data) {
     clear();
 
     std::string title = data[jsonKeys::TITLE];
-    json options = data[jsonKeys::OPTIONS];
     std::string input = data[jsonKeys::INPUT];
-
+    json options = data[jsonKeys::OPTIONS];
+    bool isText = data.contains(jsonKeys::TEXT);
+    
     int y = 5;
     mvprintw(y++, 10, "%s", title.c_str());
+    
+    std::string line;
     for (auto& [key, value] : options.items()) {
-        std::string line = key + value.get<std::string>();
+        if (isText)
+            line = value.get<std::string>();
+        else 
+            line = key + value.get<std::string>();
         mvprintw(y++, 10, "%s", line.c_str());
     }
-    mvprintw(y++, 10, "%s", input.c_str());
 
+    mvprintw(y++, 10, "%s", input.c_str());
     refresh(); 
 }
 

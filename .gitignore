@@ -1,7 +1,6 @@
 .vscode/
 src/*/*.o
-src/client/client.log
-src/server/server.log
+src/*/*.log
 src/server/ChatRooms/*
 src/server/Clients/*
 src/server/Friends/*

@@ -24,7 +24,7 @@ class GameRoom {
     bool ownerQuit = false;
     bool canGetGames = false;
     bool canPlay = false;
-    int energyLimit=25;
+    int energyLimit=0;
     int speed=0;
     int gameModeIndex=-1;
     int amountOfPlayers=0;

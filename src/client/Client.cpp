@@ -27,10 +27,7 @@ void Client::run() {
     // Boucle principale pour recevoir et afficher le jeu
 
     receiveDisplay();
-
     network.disconnect(clientSocket);
-    delwin(stdscr);
-    endwin();
 }
 
 
@@ -53,7 +50,6 @@ void Client::handleUserInput() {
                 if (!inputBuffer.empty()) {
                     if (inputBuffer == "q") {
                         network.disconnect(clientSocket);
-                        endwin();
                         exit(0);
                     }
                     controller.sendInput(inputBuffer, clientSocket);
@@ -67,7 +63,6 @@ void Client::handleUserInput() {
                 if (!inputBuffer.empty()) {
                     if (inputBuffer == "q") {
                         network.disconnect(clientSocket);
-                        endwin();
                         exit(0);
                     }
                     controller.sendInput(inputBuffer, clientSocket);
@@ -136,6 +131,7 @@ void Client::receiveDisplay() {
                     refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
                 } catch (json::parse_error& e) {
                     std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;
+                    break;
                 }
 
                 pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer

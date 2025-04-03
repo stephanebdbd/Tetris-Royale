@@ -4,6 +4,7 @@
 namespace jsonKeys {
     constexpr char TITLE[] = "title";
     constexpr char OPTIONS[] = "options";
+    constexpr char TEXT[] = "text";
     constexpr char INPUT[] = "input";
     constexpr char ACTION[] = "action";
     constexpr char MODE[] = "mode";

@@ -5,10 +5,10 @@
 
 int main() {
 
-    std::ofstream serverLog("client.log"); // Créer un fichier de log
+    std::ofstream clientLog("client.log"); // Créer un fichier de log
     // Rediriger std::cout et std::cerr vers le fichier log
-    std::cout.rdbuf(serverLog.rdbuf());
-    std::cerr.rdbuf(serverLog.rdbuf());
+    std::cout.rdbuf(clientLog.rdbuf());
+    std::cerr.rdbuf(clientLog.rdbuf());
 
     initscr();
     curs_set(0);
@@ -19,5 +19,8 @@ int main() {
 
     client.run();
     
+    delwin(stdscr);
+    endwin();
+
     return 0;
 }
