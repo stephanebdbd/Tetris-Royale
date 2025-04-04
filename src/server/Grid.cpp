@@ -7,19 +7,29 @@ Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1
 
 // Marquer une cellule comme occupée
 void Grid::markCell(int x, int y, const Color& color) {
-    if ( !cells[y][x].isOccupied() && y >= 0 && y < height && x >= 1 && x <= width + 1) {
+    if (!cells[y][x].isOccupied() && y >= 0 && y < height && x >= 1 && x <= width + 1) {
         cells[y][x].setOccupied(true);
         cells[y][x].setColor(color);
     }
 }
 
 // Vérifier si une cellule est occupée
-bool Grid::isCellOccupied(int x, int y) const {
+bool Grid::isCellOccupied(int x, int y, std::vector<int> xPositions, std::vector<int> yPositions) const {
     if (x < 1 || x > width + 1 || y >= height) {
         std::cerr << "Cellule hors des limites de la grille. x : " << x << " et y : " << y << std::endl;
         return true; // Hors des limites de la grille
     }
-    return cells[y][x].isOccupied(); // Vérifier si la cellule est occupée
+
+    if (cells[y][x].isOccupied()){
+        for (auto& xPos : xPositions) {
+            for (auto& yPos : yPositions){
+                if (x == xPos && y == yPos)
+                    return false; // La cellule est occupée par la même pièce
+            }
+        }
+    }
+    
+    return cells[y][x].isOccupied();
 }
 
 void Grid::draw() {

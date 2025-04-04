@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 Tetramino::Tetramino(int startX, int startY, int w, int h) 
-    : position{startX, startY}, gridWidth(w), gridHeight(h) {
+    : position{startX, startY}, gridWidth(w), gridHeight(h), dimension(4) {
     initializeShapes();
     selectRandomShape(); // Choisir une forme aléatoire au départµ
 }
@@ -14,42 +14,42 @@ Tetramino::Tetramino(int startX, int startY, int w, int h)
 void Tetramino::initializeShapes() {
     // Définir les formes des Tetraminos
     shapes = {
-        // Forme I
-        {{{'#', '#', '#', '#'},
-          {' ', ' ', ' ', ' '},
+        // Forme I ok
+        {{{' ', ' ', ' ', ' '},
+          {'#', '#', '#', '#'},
           {' ', ' ', ' ', ' '},
           {' ', ' ', ' ', ' '}}},
         
         // Forme L
-        {{{' ', ' ', '#', ' '},
+        {{{' ', ' ', ' ', ' '},
+          {' ', ' ', '#', ' '},
           {'#', '#', '#', ' '},
-          {' ', ' ', ' ', ' '},
           {' ', ' ', ' ', ' '}}},
         
         // Forme J
-        {{{'#', ' ', ' ', ' '},
-          {'#', '#', '#', ' '},
-          {' ', ' ', ' ', ' '},
-          {' ', ' ', ' ', ' '}}},
-        // Forme T
-        {{{' ', '#', ' ', ' '},
-          {'#', '#', '#', ' '},
-          {' ', ' ', ' ', ' '},
-          {' ', ' ', ' ', ' '}}},
-        // Forme O
         {{{' ', ' ', ' ', ' '},
-          {' ', '#', '#', ' '},
-          {' ', '#', '#', ' '},
+          {'#', ' ', ' ', ' '},
+          {'#', '#', '#', ' '},
           {' ', ' ', ' ', ' '}}},
-        // Forme Z
-        {{{'#', '#', ' ', ' '},
-          {' ', '#', '#', ' '},
+        // Forme T ok
+        {{{'#', '#', '#', ' '},
+          {' ', '#', ' ', ' '},
           {' ', ' ', ' ', ' '},
           {' ', ' ', ' ', ' '}}},
-        // Forme S
-        {{{' ', '#', '#', ' '},
+        // Forme O ok (petit temps de latence)
+        {{{'#', '#', ' ', ' '},
           {'#', '#', ' ', ' '},
           {' ', ' ', ' ', ' '},
+          {' ', ' ', ' ', ' '}}},
+        // Forme Z ok
+        {{{' ', ' ', ' ', ' '},
+          {'#', '#', ' ', ' '},
+          {' ', '#', '#', ' '},
+          {' ', ' ', ' ', ' '}}},
+        // Forme S ok
+        {{{' ', ' ', ' ', ' '},
+          {' ', '#', '#', ' '},
+          {'#', '#', ' ', ' '},
           {' ', ' ', ' ', ' '}}}
     };
 };
@@ -59,37 +59,48 @@ void Tetramino::selectRandomShape() {
     srand(time(0));
     int index = rand() % shapes.size(); // Sélectionner un index aléatoire parmi les formes disponibles
     currentShape = shapes[index];
+    dimension = currentShape.size(); // Mettre à jour la dimension de la forme actuelle
     switch (index) {
-        case 0: shapeSymbols = 'I'; break; // I - Cyan
-        case 1: shapeSymbols = 'L'; break; // L - Orange
-        case 2: shapeSymbols = 'J'; break; // J - Bleu
-        case 3: shapeSymbols = 'T'; break; // T - Magenta
-        case 4: shapeSymbols = 'O'; break; // O - Jaune
-        case 5: shapeSymbols = 'Z'; break; // Z - Rouge
-        case 6: shapeSymbols = 'S'; break; // S - Vert
-        default:shapeSymbols  = ' '; break;
+        case 0:
+            dimension = 4;
+            shapeSymbols = 'I';
+            break; // I - Cyan
+        case 1:
+            dimension = 3;
+            shapeSymbols = 'L';
+            break; // L - Orange
+        case 2:
+            dimension = 3;
+            shapeSymbols = 'J';
+            break; // J - Bleu
+        case 3:
+            dimension = 3;
+            shapeSymbols = 'T';
+            break; // T - Magenta
+        case 4:
+            dimension = 2;
+            shapeSymbols = 'O';
+            break; // O - Jaune
+        case 5:
+            dimension = 3;
+            shapeSymbols = 'Z';
+            break; // Z - Rouge
+        case 6:
+            dimension = 3;
+            shapeSymbols = 'S';
+            break; // S - Vert
+        default:
+            dimension = 3;
+            shapeSymbols = ' ';
+            break;
     }
 }
 
 void Tetramino::moveDown(Grid& grid) {
     std::cout << "Tetramino::moveDown of grid : " << &grid << std::endl;
-    if (canMoveDown(grid)) {
+    if (canMove(grid, 0, 1)) { // Vérifie si on peut bouger d'une case vers le bas
         position.y++;
     }
-}
-
-// Vérifie si la pièce peut descendre
-bool Tetramino::canMoveDown(const Grid& grid) const {
-    for (int y = 0; y < 4; ++y) {
-        for (int x = 0; x < 4; ++x) {
-            if (currentShape[y][x] != ' ') {
-                if (position.y + y + 1 >= gridHeight || grid.isCellOccupied(position.x + x, position.y + y + 1)) {
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
 }
 
 void Tetramino::moveLeft(Grid& grid) {
@@ -105,37 +116,49 @@ void Tetramino::moveRight(Grid& grid) {
 }
 
 bool Tetramino::canMove(const Grid& grid, int dx, int dy) const {
-    for (int y = 0; y < 4; ++y) { 
-        for (int x = 0; x < 4; ++x) { 
-                int newX = position.x + x + dx; 
+    std::vector<int> xPositions;
+    std::vector<int> yPositions;
+    for (int y = 0; y < dimension; ++y) {
+        for (int x = 0; x < dimension; ++x) {
+            if (currentShape[y][x] != ' ' && x < 1 && x >= gridWidth + 1) {
+                xPositions.push_back(position.x + x + dx);
+                yPositions.push_back(position.y + y + dy);
+            }
+        }
+    }
+
+    for (int y = 0; y < dimension; ++y) {
+        for (int x = 0; x < dimension; ++x) {
+            if (currentShape[y][x] != ' ') {
+                int newX = position.x + x + dx;
                 int newY = position.y + y + dy;
-                if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
-                    if (currentShape[y][x] != ' '){
-                        return false; // Collision détectée
-                    }
+                if (newX < 1 || newX >= gridWidth + 1 || newY >= gridHeight || grid.isCellOccupied(newX, newY, xPositions, yPositions)) {
+                    return false; // Collision ou hors des limites
                 }
+            }
         }
     }
     return true; // Aucun obstacle, déplacement possible
 }
 
 void Tetramino::dropTetrimino(Grid& grid) {
-    while (canMoveDown(grid)) {
+    while (canMove(grid, 0, 1)) { // Vérifie si la pièce peut descendre
         moveDown(grid);
     }
 }
 
 void Tetramino::rotate(const Grid& grid) {
-    if (!canRotate(grid)) {
+    if ((shapeSymbols == 'O')) // La rotation est inutile pour le carré
         return;
-    }
-    // Créer une nouvelle matrice pour la forme après rotation
+    if (!canRotate(grid))
+        return; // Vérifie si la rotation est possible avant de l'effectuer
+    
+        // Créer une nouvelle matrice pour la forme après rotation
     std::array<std::array<char, 4>, 4> newShape = currentShape;
-
     // Effectuer la rotation de 90° à droite
-    for (int y = 0; y < 4; ++y) {
-        for (int x = 0; x < 4; ++x) {
-            newShape[x][3 - y] = currentShape[y][x];
+    for (int y = 0; y < dimension; ++y) {
+        for (int x = 0; x < dimension; ++x) {
+            newShape[y][x] = currentShape[x][dimension - 1 - y];
         }
     }
     // Mettre à jour la forme actuelle après la rotation
@@ -143,23 +166,33 @@ void Tetramino::rotate(const Grid& grid) {
 }
 
 bool Tetramino::canRotate(const Grid& grid) {
+    Coord tempPosition = position; // Conserver la position actuelle
+    arrangeShape();
+
     // Créer une copie de la forme actuelle pour vérifier la rotation
     std::array<std::array<char, 4>, 4> tempShape = currentShape;
-    
+    std::vector<int> xPositions; 
+    std::vector<int> yPositions;
     // Effectuer la rotation sur la copie
-    for (int y = 0; y < 4; ++y) {
-        for (int x = 0; x < 4; ++x) {
-            tempShape[x][3 - y] = currentShape[y][x];
+    for (int y = 0; y < dimension; ++y) {
+        for (int x = 0; x < dimension; ++x) {
+            tempShape[x][dimension - 1 - y] = currentShape[y][x];
+            if (currentShape[y][x] != ' ' && x < 1 && x >= gridWidth + 1) {
+                xPositions.push_back(position.x + x);
+                yPositions.push_back(position.y + y);
+            }
         }
     }
 
     // Vérifier si la nouvelle forme (après rotation) entre en collision ou sort des limites
-    for (int y = 0; y < 4; ++y) {
-        for (int x = 0; x < 4; ++x) {
-            int newX = position.x + x;
-            int newY = position.y + y;
+    for (int y = 0; y < dimension; ++y) {
+        for (int x = 0; x < dimension; ++x) {
             if (tempShape[y][x] != ' ') {
-                if (newX < 1 || newX >= grid.getWidth() + 1 || newY >= grid.getHeight() || grid.isCellOccupied(newX, newY)) {
+                int newX = position.x + x;
+                int newY = position.y + y;
+                if (newX < 1 || newX >= gridWidth + 1 || newY >= gridHeight || grid.isCellOccupied(newX, newY, xPositions, yPositions)) {
+                    // Rétablir la position d'origine si la rotation n'est pas possible
+                    position = tempPosition;                   
                     return false;
                 }
             }
@@ -168,11 +201,17 @@ bool Tetramino::canRotate(const Grid& grid) {
     return true; // La rotation est possible
 }
 
+void Tetramino::arrangeShape() {
+    int direction = ((position.x < (gridWidth + 1) / 2) > 0) ? 1 : -1;
+    while ((position.x < 1) || (position.x + dimension > gridWidth + 1))
+        position.x += direction; // Ajuster la position de la pièce pour qu'elle reste dans les limites de la grille
+}
+
 void Tetramino::draw() const {
     Color color = chooseColor(shapeSymbols);
     color.activate();
-    for (int y = 0; y < 4; ++y) {
-        for (int x = 0; x < 4; ++x) {
+    for (int y = 0; y < dimension; ++y) {
+        for (int x = 0; x < dimension; ++x) {
             if (currentShape[y][x] != ' ') {
                 mvaddch(position.y + y, position.x + x, currentShape[y][x]);
             }
@@ -189,8 +228,8 @@ Color Tetramino::chooseColor(char shapeSymbol) const {
 // Fixer la pièce à sa position 
 void Tetramino::fixToGrid(Grid& grid, bool &gameOver) {
     Color cellColor = chooseColor(shapeSymbols);
-    for (int y = 0; y < 4; ++y) {
-        for (int x = 0; x < 4; ++x) {
+    for (int y = 0; y < dimension; ++y) {
+        for (int x = 0; x < dimension; ++x) {
             if (currentShape[y][x] != ' ') {
                 int gridX = position.x + x;
                 int gridY = position.y + y;

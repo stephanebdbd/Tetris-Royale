@@ -1252,21 +1252,16 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
             keyInputAddFriendMenu(clientSocket, clientId, receiver);
         else if (status == "delete")
             keyInputManageFriendlist(clientSocket, clientId, "del." + receiver);
-        /*
         else if (status == "ban")
             keyInputManageFriendlist(clientSocket, clientId, "ban." + receiver);
         else if (status == "unban")
             keyInputManageFriendlist(clientSocket, clientId, "unban." + receiver); 
-        */
-              
     }
 
     if (action.find("/help") == 0){
         clientStates[clientId] = MenuState::Help;
         bool isRC = gameRoom->getGameModeName() == GameModeName::Royal_Competition;
         bool canEditMaxPlayer = gameRoom->getGameModeName() == GameModeName::Classic || isRC;
-        std::cout << "isRC: " << std::boolalpha << isRC << std::endl;
-        std::cout << "canEditMaxPlayer: " << std::boolalpha << canEditMaxPlayer << std::endl;
         sendMenuToClient(clientSocket, menu.getHelpMenu(isRC, canEditMaxPlayer));
         return;
     }

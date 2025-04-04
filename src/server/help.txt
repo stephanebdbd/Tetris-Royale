@@ -24,5 +24,4 @@
     POUR TOUT JOUEUR
         /invite/player/<name>       Invite l'ami <name> à jouer
         /invite/viewer/<name>       Invite l'ami <name> à regarder la partie
-        /quit                       Pour quitter une partie (le statut de propriétaire est transféré
-                                    au plus ancien participant s'il venait à partir)
+        /quit                       Pour quitter une partie (pour le propriétaire, cela impliquera la suppresion de la partie)

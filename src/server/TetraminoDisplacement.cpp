@@ -56,7 +56,7 @@ void TetraminoDisplacement::dropCurrentPiece() {
 void TetraminoDisplacement::update() {
     if (dropTimer.hasElapsed() && !gameOver) { // Si le timer a expiré, tenter de descendre la pièce
         this->setNeedToSendGame(true);
-        if (currentPiece.canMoveDown(grid)) {
+        if (currentPiece.canMove(grid, 0, 1)) {
             currentPiece.moveDown(grid);
         } else {
             currentPiece.fixToGrid(grid, gameOver);
@@ -121,8 +121,6 @@ void TetraminoDisplacement::setGameOver() {
 }
 
 bool TetraminoDisplacement::getIsGameOver() const{
-    //if (gameOver)
-        //std::cout << "Appel de getIsGameOver() -> gameOver = " << gameOver << std::endl;
     return gameOver;
 }
 
