@@ -19,11 +19,9 @@ class GameRoom {
     int ownerId;
     GameModeName gameModeName;
     int maxPlayers;
-    bool started = false;
     bool inProgress = false;
     bool ownerQuit = false;
     bool canGetGames = false;
-    bool canPlay = false;
     int energyLimit=0;
     int speed=0;
     int gameModeIndex=-1;
@@ -41,31 +39,28 @@ public:
     bool removePlayer(int playerId);
     bool getIsFull() const;
     void shiftPlayers(int index);
-    void startGame();
     void handleMalusOrBonus(int playerId);
+    void startGame();
     void endGame();
     void applyFeatureMode(int playerId);
-    void setInProgress(bool status);
     void setSpeed(int speed);
     void setGameMode(GameModeName gameMode);
     void addViewer(int viewerId);
     bool getInProgress() const;
     int getRoomId() const;
     int getOwnerId() const;
-    void setOwnerId(int clientId);
     bool getGameIsOver(int playerServerId, bool fromGameRoom=false) const;
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
     bool getNeedToSendGame(int playerServerId) const;
     void setNeedToSendGame(bool needToSendGame, int playerServerId);
     void setRoomId(int roomId) { this->roomId = roomId; }
-    void setToStartGame();
-    bool getHasStarted() const;
     bool getSettingsDone() const;
     void setGameIsOver(int playerServerId);
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
+    void setAmountOfPlayers(int amount) { amountOfPlayers = amount; }
     void inputLobby(int clientId, const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);
@@ -83,11 +78,9 @@ public:
     void setOwnerQuit();
     bool getOwnerQuit() const;
     int getGameModeIndex() const { return gameModeIndex; }
-    bool getCanGetGames() const;
-    void setCanGetGames();
-    bool getCanPlay() const;
-    void setCanPlay();
+    void createGames();
     int getEnergyOfPlayer(int playerServerId) const;
+    void updatePlayerGame(int playerServerId);
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }

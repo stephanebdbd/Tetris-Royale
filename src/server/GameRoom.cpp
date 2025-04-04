@@ -17,8 +17,9 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxP
         this->maxPlayers = 1;
     }
         
-    else if ((gameModeName == GameModeName::Duel) && (maxPlayers != 2)){
-        this->maxPlayers = 2;
+    else if ((gameModeName == GameModeName::Duel)){
+        playersVictim[0] = 1;
+        playersVictim[1] = 0;
     }
         
     else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers < 2)){
@@ -65,13 +66,8 @@ bool GameRoom::getIsFull() const {
     return getAmountOfPlayers() == getMaxPlayers();
 }
 
-void GameRoom::setToStartGame(){
-    started = true;
+void GameRoom::startGame() {
     inProgress = true;
-}
-
-bool GameRoom::getHasStarted() const {
-    return started;
 }
 
 bool GameRoom::getSettingsDone() const {
@@ -82,67 +78,20 @@ bool GameRoom::getSettingsDone() const {
 
 }
 
-void GameRoom::startGame() {
-    std::cout << "Let's create GameRoom #" << roomId << " at " << this << std::endl;
-
-    if (getGameModeName() != GameModeName::Endless) {
-        while(!(getSettingsDone() || getOwnerQuit())) continue;
-
-        if (getOwnerQuit()) {
-            endGame();
-            return;
-        }
-
-        if (getGameModeName() == GameModeName::Duel) {
-            playersVictim[0] = 1;
-            playersVictim[1] = 0;
-        }
-    }
-
-    int speed = getSpeed();
-
+void GameRoom::createGames(){
     for (int idx = 0; idx < getMaxPlayers(); idx++){
         games.emplace_back(std::make_shared<Game>(10, 20, speed));
         std::cout << "Game #" << idx << " created at " << &games[idx] << std::endl;
     }
-
-    setCanGetGames();
-
-    while (!getHasStarted()) continue;
-
-    int countGameOvers = 0;
-    
-    if (getGameModeName() != GameModeName::Endless)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-
-    setCanPlay();
-
-    while (getInProgress()) {
-    
-        countGameOvers = 0;
-
-        for (int i = 0; i < getMaxPlayers(); ++i) {
-
-            if (getGameIsOver(i, true))
-                countGameOvers++;
-
-            else {
-                games[i]->updateGame();
-                if (getGameModeName() != GameModeName::Endless)
-                    handleMalusOrBonus(i);
-            }
-
-            amountOfPlayers = getMaxPlayers() - countGameOvers;
-        }
-
-        // Conditions de fin
-        if ((countGameOvers == getMaxPlayers() - 1) && (getGameModeName() != GameModeName::Endless))
-            endGame();
-        else if ((countGameOvers == 1) && (getGameModeName() == GameModeName::Endless))
-            endGame();
-    }
 }
 
+void GameRoom::updatePlayerGame(int playerServerId) {
+    int playerId = getPlayerId(playerServerId);
+    if (playerId != -1) {
+        games[playerId]->updateGame();
+        handleMalusOrBonus(playerId);
+    }
+}
 
 void GameRoom::handleMalusOrBonus(int playerId) {
     if (getGameModeName() == GameModeName::Royal_Competition) {
@@ -212,10 +161,6 @@ void GameRoom::applyFeatureMode(int playerId) {
     }
 }
 
-void GameRoom::setInProgress(bool status) {
-    inProgress = status;
-}
-
 void GameRoom::setSpeed(int newSpeed) {
     std::cout << "Speed: " << newSpeed << std::endl;
     if (newSpeed > 100)
@@ -258,14 +203,6 @@ int GameRoom::getMaxPlayers() const { return maxPlayers; }
 void GameRoom::setOwnerQuit() { ownerQuit = true; }
 
 bool GameRoom::getOwnerQuit() const { return ownerQuit; }
-
-void GameRoom::setCanGetGames() { canGetGames = true; }
-
-bool GameRoom::getCanGetGames() const { return canGetGames; }
-
-void GameRoom::setCanPlay() { canPlay = true; }
-
-bool GameRoom::getCanPlay() const { return canPlay; }
 
 void GameRoom::setMaxPlayers(int max) {
     if ((getGameModeName() != GameModeName::Endless) && (getGameModeName() != GameModeName::Duel)){
@@ -315,7 +252,7 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
     int playerId = getPlayerId(playerServerId);
     if ((playerId == -1) || getOwnerQuit())
         return;
-    if (getHasStarted()) {
+    if (getInProgress()) {
         if (getCanUseMalusOrBonus(playerId)) {
             int action = convertStringToInt(unicodeAction);
             if (action != -1) {
@@ -376,8 +313,6 @@ void GameRoom::inputLobby(int clientId, const std::string& action){
             this->setEnergyLimit(number);
     }
 }
-
-void GameRoom::setOwnerId(int clientId) { ownerId = clientId; }
 
 Score& GameRoom::getScore(int playerServerId) {
     int playerId = getPlayerId(playerServerId);

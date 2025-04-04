@@ -65,6 +65,7 @@ class Server {
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::atomic<int> clientIdCounter;
     std::unordered_map<int, int> clientGameRoomId;
+    std::unordered_map<int, int> clientIdToSocket; 
     std::vector<std::shared_ptr<GameRoom>> gameRooms;  
     std::unordered_map<std::string, std::shared_ptr<chatRoom>> chatRooms;
     std::shared_ptr<ServerChat> chat;
@@ -95,7 +96,7 @@ public:
     void acceptClients();
     void handleClient(int clientSocket, int clientId);
     void stop();
-    void loopGame(int clientSocket, int clientId);
+    void loopGame(int ownerId);
 
     void sendMenuToClient(int clientSocket, const std::string& screen);
     //welcome & main
@@ -108,7 +109,7 @@ public:
     void keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
     //game
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode=GameModeName::Endless);
+    void keyInputGameModeMenu(int clientId, GameModeName gameMode=GameModeName::Endless);
     //chat
     void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
     void sendChatModeToClient(int clientSocket);
@@ -129,10 +130,9 @@ public:
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
     
 
-    void receiveInputFromClient(int clientSocket, int clientId);
     void deleteGameRoom(int roomId);
     void extractDataBetweenSlashes(const std::string& toFind, const std::string& action, std::string& status, std::string& receiver);
-    void sendInputToGameRoom(int clientId, const std::string& action, std::shared_ptr<GameRoom> gameRoom);
+    void sendInputToGameRoom(int clientId, const std::string& action);
     void shiftGameRooms(int index);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
@@ -149,19 +149,15 @@ public:
     void sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game, Score& score);
     std::string trim(const std::string& s);
     void keyInputChooseGameModeMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action, std::shared_ptr<GameRoom> gameRoom=nullptr);
+    void keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputHelpMenu(int clientSocket, int clientId, const std::string& action);
     std::string getMode(int clientId);
     int getMaxPlayers(int clientId);
     int getAmountOfPlayers(int clientId);
     void letPlayersPlay(const std::vector<int>& players);
-    void ownerStartsGame(std::shared_ptr<GameRoom> gameRoom);
 
     void keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status);
     void keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action);
-
-    void startGame(int clientSocket, int clientId);
-
 };
 
 #endif 
