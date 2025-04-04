@@ -699,6 +699,7 @@ void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::stri
         std::cout << "Client #" << clientId << " déconnecté." << std::endl;
         // Fermer la connexion
         close(clientSocket);
+        clientStates.erase(clientId);
         //return to terminal
         return;
     }
