@@ -21,14 +21,14 @@ void FriendList::loadFriends() {
         return;
     }
     try {
-        nlohmann::json j;
+        json j;
         inputFile >> j;
         if (j.is_object()) {
             for (const auto& [user, friendList] : j.items()) {
                 friends[user] = friendList.get<std::vector<std::string>>();
             }
         }
-    } catch (const nlohmann::json::parse_error& e) {
+    } catch (const json::parse_error& e) {
         std::cerr << "Erreur de parsing JSON (friends) : " << e.what() << std::endl;
     }
 }
@@ -39,7 +39,7 @@ void FriendList::saveFriends() {
         std::cerr << "Erreur d'ouverture du fichier " << friendsFile << " pour l'écriture." << std::endl;
         return;
     }
-    nlohmann::json j(friends);
+    json j(friends);
     outputFile << j.dump(4);  // Formatage avec indentation
 }
 
@@ -51,14 +51,14 @@ void FriendList::loadRequests() {
         return;
     }
     try {
-        nlohmann::json j;
+        json j;
         inputFile >> j;
         if (j.is_object()) {
             for (const auto& [user, requestList] : j.items()) {
                 requests[user] = requestList.get<std::vector<std::string>>();
             }
         }
-    } catch (const nlohmann::json::parse_error& e) {
+    } catch (const json::parse_error& e) {
         std::cerr << "Erreur de parsing JSON (requests) : " << e.what() << std::endl;
     }
 }
@@ -69,7 +69,7 @@ void FriendList::saveRequests() {
         std::cerr << "Erreur d'ouverture du fichier " << requestsFile << " pour l'écriture." << std::endl;
         return;
     }
-    nlohmann::json j(requests);
+    json j(requests);
     outputFile << j.dump(4);
 }
 

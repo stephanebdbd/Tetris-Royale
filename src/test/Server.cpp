@@ -7,8 +7,6 @@
 #include <sys/select.h>
 #include "../common/json.hpp"
 
-using json = nlohmann::json;
-
 #define PORT 12345
 #define MAX_CLIENTS 10
 

@@ -479,7 +479,7 @@ json Menu::getHelpMenu(bool isRC, bool canEditMaxPlayer) const {
                 menu[jsonKeys::OPTIONS].push_back("    " + line);
         }
         menu[jsonKeys::OPTIONS].push_back("\n");
-    } catch (const nlohmann::json::parse_error& e) {
+    } catch (const json::parse_error& e) {
         std::cerr << "Erreur de parsing JSON (MenuHelp) : " << e.what() << std::endl;
     }
     file.close();
