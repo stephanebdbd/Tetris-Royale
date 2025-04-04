@@ -3,6 +3,7 @@
 TetraminoDisplacement::TetraminoDisplacement(Grid& grid, int speed)
     : grid(grid),
     currentPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()), 
+    nextPiece(grid.getWidth() / 2, 0, grid.getWidth(), grid.getHeight()),
     dropTimer(speed), 
     commandisBlocked(false), lightisBlocked(false) {
         std::cout << "TetraminoDisplacement created." << std::endl;
@@ -73,7 +74,8 @@ void TetraminoDisplacement::update() {
                     dropTimer.decreaseInterval(5); // Diminue le temps d'attente entre chaque chute
                 }
                 
-                currentPiece.reset(grid.getWidth() / 2, 0);
+                currentPiece = nextPiece; // La pièce actuelle devient la prochaine
+                nextPiece.reset(grid.getWidth() / 2, 0); 
             }
         }
         dropTimer.reset();

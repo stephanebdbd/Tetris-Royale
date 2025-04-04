@@ -9,6 +9,8 @@ class TetraminoDisplacement {
     Grid& grid;
     
     Tetramino currentPiece;
+    Tetramino nextPiece;
+    
     Timer dropTimer;
     bool commandisBlocked;
     bool lightisBlocked;
@@ -33,6 +35,7 @@ public:
     Grid& getGrid() { return grid; }
     void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
     Tetramino& getCurrentPiece() { return currentPiece; }
+    Tetramino& getNextPiece() { return nextPiece; }
     void setSpeed(int newSpeed);
     void setBonus1Royal(bool bonus) { bonus1Royal = bonus; }
     void setEnter(int enter) { ch = enter; }

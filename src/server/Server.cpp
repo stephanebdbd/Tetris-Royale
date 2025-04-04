@@ -1155,8 +1155,8 @@ void Server::sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game, Scor
 
     message[jsonKeys::SCORE] = score.scoreToJson();
     message[jsonKeys::GRID] = game->getGrid().gridToJson();
-    message[jsonKeys::TETRA_PIECE] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
-
+    message[jsonKeys::TETRA_PIECE] = game->getCurrentPiece().tetraminoToJson(false); // Ajout du tétrimino dans le même message
+    message[jsonKeys::NEXT_PIECE] = game->getNextPiece().tetraminoToJson(true); 
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
 }
