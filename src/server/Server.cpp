@@ -699,6 +699,7 @@ void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::stri
         std::cout << "Client #" << clientId << " déconnecté." << std::endl;
         // Fermer la connexion
         close(clientSocket);
+        clientStates.erase(clientId);
         //return to terminal
         return;
     }
@@ -1154,9 +1155,8 @@ void Server::sendGameToPlayer(int clientSocket, int clientId, std::shared_ptr<Ga
 
     message[jsonKeys::SCORE] = score.scoreToJson();
     message[jsonKeys::GRID] = game->getGrid().gridToJson();
-    message[jsonKeys::TETRA_PIECE] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
-    message[jsonKeys::MESSAGE_CIBLE] = gameRoom->messageToJson(clientId);
-    
+    message[jsonKeys::TETRA_PIECE] = game->getCurrentPiece().tetraminoToJson(false); // Ajout du tétrimino dans le même message
+    message[jsonKeys::NEXT_PIECE] = game->getNextPiece().tetraminoToJson(true); 
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
 }

@@ -18,6 +18,7 @@ namespace jsonKeys {
     constexpr char X[] = "x";
     constexpr char Y[] = "y";
     constexpr char TETRA_PIECE[] = "tetraPiece";
+    constexpr char NEXT_PIECE[] = "nextPiece";
     constexpr char SHAPE[] = "shape";
     constexpr char SHAPE_SYMBOL[] = "shapeSymbol";
 

@@ -35,6 +35,8 @@ void ClientDisplay::displayGame(const json& data) {
 
     drawTetramino(data[jsonKeys::TETRA_PIECE]);
 
+    drawTetramino(data[jsonKeys::NEXT_PIECE]);
+
     drawScore(data[jsonKeys::SCORE]);
     
     drawMessage(data[jsonKeys::MESSAGE_CIBLE]);

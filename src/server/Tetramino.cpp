@@ -205,11 +205,16 @@ void Tetramino::fixToGrid(Grid& grid, bool &gameOver) {
     }
 }
 
-json Tetramino::tetraminoToJson() const {
+json Tetramino::tetraminoToJson(bool isNext) const {
     json tetraminoJson;
-
-    tetraminoJson[jsonKeys::X] = position.x;
-    tetraminoJson[jsonKeys::Y] = position.y;
+    if (!isNext) {
+        tetraminoJson[jsonKeys::X] = position.x;
+        tetraminoJson[jsonKeys::Y] = position.y;
+    }
+    else {
+        tetraminoJson[jsonKeys::X] = position.x + 13;
+        tetraminoJson[jsonKeys::Y] = position.y + 4;
+    }
 
     json shapeJson = json::array();
     for (const auto& row : currentShape) {

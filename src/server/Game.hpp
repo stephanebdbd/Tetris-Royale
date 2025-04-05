@@ -37,6 +37,7 @@ class Game {
         void setNeedToSendGame(bool needToSendGame) { displacement.setNeedToSendGame(needToSendGame); }
         bool getNeedToSendGame() const { return displacement.getNeedToSendGame(); }
         Tetramino& getCurrentPiece() { return displacement.getCurrentPiece(); }
+        Tetramino& getNextPiece() { return displacement.getNextPiece(); }
         bool getIsGameOver() const;
         void setGameOver();
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }

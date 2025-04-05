@@ -35,7 +35,7 @@ class Tetramino {
         void setCurrentShape(std::array<std::array<char, 4>, 4> shape) { currentShape = shape; };
         Color chooseColor(char shapeSymbol) const;
         
-        json tetraminoToJson() const;
+        json tetraminoToJson(bool isNext) const;
 };
 
 #endif
