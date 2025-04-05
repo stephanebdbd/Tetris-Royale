@@ -16,47 +16,10 @@
 #include "chatRoom.hpp"
 #include "FriendList.hpp"
 #include "chatRoom.hpp"
+#include "../common/MenuState.hpp"
+#include <mutex>
 
-enum class MenuState {
-    Welcome,
-        RegisterPseudo,
-            RegisterPassword,
-        LoginPseudo,
-            LoginPassword,
-    Main,
-        Game, 
-            JoinOrCreateGame,
-                CreateGame,
-                    ChooseGameMode,
-                        Endless,
-                        Duel,
-                        Classic,
-                        Royal_Competition,
-                            Settings,
-                JoinGame,
-                    GameRequestList,
-                        Play,
-                        GameOver,
-        classement,
-        chat,
-            CreateRoom,
-            JoinRoom,
-            ManageRooms,
-                ManageRoom,
-                    ListRoomMembres,
-                    AddMembre,
-                    AddAdmin,
-                    RoomRequestList,
-                    QuitRoom,
-                    ConfirmDeleteRoom,
-                    ConfirmQuitRoom,
-                    
-            PrivateChat,
-        Friends,
-            AddFriend,
-            FriendList,
-            FriendRequestList,
-};
+
 
 class Server {
     int port;
@@ -68,6 +31,7 @@ class Server {
     std::unordered_map<std::string, std::shared_ptr<chatRoom>> chatRooms;
     std::shared_ptr<ServerChat> chat;
     std::shared_ptr<FriendList> friendList;
+    std::shared_ptr<MenuStateManager> menuStateManager;
     
     int gameRoomIdCounter=0;
     
@@ -83,6 +47,7 @@ class Server {
    
 
     std::unique_ptr<UserManager> userManager;
+    std::mutex clientMutex;
     
     Menu menu;
     void returnToMenu(int clientSocket, int clientId, MenuState state, const std::string& message = "", int sleepTime = 3);
@@ -93,10 +58,12 @@ public:
     bool start();
     void acceptClients();
     void handleClient(int clientSocket, int clientId);
+    void cleanupClient(int clientSocket, int clientId);
     void stop();
     void loopGame(int clientSocket, int clientId);
 
     void sendMenuToClient(int clientSocket, const std::string& screen);
+    void sendMenuStateToClient(int clientSocket, MenuState state, const std::string& message = "");
     //welcome & main
     void keyInputWelcomeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputMainMenu(int clientSocket, int clientId, const std::string& action);
@@ -158,6 +125,12 @@ public:
     void keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action);
 
     void startGame(int clientSocket, int clientId);
+
+    // refresh le menu
+    void refreshMenu(int clientSocket, int clientId);
+
+    //GUI
+    void handleGUIActions(int clientSocket, int clientId, const json& action);
 
 };
 

@@ -11,7 +11,7 @@
 #include <fstream>
 
 
-Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1), stopInputThread(false) {}
+Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1) {}
 
 void Client::run() {
     if (!connect()) {
@@ -99,6 +99,7 @@ void Client::handleUserInput() {
     }
 }
 
+
 void Client::receiveDisplay() {
     std::string received;
 
@@ -141,7 +142,12 @@ void Client::receiveDisplay() {
                     else {
                         chatMode = false;
                         isPlaying = false;
-                        display.displayMenu(data);
+                        if(data.contains("state")) {
+                            std::cout << "State: " << data["state"] << std::endl;
+                            currentMenuState = menuStateManager.deserialize(data["state"]);
+                            //display.displayMenu(data);
+                        }
+                        
                     }
 
                     refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
@@ -155,30 +161,7 @@ void Client::receiveDisplay() {
     }
 }
 
-void Client::sendSFMLInput(sf::Keyboard::Key key) {
-    std::string action;
-    std::cout << "Key pressed: " << key << std::endl;
 
-    if (key == sf::Keyboard::Up) {
-        action = "UP";
-    }
-    else if (key == sf::Keyboard::Down) {
-        action = "DOWN";
-    }
-    else if (key == sf::Keyboard::Left) {
-        action = "LEFT";
-    }
-    else if (key == sf::Keyboard::Right) {
-        action = "RIGHT";
-    }
-    else if (key == sf::Keyboard::Space) {
-        action = " ";
-    }
-    else {
-        action = std::string(1, static_cast<char>(key));
-    }
-    
-    if (!action.empty()) {
-        controller.sendInput(action, clientSocket);
-    }
+MenuState Client::getCurrentMenuState() {
+    return currentMenuState; 
 }

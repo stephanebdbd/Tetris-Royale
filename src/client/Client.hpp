@@ -5,8 +5,8 @@
 #include "Controller.hpp"
 #include "ClientNetwork.hpp"
 #include "ClientChat.hpp"
-
-#include <SFML/Window/Keyboard.hpp> 
+#include "../common/MenuState.hpp"
+#include <ostream>
 
 
 class Client {
@@ -16,6 +16,7 @@ private:
     Controller controller;  // Chaque client a son propre controller
     ClientNetwork network;  // Chaque client a son propre network
     ClientChat chat;        // Chaque client a son propre chat
+    MenuStateManager menuStateManager; // Chaque client a son propre gestionnaire d'état de menu
 
 
     std::string serverIP;
@@ -23,7 +24,7 @@ private:
     int clientSocket;
     bool isPlaying = false;
     bool chatMode = false;
-    bool stopInputThread;
+    MenuState currentMenuState;
     
 public:
         Client(const std::string& serverIP, int port);
@@ -32,7 +33,8 @@ public:
         void receiveDisplay();
         void handleUserInput();
         void displayMenu(const json& data);
-        void sendSFMLInput(sf::Keyboard::Key key);
+        int getClientSocket() const { return clientSocket; }
+        MenuState getCurrentMenuState();
 
 };
 
