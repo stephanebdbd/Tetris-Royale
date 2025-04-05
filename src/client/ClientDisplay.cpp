@@ -42,6 +42,9 @@ void ClientDisplay::displayGame(const json& data) {
     
     drawMessage(data[jsonKeys::MESSAGE_CIBLE]);
 
+    if(data[jsonKeys::MESSAGE_CIBLE][jsonKeys::GAME_OVER])
+        displayLargeText("GAME OVER", 10, 1, "Z");
+
     refresh();
 }
 
@@ -150,5 +153,14 @@ void ClientDisplay::drawMessage(const json& msg){
 
 
     
+    
+}
+
+void ClientDisplay::displayLargeText(const std::string& text, int startY, int startX, const std::string& colorSymbol) {
+    Color color = Color::fromShapeSymbol(colorSymbol);
+
+    color.activate();
+    mvprintw(startY, startX, "%s", text.c_str());
+    color.deactivate();
     
 }

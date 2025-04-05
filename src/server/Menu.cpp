@@ -363,9 +363,9 @@ json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& rankin
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getEndGameMenu() const {
+json Menu::getEndGameMenu(const std::string& message) const {
     json menu = {
-        {jsonKeys::TITLE, "Game Over"},
+        {jsonKeys::TITLE, message},
         {jsonKeys::OPTIONS, {
             {"1. ", "Rejouer"},
             {"2. ", "Retour au menu principal"}
@@ -454,6 +454,18 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
 json Menu::getWinGameMenu() const {
     json menu = {
         {jsonKeys::TITLE, "YOU WIN!!"},
+        {jsonKeys::OPTIONS, {
+            {"1. ", "Rejouer"},
+            {"2. ", "Retour au menu principal"}
+        }},
+        {jsonKeys::INPUT, "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getQuitGameMenu() const {
+    json menu = {
+        {jsonKeys::TITLE, "GAME END"},
         {jsonKeys::OPTIONS, {
             {"1. ", "Rejouer"},
             {"2. ", "Retour au menu principal"}

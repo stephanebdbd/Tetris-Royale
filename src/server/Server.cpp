@@ -668,9 +668,26 @@ void Server::loopGame(int clientSocket, int clientId) {
     else
         std::cout << "Owner #" << gameRoom->getOwnerId() << " a quitté la GameRoom #" << gameRoom->getRoomId() << std::endl;
 
-    if ((gameRoom->getHasStarted() && (!gameRoom->getInProgress())) || (gameRoom->getOwnerQuit() && (gameRoom->getOwnerId() != clientId))) {
+    if (gameRoom->getHasStarted() && (!gameRoom->getInProgress())) {
+        sleep(3);
+        if((gameRoom->getSizePlayersActive() == 1) && (gameRoom->getWinner() == clientId)) {
+            clientStates[clientId] = MenuState::GameOver;
+            //sendMenuToClient(clientSocket, menu.getWinGameMenu());
+            sendMenuToClient(clientSocket, menu.getEndGameMenu("YOU WIN !!"));
+        }
+        else{
+            clientStates[clientId] = MenuState::GameOver;
+            sendMenuToClient(clientSocket, menu.getEndGameMenu("GAME OVER"));
+        }
+            
+        
+    }
+
+    if (gameRoom->getOwnerQuit() && (gameRoom->getOwnerId() != clientId)){
         clientStates[clientId] = MenuState::GameOver;
-        sendMenuToClient(clientSocket, menu.getEndGameMenu());
+        sendMenuToClient(clientSocket, menu.getEndGameMenu("GAME END"));
+        
+        //sendMenuToClient(clientSocket, menu.getQuitGameMenu());
     }
 
     std::cout << "Game #" << gameRoom->getRoomId() << " ended." << std::endl;

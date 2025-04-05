@@ -130,13 +130,15 @@ void GameRoom::startGame() {
 
     while (getInProgress()) {
     
-        countGameOvers = 0;
 
         for (int i = 0; i < getMaxPlayers(); ++i) {
 
             if (getGameIsOver(i, true)){
-                countGameOvers++;
-                playersActive.erase(playersActive.begin() + i);
+                if (std::find(playersActive.begin(), playersActive.end(), players[i]) != playersActive.end()){
+                    countGameOvers++;
+                    messageList[i][jsonKeys::GAME_OVER] = true;
+                    playersActive.erase(playersActive.begin() + i);   
+                }
             }
                 
 
@@ -585,10 +587,6 @@ json GameRoom::messageToJson(int playerServerId) const {
         keyClear[playerId] = false;
     }
         
-
-    
-    //smessage[jsonKeys::PROPOSITION_CIBLE] = true;
-
 
     return smessage;
     

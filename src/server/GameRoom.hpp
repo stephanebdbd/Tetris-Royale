@@ -43,7 +43,8 @@ class GameRoom {
     {jsonKeys::CHOICE_MALUS_BONUS, false},  
     {jsonKeys::CHOICE_MALUS, false},  
     {jsonKeys::CHOICE_BONUS, false},
-    {jsonKeys::CLEAR, false}  
+    {jsonKeys::CLEAR, false},
+    {jsonKeys::GAME_OVER, false}  
 }; 
     std::vector<MessageMap> messageList;
     std::vector<std::string> boolInputs = {"Y", "y", "N", "n"};
@@ -113,7 +114,8 @@ public:
     json messageToJson(int playerServerId)const;
 
     void choiceVictimRandomly(int playerId);
-    int getWinner() const;
+    int getWinner() const { return playersActive[0];}
+    int getSizePlayersActive() const { return playersActive.size(); }
 };
 
 #endif
