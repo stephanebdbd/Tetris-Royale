@@ -50,6 +50,11 @@ void Tetramino::initializeShapes() {
         {{{' ', '#', '#', ' '},
           {'#', '#', ' ', ' '},
           {' ', ' ', ' ', ' '},
+          {' ', ' ', ' ', ' '}}},
+
+        {{{' ', ' ', ' ', ' '},
+          {' ', '#', ' ', ' '},
+          {' ', ' ', ' ', ' '},
           {' ', ' ', ' ', ' '}}}
     };
 };
@@ -57,8 +62,18 @@ void Tetramino::initializeShapes() {
 // Sélectionner une forme aléatoire
 void Tetramino::selectRandomShape() {
     srand(time(0));
-    int index = rand() % shapes.size(); // Sélectionner un index aléatoire parmi les formes disponibles
-    currentShape = shapes[index];
+    int index = rand() % (shapes.size()-1); // Sélectionner un index aléatoire parmi les formes disponibles
+    if(bonusOneBlock){
+        currentShape = shapes[7]; // prends la pièce d'un bloc 
+        counteurOneBlock += 1;
+        if(counteurOneBlock == 2){
+            bonusOneBlock = false;
+            counteurOneBlock = 0;
+        }
+    }
+        
+    else
+        currentShape = shapes[index];
     switch (index) {
         case 0: shapeSymbols = 'I'; break; // I - Cyan
         case 1: shapeSymbols = 'L'; break; // L - Orange
@@ -72,7 +87,6 @@ void Tetramino::selectRandomShape() {
 }
 
 void Tetramino::moveDown(Grid& grid) {
-    std::cout << "Tetramino::moveDown of grid : " << &grid << std::endl;
     if (canMoveDown(grid)) {
         position.y++;
     }
@@ -195,7 +209,6 @@ void Tetramino::fixToGrid(Grid& grid, bool &gameOver) {
                 int gridX = position.x + x;
                 int gridY = position.y + y;
                 if (gridY <= 1) { // Si la pièce est en dehors de la grille
-                    std::cout << "Game Over From Tetramino" << std::endl;
                     gameOver = true; // Déclencher le game over
                     return;
                 }
@@ -227,6 +240,9 @@ json Tetramino::tetraminoToJson(bool isNext) const {
     tetraminoJson[jsonKeys::SHAPE] = shapeJson;
     tetraminoJson[jsonKeys::SHAPE_SYMBOL] = shapeSymbols;
 
+    tetraminoJson[jsonKeys::LIGHT_TETRA] = lightBlocked;
+
+
     return tetraminoJson;
 }
 
@@ -234,4 +250,8 @@ json Tetramino::tetraminoToJson(bool isNext) const {
 void Tetramino::reset(int startX, int startY) {
     position = {startX, startY};
     selectRandomShape(); // Sélectionner une nouvelle forme aléatoire
+}
+
+void Tetramino::applyMiniTetraminoBonus(){
+    bonusOneBlock = true;
 }

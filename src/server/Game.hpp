@@ -42,6 +42,17 @@ class Game {
         void setGameOver();
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
         void setSpeed(int speed);
+
+        //Bonus Royal
+        void applyMiniTetraminoBonus(){displacement.applyMiniTetraminoBonus();}
+        void setSpeedBonusMalus(bool bonus) { displacement.setSpeedBonusMalus(bonus); }
+        void applySpeedBonusMalus(int speed) {displacement.applySpeedBonusMalus(speed);}
+
+        //Malus Royal
+        void setCommandIsReversed(bool malus) { displacement.setCommandIsReversed(malus); }
+        void setBlockCommand(bool malus) { displacement.setBlockCommand(malus); }
+        void setlightBlocked(bool block) { displacement.setlightBlocked(block); }
+        void random2x2MaskedBlock() { displacement.random2x2MaskedBlock(); }
 };
 
 #endif

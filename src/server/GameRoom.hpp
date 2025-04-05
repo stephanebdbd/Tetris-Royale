@@ -113,6 +113,7 @@ public:
     json messageToJson(int playerServerId)const;
 
     void choiceVictimRandomly(int playerId);
+    int getWinner() const;
 };
 
 #endif

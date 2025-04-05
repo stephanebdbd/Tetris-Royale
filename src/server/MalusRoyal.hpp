@@ -2,13 +2,14 @@
 #define MALUSROYAL_HPP
 
 #include "TetraminoDisplacement.hpp"
+#include "Game.hpp"
 
 class MalusRoyal {
     
-    TetraminoDisplacement displacement;
+    std::shared_ptr<Game> game;
     
     public:
-        MalusRoyal(TetraminoDisplacement& displacement);
+        MalusRoyal(std::shared_ptr<Game> game);
         void reverseControl();
         void blockControl();
         void increaseSpeed();
