@@ -8,66 +8,66 @@
 #include "ClientChat.hpp"
 #include "Button.hpp"
 #include "Text.hpp"
-
+#include "../common/MenuState.hpp"
 #include <memory>
 #include <vector>
 
-enum class GameState {
-    Welcome,
-    MainMenu,
-    Game,
-    GameOver,
-    GameVictory,
-    GameLost,
-    Pause,
-    Settings,
-    Chat
-};
 
-struct Textures {
+struct Textures{
     sf::Texture connexion;
-    sf::Texture mainMenu;
-    sf::Texture gameMenu;
+    sf::Texture grid;
+    sf::Texture game;
     sf::Texture gameOver;
     sf::Texture gameVictory;
     sf::Texture gameLost;
     sf::Texture gamePause;
     sf::Texture settings;
-    sf::Texture grid;
     sf::Texture chat;
+    sf::Texture notification;
+    sf::Texture logoConnexion;
+    sf::Texture logoNotification;
+    sf::Texture logoSettings;
+    sf::Texture logoTeams;
+    sf::Texture logoRanking;
+    sf::Texture logoChat;
+    sf::Texture logoMain;
+    sf::Texture logoExit;
 };
 
-struct Fonts {
-    sf::Font font;
-};
 
 class SFMLGame {
-    Client& client;
-    std::shared_ptr<sf::RenderWindow> window;
-    std::shared_ptr<Textures> textures;
-    std::shared_ptr<Fonts> fonts;
-    std::vector<std::shared_ptr<Button>> buttons;
-    std::vector<std::shared_ptr<TextField>> texts;
-    GameState currentState;
-    
 
-    //draw
-    void drawButtons();
-    void drawTextFields();
+    private:
+        std::vector<std::string> contacts = {"Alice", "Bob", "Charlie", "David", "Eve"};
 
-    //handle events
-    void handleTextFieldEvents(sf::Event& event);
-    void handleButtonEvents();
-    void handleEvents();
-    void LoadResources();
-    void cleanup();
+        Client& client;
+        std::unique_ptr<sf::RenderWindow> window;
+        std::unique_ptr<ClientNetwork> network;
+        std::unique_ptr<Textures> textures;
+        std::vector<std::unique_ptr<Button>> buttons;
+        std::vector<std::unique_ptr<TextField>> texts;
+        sf::Font font; 
+        MenuState currentState;
+
+        
+        //draw
+        void drawButtons();
+        void drawTextFields();
+
+        //handle events
+        void handleTextFieldEvents(sf::Event& event);
+        void handleButtonEvents();
+        void handleEvents();
+        void LoadResources();
+        void cleanup();
 
     public:
         SFMLGame(Client& client);
-        ~SFMLGame() = default;
+        ~SFMLGame();
 
         void run();
-        void displayBackground(const std::string& backgroundPath);
+        void refreshMenu();
+        void displayBackground(sf::Texture& texture);
 
         // Welcome Menu
         void welcomeMenu();
@@ -91,8 +91,11 @@ class SFMLGame {
         void displayPiecesFinalPosition();
 
         // Chat Menu
-        void chatMenu();
+        void chatMenu(const std::vector<std::string>& contacts);
         void ChatRoomMenu();
+
+        //notification
+        void notificationMenu(const std::vector<std::string>& notifications);
 };
 
 #endif // SFMLGAME_HPP
