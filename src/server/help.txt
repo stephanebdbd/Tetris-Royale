@@ -25,3 +25,10 @@
         /invite/player/<name>       Invite l'ami <name> à jouer
         /invite/viewer/<name>       Invite l'ami <name> à regarder la partie
         /quit                       Pour quitter une partie (pour le propriétaire, cela impliquera la suppresion de la partie)
+    
+    POUR TOUT SPECTATEUR
+        Durant la partie, le viewer utilisera ses touches de gauches et droites pour passer d'un
+        plateau de jeu à un autre, jusqu'à ce que celle-ci se termine.
+        
+        /status/player              Pour devenir passer de spectateur à joueur d'une partie
+        

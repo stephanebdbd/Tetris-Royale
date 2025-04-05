@@ -81,10 +81,10 @@ bool Game::getIsGameOver() const {
     return displacement.getIsGameOver();
 }
 
-Grid& Game::getGrid()  {
-    return grid;
+json Game::gridToJson() const {
+    return grid.gridToJson();
 }
 
-Score& Game::getScore() {
-    return score;
+json Game::scoreToJson() const {
+    return score.scoreToJson();
 }

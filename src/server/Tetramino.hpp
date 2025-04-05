@@ -33,6 +33,7 @@ class Tetramino {
         void reset(int startX, int startY);
         void setCurrentShape(std::array<std::array<char, 4>, 4> shape) { currentShape = shape; };
         void arrangeShape();
+        char getShapeSymbols() const { return shapeSymbols; }
         Color chooseColor(char shapeSymbol) const;
         
         json tetraminoToJson() const;

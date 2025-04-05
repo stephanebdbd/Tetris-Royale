@@ -30,9 +30,8 @@ public:
     bool getNeedToSendGame() const;
     bool getIsGameOver() const;
     void setGameOver();
-    Grid& getGrid() { return grid; }
     void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
-    Tetramino& getCurrentPiece() { return currentPiece; }
+    json tetraminoToJson() const { return currentPiece.tetraminoToJson(); }
     void setSpeed(int newSpeed);
     void setBonus1Royal(bool bonus) { bonus1Royal = bonus; }
     void setEnter(int enter) { ch = enter; }

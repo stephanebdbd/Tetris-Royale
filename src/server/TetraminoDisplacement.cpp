@@ -19,9 +19,13 @@ void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
         moveCurrentPieceLeft();
         setNeedToSendGame(true);
     }
-    else if (action == "up") { 
-        rotateCurrentPiece();
-        setNeedToSendGame(true);
+    else if (action == "up") {
+        if ((currentPiece.getShapeSymbols() == 'O')) // On vérifie le timer si la forme est carrée
+            update();
+        else {
+            rotateCurrentPiece();
+            setNeedToSendGame(true);
+        }
     }
     else if (action == "down"){
         moveCurrentPieceDown();

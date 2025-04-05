@@ -148,8 +148,6 @@ void Tetramino::dropTetrimino(Grid& grid) {
 }
 
 void Tetramino::rotate(const Grid& grid) {
-    if ((shapeSymbols == 'O')) // La rotation est inutile pour le carré
-        return;
     if (!canRotate(grid))
         return; // Vérifie si la rotation est possible avant de l'effectuer
     

@@ -60,7 +60,7 @@ public:
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
-    void setAmountOfPlayers(int amount) { amountOfPlayers = amount; }
+    void setAmountOfPlayers(int amount);
     void inputLobby(int clientId, const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);
@@ -71,7 +71,7 @@ public:
     int convertSettingToInt(const std::string& unicodeAction, std::size_t length);
     int convertStringToInt(const std::string& unicodeAction);
     bool getCanUseMalusOrBonus(int playerServerId) const;
-    Score& getScore(int playerServerId);
+    int getScoreValue() const;
     int getPlayerId(int playerServerId) const;
     void setEnergyLimit(int NewEnergyLimit);
     int getEnergyLimit() const;

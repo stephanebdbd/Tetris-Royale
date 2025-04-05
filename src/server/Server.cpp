@@ -11,7 +11,7 @@
 
 
 Server::Server(int port) 
-    : port(port), serverSocket(-1), clientIdCounter(0){
+    : port(port), serverSocket(-1), clientIdCounter(0), gameRoomIdCounter(0) {
         userManager = std::make_unique<UserManager>("./users.txt");
         friendList = std::make_unique<FriendList>();
     }
@@ -81,11 +81,12 @@ void Server::handleClient(int clientSocket, int clientId) {
         if (bytesReceived <= 0) {
             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
             if (clientStates[clientId] == MenuState::Play) {
+                std::lock_guard<std::mutex> lock(gameRoomsMutex);
                 int roomId = clientGameRoomId[clientId];
                 if ((roomId != -1)) {
                     if (gameRooms[roomId]->getInProgress() || gameRooms[roomId]->getGameModeName() == GameModeName::Endless) {
                         gameRooms[roomId]->endGame();
-                        deleteGameRoom(roomId);
+                        deleteGameRoom(roomId, gameRooms[roomId]->getPlayers());
                     }
                     else if (!gameRooms[roomId]->getInProgress()) 
                         gameRooms[roomId]->removePlayer(clientId);
@@ -113,124 +114,97 @@ void Server::handleClient(int clientSocket, int clientId) {
 }
 
 void Server::handleMenu(int clientSocket, int clientId, const std::string& action) {
-    if (clientStates[clientId] == MenuState::Welcome) {
-        keyInputWelcomeMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::RegisterPseudo) {
-        keyInputRegisterPseudoMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::RegisterPassword) {
-        keyInputRegisterPasswordMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::LoginPseudo) {
-        keyInputLoginPseudoMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::LoginPassword) {
-        keyInputLoginPasswordMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::Main) {
-        keyInputMainMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::classement) {
-        keyInputRankingMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::chat) {
-        keyInputChatMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::CreateRoom) {
-        keyInputCreateChatRoom(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::JoinRoom) {
-        keyInputJoinChatRoom(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::ManageRooms) {
-        keyInputManageMyRooms(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::ManageRoom) {
-        keyInputManageRoom(clientSocket, clientId, action);
-        return;
-    }
-    if(clientStates[clientId] == MenuState::ListRoomMembres){
-        keyInputListMembres(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::AddMembre) {
-        keyInputAddMembre(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::AddAdmin) {
-        keyInputAddAdmin(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::RoomRequestList) {
-        keyInputRequestList(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::ConfirmDeleteRoom) {
-        keyInputConfirmDeleteRoom(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::ConfirmQuitRoom) {
-        keyInputQuitRoom(clientSocket, clientId, action);
-        return;
-    }
-    if(clientStates[clientId] == MenuState::Friends){
-        keyInputFriendsMenu(clientSocket, clientId, action);
-        return;
-    }
-    if(clientStates[clientId] == MenuState::AddFriend){
-        keyInputAddFriendMenu(clientSocket, clientId, action);
-        return;
-    }
-    if(clientStates[clientId] == MenuState::FriendList){
-        keyInputManageFriendlist(clientSocket, clientId, action);
-        return;
-    }
-    if(clientStates[clientId] == MenuState::FriendRequestList){
-        keyInputManageFriendRequests(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::Game)
-        clientStates[clientId] = MenuState::JoinOrCreateGame;
-    if (clientStates[clientId] == MenuState::JoinOrCreateGame){
-        keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
-        return;
-    }
-        
-    if (clientStates[clientId] == MenuState::JoinGame){
-        keyInputChoiceGameRoom(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::CreateGame){
-        keyInputChooseGameModeMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::GameOver) {
-        keyInputGameOverMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::Settings){
-        keyInputLobbySettingsMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::Help){
-        keyInputHelpMenu(clientSocket, clientId, action);
-        return;
-    }
-    if (clientStates[clientId] == MenuState::Play) {
-        sendInputToGameRoom(clientId, action);
-        return;
+    switch (clientStates[clientId]) {
+        case MenuState::Welcome:
+            keyInputWelcomeMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::RegisterPseudo:
+            keyInputRegisterPseudoMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::RegisterPassword:
+            keyInputRegisterPasswordMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::LoginPseudo:
+            keyInputLoginPseudoMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::LoginPassword:
+            keyInputLoginPasswordMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::Main:
+            keyInputMainMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::classement:
+            keyInputRankingMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::chat:
+            keyInputChatMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::CreateRoom:
+            keyInputCreateChatRoom(clientSocket, clientId, action);
+            break;
+        case MenuState::JoinRoom:
+            keyInputJoinChatRoom(clientSocket, clientId, action);
+            break;
+        case MenuState::ManageRooms:
+            keyInputManageMyRooms(clientSocket, clientId, action);
+            break;
+        case MenuState::ManageRoom:
+            keyInputManageRoom(clientSocket, clientId, action);
+            break;
+        case MenuState::ListRoomMembres:
+            keyInputListMembres(clientSocket, clientId, action);
+            break;
+        case MenuState::AddMembre:
+            keyInputAddMembre(clientSocket, clientId, action);
+            break;
+        case MenuState::AddAdmin:
+            keyInputAddAdmin(clientSocket, clientId, action);
+            break;
+        case MenuState::RoomRequestList:
+            keyInputRequestList(clientSocket, clientId, action);
+            break;
+        case MenuState::ConfirmDeleteRoom:
+            keyInputConfirmDeleteRoom(clientSocket, clientId, action);
+            break;
+        case MenuState::ConfirmQuitRoom:
+            keyInputQuitRoom(clientSocket, clientId, action);
+            break;
+        case MenuState::Friends:
+            keyInputFriendsMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::AddFriend:
+            keyInputAddFriendMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::FriendList:
+            keyInputManageFriendlist(clientSocket, clientId, action);
+            break;
+        case MenuState::FriendRequestList:
+            keyInputManageFriendRequests(clientSocket, clientId, action);
+            break;
+        case MenuState::JoinOrCreateGame:
+            keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::JoinGame:
+            keyInputChoiceGameRoom(clientSocket, clientId, action);
+            break;
+        case MenuState::CreateGame:
+            keyInputChooseGameModeMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::GameOver:
+            keyInputGameOverMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::Settings:
+            keyInputLobbySettingsMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::Help:
+            keyInputHelpMenu(clientSocket, clientId, action);
+            break;
+        case MenuState::Play:
+            sendInputToGameRoom(clientId, action);
+            break;
+        default:
+            std::cerr << "Erreur: État de menu non géré." << std::endl;
+            break;
     }
 }
 
@@ -428,9 +402,6 @@ void Server::keyInputManageFriendlist(int clientSocket, int clientId, const std:
     returnToMenu(clientSocket, clientId, MenuState::FriendRequestList, "Erreur : Format invalide. Utilisez 'del.pseudo' ou 'del.all'.");
 }
 
-
-
-
 void Server::keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") {
         returnToMenu(clientSocket, clientId, MenuState::AddFriend);
@@ -492,22 +463,15 @@ void Server::keyInputAddFriendMenu(int clientSocket, int clientId, const std::st
 }
 
 
-void Server::keyInputGameModeMenu(int clientId, GameModeName gameMode) {
-    //création de la gameRoom
+void Server::keyInputGameModeMenu(int clientId, GameModeName gameMode) { //création de la gameRoom
+    std::lock_guard<std::mutex> lock(gameRoomsMutex);
+
     std::cout << "Création de la GameRoom pour le client #" << clientId << " avec le mode " << static_cast<int>(gameMode) << "." << std::endl;
-    int gameRoomIndex = gameRooms.size();
-    gameRooms.emplace_back(std::make_shared<GameRoom>(gameRoomIndex, clientId, gameMode));
+    
+    int gameRoomIndex = gameRoomIdCounter.fetch_add(1);
+    gameRooms[gameRoomIndex] = std::make_shared<GameRoom>(gameRoomIndex, clientId, gameMode);
     clientGameRoomId[clientId] = gameRoomIndex;
     
-    if (gameRoomIndex != gameRoomIdCounter) {
-        std::cerr << "Erreur: L'index de la GameRoom ne correspond pas à l'ID de la GameRoom." << std::endl;
-        return;
-    }
-    
-    gameRoomIdCounter++;
-    
-    std::cout << "Démarrage du jeu pour le client #" << clientId << "." << std::endl;
-
     std::thread loopgame(&Server::loopGame, this, clientId);
     loopgame.detach();
 }
@@ -521,28 +485,12 @@ std::string Server::trim(const std::string& s) {
     return s.substr(start, end - start + 1);
 }
 
-void Server::deleteGameRoom(int roomId) {
-    if (roomId != gameRoomIdCounter - 1)
-        shiftGameRooms(roomId);
-    for (int idx=0; idx < clientIdCounter; idx++) {
-        if (clientGameRoomId[idx] == roomId)
-            clientGameRoomId[idx] = -1;
-    }
-    gameRooms.pop_back();
-    gameRoomIdCounter--;
+void Server::deleteGameRoom(int roomId, const std::vector<int>& players) {
+    for (auto player : players)
+        clientGameRoomId[player] = -1;
+    gameRooms.erase(roomId);
+    gameRoomIdCounter.fetch_sub(1);
     std::cout << "GameRoom #" << roomId << " deleted." << std::endl;
-}
-
-void Server::shiftGameRooms(int index) {
-    int size = gameRooms.size();
-    for (int i = index; i < size - 1; ++i) {
-        auto current = gameRooms[i];
-        auto next = gameRooms[i + 1];
-        current = next;
-        current->setRoomId(i);
-        for (auto& id : current->getPlayers())
-            clientGameRoomId[id] = i;
-    }
 }
 
 void Server::sendInputToGameRoom(int clientId, const std::string& action) {
@@ -556,6 +504,53 @@ void Server::letPlayersPlay(const std::vector<int>& players) {
 
 void Server::loopGame(int ownerId) {
     auto gameRoom = gameRooms[clientGameRoomId[ownerId]];
+    if (gamePreparation(ownerId, gameRoom)){
+        std::vector<int> players = gameRoom->getPlayers();
+        int maxPlayers = gameRoom->getMaxPlayers();
+        GameModeName gameMode = gameRoom->getGameModeName();
+        gameRoom->createGames();
+        int countGameOvers = 0;
+        letPlayersPlay(players);
+        gameRoom->startGame();
+
+        while (gameRoom->getInProgress()) {
+            countGameOvers = 0;
+            for (auto player : players) {
+                if (gameRoom->getGameIsOver(player))
+                    countGameOvers++;
+                else {
+                    gameRoom->updatePlayerGame(player);
+                    if (gameRoom->getNeedToSendGame(player)) {
+                        sendGameToPlayer(clientIdToSocket[player], gameRoom->getGame(player));
+                        gameRoom->setNeedToSendGame(false, player);
+                    }
+                }
+                if (gameRoom->getAmountOfPlayers() != maxPlayers - countGameOvers) 
+                    gameRoom->setAmountOfPlayers(maxPlayers - countGameOvers);
+            }
+        }
+
+        if (gameMode == GameModeName::Endless){
+            userManager->updateHighscore(clientPseudo[ownerId], gameRoom->getScoreValue());
+        }
+    }
+
+    std::vector<int> players = gameRoom->getPlayers();
+    for (auto player : players) {
+        clientStates[player] = MenuState::GameOver;
+        sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu());        
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(gameRoomsMutex);
+        int roomId = gameRoom->getRoomId();
+        std::cout << "GameRoom #" << roomId << " ended." << std::endl;
+        deleteGameRoom(roomId, players);
+    }
+
+}
+
+bool Server::gamePreparation(int ownerId, std::shared_ptr<GameRoom> gameRoom){
     if (gameRoom->getGameModeName() != GameModeName::Endless) {
         while(!(gameRoom->getSettingsDone() || gameRoom->getOwnerQuit()))
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -571,51 +566,10 @@ void Server::loopGame(int ownerId) {
                     sendMenuToClient(clientIdToSocket[player], menu.getJoinOrCreateGame());
                 }
             }
-            return;
+            return false;
         }
     }
-
-    std::vector<int> players = gameRoom->getPlayers();
-    int maxPlayers = gameRoom->getMaxPlayers();
-    GameModeName gameMode = gameRoom->getGameModeName();
-    gameRoom->createGames();
-    int countGameOvers = 0;
-    gameRoom->startGame();
-    letPlayersPlay(players);
-    while (gameRoom->getInProgress()) {
-        countGameOvers = 0;
-        for (auto player : players) {
-            if (gameRoom->getGameIsOver(player))
-                countGameOvers++;
-            else {
-                gameRoom->updatePlayerGame(player);
-                if (gameRoom->getNeedToSendGame(player)) {
-                    sendGameToPlayer(clientIdToSocket[player], gameRoom->getGame(player), gameRoom->getScore(player));
-                    gameRoom->setNeedToSendGame(false, player);
-                }
-            }
-            gameRoom->setAmountOfPlayers(maxPlayers - countGameOvers);
-        }
-        // Conditions de fin
-        if ((countGameOvers == maxPlayers - 1) && (gameMode != GameModeName::Endless))
-            gameRoom->endGame();
-        else if ((countGameOvers == 1) && (gameMode == GameModeName::Endless))
-            gameRoom->endGame();
-    }
-
-    if (gameMode == GameModeName::Endless){
-        Score& score = gameRoom->getScore(ownerId);
-        userManager->updateHighscore(clientPseudo[ownerId], score.getScore());
-    }
-
-    int roomId = gameRoom->getRoomId();
-    std::cout << "GameRoom #" << roomId << " ended." << std::endl;
-    deleteGameRoom(roomId);
-
-    for (auto player : players) {
-        clientStates[player] = MenuState::GameOver;
-        sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu());        
-    }
+    return true;
 }
 
 
@@ -702,7 +656,7 @@ void Server::keyInputLoginPasswordMenu(int clientSocket, int clientId, const std
 void Server::keyInputMainMenu(int clientSocket, int clientId, const std::string& action) {
     if (action == "1") { // créer une gameRoom (choisir s'il veut créer sa partie ou rejoindre une partie)
         
-        clientStates[clientId] = MenuState::Game;
+        clientStates[clientId] = MenuState::JoinOrCreateGame;
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
     }
     else if (action == "2") {
@@ -1086,12 +1040,12 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
-void Server::sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game, Score& score) {
+void Server::sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game) {
     json message;
 
-    message[jsonKeys::SCORE] = score.scoreToJson();
-    message[jsonKeys::GRID] = game->getGrid().gridToJson();
-    message[jsonKeys::TETRA_PIECE] = game->getCurrentPiece().tetraminoToJson(); // Ajout du tétrimino dans le même message
+    message[jsonKeys::SCORE] = game->scoreToJson();
+    message[jsonKeys::GRID] = game->gridToJson();
+    message[jsonKeys::TETRA_PIECE] = game->tetraminoToJson(); // Ajout du tétrimino dans le même message
 
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi

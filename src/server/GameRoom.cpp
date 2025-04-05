@@ -149,6 +149,12 @@ void GameRoom::keyInputchooseVictim(int playerId, int victim) {
     }
 }
 
+void GameRoom::setAmountOfPlayers(int amount) {
+    amountOfPlayers = amount;
+    if ((amountOfPlayers == maxPlayers - 1))
+        endGame();
+}
+
 void GameRoom::endGame() {
     inProgress = false;
 }
@@ -314,9 +320,8 @@ void GameRoom::inputLobby(int clientId, const std::string& action){
     }
 }
 
-Score& GameRoom::getScore(int playerServerId) {
-    int playerId = getPlayerId(playerServerId);
-    return games[playerId]->getScore();
+int GameRoom::getScoreValue() const {
+    return games[0]->getScore();
 }
 
 std::shared_ptr<Game> GameRoom::getGame(int playerServerId) {
