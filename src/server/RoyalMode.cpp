@@ -3,13 +3,14 @@
 #include "Bonus.hpp"
 
 void RoyalMode::featureMode(std::shared_ptr<Game> game, int malusOrBonus){
-    if (malusOrBonus > 6) {
-        MalusRoyal malus(game->getDisplacement());
+    if (malusOrBonus < 6) {
+        MalusRoyal malus(game);
         choiceMalus(malusOrBonus, malus);
     }
     else {
-        Bonus bonus(game->getDisplacement());
+        Bonus bonus(game);
         choiceBonus(malusOrBonus, bonus);
+        
     }
     
 }
@@ -45,6 +46,7 @@ void RoyalMode::choiceBonus(int nbre, Bonus bonus){
         case 7:
             bonus.miniBlock();
             break;
+        
         default:
             break;
     }

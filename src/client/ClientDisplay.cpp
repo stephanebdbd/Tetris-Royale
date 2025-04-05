@@ -4,6 +4,7 @@
 #include <ncurses.h>
 #include "../common/json.hpp"
 #include "../common/jsonKeys.hpp"
+#include <iostream>
 
 void ClientDisplay::displayMenu(const json& data) {
     clear();
@@ -45,6 +46,7 @@ void ClientDisplay::displayGame(const json& data) {
 }
 
 void ClientDisplay::drawGrid(const json& grid) {
+    if(grid[jsonKeys::LIGHT_GRID]) return;
     int width = grid[jsonKeys::WIDTH]; 
     int height = grid[jsonKeys::HEIGHT]; 
     const json& cells = grid[jsonKeys::CELLS];
@@ -73,6 +75,7 @@ void ClientDisplay::drawGrid(const json& grid) {
 }
 
 void ClientDisplay::drawTetramino(const json& tetraPiece) {
+    if(tetraPiece[jsonKeys::LIGHT_TETRA]) return;
     // Récupération des informations
     int x = tetraPiece[jsonKeys::X];
     int y = tetraPiece[jsonKeys::Y];
@@ -103,31 +106,47 @@ void ClientDisplay::drawScore(const json& score) {
 void ClientDisplay::drawMessage(const json& msg){
     
     if (msg[jsonKeys::CLEAR]){
-        move(22, 0);     
-        clrtoeol(); 
-            
-        move(23, 0);     
-        clrtoeol();
+        std::cout<<"i am here from client clear"<<std::endl;
+        for(int y = 22; y < 50; y++){
+            move(y,0);
+            clrtoeol();
+        }
+        
     }
     
     
 
     if(msg[jsonKeys::PROPOSITION_CIBLE]){
         int id = msg[jsonKeys::CIBLE_ID];
-        mvprintw(22, 1, "Le joueur d'Id %d a été choisis comme joueur cible (Y/N)", id);
+        mvprintw(22, 1, "Le joueur d'Id %d a été choisis comme joueur cible (Y/N): ", id);
     }
     
     else if(msg[jsonKeys::CHOICE_CIBLE])
-        mvprintw(22, 1, "Entrez l'Id du joueur choisis.");
+        mvprintw(22, 1, "Entrez l'Id du joueur choisis: ");
 
-    else if(msg[jsonKeys::CHOICE_MALUS_BONUS])
-        mvprintw(22, 1, "Vous choisissez Malus ou Bonus.");
+    else if(msg[jsonKeys::CHOICE_MALUS_BONUS]){
+        std::cout<<"i am here from client malus bonus"<<std::endl;
+        mvprintw(22, 1, "Saisiez votre choix : \n 1. Malus  \n 2. Bonus\n Choix: ");
+    }
+        
 
-    else if(msg[jsonKeys::CHOICE_MALUS])
-        mvprintw(22, 1, "MALUS");
+    else if(msg[jsonKeys::CHOICE_MALUS]){
+        std::cout<<"i am here from client malus"<<std::endl;
+        mvprintw(22, 1, "Saisiez le numéro de MALUS choisi : \n"
+    "1. Inverser les commandes du joueur ciblé pour trois blocs.\n"
+    "2. Bloquer les commandes du joueur ciblé pour un bloc.\n"
+    "3. Accélérer la chute des pièces d’un adversaire.\n"
+    "4. Supprimer une zone de 2X2 blocs chez un adversaire.\n"
+    "5. Plonger l'écran du joueur ciblé dans le noir.\n"
+    "Choix: ");
+    }
+    
 
     else if(msg[jsonKeys::CHOICE_BONUS])
-        mvprintw(22, 1, "BONUS.");
+        mvprintw(22, 1, "Saisiez le numéro de BONUS choisi :\n"
+    "1. Ralentir la chute des pièces temporairement.\n"
+    "2. Transformer les prochaines pièces en blocs 1X1.\n"
+    "Choix: ");
 
 
     

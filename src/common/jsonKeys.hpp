@@ -31,6 +31,9 @@ namespace jsonKeys {
     constexpr char CHOICE_BONUS[] = "choiceBonus";
     constexpr char CIBLE_ID[] = "cibleId";
     constexpr char CLEAR[] = "clear";
+    constexpr char LIGHT_TETRA[] = "lightTetra";
+    constexpr char LIGHT_GRID[] = "lightGrid";
+    
 }
 
 #endif

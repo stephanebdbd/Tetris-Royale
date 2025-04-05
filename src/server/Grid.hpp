@@ -10,7 +10,7 @@
 class Grid {
     int width, height;
     std::vector<std::vector<Cell>> cells;
-    int lightBlocked = false;
+    bool lightBlocked = false;
 
     public:
         Grid(int width, int height);
@@ -24,7 +24,7 @@ class Grid {
         json gridToJson() const;
         int heightPieces();
         void piecesUp(int nbrOffset);
-        void setLightBlocked(bool block) { lightBlocked = block; }
+        void setlightBlocked(bool block) { lightBlocked = block; }
         bool isCellOccupied(int x, int y) const;
         bool isLineComplete(int y) const;
         bool isLineEmpty(int y) const;
