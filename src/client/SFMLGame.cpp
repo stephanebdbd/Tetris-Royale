@@ -169,7 +169,7 @@ void SFMLGame::refreshMenu() {
             //friendRequestListMenu();
             break;
         case MenuState::chat:
-            chatMenu(contacts);
+            //chatMenu(contacts);
             break;
         case MenuState::ManageRoom:
             //teamsMenu();
