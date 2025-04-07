@@ -504,45 +504,56 @@ void Server::letPlayersPlay(const std::vector<int>& players) {
 
 void Server::loopGame(int ownerId) {
     auto gameRoom = gameRooms[clientGameRoomId[ownerId]];
+
     if (gamePreparation(ownerId, gameRoom)){
         std::vector<int> players = gameRoom->getPlayers();
         int maxPlayers = gameRoom->getMaxPlayers();
-        GameModeName gameMode = gameRoom->getGameModeName();
         gameRoom->createGames();
         int countGameOvers = 0;
         letPlayersPlay(players);
         gameRoom->startGame();
-
+        
         while (gameRoom->getInProgress()) {
             countGameOvers = 0;
             for (auto player : players) {
-                if (gameRoom->getGameIsOver(player))
+                try {
+                    if (gameRoom->getGameIsOver(player))
                     countGameOvers++;
-                else {
-                    gameRoom->updatePlayerGame(player);
-                    if (gameRoom->getNeedToSendGame(player)) {
-                        sendGameToPlayer(player, clientIdToSocket[player], gameRoom);
-                        gameRoom->setNeedToSendGame(false, player);
+                    else {
+                        gameRoom->updatePlayerGame(player);
+                        if (gameRoom->getNeedToSendGame(player)) {
+                            sendGameToPlayer(player, clientIdToSocket[player], gameRoom);
+                            gameRoom->setNeedToSendGame(false, player);
+                        }
                     }
-                }
-                if (gameRoom->getAmountOfPlayers() != maxPlayers - countGameOvers) 
+                    if (gameRoom->getAmountOfPlayers() != maxPlayers - countGameOvers) 
                     gameRoom->setAmountOfPlayers(maxPlayers - countGameOvers);
+                }
+                catch (const std::exception& e) {
+                    players.erase(std::remove(players.begin(), players.end(), player), players.end());
+                    std::cerr << "Erreur lors de la mise à jour du jeu pour le joueur #" << player << ": " << e.what() << std::endl;
+                }
             }
         }
-
-        if (gameMode == GameModeName::Endless){
-            userManager->updateHighscore(clientPseudo[ownerId], gameRoom->getScoreValue());
-        }
     }
-
+    
     std::vector<int> players = gameRoom->getPlayers();
     std::string message = "GAME OVER";
+    
     for (auto player : players) {
-        clientStates[player] = MenuState::GameOver;
-        if (gameRoom->getGameModeName() != GameModeName::Endless){
-            message = (!gameRoom->getGameIsOver(player)) ? "YOU WIN !!" : "GAME OVER";
+        GameModeName gameMode = gameRoom->getGameModeName();
+        try {
+            clientStates[player] = MenuState::GameOver;
+            if (gameMode != GameModeName::Endless){
+                message = (!gameRoom->getGameIsOver(player)) ? "YOU WIN !!" : "GAME OVER";
+            }
+            else
+                userManager->updateHighscore(clientPseudo[player], gameRoom->getScoreValue());
+            sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu(message));
+        } catch (const std::exception& e) {
+        players.erase(std::remove(players.begin(), players.end(), player), players.end());
+        std::cerr << "Erreur lors de l'envoi du message de fin de jeu au joueur #" << player << ": " << e.what() << std::endl;
         }
-        sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu(message));
     }
 
     {
@@ -551,7 +562,6 @@ void Server::loopGame(int ownerId) {
         std::cout << "GameRoom #" << roomId << " ended." << std::endl;
         deleteGameRoom(roomId, players);
     }
-
 }
 
 bool Server::gamePreparation(int ownerId, std::shared_ptr<GameRoom> gameRoom){

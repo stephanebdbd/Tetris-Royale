@@ -90,7 +90,7 @@ bool GameRoom::getSettingsDone() const {
 void GameRoom::createGames(){
     for (int idx = 0; idx < getMaxPlayers(); idx++){
         games.emplace_back(std::make_shared<Game>(10, 20, speed));
-        std::cout << "Game #" << idx << " created at " << &games[idx] << std::endl;
+        std::cout << "Game #" << idx << " created at " << games[idx] << std::endl;
     }
 }
 
@@ -110,14 +110,11 @@ void GameRoom::handleMalusOrBonus(int playerId) {
                 messageList[playerId][jsonKeys::CHOICE_MALUS_BONUS] = true;
                 showmessage[playerId] = false;
             }
-                
             else if ((playersMalusOrBonus[playerId] != -1) && (playersVictim[playerId] != -1)) {
                 applyFeatureMode(playerId);
                 reinitializeMalusOrBonus(playerId);
             }
         }
-        
-        
     }
     else if ((getGameModeName() == GameModeName::Duel) || (getGameModeName() == GameModeName::Classic)) {
         // playersMalusOrBonus[playerId] = games[playerId]->getLinesCleared();

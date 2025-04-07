@@ -28,6 +28,8 @@ void Client::run() {
 
     receiveDisplay();
     network.disconnect(clientSocket);
+    delwin(stdscr);
+    endwin();
 }
 
 

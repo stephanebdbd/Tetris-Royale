@@ -151,6 +151,7 @@ public:
     void keyInputChooseGameModeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputHelpMenu(int clientSocket, int clientId, const std::string& action);
+    std::vector<int>::iterator getAutoOfPlayer(int playerId);
     std::string getMode(int clientId);
     int getMaxPlayers(int clientId);
     int getAmountOfPlayers(int clientId);

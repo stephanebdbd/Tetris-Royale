@@ -119,7 +119,6 @@ void TetraminoDisplacement::update() {
             if(bonusCounter1.hasElapsed()){
                 setlightBlocked(false);
             }
-            //bonusCounter1.reset();
         }
         
 
@@ -156,7 +155,6 @@ void TetraminoDisplacement::random2x2MaskedBlock(){
         }
         
     }
-    //grid.applyGravity();
 
 }
 
