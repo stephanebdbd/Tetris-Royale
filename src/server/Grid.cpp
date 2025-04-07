@@ -114,6 +114,7 @@ json Grid::gridToJson() const {
     gridJson[jsonKeys::WIDTH] = width;
     gridJson[jsonKeys::HEIGHT] = height;
     gridJson[jsonKeys::CELLS] = json::array();
+    gridJson[jsonKeys::LIGHT_GRID] = lightBlocked;
 
     for (int y = 0; y < height; ++y) {
         json row = json::array();

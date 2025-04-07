@@ -10,7 +10,7 @@
 class Grid {
     int width, height;
     std::vector<std::vector<Cell>> cells;
-    int lightBlocked = false;
+    bool lightBlocked = false;
 
     public:
         Grid(int width, int height);

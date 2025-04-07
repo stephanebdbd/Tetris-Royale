@@ -366,10 +366,9 @@ json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& rankin
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getEndGameMenu() const {
-    //gérer la fin avec message de victoire, ranking dans la partie multi joueur, ou défaite en duo, ou game over en solo
+json Menu::getEndGameMenu(const std::string& message) const {
     json menu = {
-        {jsonKeys::TITLE, "Game Over"},
+        {jsonKeys::TITLE, message},
         {jsonKeys::OPTIONS, {
             {"1. ", "Rejouer"},
             {"2. ", "Retour au menu principal"}
@@ -483,7 +482,18 @@ json Menu::getHelpMenu(bool isRC, bool canEditMaxPlayer) const {
         std::cerr << "Erreur de parsing JSON (MenuHelp) : " << e.what() << std::endl;
     }
     file.close();
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
 
+json Menu::getQuitGameMenu() const {
+    json menu = {
+        {jsonKeys::TITLE, "GAME END"},
+        {jsonKeys::OPTIONS, {
+            {"1. ", "Rejouer"},
+            {"2. ", "Retour au menu principal"}
+        }},
+        {jsonKeys::INPUT, "Votre choix: "}
+    };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 

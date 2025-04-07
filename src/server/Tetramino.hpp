@@ -19,6 +19,10 @@ class Tetramino {
     void initializeShapes();
     void selectRandomShape();
 
+    bool bonusOneBlock = false;
+    int counteurOneBlock = 0;
+    bool lightBlocked = false;
+
     public:
         Tetramino(int startX, int startY, int gridWidth, int gridHeight);
         void draw() const;
@@ -31,12 +35,16 @@ class Tetramino {
         bool canMove(const Grid& grid, int dx, int dy) const;
         void dropTetrimino(Grid& grid);
         void reset(int startX, int startY);
-        void setCurrentShape(std::array<std::array<char, 4>, 4> shape) { currentShape = shape; };
+        void setCurrentShape(std::array<std::array<char, 4>, 4> shape);
         void arrangeShape();
         char getShapeSymbols() const { return shapeSymbols; }
         Color chooseColor(char shapeSymbol) const;
         
-        json tetraminoToJson() const;
+        json tetraminoToJson(bool isNext) const;
+        const std::array<std::array<char, 4>, 4>& getCurrentShape() const;
+        
+        void applyMiniTetraminoBonus();
+        void setlightBlocked(bool block) {lightBlocked = block;}
 };
 
 #endif

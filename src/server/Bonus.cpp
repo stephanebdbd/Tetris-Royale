@@ -1,21 +1,13 @@
 #include "Bonus.hpp"
 
-Bonus::Bonus(TetraminoDisplacement& displacement) : displacement(displacement){}
+Bonus::Bonus(std::shared_ptr<Game> game) : game(game) {
+}
 
 void Bonus::miniBlock(){
-    std::array<std::array<char, 4>, 4> miniBlock = {{
-        {' ', ' ', ' ', ' '},
-        {' ', '#', ' ', ' '},
-        {' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' '}
-    }};
-
-    
-    displacement.setCurrentPiece(miniBlock);
-
+    game->applyMiniTetraminoBonus();
 }
 
 void Bonus::decreaseSpeed(){
-    displacement.setBonus1Royal(true);
-    displacement.setSpeed(-30);
+    game->setSpeedBonusMalus(true);
+    game->applySpeedBonusMalus(1300);
 }

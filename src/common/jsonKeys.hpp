@@ -19,8 +19,25 @@ namespace jsonKeys {
     constexpr char X[] = "x";
     constexpr char Y[] = "y";
     constexpr char TETRA_PIECE[] = "tetraPiece";
+    constexpr char NEXT_PIECE[] = "nextPiece";
     constexpr char SHAPE[] = "shape";
     constexpr char SHAPE_SYMBOL[] = "shapeSymbol";
+
+    constexpr char MESSAGE_CIBLE[] = "messageCible";
+
+    constexpr char PROPOSITION_CIBLE[] = "propositionCible";
+    constexpr char CHOICE_CIBLE[] = "choiceCible";
+    constexpr char CHOICE_MALUS_BONUS[] = "choiceMalusBonus";
+    constexpr char CHOICE_MALUS[] = "choiceMalus";
+    constexpr char CHOICE_BONUS[] = "choiceBonus";
+    constexpr char CIBLE_ID[] = "cibleId";
+    constexpr char CLEAR[] = "clear";
+    constexpr char LIGHT_TETRA[] = "lightTetra";
+    constexpr char LIGHT_GRID[] = "lightGrid";
+
+    constexpr char GAME_OVER[] = "gameOver";
+
+    
 }
 
 #endif

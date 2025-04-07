@@ -146,7 +146,7 @@ public:
     std::unordered_map<std::string, std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
-    void sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game);
+    void sendGameToPlayer(int clientId, int clientSocket, std::shared_ptr<GameRoom> gameRoom);
     std::string trim(const std::string& s);
     void keyInputChooseGameModeMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action);

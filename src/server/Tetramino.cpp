@@ -14,7 +14,7 @@ Tetramino::Tetramino(int startX, int startY, int w, int h)
 void Tetramino::initializeShapes() {
     // Définir les formes des Tetraminos
     shapes = {
-        // Forme I ok
+        // Forme I
         {{{' ', ' ', ' ', ' '},
           {'#', '#', '#', '#'},
           {' ', ' ', ' ', ' '},
@@ -31,25 +31,31 @@ void Tetramino::initializeShapes() {
           {'#', ' ', ' ', ' '},
           {'#', '#', '#', ' '},
           {' ', ' ', ' ', ' '}}},
-        // Forme T ok
+        // Forme T
         {{{'#', '#', '#', ' '},
           {' ', '#', ' ', ' '},
           {' ', ' ', ' ', ' '},
           {' ', ' ', ' ', ' '}}},
-        // Forme O ok (petit temps de latence)
+        // Forme O
         {{{'#', '#', ' ', ' '},
           {'#', '#', ' ', ' '},
           {' ', ' ', ' ', ' '},
           {' ', ' ', ' ', ' '}}},
-        // Forme Z ok
+        // Forme Z
         {{{' ', ' ', ' ', ' '},
           {'#', '#', ' ', ' '},
           {' ', '#', '#', ' '},
           {' ', ' ', ' ', ' '}}},
-        // Forme S ok
+        // Forme S
         {{{' ', ' ', ' ', ' '},
           {' ', '#', '#', ' '},
           {'#', '#', ' ', ' '},
+          {' ', ' ', ' ', ' '}}},
+        
+        // Forme 1x1 (bonus)
+        {{{'#', ' ', ' ', ' '},
+          {' ', ' ', ' ', ' '},
+          {' ', ' ', ' ', ' '},
           {' ', ' ', ' ', ' '}}}
     };
 };
@@ -57,9 +63,18 @@ void Tetramino::initializeShapes() {
 // Sélectionner une forme aléatoire
 void Tetramino::selectRandomShape() {
     srand(time(0));
-    int index = rand() % shapes.size(); // Sélectionner un index aléatoire parmi les formes disponibles
+    if (bonusOneBlock){
+        currentShape = shapes[7]; // prends la pièce d'un bloc 
+        dimension = 1;
+        counteurOneBlock += 1;
+        if (counteurOneBlock == 2){
+            bonusOneBlock = false;
+            counteurOneBlock = 0;
+        }
+        return;
+    }
+    int index = rand() % (shapes.size()-1); // Sélectionner un index aléatoire parmi les formes disponibles
     currentShape = shapes[index];
-    dimension = currentShape.size(); // Mettre à jour la dimension de la forme actuelle
     switch (index) {
         case 0:
             dimension = 4;
@@ -90,8 +105,7 @@ void Tetramino::selectRandomShape() {
             shapeSymbols = 'S';
             break; // S - Vert
         default:
-            dimension = 3;
-            shapeSymbols = ' ';
+            shapeSymbols = ' '; // Forme inconnue
             break;
     }
 }
@@ -199,6 +213,22 @@ bool Tetramino::canRotate(const Grid& grid) {
     return true; // La rotation est possible
 }
 
+void Tetramino::setCurrentShape(std::array<std::array<char, 4>, 4> shape) {
+    for (const auto& row : currentShape) {
+        for (char cell : row) {
+            std::cout << cell << " ";
+        }
+        std::cout << std::endl;
+    } 
+    this->currentShape = shape;
+    for (const auto& row : currentShape) {
+        for (char cell : row) {
+            std::cout << cell << " ";
+        }
+        std::cout << std::endl;
+    } 
+}
+
 void Tetramino::arrangeShape() {
     int direction = ((position.x < (gridWidth + 1) / 2) > 0) ? 1 : -1;
     while ((position.x < 1) || (position.x + dimension > gridWidth + 1))
@@ -232,7 +262,6 @@ void Tetramino::fixToGrid(Grid& grid, bool &gameOver) {
                 int gridX = position.x + x;
                 int gridY = position.y + y;
                 if (gridY <= 1) { // Si la pièce est en dehors de la grille
-                    std::cout << "Game Over From Tetramino" << std::endl;
                     gameOver = true; // Déclencher le game over
                     return;
                 }
@@ -242,11 +271,20 @@ void Tetramino::fixToGrid(Grid& grid, bool &gameOver) {
     }
 }
 
-json Tetramino::tetraminoToJson() const {
-    json tetraminoJson;
+const std::array<std::array<char, 4>, 4>& Tetramino::getCurrentShape() const {
+    return currentShape;
+}
 
-    tetraminoJson[jsonKeys::X] = position.x;
-    tetraminoJson[jsonKeys::Y] = position.y;
+json Tetramino::tetraminoToJson(bool isNext) const {
+    json tetraminoJson;
+    if (!isNext) {
+        tetraminoJson[jsonKeys::X] = position.x;
+        tetraminoJson[jsonKeys::Y] = position.y;
+    }
+    else {
+        tetraminoJson[jsonKeys::X] = 13;
+        tetraminoJson[jsonKeys::Y] = 4;
+    }
 
     json shapeJson = json::array();
     for (const auto& row : currentShape) {
@@ -259,6 +297,9 @@ json Tetramino::tetraminoToJson() const {
     tetraminoJson[jsonKeys::SHAPE] = shapeJson;
     tetraminoJson[jsonKeys::SHAPE_SYMBOL] = shapeSymbols;
 
+    tetraminoJson[jsonKeys::LIGHT_TETRA] = lightBlocked;
+
+
     return tetraminoJson;
 }
 
@@ -266,4 +307,8 @@ json Tetramino::tetraminoToJson() const {
 void Tetramino::reset(int startX, int startY) {
     position = {startX, startY};
     selectRandomShape(); // Sélectionner une nouvelle forme aléatoire
+}
+
+void Tetramino::applyMiniTetraminoBonus(){
+    bonusOneBlock = true;
 }

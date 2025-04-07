@@ -2,6 +2,7 @@
 #define TETRAMINODISPLACEMENT_HPP
 
 #include <iostream>
+#include "../common/jsonKeys.hpp"
 #include "Timer.hpp"
 #include "Tetramino.hpp"
 
@@ -9,13 +10,24 @@ class TetraminoDisplacement {
     Grid& grid;
     
     Tetramino currentPiece;
+    Tetramino nextPiece;
+    
     Timer dropTimer;
-    bool commandisBlocked;
-    bool lightisBlocked;
+    bool blockCommand = false;
+    bool lightisBlocked = false;
     bool gameOver = false;
     bool needToSendGame = true;
-    bool bonus1Royal = false;
-    int ch;
+    bool SpeedBonusMalus = false;
+    bool commandIsBlocked = false;
+    Timer bonusCounter1;
+
+    std::string ch= "";
+    bool commandIsReversed = false;
+    bool inverseCommand = false;
+    int counterMalus1 = -1;
+    int counterMalus2 = -1;
+    bool test = false;
+    int speedtest = 0;
 public:
     TetraminoDisplacement(Grid& grid, int speed=1000);
     void keyInputGameMenu(const std::string& action);
@@ -30,15 +42,28 @@ public:
     bool getNeedToSendGame() const;
     bool getIsGameOver() const;
     void setGameOver();
-    void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { currentPiece.setCurrentShape(shape); }
-    json tetraminoToJson() const { return currentPiece.tetraminoToJson(); }
+    void setCurrentPiece(std::array<std::array<char, 4>, 4> shape) { this->currentPiece.setCurrentShape(shape); }
+    json tetraminoToJson() const;
     void setSpeed(int newSpeed);
-    void setBonus1Royal(bool bonus) { bonus1Royal = bonus; }
-    void setEnter(int enter) { ch = enter; }
+    void setSpeedBonusMalus(bool bonus) { SpeedBonusMalus = bonus; }
+    //void setEnter(int enter) { ch = enter; }
     void setBlockCommand(bool block);
     void setlightBlocked(bool block);
     void randomPosition();
     void random2x2MaskedBlock();
+    const std::array<std::array<char, 4>, 4>& getCurrentShape() const {
+        return currentPiece.getCurrentShape();
+    }
+    
+    void applyMiniTetraminoBonus(){
+        currentPiece.applyMiniTetraminoBonus();
+    }
+
+    void applySpeedBonusMalus(int speed);
+
+    //Malus Royal
+    void applyMalus1();
+    void setCommandIsReversed(bool malus) { commandIsReversed = malus; }
 };
 
 #endif

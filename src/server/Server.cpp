@@ -521,7 +521,7 @@ void Server::loopGame(int ownerId) {
                 else {
                     gameRoom->updatePlayerGame(player);
                     if (gameRoom->getNeedToSendGame(player)) {
-                        sendGameToPlayer(clientIdToSocket[player], gameRoom->getGame(player));
+                        sendGameToPlayer(player, clientIdToSocket[player], gameRoom);
                         gameRoom->setNeedToSendGame(false, player);
                     }
                 }
@@ -536,9 +536,13 @@ void Server::loopGame(int ownerId) {
     }
 
     std::vector<int> players = gameRoom->getPlayers();
+    std::string message = "GAME OVER";
     for (auto player : players) {
         clientStates[player] = MenuState::GameOver;
-        sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu());        
+        if (gameRoom->getGameModeName() != GameModeName::Endless){
+            message = (!gameRoom->getGameIsOver(player)) ? "YOU WIN !!" : "GAME OVER";
+        }
+        sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu(message));
     }
 
     {
@@ -559,7 +563,7 @@ bool Server::gamePreparation(int ownerId, std::shared_ptr<GameRoom> gameRoom){
             for (auto player : gameRoom->getPlayers()) {
                 if (player != ownerId){
                     clientStates[player] = MenuState::GameOver;
-                    sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu());
+                    sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu("GAME END"));
                 }
                 else {
                     clientStates[player] = MenuState::JoinOrCreateGame;
@@ -590,6 +594,7 @@ void Server::keyInputWelcomeMenu(int clientSocket, int clientId, const std::stri
         std::cout << "Client #" << clientId << " déconnecté." << std::endl;
         // Fermer la connexion
         close(clientSocket);
+        clientStates.erase(clientId);
         //return to terminal
         return;
     }
@@ -1040,13 +1045,16 @@ void Server::sendMenuToClient(int clientSocket, const std::string& screen) {
     send(clientSocket, screen.c_str(), screen.size(), 0);
 }
 
-void Server::sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game) {
-    json message;
+void Server::sendGameToPlayer(int clientId, int clientSocket, std::shared_ptr<GameRoom> gameRoom) {
+    std::shared_ptr<Game> game = gameRoom->getGame(clientId);
+    json message, tetraminos = game->tetraminoToJson();
 
     message[jsonKeys::SCORE] = game->scoreToJson();
     message[jsonKeys::GRID] = game->gridToJson();
-    message[jsonKeys::TETRA_PIECE] = game->tetraminoToJson(); // Ajout du tétrimino dans le même message
+    message[jsonKeys::TETRA_PIECE] = tetraminos[jsonKeys::TETRA_PIECE]; // Ajout du tétrimino dans le même message
+    message[jsonKeys::NEXT_PIECE] = tetraminos[jsonKeys::NEXT_PIECE];
 
+    message[jsonKeys::MESSAGE_CIBLE] = gameRoom->messageToJson(clientId);
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
 }
@@ -1288,4 +1296,3 @@ int main() {
     }
     return 0;
 }
-
