@@ -8,7 +8,6 @@ class Menu {
         //welcome & main menu
         json getMainMenu0() const;  
         json getMainMenu1() const;
-
         //register & login  
         json getRegisterMenu1() const;
         json getRegisterMenuFailed() const;
@@ -17,9 +16,9 @@ class Menu {
         json getLoginMenuFailed1() const;
         json getLoginMenu2() const;
         json getLoginMenuFailed2() const;
-
         //chat
         json getQuitRoomConfirmationMenu(const std::string& roomName) const;
+
         json getChatMenu() const;
         json getPrivateChatMenu() const;
         json getCreateChatRoomMenu() const;
@@ -34,7 +33,6 @@ class Menu {
         json getAddAdmin() const;
         json getListeRequests(const std::vector<std::string>& data) const;
         json getDeleteRoomConfirmationMenu(const std::string& roomName) const;
-        
         //game
         json getJoinOrCreateGame() const;
         json getGameMode() const;

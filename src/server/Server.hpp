@@ -7,15 +7,18 @@
 #include "Tetramino.hpp"
 #include "Score.hpp"
 #include "GameRoom.hpp"
-#include "chat.hpp"
-#include "UserManager.hpp"  // Inclure le gestionnaire d'utilisateurs
+//#include "chat.hpp"
+#include "./data/DataManager.hpp"  // Inclure le gestionnaire d'utilisateurs
+#include "./data/chatRoom.hpp"  // Inclure la base de données
+#include "./data/chat.hpp"  // Inclure la base de données
 #include "Menu.hpp"
 #include <atomic>
 #include <unordered_map>
-#include "FriendList.hpp"
-#include "chatRoom.hpp"
-#include "FriendList.hpp"
-#include "chatRoom.hpp"
+#include <mutex>
+//#include "FriendList.hpp"
+//#include "chatRoom.hpp"
+//#include "FriendList.hpp"
+//#include "chatRoom.hpp"
 
 enum class MenuState {
     Welcome,
@@ -51,6 +54,7 @@ enum class MenuState {
                     QuitRoom,
                     ConfirmDeleteRoom,
                     ConfirmQuitRoom,
+                    
             PrivateChat,
         Friends,
             AddFriend,
@@ -59,14 +63,21 @@ enum class MenuState {
 };
 
 class Server {
+
     int port;
     int serverSocket;
     //0 = welcome, 1 = main, 2 = création compte, x => game.
     std::atomic<int> clientIdCounter;
     std::unordered_map<int, int> clientGameRoomId;
     std::vector<std::shared_ptr<GameRoom>> gameRooms;  
-    std::unordered_map<std::string, std::shared_ptr<chatRoom>> chatRooms;
-    std::shared_ptr<ServerChat> chat;
+    std::shared_ptr<DataBase> database; // DataBase instance
+    DataManager dataManager; //std::unordered_map<std::string, std::vector<std::string>> users_notifications;
+    ChatRoom chatRoomsManage; // ChatRoom instance
+    Chat chat; // Chat instance
+
+    //ChatRoom chatRoomsManage;
+    //std::shared_ptr<ServerChat> chat;
+    //std::shared_ptr<FriendList> friendList;
     
     int gameRoomIdCounter=0;
     
@@ -83,10 +94,10 @@ class Server {
     std::mutex clientStatesMutex;                                 // mutex pour menu
     std::mutex clientsChatMutex;                                       //mutex pour chat
 
-    std::unique_ptr<UserManager> userManager;
+    //std::unique_ptr<UserManager> userManager;
     
     Menu menu;
-    void returnToMenu(int clientSocket, int clientId, MenuState state, const std::string& message = "", int sleepTime = 2);
+    void returnToMenu(int clientSocket, int clientId, MenuState state, const std::string& message = "", int sleepTime = 3);
 
 public:
     Server(int port);
@@ -144,7 +155,7 @@ public:
     bool getRunningChat(int clientSocket);
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
     std::unordered_map<int, std::string> getSocketPseudo() { return sockToPseudo; }
-    std::unordered_map<std::string, std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }
+    //std::unordered_map<std::string, std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }
     void keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action);
     void keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action);
     void sendGameToPlayer(int clientSocket, std::shared_ptr<Game> game, Score& score);
@@ -161,7 +172,6 @@ public:
     void keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action);
 
     void startGame(int clientSocket, int clientId);
-
 };
 
 #endif 

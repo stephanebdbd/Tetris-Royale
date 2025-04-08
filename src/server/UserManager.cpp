@@ -1,4 +1,4 @@
-#include "UserManager.hpp"
+/*#include "UserManager.hpp"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -65,7 +65,7 @@ void UserManager::updateHighscore(const std::string& username, int newScore) {
 // Récupère le score élevé de l'utilisateur
 int UserManager::getHighScore(const std::string& username) const {
     if (usersData.contains(username)) {
-        return usersData[username]["highScore"];
+        return usersData.at(username).at("highScore");
     }
     return 0;
 }
@@ -175,8 +175,8 @@ std::vector<std::pair<std::string, int>> UserManager::getRanking() const {
     std::vector<std::pair<std::string, int>> ranking;
     // Parcours des utilisateurs et récupération des noms et scores
     for (const auto& [username, data] : usersData.items()) {
-        int score = data["highScore"];
-        ranking.emplace_back(username, score);
+        int highscore = data["highscore"];
+        ranking.push_back({username, highscore});
     }
 
     // Tri décroissant par rapport au highscore
@@ -248,3 +248,146 @@ void UserManager::loadGameInvitations() {
         }
     }
 }
+*/
+/*
+#include "UserManager.hpp"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+
+UserManager::UserManager(const std::string& dbName) : dbFile(dbName), db(nullptr) {
+    // Ouverture de la base de données SQLite
+    int rc = sqlite3_open(dbFile.c_str(), &db);
+    if (rc) {
+        std::cerr << "Can't open database: " << sqlite3_errmsg(db) << std::endl;
+        throw std::runtime_error("Database opening failed");
+    }
+
+    // Exécuter les requêtes SQL pour créer les tables si elles n'existent pas
+    executeSQLFromFile("schema.sql");  // Assurez-vous que ce fichier "schema.sql" existe et contient les requêtes de création des tables
+}
+
+UserManager::~UserManager() {
+    if (db) {
+        sqlite3_close(db);  // Fermer la base de données lorsque l'objet est détruit
+    }
+}
+
+void UserManager::executeSQLFromFile(const std::string& sqlFile) {
+    std::ifstream file(sqlFile);
+    if (!file.is_open()) {
+        std::cerr << "Could not open SQL file: " << sqlFile << std::endl;
+        return;
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string sql = buffer.str();
+
+    // Exécuter les requêtes lues depuis le fichier SQL
+    if (!executeSQL(sql)) {
+        std::cerr << "Error executing SQL from file: " << sqlFile << std::endl;
+    } else {
+        std::cout << "Tables created successfully or already exist." << std::endl;
+    }
+}
+
+bool UserManager::executeSQL(const std::string& sql) {
+    char* errMessage = nullptr;
+    int rc = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errMessage);
+    if (rc != SQLITE_OK) {
+        std::cerr << "SQL error: " << errMessage << std::endl;
+        sqlite3_free(errMessage);
+        return false;
+    }
+    return true;
+}
+
+bool UserManager::registerUser(const std::string& username, const std::string& password) {
+    std::string sql = "INSERT INTO Users (username, hash_pwd) VALUES ('" + username + "', '" + password + "');";
+    return executeSQL(sql);
+}
+
+bool UserManager::loginUser(const std::string& username, const std::string& password) {
+    std::string sql = "SELECT * FROM Users WHERE username = '" + username + "' AND hash_pwd = '" + password + "';";
+    // Exécution de la requête pour vérifier les informations de connexion (simplifiée pour l'exemple)
+    // Idéalement, il faudrait exécuter une requête SELECT et vérifier le résultat
+    return executeSQL(sql);
+}
+
+bool UserManager::sendFriendRequest(const std::string& sender, const std::string& receiver) {
+    std::string sql = "INSERT INTO FriendStatus (sender_id, receiver_id, status) VALUES ('" + sender + "', '" + receiver + "', 'pending');";
+    return executeSQL(sql);
+}
+
+bool UserManager::acceptFriendRequest(const std::string& sender, const std::string& receiver) {
+    std::string sql = "UPDATE FriendStatus SET status = 'accepted' WHERE sender_id = '" + sender + "' AND receiver_id = '" + receiver + "';";
+    return executeSQL(sql);
+}
+
+bool UserManager::rejectFriendRequest(const std::string& sender, const std::string& receiver) {
+    std::string sql = "UPDATE FriendStatus SET status = 'rejected' WHERE sender_id = '" + sender + "' AND receiver_id = '" + receiver + "';";
+    return executeSQL(sql);
+}
+
+bool UserManager::areFriends(const std::string& user1, const std::string& user2) {
+    std::string sql = "SELECT * FROM FriendStatus WHERE (sender_id = '" + user1 + "' AND receiver_id = '" + user2 + "' OR sender_id = '" + user2 + "' AND receiver_id = '" + user1 + "') AND status = 'accepted';";
+    // Exécution de la requête pour vérifier si les deux utilisateurs sont amis
+    return executeSQL(sql);
+}
+
+std::vector<std::string> UserManager::getFriendList(const std::string& user) {
+    std::vector<std::string> friends;
+    std::string sql = "SELECT receiver_id FROM FriendStatus WHERE sender_id = '" + user + "' AND status = 'accepted';";
+    // Récupérer la liste des amis pour l'utilisateur
+    // (À implémenter avec un callback ou un mécanisme pour récupérer les résultats de la requête SELECT)
+    return friends;
+}
+
+void UserManager::updateHighscore(const std::string& username, int newScore) {
+    std::string sql = "UPDATE Users SET highscore = " + std::to_string(newScore) + " WHERE username = '" + username + "';";
+    executeSQL(sql);
+}
+
+int UserManager::getHighscore(const std::string& username) const {
+    std::string sql = "SELECT highscore FROM Users WHERE username = '" + username + "';";
+    // Exécuter la requête et retourner le score (simplifié pour l'exemple)
+    return 0;  // Retourner le score pour l'utilisateur
+}
+
+std::vector<std::string> UserManager::getPendingRequests(const std::string& username) {
+    std::vector<std::string> requests;
+    std::string sql = "SELECT sender_id FROM FriendStatus WHERE receiver_id = '" + username + "' AND status = 'pending';";
+    // Récupérer la liste des demandes en attente pour l'utilisateur
+    // (À implémenter avec un callback ou un mécanisme pour récupérer les résultats de la requête SELECT)
+    return requests;
+}
+QueryResult DataBase::insertEntry(const std::string &table_name, const std::string& columns, const std::string& values){
+    std::string sql = "INSERT INTO " + table_name + " (" + columns + ") VALUES (" + values + ");";
+    return executeQuery(sql);
+}
+
+
+QueryResult DataBase::deleteEntry(const std::string &table_name, const std::string& condition) {
+    std::string sql = "DELETE FROM " + table_name + " WHERE " + condition + ";";
+    QueryResult result = executeQuery(sql);
+    //int num_del_rows = sqlite3_changes(db);
+    return executeQuery(sql);
+}
+
+
+QueryResult DataBase::updateEntry(const std::string& table_name, const std::string& columns, const std::string& condition) {
+    std::string sql = "UPDATE " + table_name + " SET " + columns + " WHERE " + condition + ";";
+    return executeQuery(sql);
+}
+
+
+QueryResult DataBase::selectFromTable(const std::string& table_name, const std::string& columns, const std::string& condition) {
+    std::string sql = "SELECT " + columns + " FROM " + table_name;
+    if (!condition.empty()) {
+        sql += " WHERE " + condition;
+    }
+    return executeQuery(sql);
+}
+*/

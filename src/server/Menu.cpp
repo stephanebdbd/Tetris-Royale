@@ -117,7 +117,6 @@ json Menu::getLoginMenuFailed2() const {
 json Menu::getJoinOrCreateGame() const {
     json menu = {
         {jsonKeys::TITLE, "Rejoindre ou créer une partie"},
-
         {jsonKeys::OPTIONS, {
             {"1. ", "créer"},
             {"2. ", "rejoindre"},
@@ -174,7 +173,7 @@ json Menu::getJoinChatRoomMenu() const {
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer le nom de la Room", ":"},
         }},
-        {jsonKeys::INPUT, "Tapez le nom de la room à rejoindre ou '/quit' pour quitter:    "}
+        {jsonKeys::INPUT, "Tapez le nom de la room à rejoindre ou './quit' pour quitter:    "}
     };
 
     return menu.dump() + "\n";  // Affichage formaté
@@ -188,7 +187,7 @@ json Menu::getInvitationsRoomsMenu(const std::vector<std::string>& invitations) 
 json Menu::getListe(const std::vector<std::string>& data, std::string title, const std::string& input) const {
     json menu = {
         {jsonKeys::TITLE, title},
-        {jsonKeys::OPTIONS, json::object()},
+        {jsonKeys::OPTIONS, json::array()},
         {jsonKeys::INPUT, input}
     };
 
@@ -201,23 +200,21 @@ json Menu::getListe(const std::vector<std::string>& data, std::string title, con
 }
 
 json Menu::getListeMembers(const std::vector<std::string>& data) const {
-    return getListe(data, "Liste des membres", "Taper '/quit' pour quitter:  ");
+    return getListe(data, "Liste des membres", "Taper './quit' pour quitter:  ");
 }
 
 json Menu::getManageChatRoomsMenu(const std::vector<std::string>& chatRooms) const {
     if (chatRooms.empty()) {
         json menu = {
             {jsonKeys::TITLE, "Mes Rooms"},
-
-
             {jsonKeys::OPTIONS, {
                 {"Vous n'avez aucun room à gérer.", ""}
             }},
-            {jsonKeys::INPUT, "Tapez '/quit' pour quitter: "}
+            {jsonKeys::INPUT, "Tapez './quit' pour quitter: "}
         };
         return menu.dump() + "\n";  // Convertir en chaîne JSON
     } else {
-        return getListe(chatRooms, "Mes Rooms", "Tapez le nom d'une room pour la gérer ou '/quit' pour quitter: ");
+        return getListe(chatRooms, "Mes Rooms", "Tapez le nom d'une room pour la gérer ou './quit' pour quitter: ");
     }
 }
 
@@ -249,7 +246,6 @@ json Menu::getManageRoomMenu(bool isAdmin, bool lastAdmin) const {
     
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
-
 
 json Menu::getAddMemberAdminMenu(std::string title, std::string input) const {
     json menu = {
@@ -323,7 +319,6 @@ json Menu::getAddFriendMenu() const {
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer le pseudo de l'ami à ajouter", ":"},
         }},
-        
         {jsonKeys::INPUT, "Votre choix: "}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
@@ -352,8 +347,6 @@ json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
 json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const {
     json menu = {
         {jsonKeys::TITLE, "Classement des meilleurs joueurs"},
-
-        
         {jsonKeys::OPTIONS, json::object()},  // car avec array la key commence a 0
         {jsonKeys::INPUT, "Appuyez sur la touche \"1\" pour revenir au menu principal : "}
     };
@@ -371,7 +364,6 @@ json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& rankin
 json Menu::getEndGameMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Game Over"},
-        {jsonKeys::Notif, "false"},
         {jsonKeys::OPTIONS, {
             {"1. ", "Rejouer"},
             {"2. ", "Retour au menu principal"}
@@ -384,7 +376,6 @@ json Menu::getEndGameMenu() const {
 json Menu::getGameModeMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Game Mode"},
-
         {jsonKeys::OPTIONS, {
             {"1. ", "Endless"},
             {"2. ", "Duel"},
@@ -400,7 +391,6 @@ json Menu::getGameModeMenu() const {
 json Menu::getLobbyMenu1() const {
     json menu = {
         {jsonKeys::TITLE, "Configuration des paramètres de la partie:"},
-
         {jsonKeys::OPTIONS, {
             {"/max/<number> ", "Nombre maximal de joueurs"},
             {"/quit ", "Quitter la partie"}
@@ -423,7 +413,6 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
     
     json menu = {
         {jsonKeys::TITLE, "La salle d'invitation et d'attente:"},
-
         {jsonKeys::OPTIONS, {
             {"Game Mode: ", mode},
             {"Joueurs Maximum: ", std::to_string(maxPlayers)},

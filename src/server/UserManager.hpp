@@ -1,11 +1,7 @@
-#ifndef UserManager_HPP
-#define UserManager_HPP
-
-#include <iostream>
-#include <unordered_map>
+/*#include <unordered_map>
 #include <vector>
 #include <fstream>
-#include "../common/json.hpp"
+#include <nlohmann/json.hpp>
 
 class UserManager {
 private:
@@ -55,4 +51,74 @@ public:
     std::vector<std::vector<std::string>> getListGameRequest(const std::string& user);  // Récupérer la liste des demandes de jeu
 };
 
-#endif // UserManager_HPP
+#endif // UserManager_HPP*/
+/*
+#ifndef USERMANAGER_HPP
+#define USERMANAGER_HPP
+
+#include <sqlite3.h>
+#include <string>
+#include <vector>
+#include <unordered_map>
+enum class DbError {
+    OK,
+    EXECUTION_ERROR,
+    DB_CONNECTION_ERROR,
+    DDL_FILE_OPENING_ERROR,
+    DDL_FILE_EXECUTION_ERROR,
+    WRONG_PWD_FAILED,
+    NON_EXISTENT_USER_NAME,
+    NON_EXISTENT_USER_ID,
+    UNIQUE_CONSTRAINT_FAILED,
+    CHECK_USERNAME_CONSTRAINT_FAILED,
+    CHECK_RELATION_CONSTRAINT_FAILED,
+    CHECK_MSG_CONSTRAINT_FAILED,
+    CHECK_SENDER_CONSTRAINT_FAILED,
+    CANNOT_UPDATE_ID_COLUMN,
+    FOREIGN_KEY_CONSTRAINT_FAILED
+};
+class UserManager {
+private:
+    sqlite3* db;  // Le handle de la base de données
+    std::string dbFile;  // Le nom du fichier de la base de données
+
+    void executeSQLFromFile(const std::string& sqlFile);  // Fonction pour exécuter des commandes SQL depuis un fichier
+    bool executeSQL(const std::string& sql);  // Exécuter une requête SQL simple
+
+public:
+    // Constructeur et destructeur
+    UserManager(const std::string& dbName = "mydatabase.db");
+    ~UserManager();
+
+    // Gestion des utilisateurs
+    bool registerUser(const std::string& username, const std::string& password);  // Inscrire un utilisateur
+    bool loginUser(const std::string& username, const std::string& password);      // Connexion d'un utilisateur
+
+    // Gestion des demandes d'amis
+    bool sendFriendRequest(const std::string& sender, const std::string& receiver);  // Envoyer une demande d'ami
+    bool acceptFriendRequest(const std::string& sender, const std::string& receiver); // Accepter une demande d'ami
+    bool rejectFriendRequest(const std::string& sender, const std::string& receiver); // Rejeter une demande d'ami
+
+    // Gestion des amis
+    bool areFriends(const std::string& user1, const std::string& user2);  // Vérifier si deux utilisateurs sont amis
+    std::vector<std::string> getFriendList(const std::string& user);  // Récupérer la liste des amis
+
+    // Gestion des scores
+    void updateHighscore(const std::string& username, int newScore);  // Mettre à jour le score
+    int getHighscore(const std::string& username) const;  // Récupérer le score
+
+    // Liste des demandes d'amis
+    std::vector<std::string> getPendingRequests(const std::string& username);  // Liste des demandes d'amis en attente
+
+    bool insertEntry(const std::string& table_name, const std::string& columns, const std::string& values);  // Insérer une entrée dans une table
+    bool deleteEntry(const std::string& table_name, const std::string& condition);  // Supprimer une entrée d'une table
+    bool updateEntry(const std::string& table_name, const std::string& columns, const std::string& condition);  // Mettre à jour une entrée dans une table
+    bool selectEntry(const std::string& table_name, const std::string& columns, const std::string& condition);  // Sélectionner une entrée d'une table
+    std::vector<std::string> getAllUserMsg(const std::string& id_user);  // Récupérer tous les messages d'un utilisateur
+    std::vector<std::string> getMsgBetweenUsers(const std::string& id_user, const std::string& id_friend);  // Récupérer les messages entre deux utilisateurs
+
+};
+
+
+#endif // USERMANAGER_HPP
+*/
