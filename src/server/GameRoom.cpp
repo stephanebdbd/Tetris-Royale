@@ -3,28 +3,30 @@
 #include <unistd.h>
 
 
-GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxPlayers)
-    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers) {
+GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName)
+    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(1) {
     
     gameModes.emplace_back(std::make_shared<ClassicMode>());
     gameModes.emplace_back(std::make_shared<RoyalMode>());
 
     setGameMode(gameModeName);
-    if (gameModeName == GameModeName::Endless)
-        setSpeed(1000);
-
+    
     if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1)){
+        setSpeed(1000);
         this->maxPlayers = 1;
     }
         
     else if ((gameModeName == GameModeName::Duel)){
-        playersVictim[0] = 1;
-        playersVictim[1] = 0;
+        playersVictim.push_back(1);
+        playersVictim.push_back(0);
+        if (maxPlayers != 2)
+            this->maxPlayers = 2;
     }
         
     else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers < 2)){
         this->maxPlayers = 3;
     }
+
     addPlayer(clientId);
     std::cout << "Max players: " << maxPlayers << std::endl;
     std::cout << "GameRoom #" << roomId << " created at " << this << std::endl;

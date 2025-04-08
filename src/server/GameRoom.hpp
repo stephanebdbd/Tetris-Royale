@@ -19,7 +19,7 @@ class GameRoom {
     int roomId;
     int ownerId;
     GameModeName gameModeName;
-    int maxPlayers;
+    int maxPlayers = 1;
     bool inProgress = false;
     bool ownerQuit = false;
     int energyLimit=0;
@@ -50,7 +50,7 @@ class GameRoom {
     std::vector<bool> showmessage;
     mutable std::vector<int> keyClear;
 public:
-    GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
+    GameRoom(int roomId, int clientId, GameModeName gameModeName);
     void addPlayer(int playerId);
     bool removePlayer(int playerId);
     bool getIsFull() const;

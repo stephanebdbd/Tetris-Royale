@@ -109,7 +109,7 @@ public:
     void keyInputLoginPasswordMenu(int clientSocket, int clientId, const std::string& action);
     //game
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputGameModeMenu(int clientId, GameModeName gameMode=GameModeName::Endless);
+    void keyInputCreateGameRoom(int clientId, GameModeName gameMode);
     bool gamePreparation(int ownerId, std::shared_ptr<GameRoom> gameRoom);
     //chat
     void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
@@ -131,7 +131,7 @@ public:
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
     
 
-    void deleteGameRoom(int roomId, const std::vector<int>& players);
+    void deleteGameRoom(int roomId, const std::vector<int> players);
     void extractDataBetweenSlashes(const std::string& toFind, const std::string& action, std::string& status, std::string& receiver);
     void sendInputToGameRoom(int clientId, const std::string& action);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
@@ -156,7 +156,7 @@ public:
     int getMaxPlayers(int clientId);
     int getAmountOfPlayers(int clientId);
     void letPlayersPlay(const std::vector<int>& players);
-
+    void disconnectPlayer(int clientId, bool canRemove = false);
     void keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status);
     void keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action);
 };

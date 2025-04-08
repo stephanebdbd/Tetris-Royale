@@ -83,7 +83,7 @@ void Grid::exchangeState(int x, int y, int y1) {
 
 void Grid::applyGravity(std::vector<int> clearLines) {
     int clearCells = 0, size = clearLines.size(), lines = 1;
-    int start = clearLines[0], end=0;
+    int start = clearLines[0], end = 0;
     for (int y = start; y >= 0; --y) {
         clearCells = 0;
         while ((lines < size) && ((y == clearLines[lines]) || (y - lines == clearLines[lines]))) 
@@ -95,17 +95,15 @@ void Grid::applyGravity(std::vector<int> clearLines) {
                 exchangeState(x, y, y - lines);
             }
         }
-        else if (y - lines < 0) {
-            clearLine(y);
-            start = y - 1;
-            break;
-        }
-        else if (((clearCells == width) && (lines == size))){
-            start = y - lines - 1;
+        else if (((clearCells == width) && (lines == size)) || (y - lines < 0)){
+            start = (y - lines < 0) ? y - 1 : y - lines - 1;
+            if (y - lines < 0)
+                clearLine(y);
+            end = start - lines + 1;
             break;
         }
     }
-    end = start - lines + 1;
+    
     for (int y = start; (y >= end) && (y >= 0); --y)
         clearLine(y);
 }
