@@ -10,21 +10,10 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName)
     gameModes.emplace_back(std::make_shared<RoyalMode>());
 
     setGameMode(gameModeName);
-    
-    if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1)){
-        setSpeed(1000);
-        this->maxPlayers = 1;
-    }
         
-    else if ((gameModeName == GameModeName::Duel)){
+    if ((gameModeName == GameModeName::Duel)){
         playersVictim.push_back(1);
         playersVictim.push_back(0);
-        if (maxPlayers != 2)
-            this->maxPlayers = 2;
-    }
-        
-    else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers < 2)){
-        this->maxPlayers = 3;
     }
 
     addPlayer(clientId);
@@ -166,7 +155,6 @@ bool GameRoom::getCanUseMalusOrBonus(int playerId) const {
 
 void GameRoom::keyInputchooseMalusorBonus(int playerId, int malusOrBonus) {
     if (getGameModeName() == GameModeName::Royal_Competition){
-        //if ((malusOrBonus > 0) && (malusOrBonus < 8)){
         if(messageList[playerId][jsonKeys::CHOICE_MALUS]){
             playersMalusOrBonus[playerId] = malusOrBonus;
             messageList[playerId][jsonKeys::CHOICE_MALUS] = false;
@@ -219,17 +207,18 @@ void GameRoom::setGameMode(GameModeName gameMode) {
         gameModeName = gameMode;
     if (getGameModeName() == GameModeName::Endless) {
         gameModeIndex = -1;
-        setMaxPlayers(1);
+        this->setSpeed(1000);
+        this->setMaxPlayers(1);
     }
-    else if (getGameModeName() == GameModeName::Royal_Competition) {
-        gameModeIndex = 1;
+    else if ((getGameModeName() == GameModeName::Royal_Competition) || (getGameModeName() == GameModeName::Classic)) {
+        gameModeIndex = (getGameModeName() == GameModeName::Royal_Competition) ? 1 : 0;
         if (getMaxPlayers() < 3)
-            setMaxPlayers(3);
+            this->setMaxPlayers(3);
     }
     else {
         gameModeIndex = 0;
-        if (getMaxPlayers() < 2)
-            setMaxPlayers((getGameModeName() == GameModeName::Duel) ? 2 : 3);
+        if (getMaxPlayers() != 2)
+            this->setMaxPlayers(2);
     }
 }
 
@@ -256,6 +245,10 @@ void GameRoom::setMaxPlayers(int max) {
         if ((max > 2) && (max < 10) && (getAmountOfPlayers() <= max))
             maxPlayers = max;    
     }
+    else if ((getGameModeName() == GameModeName::Duel))
+        maxPlayers = 2;
+    else
+        maxPlayers = 1;
 }
 
 std::string GameRoom::convertUnicodeToText(const std::string& unicodeAction) {
@@ -500,7 +493,6 @@ void GameRoom::choiceVictimRandomly(int playerId) {
 }
 json GameRoom::messageToJson(int playerServerId) const {
     int playerId = getPlayerId(playerServerId);
-    //int targetId = rand() % playersVictim.size();
     json smessage;
     for (const auto& m : messageList[playerId]) {
         smessage[m.first] = m.second;

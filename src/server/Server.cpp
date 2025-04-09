@@ -108,10 +108,8 @@ void Server::handleClient(int clientSocket, int clientId) {
     }
 }
 
-void Server::disconnectPlayer(int clientId, bool canRemove){
+void Server::disconnectPlayer(int clientId){
     close(clientIdToSocket[clientId]); // Fermer la connexion
-    if ((clientGameRoomId[clientId] != -1) && canRemove)
-        gameRooms[clientGameRoomId[clientId]]->removePlayer(clientId);
     clientGameRoomId.erase(clientId); // Supprimer l'ID de la salle de jeu   
     clientIdToSocket.erase(clientId); // Supprimer le socket du client
     clientStates.erase(clientId); // Supprimer l'état des menus du client
@@ -535,7 +533,8 @@ void Server::loopGame(int ownerId) {
                     gameRoom->setAmountOfPlayers(maxPlayers - countGameOvers);
                 } catch (const std::exception& e) {
                     players.erase(std::remove(players.begin(), players.end(), player), players.end());
-                    disconnectPlayer(player, true);
+                    disconnectPlayer(player);
+                    gameRoom->removePlayer(player);
                     std::cerr << "Erreur lors de la mise à jour du jeu pour le joueur #" << player << ": " << e.what() << std::endl;
                 }
             }
@@ -1071,6 +1070,7 @@ void Server::sendGameToPlayer(int clientId, int clientSocket, std::shared_ptr<Ga
 
     message[jsonKeys::MESSAGE_CIBLE] = gameRoom->messageToJson(clientId);
     std::string msg = message.dump() + "\n";
+
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
 }
 

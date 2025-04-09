@@ -88,7 +88,6 @@ void TetraminoDisplacement::update() {
             currentPiece.fixToGrid(grid, gameOver);
             if (!gameOver) { 
                 dropTimer.decreaseInterval(5); // Diminue le temps d'attente entre chaque chute
-                //currentPiece.reset(grid.getWidth() / 2, 0);
                 if(commandIsReversed){
                     inverseCommand = true;
                     counterMalus1 += 1;

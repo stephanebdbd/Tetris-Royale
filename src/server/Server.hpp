@@ -156,7 +156,7 @@ public:
     int getMaxPlayers(int clientId);
     int getAmountOfPlayers(int clientId);
     void letPlayersPlay(const std::vector<int>& players);
-    void disconnectPlayer(int clientId, bool canRemove = false);
+    void disconnectPlayer(int clientId);
     void keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status);
     void keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action);
 };
