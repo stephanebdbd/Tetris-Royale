@@ -9,8 +9,31 @@
 #include "Button.hpp"
 #include "Text.hpp"
 #include "../common/MenuState.hpp"
-#include <memory>
-#include <vector>
+
+//resources path
+const std::string FONT_PATH = "../../res/fonts/Arial.ttf";
+const std::string LogoBackGround = "../../res/background/logo.png";
+const std::string ConnexionBackGround = "../../res/background/connexion.png";
+const std::string MainMenuBackGround = "../../res/background/main_menu.png";
+const std::string GameMenuBackGround = "../../res/background/game_menu.png";
+const std::string GameOverBackGround = "../../res/background/game_over.png";
+const std::string GameVictoryBackGround = "../../res/background/game_victory.png";
+const std::string GameLostBackGround = "../../res/background/game_lost.png";
+const std::string GamePauseBackGround = "../../res/background/game_pause.png";
+const std::string SettingsBackGround = GamePauseBackGround;
+const std::string GridBackGround = "../../res/background/grid.png";
+const std::string ChatBackGround = "../../res/background/chat.png";
+const std::string NotificationBackGround = "../../res/background/notification.png";
+const std::string LogoNotification = "../../res/logo/notification.png";
+const std::string LogoSettings = "../../res/logo/settings.png";
+const std::string LogoTeams = "../../res/logo/teams.png";
+const std::string LogoRanking = "../../res/logo/ranking.png";
+const std::string LogoChat = "../../res/logo/chat.png";
+const std::string LogoMain = "../../res/logo/main.png";
+const std::string LogoExit = "../../res/logo/exit.png";
+const std::string LogoFriend = "../../res/logo/friend.png";
+const std::string LogoAddFriend = "../../res/logo/addFriend.png";
+const std::string LogoFrindsRequest = "../../res/logo/friendRequest.png";
 
 
 struct Textures{
@@ -32,13 +55,14 @@ struct Textures{
     sf::Texture logoChat;
     sf::Texture logoMain;
     sf::Texture logoExit;
+    sf::Texture logoAddFriend;
+    sf::Texture logoFrindsRequest;
 };
 
 
 class SFMLGame {
 
     private:
-        std::vector<std::string> contacts = {"Alice", "Bob", "Charlie", "David", "Eve"};
 
         Client& client;
         std::unique_ptr<sf::RenderWindow> window;
@@ -46,8 +70,15 @@ class SFMLGame {
         std::unique_ptr<Textures> textures;
         std::vector<std::unique_ptr<Button>> buttons;
         std::vector<std::unique_ptr<TextField>> texts;
-        sf::Font font; 
+        sf::Font font;
         MenuState currentState;
+        std::string contact;
+        float scrollSpeed = 0.5f; // Vitesse de défilement
+        float friendsListOffset = 0.0f; // Décalage vertical pour la liste des amis
+        float chatContactsOffset = 0.0f; // Décalage vertical pour les contacts du chat
+        int MessagesY = 60; // Position Y pour afficher les messages
+        int MessagesSentX = 400; // Position X pour afficher les messages
+        int MessagesReceivedX = 220; // Position X pour afficher les messages
 
         
         //draw
@@ -61,9 +92,16 @@ class SFMLGame {
         void LoadResources();
         void cleanup();
 
+        //send json to server
+        bool sendJsonToServer(json& j, const std::string& action) {
+            j["action"] = action;
+            return network->sendData(j.dump() + "\n", client.getClientSocket());
+            cleanup();
+        }
+
     public:
         SFMLGame(Client& client);
-        ~SFMLGame();
+        ~SFMLGame() = default;
 
         void run();
         void refreshMenu();
@@ -91,8 +129,14 @@ class SFMLGame {
         void displayPiecesFinalPosition();
 
         // Chat Menu
-        void chatMenu(const std::vector<std::string>& contacts);
+        void chatMenu();
+        void diplayMessage(const std::string& message, bool isSent);
         void ChatRoomMenu();
+
+        //friends
+        void friendsMenu();
+        void addFriendMenu();
+        void friendRequestListMenu();
 
         //notification
         void notificationMenu(const std::vector<std::string>& notifications);

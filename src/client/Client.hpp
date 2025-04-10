@@ -19,13 +19,16 @@ private:
     MenuStateManager menuStateManager; // Chaque client a son propre gestionnaire d'état de menu
 
 
-    std::string serverIP;
-    int port;
-    int clientSocket;
-    bool isPlaying = false;
-    bool chatMode = false;
-    MenuState currentMenuState;
-    
+    std::string serverIP;               // Adresse IP du serveur
+    int port;                           // Port du serveur
+    int clientSocket;                   // Socket du client
+    bool isPlaying = false;             // Indique si le client est en mode jeu
+    bool chatMode = false;                  // Indique si le client est en mode chat
+    MenuState currentMenuState;            // État du menu actuel
+    json serverData;                // Données reçues du serveur
+    bool stop_threads = false; // Indique si les threads doit s'arrêter
+
+
 public:
         Client(const std::string& serverIP, int port);
         void run();
@@ -34,7 +37,9 @@ public:
         void handleUserInput();
         void displayMenu(const json& data);
         int getClientSocket() const { return clientSocket; }
+        void stopThreads() { stop_threads = true; }
         MenuState getCurrentMenuState();
+        json getServerData() const { return serverData; }
 
 };
 

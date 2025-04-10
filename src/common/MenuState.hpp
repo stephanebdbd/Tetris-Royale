@@ -1,6 +1,7 @@
 #ifndef MenuState_hpp
 #define MenuState_hpp
 #include <string>
+#include <vector>
 #include <sys/socket.h>
 #include <ostream>
 #include <iostream>
@@ -60,7 +61,8 @@ public:
     // Deserialize the string back to MenuState enum
     MenuState deserialize(const std::string& data);
     // Send the MenuState to the client
-    void sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message = "");
+    
+    void sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message = "", const std::vector<std::string>& data = {});
 
 };
 

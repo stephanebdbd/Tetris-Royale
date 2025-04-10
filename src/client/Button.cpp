@@ -39,7 +39,7 @@ Button::Button(const std::string& text, const sf::Font& font, unsigned int chara
                const sf::Color& textColor, const sf::Color& backgroundColor, 
                const sf::Vector2f& position, const sf::Vector2f& size, 
                const sf::Color& rectangleColor)
-    : clicked(false), clickProcessed(false) {
+    : clicked(false){
     // Configuration des couleurs
     this->originalColor = backgroundColor;
     this->hoverColor = sf::Color(
@@ -74,6 +74,7 @@ Button::Button(const std::string& text, const sf::Font& font, unsigned int chara
                         position.y + size.y / 2.0f);
 }
 
+// Fonction pour dessiner le bouton
 void Button::draw(sf::RenderWindow& window) const {
     if(buttonTexture) {
         sf::Sprite sprite(*buttonTexture);
@@ -89,11 +90,13 @@ void Button::draw(sf::RenderWindow& window) const {
     window.draw(text);
 }
 
+// Fonction pour vérifier si la souris est au-dessus du bouton
 bool Button::isMouseOver(const sf::RenderWindow& window) const {
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     return shape.getGlobalBounds().contains(mousePos);
 }
 
+// Fonction pour vérifier si le bouton a été cliqué
 bool Button::isClicked(sf::RenderWindow& window) {
     bool isPressed = isMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left);
     
@@ -112,12 +115,14 @@ bool Button::isClicked(sf::RenderWindow& window) {
     return false;
 }
 
+// le client ne doit pas rester bloqué il doit attendre 0.5s avant de pouvoir recliquer
 void Button::update() {
     // Réinitialisation si le clic est maintenu trop longtemps
     if (wasPressed && clickTimer.getElapsedTime().asMilliseconds() > 500) {
         wasPressed = false;
     }
 }
+
 void Button::setBackgroundColor(sf::RenderWindow& window) {
     if(!buttonTexture) {
         if(isMouseOver(window)) {
@@ -132,13 +137,20 @@ void Button::setBackgroundColor(sf::RenderWindow& window) {
     }
 }
 
+// Fonction pour réinitialiser la couleur du bouton
 void Button::resetColor() {
     shape.setFillColor(originalColor);
 }
 
+// Fonction pour dessiner une photo sur le bouton
 void Button::drawPhoto(const sf::Texture& texture) {
     sf::Sprite sprite(texture);
     sprite.setPosition(shape.getPosition());
     sprite.setScale(shape.getSize().x / texture.getSize().x, shape.getSize().y / texture.getSize().y);
     shape.setTexture(&texture);
+}
+
+// Fonction pour obtenir le texte du bouton
+std::string Button::getText() const {
+    return text.getString();
 }

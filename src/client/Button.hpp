@@ -8,6 +8,7 @@ class Rectangle {
         Rectangle(const sf::Vector2f& position, const sf::Vector2f& size, 
                 const sf::Color& FillColor, const sf::Color& outLineColor);
         void draw(sf::RenderWindow& window) const;
+        void drawPhoto(const sf::Texture& texture);
         
     private:
         sf::RectangleShape shape;
@@ -19,6 +20,7 @@ class Circle {
             const sf::Color& FillColor, const sf::Color& outLineColor);
         void draw(sf::RenderWindow& window);
         void setTexture(const std::shared_ptr<sf::Texture>& texture);
+        void drawPhoto(const sf::Texture& texture);
         
     private:
         sf::CircleShape shape;
@@ -39,6 +41,11 @@ class Button {
         void setBackgroundColor(sf::RenderWindow& window);
         void resetColor();
         void drawPhoto(const sf::Texture& texture);
+        std::string getText() const;
+        
+        bool operator==(const Button& other) const {
+            return text.getString() == other.text.getString();
+        }
         
     private:
         sf::RectangleShape shape;
@@ -49,8 +56,7 @@ class Button {
         sf::Color hoverColor;
         sf::Color clickColor;
         bool clicked;
-        bool clickProcessed;
         bool wasPressed; // Nouvel état pour suivre l'état précédent
         sf::Clock clickTimer; // Pour gérer les délais entre les clics
-        std::shared_ptr<sf::Texture> buttonTexture;
+        std::shared_ptr<sf::Texture> buttonTexture; // Texture pour le bouton (optionnel)
 };

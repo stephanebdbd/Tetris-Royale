@@ -13,3 +13,6 @@ client: $(OBJS)
 
 clean:
 	rm -f *.o client
+
+run: client
+	./client

@@ -48,7 +48,7 @@ void Client::handleUserInput() {
     halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
     std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
     
-    while (true) {
+    while (!stop_threads) {
         
         if (chatMode) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
@@ -103,7 +103,7 @@ void Client::handleUserInput() {
 void Client::receiveDisplay() {
     std::string received;
 
-    while (true) {
+    while (!stop_threads) {
         char buffer[12000];
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
 
@@ -122,8 +122,8 @@ void Client::receiveDisplay() {
                     if (data.contains(jsonKeys::GRID)) {
                         isPlaying = true;
                         chatMode = false;
-                        display.displayGame(data);
-
+                        serverData = data;
+                        //display.displayGame(data);
                     }
                     // Si c'est un message de chat
                     else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
@@ -142,10 +142,14 @@ void Client::receiveDisplay() {
                     else {
                         chatMode = false;
                         isPlaying = false;
+                        // changer le menuState dans le cas de GUI
                         if(data.contains("state")) {
-                            std::cout << "State: " << data["state"] << std::endl;
                             currentMenuState = menuStateManager.deserialize(data["state"]);
-                            //display.displayMenu(data);
+                            serverData = data;
+                        }
+                        //sinon on affiche le menu sur le terminal
+                        else {
+                            display.displayMenu(data);
                         }
                         
                     }

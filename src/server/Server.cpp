@@ -118,7 +118,7 @@ void Server::handleClient(int clientSocket, int clientId) {
 
                 std::string action = receivedData[jsonKeys::ACTION];
                 handleGUIActions(clientSocket, clientId, receivedData);
-                //handleMenu(clientSocket, clientId, action);
+                handleMenu(clientSocket, clientId, action);
             } catch (json::parse_error& e) {
                 std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
             }
@@ -163,6 +163,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 if (userManager->authenticateUser(action["username"], action["password"])) { // Si le mot de passe est correct
                     clientStates[clientId] = MenuState::Main;
                     menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu principal.");
+                    clientPseudo[clientId] = action["username"];
                     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
                     sockToPseudo[clientSocket] = clientPseudo[clientId];
                     std::cout << "Client #" << clientId << " connecté avec succès." << std::endl;
@@ -181,11 +182,12 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 userManager->registerUser(action["username"], action["password"]);
                 clientStates[clientId] = MenuState::Main;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo n'existe pas.");
-                
+                clientPseudo[clientId] = action["username"];
+                sockToPseudo[clientSocket] = action["username"];
+                pseudoTosocket[action["username"]] = clientSocket;
             }else{
                 std::cout << "Le pseudo existe déjà." << std::endl;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo existe déjà.");
-                
             }
         }
         else if(actionType == "welcome") {
@@ -234,7 +236,39 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             //gerer le chat
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat." << std::endl;
             clientStates[clientId] = MenuState::chat;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le chat.");
+            auto friends = friendList->getFriendList(clientPseudo[clientId]);
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le chat.", friends);
+            return;
+        }
+        else if(actionType == "friends") {
+            //gerer les amis
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
+            clientStates[clientId] = MenuState::Friends;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans la liste d'amis.");
+            return;
+        }
+        else if(actionType == "friendsList"){
+            //la liste des amis
+            auto friends = friendList->getFriendList(clientPseudo[clientId]);
+            if(friends.empty()){
+                menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Aucun ami trouvé.");
+                return;
+            }
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Liste d'amis", friends);
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
+        }
+        else if(actionType == "addFriend"){
+            //gerer l'ajout d'amis
+            keyInputAddFriendMenu(clientSocket, clientId, action["friend"]);
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Demande d'ami envoyée.");
+            std::cout << "Client #" << clientId << " a demandé d'ajouter un ami." << std::endl;
+            return;
+        }
+        else if(actionType == "openChat"){
+            //gerer l'ouverture du chat
+            std::string contact = action["contact"];
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat avec " << contact << "." << std::endl;
+            //chat->processClientChat(clientSocket, clientId, *this, clientStates[clientId]);
             return;
         }
     }
@@ -517,13 +551,16 @@ void Server::keyInputManageFriendRequests(int clientSocket, int clientId, const 
 
 void Server::keyInputManageFriendlist(int clientSocket, int clientId, const std::string& action) {
     std::string currentUser = clientPseudo[clientId];
-
+    std::cout << "Client #" << sockToPseudo[clientId] << " a demandé de gérer la liste d'amis." << std::endl;
     if (action == "/quit") {
         returnToMenu(clientSocket, clientId, MenuState::Friends);
         return;
     }
 
     std::vector<std::string> friends = friendList->getFriendList(currentUser);
+    for (const std::string& friend_name : friends) {
+        std::cout << "Ami: " << friend_name << std::endl;
+    }
     if (friends.empty()) {
         returnToMenu(clientSocket, clientId, MenuState::Main, "Vous n'avez aucun ami dans votre liste.");
         return;
@@ -562,6 +599,7 @@ void Server::keyInputFriendsMenu(int clientSocket, int clientId, const std::stri
     }
     else if (action == "2") {
         returnToMenu(clientSocket, clientId, MenuState::FriendList);
+        std::cout << "Client #" << sockToPseudo[clientId] << " a demandé de gérer la liste d'amis." << std::endl;
         
     }
     else if (action == "3") {
