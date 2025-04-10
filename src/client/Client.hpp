@@ -6,7 +6,10 @@
 #include "ClientNetwork.hpp"
 #include "ClientChat.hpp"
 #include "../common/MenuState.hpp"
-#include <ostream>
+#include <mutex>
+#include <thread>
+#include <atomic>
+#include <string>
 
 
 class Client {
@@ -26,11 +29,16 @@ private:
     bool chatMode = false;                  // Indique si le client est en mode chat
     MenuState currentMenuState;            // État du menu actuel
     json serverData;                // Données reçues du serveur
-    bool stop_threads = false; // Indique si les threads doit s'arrêter
+    std::atomic<bool> stop_threads{false};
+    std::thread inputThread;
+    std::thread receiveThread;
+    std::string receivedData;
+    std::mutex receiveMutex;
 
 
 public:
         Client(const std::string& serverIP, int port);
+        ~Client();
         void run();
         bool connect();
         void receiveDisplay();

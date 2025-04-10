@@ -13,20 +13,29 @@
 
 Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1) {}
 
+Client::~Client() {
+    stopThreads();
+    if (inputThread.joinable()) {
+        inputThread.join();
+    }
+    if (receiveThread.joinable()) {
+        receiveThread.join();
+    }
+}
+
 void Client::run() {
     if (!connect()) {
-        std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
+        std::cerr << "Error: Could not connect to server." << std::endl;
         return;
     }
 
-    // Lancer un thread pour écouter les touches et envoyer les inputs
-    std::thread inputThread(&Client::handleUserInput, this);
-    inputThread.detach(); // Permet au thread de fonctionner indépendamment
+    // Start threads (no longer detached)
+    inputThread = std::thread(&Client::handleUserInput, this);
+    receiveThread = std::thread(&Client::receiveDisplay, this);
 
-    // Boucle principale pour recevoir et afficher le jeu
-    while (true) {
-        receiveDisplay();
-    }
+    // Wait for threads to finish (they won't unless stop_threads is set)
+    inputThread.join();
+    receiveThread.join();
 
     network.disconnect(clientSocket);
     delwin(stdscr);
@@ -101,23 +110,24 @@ void Client::handleUserInput() {
 
 
 void Client::receiveDisplay() {
-    std::string received;
-
+    // Make received a member variable instead of local
     while (!stop_threads) {
         char buffer[12000];
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
 
         if (bytesReceived > 0) {
-            received += std::string(buffer, bytesReceived);
+            std::lock_guard<std::mutex> lock(receiveMutex); // Add mutex for thread safety
+            receivedData += std::string(buffer, bytesReceived); // Use member variable
 
-            // Vérifier si un JSON complet est reçu (fini par un '\n') 
-            size_t pos = received.find("\n");
+            // Process complete JSON messages
+            size_t pos = receivedData.find("\n");
             while (pos != std::string::npos) {
-                std::string jsonStr = received.substr(0, pos);  // Extraire un JSON complet
-                received.erase(0, pos + 1);  // Supprimer le JSON traité
-
                 try {
-                    json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
+
+                    std::string jsonStr = receivedData.substr(0, pos);
+                    receivedData.erase(0, pos + 1);
+                    json data = json::parse(jsonStr);
+                    
                     // Si c'est une grille de jeu
                     if (data.contains(jsonKeys::GRID)) {
                         isPlaying = true;
@@ -156,10 +166,23 @@ void Client::receiveDisplay() {
 
                     refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
                 } catch (json::parse_error& e) {
-                    std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;
+                    std::cerr << "JSON parse error: " << e.what() << std::endl;
                 }
 
-                pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer
+                pos = receivedData.find("\n");
+            }
+        }
+        else if (bytesReceived == 0) {
+            // Connection closed
+            stopThreads();
+            break;
+        } else {
+            if (stop_threads) {
+                break;  // Exit if stop_threads is set
+            }
+            // Error
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                stopThreads();
             }
         }
     }

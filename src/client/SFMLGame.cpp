@@ -195,30 +195,17 @@ void SFMLGame::refreshMenu() {
 
 // Compléter le switch dans run()
 void SFMLGame::run() {
+    // Start client threads (they're now managed by the Client class)
+    std::thread clientThread([this]() { client.run(); });
+    clientThread.detach();
 
-    if (!client.connect()) {
-        std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
-        return;
-    }
-
-    // creer la fenêtre
     window->create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE);
     window->setFramerateLimit(60);
-
-    // lancer le thread d'entrée utilisateur
-    std::thread inputThread(&Client::handleUserInput, client);
-    inputThread.detach();
-
-    //lancer le thread de reception des données du serveur
-    std::thread receiveThread([this]() { client.receiveDisplay(); });
-    receiveThread.detach();
 
     while (window->isOpen()) {
         handleEvents();
         refreshMenu();
     }
-
-    client.stopThreads();
 }
 
 void SFMLGame::cleanup() {
@@ -292,6 +279,7 @@ void SFMLGame::welcomeMenu() {
     // Quitter le jeu
     if (buttons[2]->isClicked(*window)) {
         // Envoyer une requête de déconnexion au serveur
+        cleanup();
         window->close();
         return;
     }
