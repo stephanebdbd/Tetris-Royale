@@ -24,10 +24,8 @@ void Client::run() {
     inputThread.detach(); // Permet au thread de fonctionner indépendamment
 
     // Boucle principale pour recevoir et afficher le jeu
-    while (true) {
-        receiveDisplay();
-    }
 
+    receiveDisplay();
     network.disconnect(clientSocket);
     delwin(stdscr);
     endwin();
@@ -63,7 +61,6 @@ void Client::handleUserInput() {
                 if (!inputBuffer.empty()) {
                     if (inputBuffer == "q") {
                         network.disconnect(clientSocket);
-                        endwin();
                         exit(0);
                     }
                     controller.sendInput(inputBuffer, clientSocket);
@@ -77,7 +74,6 @@ void Client::handleUserInput() {
                 if (!inputBuffer.empty()) {
                     if (inputBuffer == "q") {
                         network.disconnect(clientSocket);
-                        endwin();
                         exit(0);
                     }
                     controller.sendInput(inputBuffer, clientSocket);
@@ -106,48 +102,50 @@ void Client::receiveDisplay() {
         char buffer[12000];
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
 
-        if (bytesReceived > 0) {
-            received += std::string(buffer, bytesReceived);
+        if (bytesReceived <= 0) {
+            delwin(stdscr);
+            endwin();  // Quitte ncurses proprement
+            std::cout << "\033[0m\033[2J\033[H" << std::flush;  // Réinitialise couleurs + clear écran
+            std::cout << "Déconnecté du serveur. Fin du programme." << std::endl;            
+            return;
+        }
 
-            // Vérifier si un JSON complet est reçu (fini par un '\n') 
-            size_t pos = received.find("\n");
-            while (pos != std::string::npos) {
-                std::string jsonStr = received.substr(0, pos);  // Extraire un JSON complet
-                received.erase(0, pos + 1);  // Supprimer le JSON traité
+        received += std::string(buffer, bytesReceived);
 
-                try {
-                    json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
-                    // Si c'est une grille de jeu
-                    if (data.contains(jsonKeys::GRID)) {
-                        isPlaying = true;
-                        chatMode = false;
-                        display.displayGame(data);
+        // Vérifier si un JSON complet est reçu (fini par un '\n') 
+        std::size_t pos = received.find("\n");
+        while (pos != std::string::npos) {
+            std::string jsonStr = received.substr(0, pos);  // Extraire un JSON complet
+            received.erase(0, pos + 1);  // Supprimer le JSON traité
 
-                    }
-                    // Si c'est un message de chat
-                    else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
-                        chatMode = true;
-                        isPlaying = false;
-                        // Lancer le chat dans un thread
-                        std::thread chatThread(&ClientChat::run, &chat);
-                        chatThread.detach();
-        
-                    }
-                    // Si c'est un message de chat
-                    else if (data.contains("sender")) {
-                        chat.receiveChatMessages(data);
-                    }
-                    // Sinon, c'est un menu
-                    else {
-                        chatMode = false;
-                        isPlaying = false;
-                        display.displayMenu(data);
-                    }
+            try {
+                json data = json::parse(jsonStr);
 
-                    refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
-                } catch (json::parse_error& e) {
-                    std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;
+                if (data.contains(jsonKeys::GRID)) {
+                    isPlaying = true;
+                    chatMode = false;
+                    display.displayGame(data);
+
+                } else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
+                    chatMode = true;
+                    isPlaying = false;
+                    std::thread chatThread(&ClientChat::run, &chat);
+                    chatThread.detach();
+
+                } else if (data.contains("sender")) {
+                    chat.receiveChatMessages(data);
+
+                } else {
+                    chatMode = false;
+                    isPlaying = false;
+                    display.displayMenu(data);
                 }
+
+                refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
+            } catch (json::parse_error& e) {
+                std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;
+                    break;
+            }
 
                 pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer
             }

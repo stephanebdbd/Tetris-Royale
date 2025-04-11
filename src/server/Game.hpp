@@ -29,18 +29,31 @@ class Game {
         void showGame();
         void showGameOver();
         void updateGame();
-        Grid& getGrid();
-        Score& getScore();
         void moveTetramino(const std::string& action) { displacement.keyInputGameMenu(action); }
         TetraminoDisplacement& getDisplacement() { return displacement; }
+        Grid& getGrid() { return grid; }
         int getLinesCleared() const { return linesCleared; }
         void setNeedToSendGame(bool needToSendGame) { displacement.setNeedToSendGame(needToSendGame); }
         bool getNeedToSendGame() const { return displacement.getNeedToSendGame(); }
-        Tetramino& getCurrentPiece() { return displacement.getCurrentPiece(); }
+        json scoreToJson() const;
+        json gridToJson() const;
+        json tetraminoToJson() const { return displacement.tetraminoToJson(); }
         bool getIsGameOver() const;
         void setGameOver();
         void setmalus5Royal(bool malus5Royal) { this->malus5Royal = malus5Royal; }
         void setSpeed(int speed);
+        int getScore() const { return score.getScore(); }
+
+        //Bonus Royal
+        void applyMiniTetraminoBonus(){displacement.applyMiniTetraminoBonus();}
+        void setSpeedBonusMalus(bool bonus) { displacement.setSpeedBonusMalus(bonus); }
+        void applySpeedBonusMalus(int speed) {displacement.applySpeedBonusMalus(speed);}
+
+        //Malus Royal
+        void setCommandIsReversed(bool malus) { displacement.setCommandIsReversed(malus); }
+        void setBlockCommand(bool malus) { displacement.setBlockCommand(malus); }
+        void setlightBlocked(bool block) { displacement.setlightBlocked(block); }
+        void random2x2MaskedBlock() { displacement.random2x2MaskedBlock(); }
 };
 
 #endif

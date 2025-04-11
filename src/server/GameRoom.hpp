@@ -12,19 +12,17 @@
 #include "GameMode.hpp"
 #include "RoyalMode.hpp"
 #include "ClassicMode.hpp"
+#include "../common/jsonKeys.hpp"
 
 
 class GameRoom {
     int roomId;
     int ownerId;
     GameModeName gameModeName;
-    int maxPlayers;
-    bool started = false;
+    int maxPlayers = 1;
     bool inProgress = false;
     bool ownerQuit = false;
-    bool canGetGames = false;
-    bool canPlay = false;
-    int energyLimit=25;
+    int energyLimit=0;
     int speed=0;
     int gameModeIndex=-1;
     int amountOfPlayers=0;
@@ -35,37 +33,49 @@ class GameRoom {
     std::vector<int> players;
     std::vector<std::shared_ptr<Game>> games;
     std::vector<int> viewersId;
+    using MessageMap = std::unordered_map<std::string, bool>;
+    MessageMap Cmessages = {
+    {jsonKeys::PROPOSITION_CIBLE, false},
+    {jsonKeys::CHOICE_CIBLE, false},
+    {jsonKeys::CHOICE_MALUS_BONUS, false},  
+    {jsonKeys::CHOICE_MALUS, false},  
+    {jsonKeys::CHOICE_BONUS, false},
+    {jsonKeys::CLEAR, false},
+    {jsonKeys::GAME_OVER, false}
+}; 
+    mutable std::vector<MessageMap> messageList;
+    std::vector<std::string> boolInputs = {"Y", "y", "N", "n"};
+    int victimRandom = -1;
+    std::vector<bool> applyMalus;
+    std::vector<bool> showmessage;
+    mutable std::vector<int> keyClear;
 public:
-    GameRoom(int roomId, int clientId, GameModeName gameModeName=GameModeName::Endless, int maxPlayers=1);
+    GameRoom(int roomId, int clientId, GameModeName gameModeName);
     void addPlayer(int playerId);
     bool removePlayer(int playerId);
     bool getIsFull() const;
     void shiftPlayers(int index);
-    void startGame();
     void handleMalusOrBonus(int playerId);
+    void startGame();
     void endGame();
     void applyFeatureMode(int playerId);
-    void setInProgress(bool status);
     void setSpeed(int speed);
     void setGameMode(GameModeName gameMode);
     void addViewer(int viewerId);
     bool getInProgress() const;
     int getRoomId() const;
     int getOwnerId() const;
-    void setOwnerId(int clientId);
     bool getGameIsOver(int playerServerId, bool fromGameRoom=false) const;
     void setMaxPlayers(int max);
     int getMaxPlayers() const;
     bool getNeedToSendGame(int playerServerId) const;
     void setNeedToSendGame(bool needToSendGame, int playerServerId);
     void setRoomId(int roomId) { this->roomId = roomId; }
-    void setToStartGame();
-    bool getHasStarted() const;
     bool getSettingsDone() const;
-    void setGameIsOver(int playerServerId);
     void input(int playerId, const std::string& unicodeAction);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
+    void setAmountOfPlayers(int amount);
     void inputLobby(int clientId, const std::string& action);
     void keyInputGame(int playerId, const std::string& unicodeAction);
     void keyInputchooseVictim(int playerId, int victim);
@@ -76,21 +86,22 @@ public:
     int convertSettingToInt(const std::string& unicodeAction, std::size_t length);
     int convertStringToInt(const std::string& unicodeAction);
     bool getCanUseMalusOrBonus(int playerServerId) const;
-    Score& getScore(int playerServerId);
+    int getScoreValue() const;
     int getPlayerId(int playerServerId) const;
     void setEnergyLimit(int NewEnergyLimit);
     int getEnergyLimit() const;
     void setOwnerQuit();
     bool getOwnerQuit() const;
     int getGameModeIndex() const { return gameModeIndex; }
-    bool getCanGetGames() const;
-    void setCanGetGames();
-    bool getCanPlay() const;
-    void setCanPlay();
+    void createGames();
     int getEnergyOfPlayer(int playerServerId) const;
+    void updatePlayerGame(int playerServerId);
 
     std::vector<int> getPlayers() const { return players; }
     int getSpeed() const { return speed; }
+    json messageToJson(int playerServerId)const;
+
+    void choiceVictimRandomly(int playerId);
 };
 
 #endif

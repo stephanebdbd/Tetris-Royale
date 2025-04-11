@@ -1,5 +1,8 @@
 #include "Menu.hpp"
 #include "../common/jsonKeys.hpp"
+#include <fstream>
+#include <iostream>
+
 
 
 json Menu::getMainMenu0() const {
@@ -363,9 +366,9 @@ json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& rankin
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getEndGameMenu() const {
+json Menu::getEndGameMenu(const std::string& message) const {
     json menu = {
-        {jsonKeys::TITLE, "Game Over"},
+        {jsonKeys::TITLE, message},
         {jsonKeys::OPTIONS, {
             {"1. ", "Rejouer"},
             {"2. ", "Retour au menu principal"}
@@ -390,46 +393,34 @@ json Menu::getGameModeMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getLobbyMenu1() const {
-    json menu = {
-        {jsonKeys::TITLE, "Configuration des paramètres de la partie:"},
-        {jsonKeys::OPTIONS, {
-            {"/max/<number> ", "Nombre maximal de joueurs"},
-            {"/quit ", "Quitter la partie"}
-        }},
-
-        {jsonKeys::INPUT, "entrez le paramètre: "}
-        
-    };
-    return menu.dump() + "\n";  // Convertir en chaîne JSON
-}
-
-json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPlayers) const {
-    std::string cmd = "";
-    std::string desc = "";
+json Menu::getLobbyMenu(int maxPlayers, const std::string& mode, int amountOfPlayers, int speed, int energy) const {
+    std::string key;
+    std::string value;
     if (mode == "Royal Competition"){
-        cmd = "/energy/<energy> (inférieure à 15) ";
-        desc = "déterminer l'énergie à atteindre";
+        key = "Energie: ";
+        value = std::to_string(energy) + "\n";
     }
-
-    
+    std::string space(8, ' ');
     json menu = {
-        {jsonKeys::TITLE, "La salle d'invitation et d'attente:"},
+        {jsonKeys::TITLE, space + "TETRIS ROYAL LOBBY"},
+        {jsonKeys::TEXT, "isText"},
         {jsonKeys::OPTIONS, {
-            {"Game Mode: ", mode},
-            {"Joueurs Maximum: ", std::to_string(maxPlayers)},
-            {"Nombre actuel de joueurs: ", std::to_string(amountOfPlayers)},
-            {"/invite/player/<name> ", "Inviter un joueur"},
-            {"/invite/viewer/<name> ", "Inviter un spectateur"},
-            {"/speed/<vitesse> (supérieure à 100) ", "déterminer la vitesse du jeu"},
-            {cmd, desc},
-            {"/quit ", "Quitter la partie"}
-
+            "\n",
+            "Game Mode: " + mode,
+            "Joueurs Maximum: " + std::to_string(maxPlayers),
+            "Nombre actuel de joueurs: " + std::to_string(amountOfPlayers),
+            "Vitesse: " + std::to_string(speed),
         }},
-
-        {jsonKeys::INPUT, "entrez le paramètre: "}
-        
+        {jsonKeys::INPUT, space + "Entrez: "}       
     };
+
+    if (mode == "Royal Competition")
+        menu[jsonKeys::OPTIONS].push_back(key + value);
+    menu[jsonKeys::OPTIONS].push_back("\n");
+    menu[jsonKeys::OPTIONS].push_back("/help Afficher le mode d'emploi");
+    menu[jsonKeys::OPTIONS].push_back("/quit Quitter la partie");
+    menu[jsonKeys::OPTIONS].push_back("\n");
+
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
@@ -454,6 +445,49 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
 json Menu::getWinGameMenu() const {
     json menu = {
         {jsonKeys::TITLE, "YOU WIN!!"},
+        {jsonKeys::OPTIONS, {
+            {"1. ", "Rejouer"},
+            {"2. ", "Retour au menu principal"}
+        }},
+        {jsonKeys::INPUT, "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getHelpMenu(bool isRC, bool canEditMaxPlayer) const {    
+    json menu = {
+        {jsonKeys::TITLE, "Mode d'emploi de l'utilisation du chat"},
+        {jsonKeys::OPTIONS, json::array()},
+        {jsonKeys::TEXT, "isText"},
+        {jsonKeys::INPUT, "Tapez '/quit' pour quitter: "}
+    };
+    std::ifstream file("help.txt");
+    if (!file) {
+        std::cerr << "Erreur : Impossible d'ouvrir le fichier help.txt." << std::endl;
+        return json();
+    }
+    try {
+        std::string line; 
+        menu[jsonKeys::OPTIONS].push_back("\n");
+        while (std::getline(file, line)){
+            if (isRC && line.find("/energy") != std::string::npos)
+                menu[jsonKeys::OPTIONS].push_back("    " + line);
+            else if (canEditMaxPlayer && line.find("/max") != std::string::npos)
+                menu[jsonKeys::OPTIONS].push_back("    " + line);
+            else if ((line.find("/max") == std::string::npos) && (line.find("/energy") == std::string::npos))
+                menu[jsonKeys::OPTIONS].push_back("    " + line);
+        }
+        menu[jsonKeys::OPTIONS].push_back("\n");
+    } catch (const json::parse_error& e) {
+        std::cerr << "Erreur de parsing JSON (MenuHelp) : " << e.what() << std::endl;
+    }
+    file.close();
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getQuitGameMenu() const {
+    json menu = {
+        {jsonKeys::TITLE, "GAME END"},
         {jsonKeys::OPTIONS, {
             {"1. ", "Rejouer"},
             {"2. ", "Retour au menu principal"}

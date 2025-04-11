@@ -15,6 +15,8 @@ class Timer {
         void reset();
         void decreaseInterval(int amount);  
         void setInterval(int ms);  
+        int getInterval() const { return interval; }
+        steady_clock::time_point getLastUpdate() const { return lastUpdate; }
 };
 
 #endif

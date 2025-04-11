@@ -2,7 +2,6 @@
 #define DATA_HPP
 
 #include "../common/json.hpp"  // Inclusion de la bibliothèque JSON
-using json = nlohmann::json;
 #include <string>
 #include <set>
 #include <fstream>

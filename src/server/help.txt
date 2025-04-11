@@ -1,27 +1,34 @@
-                Mode d'emploi de l'utilisation du chat (appuyez sur Esc pour quitter l'onglet)
-"                                                                                                                              "
-**DESCRIPTION**
+**DESCRIPTION GENERALE DU LOBBY**
     Le chat vous permet en quelques commandes de modifier vos listes d'amis et de modifier les paramètres d'une partie à
     laquelle vous participez. Le chat est disponible à partir de n'importe quel menu après connexion, en appuyant sur la
     touche "c". On y quitte via la touche "esc".
 
-**OPTIONS GÉNERALES**
-    \ban \<name>                Ajoute le joueur <name> dans la liste de joueurs bloqués, avec qui vous ne pourrez pas jouer
-    \addfriend \<name>          Envoie une demande d'ami à l'utilisateur <name>
-    \deletefriend \<name>       Supprime l'ami <name> de votre liste d'amis
+**OPTIONS GENERALES**
+    /friend/ban/<name>              Ajoute le joueur <name> dans la liste de joueurs bloqués, avec qui vous ne pourrez pas jouer
+    /friend/unban/<name>            Supprime le joueur <name> de la liste de joueurs bloqués, avec qui vous pourrez à nouveau jouer
+    /friend/add/<name>              Envoie une demande d'ami à l'utilisateur <name>
+    /friend/delete/<name>           Supprime l'ami <name> de votre liste d'amis
 
-**PARAMÈTRES DE JEU**
+**PARAMETRES DE JEU**
     DESCRIPTION
         Ce chat est différent du chat général. Celui-ci sera disponible que dans le lobby d'une partie à laquelle vous
         participez, en attendant d'avoir le nombre de joueurs demandés. Vous pourrez toujours profiter des options générales
         (sauf au fait d'accéder au chat général) en plus de pouvoir discuter avec les joueurs connectés à la partie.
         D'autres commandes pour modifier la parties sont expliquées ci-dessous.
 
-    POUR LE PROPRIÉTAIRE DE LA PARTIE
-        \<number>                   Permet de changer le nombre maximal de joueurs (Sauf pour le mode duel)
-        \speed <level>              Change la vitesse de descente de tetraminos à la vitesse du niveau <level>
+    POUR LE PROPRIETAIRE DE LA PARTIE
+        /max/<number>               Permet de changer le nombre maximal de joueurs (entre 3 et 9)
+        /speed/<level>              Change la vitesse de descente de tetraminos à la vitesse du niveau <level> (supérieur à 100)       
+        /energy/<energy>            déterminer l'énergie à atteindre (inférieure à 15)
+    
     POUR TOUT JOUEUR
-        \invite \player \<name>     Invite l'ami <name> à jouer
-        \invite \viewer \<name>     Invite l'ami <name> à regarder la partie
-        \quit                       Pour quitter une partie (le statut de propriétaire est transféré au plus ancien
-                                    participant s'il venait à partir)
+        /invite/player/<name>       Invite l'ami <name> à jouer
+        /invite/viewer/<name>       Invite l'ami <name> à regarder la partie
+        /quit                       Pour quitter une partie (pour le propriétaire, cela impliquera la suppresion de la partie)
+    
+    POUR TOUT SPECTATEUR
+        Durant la partie, le viewer utilisera ses touches de gauches et droites pour passer d'un
+        plateau de jeu à un autre, jusqu'à ce que celle-ci se termine.
+        
+        /status/player              Pour devenir passer de spectateur à joueur d'une partie
+        

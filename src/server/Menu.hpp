@@ -32,11 +32,11 @@ class Menu {
         json getListeRequests(const std::vector<std::string>& data) const;
         json getDeleteRoomConfirmationMenu(const std::string& roomName) const;
         //game
+        json getHelpMenu(bool isRC, bool canEditMaxPlayer) const;
         json getJoinOrCreateGame() const;
         json getGameMode() const;
         json getGameModeMenu() const;
-        json getLobbyMenu1() const;
-        json getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPlayers) const;
+        json getLobbyMenu(int maxPlayers, const std::string& mode, int amountOfPlayers, int speed=0, int energy=0) const;
         json getGameRequestsListMenu(const std::vector<std::vector<std::string>>& pendingRequests) const;
 
         //friends
@@ -46,11 +46,12 @@ class Menu {
         json getRequestsListMenu(const std::vector<std::string>& pendingRequests) const;
         
         json getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const;
-        json getEndGameMenu() const; 
+        json getEndGameMenu(const std::string& message) const; 
         json getWinGameMenu() const;       
         
         json displayMessage(const std::string& message) const;
         
+        json getQuitGameMenu() const;
 
 };
 
