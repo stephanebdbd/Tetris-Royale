@@ -60,7 +60,6 @@ public:
     bool start();
     void acceptClients();
     void handleClient(int clientSocket, int clientId);
-    void cleanupClient(int clientSocket, int clientId);
     void stop();
     void loopGame(int ownerId);
 
