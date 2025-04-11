@@ -29,16 +29,19 @@ int main() {
     std::cout << "Entrez votre choix (1 ou 2) : ";
     std::cin >> choix;
 
-    std::ofstream serverLog("client.log");
-    std::cout.rdbuf(serverLog.rdbuf());
-    std::cerr.rdbuf(serverLog.rdbuf());
-
     Client client("127.0.0.1", 12345);
 
     if (choix == 1) {
+        std::ofstream serverLog("client.log");
+        std::cout.rdbuf(serverLog.rdbuf());
+        std::cerr.rdbuf(serverLog.rdbuf());
+        
         lancerModeTerminal(client);
+
     } else if (choix == 2) {
+
         lancerModeGraphique(client);
+        
     } else {
         std::cout << "Choix invalide.\n";
     }

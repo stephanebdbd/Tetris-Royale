@@ -5,8 +5,11 @@
 #include "Controller.hpp"
 #include "ClientNetwork.hpp"
 #include "ClientChat.hpp"
-
-#include <SFML/Window/Keyboard.hpp> 
+#include "../common/MenuState.hpp"
+#include <mutex>
+#include <thread>
+#include <atomic>
+#include <string>
 
 
 class Client {
@@ -16,23 +19,35 @@ private:
     Controller controller;  // Chaque client a son propre controller
     ClientNetwork network;  // Chaque client a son propre network
     ClientChat chat;        // Chaque client a son propre chat
+    MenuStateManager menuStateManager; // Chaque client a son propre gestionnaire d'état de menu
 
 
-    std::string serverIP;
-    int port;
-    int clientSocket;
-    bool isPlaying = false;
-    bool chatMode = false;
-    bool stopInputThread;
-    
+    std::string serverIP;               // Adresse IP du serveur
+    int port;                           // Port du serveur
+    int clientSocket;                   // Socket du client
+    bool isPlaying = false;             // Indique si le client est en mode jeu
+    bool chatMode = false;                  // Indique si le client est en mode chat
+    MenuState currentMenuState;            // État du menu actuel
+    json serverData;                // Données reçues du serveur
+    std::atomic<bool> stop_threads{false};
+    std::thread inputThread;
+    std::thread receiveThread;
+    std::string receivedData;
+    std::mutex receiveMutex;
+
+
 public:
         Client(const std::string& serverIP, int port);
+        ~Client();
         void run();
         bool connect();
         void receiveDisplay();
         void handleUserInput();
         void displayMenu(const json& data);
-        void sendSFMLInput(sf::Keyboard::Key key);
+        int getClientSocket() const { return clientSocket; }
+        void stopThreads() { stop_threads = true; }
+        MenuState getCurrentMenuState();
+        json getServerData() const { return serverData; }
 
 };
 

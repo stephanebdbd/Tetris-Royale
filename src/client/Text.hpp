@@ -7,7 +7,7 @@ class TextField {
         TextField(const sf::Font& font, unsigned int characterSize, 
                   const sf::Color& textColor, const sf::Color& backgroundColor, 
                   const sf::Vector2f& position, const sf::Vector2f& size, 
-                  const std::string& placeholder);
+                  const std::string& placeholder, bool hidden = false);
     
 
         void draw(sf::RenderWindow& window) const;
@@ -31,4 +31,5 @@ class TextField {
         sf::Clock cursorClock;
         sf::RectangleShape cursor;
         float padding;
+        bool hiddenText = false;
 };

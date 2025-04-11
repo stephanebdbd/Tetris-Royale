@@ -11,21 +11,32 @@
 #include <fstream>
 
 
-Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1), stopInputThread(false) {}
+Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1) {}
+
+Client::~Client() {
+    stopThreads();
+    if (inputThread.joinable()) {
+        inputThread.join();
+    }
+    if (receiveThread.joinable()) {
+        receiveThread.join();
+    }
+}
 
 void Client::run() {
     if (!connect()) {
-        std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
+        std::cerr << "Error: Could not connect to server." << std::endl;
         return;
     }
 
-    // Lancer un thread pour écouter les touches et envoyer les inputs
-    std::thread inputThread(&Client::handleUserInput, this);
-    inputThread.detach(); // Permet au thread de fonctionner indépendamment
+    // Start threads (no longer detached)
+    inputThread = std::thread(&Client::handleUserInput, this);
+    receiveThread = std::thread(&Client::receiveDisplay, this);
 
-    // Boucle principale pour recevoir et afficher le jeu
+    // Wait for threads to finish (they won't unless stop_threads is set)
+    inputThread.join();
+    receiveThread.join();
 
-    receiveDisplay();
     network.disconnect(clientSocket);
     delwin(stdscr);
     endwin();
@@ -46,7 +57,7 @@ void Client::handleUserInput() {
     halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
     std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
     
-    while (true) {
+    while (!stop_threads) {
         
         if (chatMode) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Attendre 100ms avant de vérifier à nouveau
@@ -95,88 +106,87 @@ void Client::handleUserInput() {
     }
 }
 
-void Client::receiveDisplay() {
-    std::string received;
 
-    while (true) {
+void Client::receiveDisplay() {
+    // Make received a member variable instead of local
+    while (!stop_threads) {
         char buffer[12000];
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
 
-        if (bytesReceived <= 0) {
-            delwin(stdscr);
-            endwin();  // Quitte ncurses proprement
-            std::cout << "\033[0m\033[2J\033[H" << std::flush;  // Réinitialise couleurs + clear écran
-            std::cout << "Déconnecté du serveur. Fin du programme." << std::endl;            
-            return;
-        }
+        if (bytesReceived > 0) {
+            std::lock_guard<std::mutex> lock(receiveMutex); // Add mutex for thread safety
+            receivedData += std::string(buffer, bytesReceived); // Use member variable
 
-        received += std::string(buffer, bytesReceived);
+            // Process complete JSON messages
+            size_t pos = receivedData.find("\n");
+            while (pos != std::string::npos) {
+                try {
 
-        // Vérifier si un JSON complet est reçu (fini par un '\n') 
-        std::size_t pos = received.find("\n");
-        while (pos != std::string::npos) {
-            std::string jsonStr = received.substr(0, pos);  // Extraire un JSON complet
-            received.erase(0, pos + 1);  // Supprimer le JSON traité
+                    std::string jsonStr = receivedData.substr(0, pos);
+                    receivedData.erase(0, pos + 1);
+                    json data = json::parse(jsonStr);
+                    
+                    // Si c'est une grille de jeu
+                    if (data.contains(jsonKeys::GRID)) {
+                        isPlaying = true;
+                        chatMode = false;
+                        serverData = data;
+                        //display.displayGame(data);
+                    }
+                    // Si c'est un message de chat
+                    else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
+                        chatMode = true;
+                        isPlaying = false;
+                        // Lancer le chat dans un thread
+                        std::thread chatThread(&ClientChat::run, &chat);
+                        chatThread.detach();
+        
+                    }
+                    // Si c'est un message de chat
+                    else if (data.contains("sender")) {
+                        chat.receiveChatMessages(data);
+                    }
+                    // Sinon, c'est un menu
+                    else {
+                        chatMode = false;
+                        isPlaying = false;
+                        // changer le menuState dans le cas de GUI
+                        if(data.contains("state")) {
+                            currentMenuState = menuStateManager.deserialize(data["state"]);
+                            serverData = data;
+                        }
+                        //sinon on affiche le menu sur le terminal
+                        else {
+                            display.displayMenu(data);
+                        }
+                        
+                    }
 
-            try {
-                json data = json::parse(jsonStr);
-
-                if (data.contains(jsonKeys::GRID)) {
-                    isPlaying = true;
-                    chatMode = false;
-                    display.displayGame(data);
-
-                } else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
-                    chatMode = true;
-                    isPlaying = false;
-                    std::thread chatThread(&ClientChat::run, &chat);
-                    chatThread.detach();
-
-                } else if (data.contains("sender")) {
-                    chat.receiveChatMessages(data);
-
-                } else {
-                    chatMode = false;
-                    isPlaying = false;
-                    display.displayMenu(data);
+                    refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
+                } catch (json::parse_error& e) {
+                    std::cerr << "JSON parse error: " << e.what() << std::endl;
                 }
 
-                refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
-            } catch (json::parse_error& e) {
-                std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;
-                    break;
+                pos = receivedData.find("\n");
             }
-
-                pos = received.find("\n");  // Vérifier s'il reste d'autres JSON dans le buffer
+        }
+        else if (bytesReceived == 0) {
+            // Connection closed
+            stopThreads();
+            break;
+        } else {
+            if (stop_threads) {
+                break;  // Exit if stop_threads is set
+            }
+            // Error
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                stopThreads();
             }
         }
     }
+}
 
 
-void Client::sendSFMLInput(sf::Keyboard::Key key) {
-    std::string action;
-    std::cout << "Key pressed: " << key << std::endl;
-
-    if (key == sf::Keyboard::Up) {
-        action = "UP";
-    }
-    else if (key == sf::Keyboard::Down) {
-        action = "DOWN";
-    }
-    else if (key == sf::Keyboard::Left) {
-        action = "LEFT";
-    }
-    else if (key == sf::Keyboard::Right) {
-        action = "RIGHT";
-    }
-    else if (key == sf::Keyboard::Space) {
-        action = " ";
-    }
-    else {
-        action = std::string(1, static_cast<char>(key));
-    }
-    
-    if (!action.empty()) {
-        controller.sendInput(action, clientSocket);
-    }
+MenuState Client::getCurrentMenuState() {
+    return currentMenuState; 
 }
