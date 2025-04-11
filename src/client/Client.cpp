@@ -151,7 +151,7 @@ void Client::receiveDisplay() {
             }
         }
     }
-}
+
 
 void Client::sendSFMLInput(sf::Keyboard::Key key) {
     std::string action;
