@@ -34,6 +34,8 @@ class DataBase {
     
         void rollBack();
         void closeConnection();
+        
+        std::string getTime();
 };
 /*
 class DataBase

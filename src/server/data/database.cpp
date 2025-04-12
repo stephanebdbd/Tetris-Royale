@@ -7,7 +7,7 @@
 #include <sstream>
 #include <ctime>
 
-#define DATABASE_DIR "data/full_schema.sql"
+#define DATABASE_DIR "data/DDL_user_db.sql"
 #define DB_NAME "mama.db"
 
 
@@ -123,4 +123,13 @@ void DataBase::rollBack(){
 
 void DataBase::closeConnection(){
         sqlite3_close(this->db);    
+}
+
+
+std::string DataBase::getTime(){
+    std::time_t now = std::time(nullptr);
+    std::tm *tm_time = std::localtime(&now);
+    char buffer[80];
+    std::strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", tm_time);
+    return std::string(buffer);
 }

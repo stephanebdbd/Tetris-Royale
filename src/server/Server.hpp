@@ -41,22 +41,25 @@ enum class MenuState {
                         Play,
                         GameOver,
         classement,
-        chat,
+
+        Rooms,
             CreateRoom,
             JoinRoom,
             RoomsRequest,
+            ChatRooms,
+                
             ManageRooms,
                 ManageRoom,
-                    ListRoomMembres,
-                    AddMembre,
-                    AddAdmin,
-                    RoomRequestList,
-                    QuitRoom,
-                    ConfirmDeleteRoom,
-                    ConfirmQuitRoom,
-                    
-            PrivateChat,
+                    ManageMyRooms,
+                        ListRoomMembres,
+                        AddMembre,
+                        AddAdmin,
+                        RoomRequestList,
+                        QuitRoom,
+                            ConfirmDeleteRoom,
+                            ConfirmQuitRoom,
         Friends,
+            ChatFriends,
             AddFriend,
             FriendList,
             FriendRequestList,
@@ -83,6 +86,9 @@ class Server {
     
     
     //chaque client aura sa game
+    std::unordered_map<std::string, std::shared_ptr<std::vector<int>>> roomMap;
+    std::mutex roomMutex;
+
     std::unordered_map<int, std::string> clientPseudo;            // id -> pseudo
     std::unordered_map<int, MenuState> clientStates;              // id -> menu
     std::unordered_map<std::string, int> pseudoTosocket;          // pseudo -> socket
@@ -107,6 +113,7 @@ public:
     void handleClient(int clientSocket, int clientId);
     void stop();
     void loopGame(int clientSocket, int clientId);
+    std::shared_ptr<std::vector<int>> joinRoom(const std::string& roomName, int clientSocket) ;
 
     void sendMenuToClient(int clientSocket, const std::string& screen);
     //welcome & main
@@ -121,8 +128,10 @@ public:
     void keyInputJoinOrCreateGameMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameModeMenu(int clientSocket, int clientId, GameModeName gameMode=GameModeName::Endless);
     //chat
-    void keyInputChatMenu(int clientSocket, int clientId, const std::string& action);
-    void keyInputPrivateChat(int clientSocket, int clientId, const std::string& action);
+    void keyInputChatRoomsChooseMenu(int clientSocket, int clientId, const std::string& action) ;
+
+    void keyInputChatFriendsMenu(int clientSocket, int clientId, const std::string& action);
+    //void keyInputPrivateChat(int clientSocket, int clientId, const std::string& action);
     void sendChatModeToClient(int clientSocket);
     void keyInputCreateChatRoom(int clientSocket, int clientId, const std::string& action);
     void keyInputJoinChatRoom(int clientSocket, int clientId, const std::string& action);
@@ -136,6 +145,8 @@ public:
     void keyInputQuitRoom(int clientSocket, int clientId, const std::string& action);
     void loadChatRooms();
     void keyInputConfirmDeleteRoom(int clientSocket, int clientId, const std::string& action);
+    void keyInputChatRoomsMenu(int clientSocket, int clientId, const std::string& action) ;
+
 
     //friends
     void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);

@@ -11,15 +11,17 @@ class Menu {
         //register & login  
         json getRegisterMenu1() const;
         json getRegisterMenuFailed() const;
-        json getRegisterMenu2() const;
+        json getRegisterMenu2WithPseudo(const std::string& pseudo) const; 
         json getLoginMenu1() const;
         json getLoginMenuFailed1() const;
-        json getLoginMenu2() const;
+        json getLoginMenu2WithPseudo(const std::string& pseudo) const ;
         json getLoginMenuFailed2() const;
         //chat
-        json getQuitRoomConfirmationMenu(const std::string& roomName) const;
+        json getChatWithRoomMenu(const std::vector<std::string>& chatRooms) const ;
 
-        json getChatMenu() const;
+        json getQuitRoomConfirmationMenu(const std::string& roomName) const;
+        json getChatRoomsMenu() const ;
+        json getChatMenu(const std::vector<std::string>& data) const;
         json getPrivateChatMenu() const;
         json getCreateChatRoomMenu() const;
         json getJoinChatRoomMenu() const;

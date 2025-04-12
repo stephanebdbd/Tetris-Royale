@@ -27,11 +27,7 @@ public:
     
     bool loginUser(const std::string &username, const std::string &pwd);
     bool registerUser(const std::string &username, const std::string &pwd);
-    bool sendMsg(const std::string &id_sender, const std::string &id_receiver, const std::string &msg);
-    
-    QueryResult getMsgBetweenUsers(const std::string &id_user, const std::string &id_friend);
-    
-    QueryResult getAllUserMsg(const std::string &id_user);
+  
 
     QueryResult getUsername(const std::string &id_user);
     QueryResult getUserId(const std::string& username);
@@ -41,8 +37,6 @@ public:
     QueryResult updatePwd(const std::string &username, const std::string &pwd, const std::string &new_pwd);
     
     bool deleteFriend(const std::string &username, const std::string &friend_username);
-    
-    std::string getTime();
     
     QueryResult deleteAccount(const std::string &id_user, const std::string &pwd);
     

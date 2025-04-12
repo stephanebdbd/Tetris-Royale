@@ -68,85 +68,93 @@ bool DataManager::registerUser(const std::string &username, const std::string &p
 
 
 bool DataManager::sendFriendRequest(const std::string& sender, const std::string& receiver) {
-    // Récupérer les ID des utilisateurs
-    QueryResult senderId = getUserId(sender);
-    QueryResult receiverId = getUserId(receiver);
+    // Empêcher l'envoi de demande à soi-même
+    if (sender == receiver) return false;
 
-    // Vérification si les utilisateurs existent
-    if (!senderId.isOk()|| senderId.data.empty()) {
-        return false; 
+    // Récupération des IDs
+    QueryResult senderIdResult = getUserId(sender);
+    QueryResult receiverIdResult = getUserId(receiver);
+
+    if (!senderIdResult.isOk() || senderIdResult.data.empty() ||
+        !receiverIdResult.isOk() || receiverIdResult.data.empty()) {
+        return false; // Un des utilisateurs n'existe pas
     }
 
-    if (!receiverId.isOk()|| receiverId.data.empty()) {
-        return false; // Utilisateur "sender" inexistant
+    std::string senderId = senderIdResult.getFirst();
+    std::string receiverId = receiverIdResult.getFirst();
+
+    // Vérifie si une relation existe déjà (dans les deux sens)
+    std::string condition = 
+        "(id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "') OR "
+        "(id_sender = '" + receiverId + "' AND id_receiver = '" + senderId + "')";
+
+    QueryResult existing = db->selectFromTable("Friendships", "status", condition);
+
+    if (!existing.data.empty()) {
+        return false; // Déjà amis ou demande déjà envoyée/reçue
     }
 
-    // Vérification si une relation existe déjà
-    std::string condition = "(id_sender = '" + senderId.getFirst() + "' AND id_receiver = '" + receiverId.getFirst() + "') "
-                            "OR (id_sender = '" + receiverId.getFirst() + "' AND id_receiver = '" + senderId.getFirst() + "')";
-    
-    QueryResult checkExisting = db->selectFromTable("Friendships", "status", condition);
-
-    if (!checkExisting.data.empty()) {
-        return false; // Une relation existe déjà entre ces deux utilisateurs
-    }
-
-    // Insertion de la nouvelle demande d'ami
+    // Envoi de la demande d'ami
     std::string columns = "id_sender, id_receiver, status";
-    std::string values = "'" + senderId.getFirst() + "', '" + receiverId.getFirst() + "', 'pending'";
+    std::string values = "'" + senderId + "', '" + receiverId + "', 'pending'";
 
-    QueryResult result = db->insertEntry("Friendships", columns, values);
+    QueryResult insertResult = db->insertEntry("Friendships", columns, values);
 
-    return result.isOk(); // Retourne vrai si l'insertion a réussi, sinon faux
+    return insertResult.isOk();
 }
 
 
 bool DataManager::acceptFriendRequest(const std::string& receiver, const std::string& sender) {
     // Récupérer les IDs des utilisateurs
-    QueryResult senderId = getUserId(sender);
-    QueryResult receiverId = getUserId(receiver);
+    QueryResult senderIdResult = getUserId(sender);
+    QueryResult receiverIdResult = getUserId(receiver);
 
-    if (senderId.data.empty() || receiverId.data.empty()) {
-        return false; // L'un des utilisateurs n'existe pas
+    if (senderIdResult.data.empty() || receiverIdResult.data.empty()) {
+        return false;
     }
 
-    // Construire la condition pour vérifier l'existence d'une demande d'ami en attente
-    std::string condition = "id_sender = '" + senderId.getFirst() + "' AND id_receiver = '" + receiverId.getFirst() + "' AND status = 'pending'";
+    std::string senderId = senderIdResult.getFirst();
+    std::string receiverId = receiverIdResult.getFirst();
 
-    // Vérifier si la demande d'ami existe
+    // Vérifie l'existence d'une demande d'ami en attente
+    std::string condition = 
+        "id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "' AND status = 'pending'";
+
     QueryResult checkRequest = db->selectFromTable("Friendships", "status", condition);
-
     if (checkRequest.data.empty()) {
-        return false; // Aucune demande d'ami en attente
+        return false;
     }
 
-    // Mettre à jour le statut de la demande d'ami
-    std::string updateValues = "status = 'accepted'";
-    QueryResult result = db->updateEntry("Friendships", updateValues, condition);
-
-    return result.isOk(); // Retourner true si l'opération est réussie, sinon false
+    // Mettre à jour le statut à 'accepted'
+    QueryResult update = db->updateEntry("Friendships", "status = 'accepted'", condition);
+    return update.isOk();
 }
 
 bool DataManager::rejectFriendRequest(const std::string& receiver, const std::string& sender) {
-    // Vérifier si les utilisateurs existent
-    QueryResult senderId = getUserId(sender);
-    QueryResult receiverId = getUserId(receiver);
+    // Récupérer les IDs des utilisateurs
+    QueryResult senderIdResult = getUserId(sender);
+    QueryResult receiverIdResult = getUserId(receiver);
 
-    if (senderId.data.empty() || receiverId.data.empty()) {
-        return false; // L'un des utilisateurs n'existe pas
+    if (senderIdResult.data.empty() || receiverIdResult.data.empty()) {
+        return false;
     }
 
-    // Vérifier si une demande d'ami en attente existe
-    std::string condition = "id_sender = '" + senderId.getFirst() + "' AND id_receiver = '" + receiverId.getFirst() + "' AND status = 'pending'";
+    std::string senderId = senderIdResult.getFirst();
+    std::string receiverId = receiverIdResult.getFirst();
+
+    // Vérifie l'existence de la demande
+    std::string condition = 
+        "id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "' AND status = 'pending'";
+
     QueryResult checkRequest = db->selectFromTable("Friendships", "status", condition);
-
     if (checkRequest.data.empty()) {
-        return false; // Aucune demande d'ami en attente
+        return false;
     }
 
-    // Supprimer complètement la demande d'ami
-    return deleteFriend(sender, receiver);
+    // Supprime la demande
+    return db->deleteEntry("Friendships", condition).isOk();
 }
+
 
 
 bool DataManager::areFriends(const std::string& user1, const std::string& user2) {
@@ -189,45 +197,40 @@ bool DataManager::userExists(const std::string& username) const {
 bool DataManager::userNotExists(const std::string& username) const {
     return !userExists(username);  // Inverse de userExists
 }
-
-std::vector<std::string> DataManager::getList(const std::string& user, const std::string& status) {
-    std::vector<std::string> requestList;
-
-    // Récupérer l'ID de l'utilisateur
-    QueryResult userIdResult = getUserId(user);
-    if (userIdResult.data.empty()) {
-        return requestList; // Retourne une liste vide si l'utilisateur n'existe pas
-    }
-    std::string userId = userIdResult.getFirst();
-
-    // Construire la condition pour récupérer les relations avec le bon statut
-    std::string condition = 
-        "(id_sender = '" + userId + "' OR id_receiver = '" + userId + "') "
-        "AND status = '" + status + "'";
-
-    // Récupérer les IDs des amis ou demandes d'amis selon le statut
-    QueryResult result = db->selectFromTable("Friendships", "id_sender, id_receiver", condition);
-
-    if (result.data.empty()) {
-        return requestList; // Retourne une liste vide si aucun ami/demande trouvée
-    }
-
-    // Parcourir les résultats et récupérer les amis ou demandeurs
-    for (const auto& row : result.data) {
-        std::string id1 = row[0];
-        std::string id2 = row[1];
-
-        // Déterminer qui est l'ami ou l'expéditeur de la demande
-        std::string friendId = (id1 == userId) ? id2 : id1;
-
-        // Convertir l'ID en pseudo
-        QueryResult friendUsername = db->selectFromTable("Users", "username", "id_user = '" + friendId + "'");
-        if (!friendUsername.data.empty()) {
-            requestList.push_back(friendUsername.getFirst());
+void printList(const std::vector<std::string>& list) {
+    if (list.empty()) {
+        std::cout << "La liste est vide." << std::endl;
+    } else {
+        for (const auto& username : list) {
+            std::cout << username << std::endl;
         }
     }
+}
 
-    return requestList;
+std::vector<std::string> DataManager::getList(const std::string& user, const std::string& status) {
+    std::vector<std::string> list;
+
+    QueryResult userIdResult = getUserId(user);
+    if (userIdResult.data.empty()) return list;
+
+    std::string userId = userIdResult.getFirst();
+
+    std::string sql =
+        "SELECT u.username "
+        "FROM Friendships f "
+        "JOIN Users u ON ("
+            "(u.id_user = f.id_sender AND f.id_receiver = '" + userId + "') OR "
+            "(u.id_user = f.id_receiver AND f.id_sender = '" + userId + "')"
+        ") "
+        "WHERE f.status = '" + status + "';";
+
+    QueryResult result = db->executeQuery(sql);
+
+    for (const auto& row : result.getData()) {
+        if (!row.empty()) list.push_back(row[0]);  // username
+    }
+    printList(list);
+    return list;
 }
 bool DataManager::deleteFriend(const std::string& user1, const std::string& user2) {
     // Récupération des IDs des utilisateurs
@@ -262,47 +265,10 @@ std::vector<std::string> DataManager::getFriendList(const std::string& user) {
 
 // Obtenir la liste des demandes d'amis en attente
 std::vector<std::string> DataManager::getRequestList(const std::string& user) {
+    std::cout << " yaw yaw yaw yaw  aw" << std::endl;
     return getList(user, "pending");
 }
 
-bool DataManager::sendMsg(const std::string &sender, const std::string &receiver, const std::string &msg){
-    // Get the string time the message was send (now)
-    std::string time = getTime();
-
-    // Insert the message in the db
-    std::string clean_msg = std::regex_replace(msg, std::regex("'"), "''");     // Escape single quotes in the message
-    std::string columns = "sender, receiver, msg, msg_date_time";
-    std::string values = "'" + sender + "', '" + receiver + "', '" + clean_msg + "', '" + time +  "'";
-    QueryResult result = db->insertEntry("Messages", columns, values);
-    return result.isOk();
-}
-
-
-QueryResult DataManager::getMsgBetweenUsers(const std::string &id_user, const std::string &id_friend){
-    std::string columns = "sender, receiver, msg";
-    std::string condition = "(sender = '" + id_user + "' AND receiver = '" + id_friend + "')"\
-                            " OR (sender = '" + id_friend + "' AND receiver = '" + id_user + "')";
-    std::string order_by = " ORDER BY msg_date_time";   // Order by the msg_date_time column
-    QueryResult result = db->selectFromTable("Messages", columns, condition + order_by);
-    return result;
-}
-
-
-QueryResult DataManager::getAllUserMsg(const std::string &id_user){
-    std::string columns = "sender, receiver, msg";
-    std::string condition = "(sender = '" + id_user + "' OR receiver = '" + id_user + "')";
-    std::string order_by = " ORDER BY (CASE WHEN sender = '" + id_user + "' THEN receiver ELSE sender END)";
-    QueryResult result = db->selectFromTable("Messages", columns, condition + order_by);
-    return result;
-}
-
-std::string DataManager::getTime(){
-    std::time_t now = std::time(nullptr);
-    std::tm *tm_time = std::localtime(&now);
-    char buffer[80];
-    std::strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", tm_time);
-    return std::string(buffer);
-}
 
 
 QueryResult DataManager::updateUserName(const std::string &id_user, const std::string &pwd, const std::string &new_username){
@@ -356,7 +322,7 @@ QueryResult DataManager::getUserFriends(const std::string &id_user){
 
 
 bool DataManager::addGameState(const std::string &id_player1, const std::string &id_player2,const std::string &id_session, const std::string &game_state){
-    std::string time = getTime();
+    std::string time = db->getTime();
     std::string columns = "id_player1, id_player2, id_session, game_state, state_date_time";
     std::string values = "'" + id_player1 + "', '" + id_player2 + "', '" + id_session + "', '" + game_state + "', '" + time + "'";
     QueryResult result = db->insertEntry("GameStates", columns, values);

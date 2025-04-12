@@ -3,8 +3,17 @@
 #include <sqlite3.h>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
+#include <thread>
+#include <string>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <iostream>
+#include <atomic>   
 // #include <ctime>
 #include <iostream>
+#include "../../common/json.hpp"
 #include <memory>
 #include <regex>
 #include <sodium.h>
@@ -50,10 +59,17 @@ class ChatRoom {
         std::vector<std::string> getChatRoomsForUser(const std::string& username) const ;
 
         void joinRoom(const std::string& pseudo, const std::string& room_name) ;
-        std::vector<std::string> getMembers(const std::string& room_name) ;
+        std::vector<std::string> getMembers(const std::string& room_name) const ;
         std::vector<std::string> getAdmins(const std::string& room_name) ;
         std::vector<std::string> getClientPending(const std::string& room_name) ;
         bool deleteChatRoom(const std::string& room_name) ;
         bool quitRoom(const std::string& room_name, const std::string& username) ;
         std::vector<std::string> getChatRooms() const;
+        
+        bool saveMessageToRoom(const std::string& sender, const std::string& room_name, const std::string& msg) ;
+        std::string getMessagesFromRoom(const std::string& room_name) ;
+        void processRoomChat(int senderSocket, const std::string& sender, const std::string& roomName, std::shared_ptr<std::vector<int>> roomSockets) ;
+
+
+
 };
