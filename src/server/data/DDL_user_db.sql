@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS ChatRoomMembers (
 CREATE TABLE IF NOT EXISTS ChatMessages (
     id_message INTEGER PRIMARY KEY AUTOINCREMENT,
     id_room INTEGER NOT NULL,
-    pseudUser TEXT NOT NULL,
+    sender TEXT NOT NULL,
     message TEXT NOT NULL,
     msg_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_room) REFERENCES ChatRooms(id_room) ON DELETE CASCADE

@@ -547,7 +547,7 @@ std::vector<std::string> ChatRoom::getChatRoomsForUser(const std::string& userna
 }
 
 
-bool ChatRoom::saveMessageToRoom(const std::string& room_name, const std::string& pseudUser, const std::string& message) {
+bool ChatRoom::saveMessageToRoom(const std::string& sender, const std::string& room_name, const std::string& message) {
     // Récupérer l'id de la salle
     std::string condition = "room_name = '" + room_name + "'";
     QueryResult roomResult = db->selectFromTable("ChatRooms", "id_room", condition);
@@ -560,10 +560,14 @@ bool ChatRoom::saveMessageToRoom(const std::string& room_name, const std::string
     std::string id_room = roomResult.getFirst();
     std::string timestamp = db->getTime();
 
-    std::string columns = "id_room, pseudUser, message, msg_date_time";
-    std::string values = id_room + ", '" + pseudUser + "', '" + message + "', '" + timestamp + "'";
+    std::string columns = "id_room, sender, message, msg_date_time";
+    std::string values = id_room + ", '" + sender + "', '" + message + "', '" + timestamp + "'";
 
     QueryResult insertResult = db->insertEntry("ChatMessages", columns, values);
+    if (!insertResult.isOk()) {
+        std::cout << "Erreur lors de l'insertion du message : " << insertResult.getError() << std::endl;
+        return false;
+    }
     return insertResult.isOk();
 }
 std::string ChatRoom::getMessagesFromRoom(const std::string& room_name) {
@@ -579,7 +583,7 @@ std::string ChatRoom::getMessagesFromRoom(const std::string& room_name) {
     std::string id_room = roomResult.getFirst();
     condition = "id_room = " + id_room;
     std::string order = " ORDER BY msg_date_time ";
-    QueryResult result = db->selectFromTable("ChatMessages", "pseudUser, message, msg_date_time", condition + order);
+    QueryResult result = db->selectFromTable("ChatMessages", "sender, message, msg_date_time", condition + order);
 
     json messagesJson = json::array();
     for (const auto& row : result.getData()) {
@@ -632,7 +636,9 @@ void ChatRoom::processRoomChat(int senderSocket, const std::string& sender, cons
                 }
 
                 msg["sender"] = sender;
-                msg["receiver"] = roomName;  // Important pour saveMessage
+                //msg["receiver"] = roomName;  // Important pour saveMessage
+                std::cout << "Message reçu dans la room "<< sender << "------" << roomName << ": " << msg["message"] << std::endl;
+
 
                 if (saveMessageToRoom(sender, roomName, msg["message"])) {
                     std::cout << "Message de " << sender << " sauvegardé dans la room " << roomName << std::endl;
