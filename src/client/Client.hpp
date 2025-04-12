@@ -48,6 +48,7 @@ public:
         void stopThreads() { stop_threads = true; }
         MenuState getCurrentMenuState();
         json getServerData() const { return serverData; }
+        void clearServerData() { serverData.clear(); }
 
 };
 

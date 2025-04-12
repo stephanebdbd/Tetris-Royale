@@ -42,8 +42,8 @@ class Server {
     std::unordered_map<int, MenuState> clientStates;      // id -> menu
     std::unordered_map<std::string, int> pseudoTosocket;  // pseudo -> socket
     std::unordered_map<int, std::string> sockToPseudo;    // socket -> pseudo
-    std::unordered_map<int, bool> runningChats; 
     std::unordered_map<int, std::string> roomToManage;    // id -> room
+    std::unordered_map<int, std::string> receiverOfMessages;    // id -> receiver
     std::mutex clientPseudoMutex;        // socket -> bool(chat en cours)
     std::mutex gameRoomsMutex;          // mutex pour la gestion des rooms de jeu
    
@@ -95,7 +95,10 @@ public:
     //friends
     void keyInputFriendsMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputAddFriendMenu(int clientSocket, int clientId, const std::string& action);
-    
+    std::vector<std::string> getFriendsList(int clientId){
+        return friendList->getFriendList(clientPseudo[clientId]);
+    }
+
 
     void deleteGameRoom(int roomId, const std::vector<int> players);
     void extractDataBetweenSlashes(const std::string& toFind, const std::string& action, std::string& status, std::string& receiver);
@@ -104,9 +107,7 @@ public:
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
     void handleMenu(int clientSocket, int clientId, const std::string& action);
     std::string convertUnicodeToText(const std::string& unicode);
-    void setRunningChat(int clientSocket, bool value);
     void setClientState(int clientId, MenuState state);
-    bool getRunningChat(int clientSocket);
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
     std::unordered_map<int, std::string> getSocketPseudo() { return sockToPseudo; }
     std::unordered_map<std::string, std::shared_ptr<chatRoom>> getChatRooms() { return chatRooms; }

@@ -7,7 +7,7 @@
 
 
 std::mutex mtx; // Mutex pour synchroniser l'accès aux fenêtres ncurses
-#define INPUT_HEIGHT 3  // Hauteur de la zone de saisie
+#define INPUT_HEIGHT 6  // Hauteur de la zone de saisie
 
 
 void ClientChat::run() {
@@ -28,9 +28,10 @@ void ClientChat::run() {
 
     // Fenêtre pour saisir les messages (en bas)
     inputWin = newwin(INPUT_HEIGHT, width, height - INPUT_HEIGHT, 0);
-    scrollok(inputWin, TRUE);
-    box(inputWin, 0, 0);
-    wrefresh(inputWin);
+    scrollok(inputWin, TRUE); // Activer le défilement pour cette fenêtre
+    box(inputWin, 0, 0); // Dessiner une bordure autour de la fenêtre
+    curs_set(1); // Rendre le curseur visible
+    wrefresh(inputWin); // Rafraîchir la fenêtre
 
     std::thread sendThread(&ClientChat::sendChatMessages, this);
     sendThread.join();  // Attendre la fin du thread d'envoi de messages
@@ -38,14 +39,15 @@ void ClientChat::run() {
     delwin(displayWin);
     delwin(inputWin);
     echo(); // Réactiver l'affichage automatique des entrées utilisateur
+    curs_set(0); // Rendre le curseur invisible
     endwin(); // Terminer ncurses
 }
 
 
 void ClientChat::sendChatMessages() {
-    isChatting = true;
     std::string inputStr;
     std::string constReceiver;
+    json msg_json;
     int ch;
 
     while (true) {
@@ -56,70 +58,21 @@ void ClientChat::sendChatMessages() {
         wrefresh(inputWin);
         mtx.unlock();
 
-        std::string receiver, message;
-
         ch = getch();
         if (ch == 10) {  // Entrée
             if (inputStr.empty()) continue;
 
-            if(constReceiver.empty() && inputStr.substr(0, 2) != "./"){
-                std::cerr << "Veuillez spécifier un destinataire !\n";
-                continue;
-            }
-
-            //si le message est ./flush on affiche tous les messages enregistrés non affichés
-            if(inputStr == "./flush"){
-                receiver = "server";
-                message = "flush";
-            }
-
-            //si le message est ./exit on envoie un message au serveur pour lui dire qu'on veut quitter le chat
-            if(inputStr == "./exit"){
-                receiver = "server";
-                message = "exit";
-            }
-            //sinon on envoie un message normal (après avoir vérifié le format)
-            else{
-                std::string::size_type pos = inputStr.find(" ");
-                if(inputStr.substr(0, 2) == "./"){
-                    if(constReceiver.empty()){
-                        if(pos == std::string::npos){
-                            constReceiver = inputStr.substr(2);
-                            inputStr.clear();
-                            continue;
-                        }
-                        receiver = inputStr.substr(2, pos-2);
-                        message = inputStr.substr(pos+1);
-                    }else{
-                        if(pos == std::string::npos){
-                            constReceiver = inputStr.substr(2);
-                            inputStr.clear();
-                            continue;
-                        }else{
-                            receiver = inputStr.substr(2, pos-2);
-                            message = inputStr.substr(pos+1);
-                        }
-                    }
-                }else{
-                    if(constReceiver.empty()){
-                        std::cerr << "Veuillez spécifier un destinataire !\n";
-                        continue;
-                    }
-                    receiver = constReceiver;
-                    message = inputStr;
-                }
-            }
-
-            json msg_json = { {"receiver", receiver}, {"message", message} };
-            std::cout << msg_json << std::endl;
+            msg_json = {
+                {"message", inputStr}
+            };
+            
             if (!network.sendData(msg_json.dump(), clientSocket)) {
                 std::cerr << "Erreur d'envoi du message !\n";
             }
-            if (receiver == "server" && message == "exit") {
+            if (inputStr == "/exit") {
                 break;
             }
-            displayChatMessage("Moi->"+receiver, message);
-            y++;
+            displayChatMessage("You", inputStr);
             inputStr.clear();
 
         } else if (ch == 127 || ch == KEY_BACKSPACE) {
@@ -129,23 +82,26 @@ void ClientChat::sendChatMessages() {
         }
     }
     y = 1;
-    isChatting = false;
 }
 
+/*
+a supprimer 
+*/
 void ClientChat::receiveChatMessages(const json& msg) {
-    displayChatMessage(msg["sender"], msg["message"]);
-    y++;        
+    displayChatMessage(msg["sender"], msg["message"]);      
 }
 
 void ClientChat::displayChatMessage(std::string sender, const std::string& message) {
     mtx.lock();// Verrouiller l'accès à la fenêtre ncurses
-    mvprintw(y, 1, "[%s] : %s", sender.c_str(), message.c_str());
-    refresh();
+    if(y == LINES - INPUT_HEIGHT - 1){
+        wclear(displayWin);
+        box(displayWin, 0, 0);
+        y = 1;
+        wrefresh(displayWin);
+    }
+    mvwprintw(displayWin, y++, 1, "[%s] : %s", sender.c_str(), message.c_str());
+    wrefresh(displayWin);
     mtx.unlock();// Déverrouiller l'accès
-}
-
-void ClientChat::setIsChatting(bool isChatting) {
-    this->isChatting = isChatting;
 }
 
 void ClientChat::setClientSocket(int clientSocket) {
