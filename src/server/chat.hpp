@@ -2,6 +2,7 @@
 #define SERVER_CHAT_HPP
 
 #include "../common/json.hpp"
+#include "../common/MenuState.hpp"
 #include "Data.hpp"
 
 #include <unordered_map>
@@ -29,20 +30,24 @@ public:
     ServerChat& operator=(const ServerChat&) = delete;
         
     // thread pour gérer un chat d'un client
-    void processClientChat(int clientSocket, int clientId, Server &server, MenuState state, std::string menu);
+    void processClientChat(int receiverSock, const std::string& sender, const std::string& receiver, const json& msg, bool isRoom);
     
     // envoi d'un message à un client
-    void sendMessage(int clientSocket, std::string sender, const std::string& message, bool isOnline);
+    void sendMessage(int clientSocket, std::string sender, std::string receiver, const std::string& message, bool isOnline);
     
     // memoire pour stocker les messages si le client n'est pas en train de chatter
-    json openFile(const std::string& filename);
-    void writeFile(const std::string& filename, const json& j);
-    bool initMessageMemory(const std::string& filename);
-    void saveMessage(const std::string& filename, const std::string& message);
-    void FlushMemory(const std::string& filename, Server &server);
+    json openFile(const std::string& pseudo);
+    void writeFile(const std::string& pseudo, const json& j);
+    bool initMessageMemory(const std::string& pseudo);
+    void saveMessage(const std::string& pseudo, const std::string& message);
+    void FlushMemory(const std::string& pseudo, Server &server);
 
     //getter des données du fichier json du client
+    std::vector<std::string> getUserData(const std::string& pseudo, const std::string& dataType);
+    std::vector<std::string> getMyFriends(const std::string& pseudo);
+    std::vector<std::string> getMyFriendRequests(const std::string& pseudo);
     std::vector<std::string> getMyRooms(const std::string& pseudo);
+    std::vector<std::string> getMyRoomRequests(const std::string& pseudo);
 };
 
 #endif // SERVER_CHAT_HPP

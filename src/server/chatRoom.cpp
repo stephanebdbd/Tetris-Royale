@@ -88,7 +88,7 @@ void chatRoom::removeAdmin(const std::string& pseudo) {
 void chatRoom::addReceivedRequest(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(requestsMutex);
     saveData(filename, "receivedReq", pseudo);
-}   
+}
 
 void chatRoom::acceptClientRequest(const std::string& pseudo) {
     std::lock_guard<std::mutex> lock(requestsMutex);
@@ -112,7 +112,8 @@ void chatRoom::broadcastMessage(const std::string& message, const std::string& s
         //send message to client
         if (client != sender) {
             int receiverSocket = server.getPseudoSocket()[client];
-            chat.sendMessage(receiverSocket, sender, message, server.getRunningChat(receiverSocket));
+            std::cout << "Receiver socket: " << message << receiverSocket << std::endl;
+            //sendMessage(receiverSocket, sender, client, message, true);
         }
     }
 }

@@ -68,6 +68,7 @@ public:
         void sendInputFromSFML(const std::string& input);
         void setGameStateIsEnd(bool isEnd);
        
+        void clearServerData() { serverData.clear(); }
 
 };
 

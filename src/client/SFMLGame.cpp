@@ -45,6 +45,15 @@ void SFMLGame::drawTextFields() {
     }
 }
 
+void SFMLGame::drawMessages() {
+    for (std::size_t i = 0; i < messages.size(); ++i) {
+        const auto& msg = messages[i];
+        MessagesY += 50 * i+1; // Adjust the Y position for each message
+        displayMessage(msg.first, msg.second);
+        MessagesY = 60; // Reset Y position for the next message
+    }
+}
+
 void SFMLGame::handleTextFieldEvents(sf::Event& event) {
     for (const auto& text : texts) {
         text->handleInput(event);
@@ -390,6 +399,7 @@ void SFMLGame::mainMenu(){
     }
 }
 
+
 void SFMLGame::chatMenu() {
     // Display the chat background
     displayBackground(textures->chat);
@@ -417,6 +427,7 @@ void SFMLGame::chatMenu() {
         texts.emplace_back(std::make_unique<TextField>(messageField));
         texts.emplace_back(std::make_unique<TextField>(searchField));
     }
+
     if (buttons.empty()) {
         // Bouton pour revenir au menu principal
         Button backButton("", font, 20, sf::Color::Transparent, sf::Color::White,
@@ -436,12 +447,15 @@ void SFMLGame::chatMenu() {
     
     drawTextFields();
     drawButtons();
-
-    // Récupérer la liste des contacts
-    auto contacts = client.getServerData()["data"];
+    drawMessages();
+    
+    if (!client.getServerData().empty() && client.getServerData().contains("data")) {
+        contacts = client.getServerData()["data"];
+        client.clearServerData();
+    }
     //float contactY = 100 - chatContactsOffset; // Appliquer le décalage vertical
 
-    /*
+    /** 
     for (size_t i = 0; i < contacts.size(); ++i) {
         if (contactY + i * 50 >= 100 && contactY + i * 50 <= WINDOW_HEIGHT - 50) { // Afficher uniquement les contacts visibles
             sf::Text contactName(std::string(contacts[i]), font, 20);
@@ -466,10 +480,12 @@ void SFMLGame::chatMenu() {
     // Ensuite vérifier le sendButton
     if (!clickHandled && buttons[1]->isClicked(*window)) {
         json j = {
-            {"action", "sendMessage"},
             {"message", texts[0]->getText()},
         };
         network->sendData(j.dump() + "\n", client.getClientSocket());
+        messages.push_back({"You", texts[0]->getText()});
+        //messages.push_back({contact, "hellllllo"});
+        texts[0]->clear(); // Effacer le champ de texte après l'envoi
         clickHandled = true; // Marquer le clic comme traité
         return;
     }
@@ -491,51 +507,55 @@ void SFMLGame::chatMenu() {
                 buttons.emplace_back(std::make_unique<Button>(contactButton));
             }
             float contactY = 100.0f + i * contactHeight;
-        
-        
-            // Load avatar texture
-            const std::string avatarPath = "../../res/avatar/avatar" + std::to_string(i + 1) + ".png";
-            
-            if (avatarTextures[i].loadFromFile(avatarPath)) {
-                // Create sprite with circular clipping effect
-                sf::Sprite avatarSprite(avatarTextures[i]);
 
-                // Get size and compute scale to fit in the circle
-                sf::Vector2u textureSize = avatarTextures[i].getSize();
-                float scale = (avatarRadius * 2) / std::max(textureSize.x, textureSize.y);
-                avatarSprite.setScale(scale, scale);
+            // Check if avatar is already drawn for this contact
+            static std::map<std::string, sf::Sprite> drawnAvatars;
+            if (drawnAvatars.find(contacts[i]) == drawnAvatars.end()) {
+                // Load avatar texture
+                const std::string avatarPath = "../../res/avatar/avatar" + std::to_string(i + 1) + ".png";
 
-                // Re-center the image inside the circle
-                float newWidth = textureSize.x * scale;
-                float newHeight = textureSize.y * scale;
-                float offsetX = avatarRadius - newWidth / 2;
-                float offsetY = avatarRadius - newHeight / 2;
+                // Check if the texture is already loaded
+                if (avatarTextures[i].loadFromFile(avatarPath)) {
+                    // Create sprite with circular clipping effect
+                    sf::Sprite avatarSprite(avatarTextures[i]);
 
-                avatarSprite.setPosition(20 + offsetX, contactY + offsetY);
+                    // Get size and compute scale to fit in the circle
+                    sf::Vector2u textureSize = avatarTextures[i].getSize();
+                    float scale = (avatarRadius * 2) / std::max(textureSize.x, textureSize.y);
+                    avatarSprite.setScale(scale, scale);
 
-                // Apply circular mask using a shader (optional, for better visuals)
-                sf::CircleShape mask(avatarRadius);
-                mask.setPosition(20, contactY + 8);
-                mask.setTexture(&avatarTextures[i]);
-                mask.setTextureRect(sf::IntRect(0, 0, textureSize.x, textureSize.y));
-                mask.setFillColor(sf::Color::White); // Ensure the mask is visible
-                window->draw(mask);
-            } else {
-                // Fallback: grey circle + initial
-                // Background circle (like WhatsApp mask)
-                sf::CircleShape avatarCircle(avatarRadius);
-                avatarCircle.setPosition(20, contactY);
-                avatarCircle.setFillColor(sf::Color::White); // Optional border or background
-                std::string contactStr = contacts[i];
-                char initial = contactStr.empty() ? '?' : static_cast<char>(std::toupper(contactStr[0]));
-                sf::Text initialText(std::string(1, initial), font, 24);
-                initialText.setFillColor(sf::Color::White);
-                initialText.setStyle(sf::Text::Bold);
-                // Center text inside the circle
-                initialText.setPosition(20 + avatarRadius - 8, contactY + avatarRadius - 14);
-                window->draw(avatarCircle);
-                window->draw(initialText);
+                    // Re-center the image inside the circle
+                    float newWidth = textureSize.x * scale;
+                    float newHeight = textureSize.y * scale;
+                    float offsetX = avatarRadius - newWidth / 2;
+                    float offsetY = avatarRadius - newHeight / 2;
+
+                    avatarSprite.setPosition(20 + offsetX, contactY + offsetY);
+
+                    // Store the sprite in the map
+                    drawnAvatars[contacts[i]] = avatarSprite;
+                } else {
+                    // Fallback: grey circle + initial
+                    sf::CircleShape avatarCircle(avatarRadius);
+                    avatarCircle.setPosition(20, contactY);
+                    avatarCircle.setFillColor(sf::Color::White);
+
+                    std::string contactStr = contacts[i];
+                    char initial = contactStr.empty() ? '?' : static_cast<char>(std::toupper(contactStr[0]));
+                    sf::Text initialText(std::string(1, initial), font, 24);
+                    initialText.setFillColor(sf::Color::White);
+                    initialText.setStyle(sf::Text::Bold);
+                    initialText.setPosition(20 + avatarRadius - 8, contactY + avatarRadius - 14);
+
+                    // Draw fallback avatar
+                    window->draw(avatarCircle);
+                    window->draw(initialText);
+                    continue;
+                }
             }
+
+            // Draw the avatar sprite
+            window->draw(drawnAvatars[contacts[i]]);
         }
         
 
@@ -561,18 +581,42 @@ void SFMLGame::chatMenu() {
         contactName.setStyle(sf::Text::Bold);
         contactName.setPosition(260, 10);
         window->draw(contactName);
+
+        // Afficher les message de l'utilisateur
+        auto message = client.getServerData();
+        if (message.contains("sender") && message["sender"] == contact) {
+            messages.push_back({contact, message["message"]});
+        }
+        client.clearServerData();
     }
     clickHandled = false; // Réinitialiser le drapeau après le traitement des clics
-
 }
 
-void SFMLGame::diplayMessage(const std::string& message, bool isSent) {
-    // Afficher le message dans la zone de chat
-    sf::Text chatMessage(message, font, 20);
-    chatMessage.setFillColor(isSent ? sf::Color::Green : sf::Color::White);
-    chatMessage.setPosition(20, MessagesY);
-    window->draw(chatMessage);
+void SFMLGame::displayMessage(const std::string& sender, const std::string& message) {
+    const bool isYou = sender == "You";
+    const float bubbleHeight = 30.f;
+    const float bubbleWidth = std::min(300.f, message.length() * 13.f);
+    const float cornerRadius = 10.f;
+    const float bubbleX = isYou ? WINDOW_WIDTH - 5 - bubbleWidth : 210;
+    const sf::Color bubbleColor = isYou ? sf::Color(70, 130, 180) : sf::Color(90, 90, 110);
 
-    // Mettre à jour la position Y pour le prochain message
-    MessagesY += 30; // Ajuster l'espacement entre les messages
+    // Create and draw the main bubble
+    sf::RectangleShape mainRect(sf::Vector2f(bubbleWidth - 2 * cornerRadius, bubbleHeight));
+    mainRect.setPosition(bubbleX + cornerRadius, MessagesY);
+    mainRect.setFillColor(bubbleColor);
+    mainRect.setOutlineColor(sf::Color(120, 120, 140));
+    mainRect.setOutlineThickness(1);
+    window->draw(mainRect);
+
+
+    // Draw message text
+    sf::Text messageText(message, font, 16);
+    messageText.setFillColor(sf::Color::White);
+    
+    const sf::FloatRect textBounds = messageText.getLocalBounds();
+    messageText.setPosition(
+        bubbleX + cornerRadius + 5.f, 
+        MessagesY + (bubbleHeight - textBounds.height) / 2 - textBounds.top
+    );
+    window->draw(messageText);
 }

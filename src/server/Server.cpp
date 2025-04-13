@@ -76,11 +76,6 @@ void Server::handleClient(int clientSocket, int clientId) {
         auto lastRefreshTime = std::chrono::steady_clock::now();
 
         while (true) {
-            if (getRunningChat(clientSocket)) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                continue;
-            }
-
             memset(buffer, 0, sizeof(buffer));
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
 
@@ -106,9 +101,18 @@ void Server::handleClient(int clientSocket, int clientId) {
                 return;
             }
 
+
             try {
+
                 std::cout << "Client #" << clientId << " a envoyé: " << buffer << std::endl;
                 json receivedData = json::parse(buffer);
+
+
+                if(receivedData.contains("message")) {
+                    auto receiver = receiverOfMessages[clientId];
+                    chat->processClientChat(pseudoTosocket[receiver], clientPseudo[clientId], receiverOfMessages[clientId], receivedData, false);
+                    continue;
+                }
 
                 if (!receivedData.contains(jsonKeys::ACTION) || !receivedData[jsonKeys::ACTION].is_string()) {
                     std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
@@ -221,6 +225,11 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le chat.", friends);
             return;
         }
+        else if(actionType == "openChat"){
+            std::cout << action << std::endl;
+            receiverOfMessages[clientId] = action["contact"];
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat avec " << action["contact"] << "." << std::endl;
+        }
         else if(actionType == "friends") {
             //gerer les amis
             std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
@@ -243,13 +252,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             keyInputAddFriendMenu(clientSocket, clientId, action["friend"]);
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Demande d'ami envoyée.");
             std::cout << "Client #" << clientId << " a demandé d'ajouter un ami." << std::endl;
-            return;
-        }
-        else if(actionType == "openChat"){
-            //gerer l'ouverture du chat
-            std::string contact = action["contact"];
-            std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat avec " << contact << "." << std::endl;
-            //chat->processClientChat(clientSocket, clientId, *this, clientStates[clientId]);
             return;
         }
     }
@@ -905,8 +907,7 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
     }
     else if(action == "4") {
         sendChatModeToClient(clientSocket);
-        setRunningChat(clientSocket, true);
-        chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, menu.getChatMenu());
+
     }
     else if(action == "5") {
         clientStates[clientId] = MenuState::Main;
@@ -1221,22 +1222,6 @@ void Server::sendChatModeToClient(int clientSocket) {
     send(clientSocket, msg.c_str(), msg.size(), 0);
 }
 
-
-bool Server::getRunningChat(int clientId) {
-    auto it = runningChats.find(clientId);
-    if (it != runningChats.end()) {
-        return it->second;
-    }
-    return false;
-}
-
-void Server::setRunningChat(int clientId, bool value) {
-    runningChats[clientId] = value;
-}
-
-void Server::setClientState(int clientId, MenuState state) {
-    clientStates[clientId] = state;
-}
 
 
 ////////////////Ce qui suit est pour les invitations de jeu/////////////////

@@ -121,6 +121,7 @@ void Client::receiveDisplay() {
             size_t pos = receivedData.find("\n");
             while (pos != std::string::npos) {
                 try {
+                    
 
                     std::string jsonStr = receivedData.substr(0, pos);
                     receivedData.erase(0, pos + 1);
@@ -146,6 +147,8 @@ void Client::receiveDisplay() {
                     // Si c'est un message de chat
                     else if (data.contains("sender")) {
                         chat.receiveChatMessages(data);
+                        serverData = data;
+                        std::cout << data << std::endl;
                     }
                     // Sinon, c'est un menu
                     else {
