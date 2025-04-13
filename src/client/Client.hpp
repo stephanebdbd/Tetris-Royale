@@ -6,10 +6,14 @@
 #include "ClientNetwork.hpp"
 #include "ClientChat.hpp"
 #include "../common/MenuState.hpp"
+#include <ostream>
+
+#include "../common/GameState.hpp"
 #include <mutex>
 #include <thread>
 #include <atomic>
 #include <string>
+#include <functional>
 
 
 class Client {
@@ -28,12 +32,17 @@ private:
     bool isPlaying = false;             // Indique si le client est en mode jeu
     bool chatMode = false;                  // Indique si le client est en mode chat
     MenuState currentMenuState;            // État du menu actuel
+    GameState gameState;
+    std::mutex gameStateMutex;
+
+    //DisplayCallback displayCallback;
     json serverData;                // Données reçues du serveur
     std::atomic<bool> stop_threads{false};
     std::thread inputThread;
     std::thread receiveThread;
     std::string receivedData;
     std::mutex receiveMutex;
+
 
 
 public:
@@ -48,6 +57,17 @@ public:
         void stopThreads() { stop_threads = true; }
         MenuState getCurrentMenuState();
         json getServerData() const { return serverData; }
+        
+
+        const GameState getGameState();
+        void setGameStateFromServer(const json& data);
+        bool isGameStateUpdated();
+        void setGameStateUpdated(bool updated);
+
+
+        void sendInputFromSFML(const std::string& input);
+        void setGameStateIsEnd(bool isEnd);
+       
 
 };
 

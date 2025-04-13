@@ -132,6 +132,7 @@ void Client::receiveDisplay() {
                         chatMode = false;
                         serverData = data;
                         //display.displayGame(data);
+                        setGameStateFromServer(data);
                     }
                     // Si c'est un message de chat
                     else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
@@ -154,10 +155,12 @@ void Client::receiveDisplay() {
                         if(data.contains("state")) {
                             currentMenuState = menuStateManager.deserialize(data["state"]);
                             serverData = data;
-                        }
-                        //sinon on affiche le menu sur le terminal
-                        else {
+                            
+                        } else {
                             display.displayMenu(data);
+                            setGameStateFromServer(data);
+
+
                         }
                         
                     }
@@ -190,3 +193,52 @@ void Client::receiveDisplay() {
 MenuState Client::getCurrentMenuState() {
     return currentMenuState; 
 }
+void Client::setGameStateFromServer(const json& data) {
+    std::lock_guard<std::mutex> lock(gameStateMutex);
+
+    if (data.contains(jsonKeys::GRID)) {
+        gameState.gridData = data[jsonKeys::GRID];
+        gameState.currentPieceData = data[jsonKeys::TETRA_PIECE];
+        gameState.nextPieceData = data[jsonKeys::NEXT_PIECE];
+        gameState.scoreData = data[jsonKeys::SCORE];
+        gameState.isGame = true;
+    }
+    else{
+        gameState.isGame = false;
+        gameState.isEnd = true;
+        gameState.menu = data;
+        
+    }
+    gameState.updated = true;
+    
+
+    
+}
+
+const GameState Client::getGameState() {
+    std::lock_guard<std::mutex> lock(gameStateMutex);
+    return gameState;
+}
+
+bool Client::isGameStateUpdated() {
+    std::lock_guard<std::mutex> lock(gameStateMutex);
+    return gameState.updated;
+}
+
+void Client::setGameStateUpdated(bool updated) {
+    std::lock_guard<std::mutex> lock(gameStateMutex);
+    gameState.updated = updated;
+}
+
+void Client::setGameStateIsEnd(bool isEnd) {
+    std::lock_guard<std::mutex> lock(gameStateMutex);
+    gameState.isEnd = isEnd;
+}
+
+void Client::sendInputFromSFML(const std::string& input) {
+    if (!input.empty()) {
+        controller.sendInput(input, clientSocket);
+    }
+}
+
+
