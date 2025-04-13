@@ -477,7 +477,140 @@ void SFMLGame::CreateOrJoinGame(){
         //to do 
     }
 }
+void SFMLGame::ChoiceGameMode(){
+    displayBackground(textures->logoConnexion);
+    if(buttons.empty()){
+        std ::cout << "Creating buttons" << std::endl;
+        // Création des boutons
+        Button EndlessButton("Mode Endless", font, 24, sf::Color::White, sf::Color(65, 105, 225), 
+                        sf::Vector2f(310, 250), sf::Vector2f(180, 45));
+        Button DuelButton("Mode Duel", font, 24, sf::Color::White, sf::Color(65, 105, 225),
+                        sf::Vector2f(310, 310), sf::Vector2f(180, 45));
 
+        Button ClassicButton("Mode Classic", font, 24, sf::Color::White, sf::Color(65, 105, 225), 
+                        sf::Vector2f(310, 370), sf::Vector2f(180, 45));
+        Button RoyaleButton("Mode Royale", font, 24, sf::Color::White, sf::Color(65, 105, 225),
+                        sf::Vector2f(310, 430), sf::Vector2f(180, 45));
+        // Création du bouton "Exit" avec une photo dans sf::Texture logoChat dans le coin supérieur gauche
+        Button quitButton("", font, 24, sf::Color::Transparent, sf::Color::White,
+                        sf::Vector2f(10, 20), sf::Vector2f(40, 40), sf::Color::Transparent);
+        quitButton.drawPhoto(textures->logoExit);
+
+        // Création du bouton "Settings" avec une photo dans sf::Texture logoSettings dans le coin supérieur droit
+        Button settingsButton("", font, 24, sf::Color::Transparent, sf::Color::White,
+            sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
+        settingsButton.drawPhoto(textures->logoSettings);
+
+        //Creation du button "Notification" avec une photo dans sf::Texture logoNotification dans le coin supérieur gauche
+        Button notificationButton("", font, 24, sf::Color::Transparent, sf::Color::White,
+            sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45), sf::Color::Transparent);
+        notificationButton.drawPhoto(textures->logoNotification);
+        
+        // Création du bouton "Profile" avec une photo dans sf::Texture logoTeams dans le coin supérieur droit
+        Button profileButton("", font, 24, sf::Color::Transparent, sf::Color::White,
+            sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
+        //profileButton.drawPhoto(avatarduClient);
+        
+        // Ajout des boutons au vecteur
+        buttons.emplace_back(std::make_unique<Button>(EndlessButton));
+        buttons.emplace_back(std::make_unique<Button>(DuelButton));
+        buttons.emplace_back(std::make_unique<Button>(ClassicButton));
+        buttons.emplace_back(std::make_unique<Button>(RoyaleButton));
+        buttons.emplace_back(std::make_unique<Button>(quitButton));
+        buttons.emplace_back(std::make_unique<Button>(settingsButton));
+        buttons.emplace_back(std::make_unique<Button>(notificationButton));
+        buttons.emplace_back(std::make_unique<Button>(profileButton));
+
+    }
+    
+    //draw buttons
+    drawButtons();
+    json j;
+    
+    if(buttons[0]->isClicked(*window)) {
+        j["action"] = "EndlessMode";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }else if(buttons[0]->isClicked(*window)){
+        j["action"] = "DuelMode";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+}
+void SFMLGame::displayGame(){
+    
+    if (client.isGameStateUpdated()) {
+        
+        GameState gameData = client.getGameState();
+        if(gameData.isGame){
+            drawGrid(gameData.gridData);
+            drawTetramino(gameData.currentPieceData);
+            drawTetramino(gameData.nextPieceData);
+            drawScore(gameData.scoreData);
+        }
+        
+        else if (gameData.isEnd){
+            drawEndGame(gameData.menu);
+        }
+    }
+
+  
+
+    
+}
+
+void SFMLGame::drawGrid(const json& grid) {
+    int width = grid[jsonKeys::WIDTH]; 
+    int height = grid[jsonKeys::HEIGHT]; 
+    const json& cells = grid[jsonKeys::CELLS];
+    sf::Color color ;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            sf::RectangleShape cell(sf::Vector2f(cellSize - 1, cellSize - 1)); 
+            cell.setPosition(x * cellSize + cellSize, y * cellSize);  
+            
+            bool occupied = cells[y][x][jsonKeys::OCCUPIED]; 
+            if (occupied) {
+                int colorValue = cells[y][x][jsonKeys::COLOR];
+                sf::Color color = fromSFML(colorValue);
+                cell.setFillColor(color);
+            }else{
+                cell.setFillColor(sf::Color(50, 50, 50));
+            }
+
+            window->draw(cell);  
+        }
+    }
+
+
+    for (int y = 0; y < 2*height; ++y) {
+        sf::RectangleShape leftWall(sf::Vector2f(cellSize/2, cellSize/2));
+        leftWall.setPosition(cellSize/2, y * (cellSize/2));
+        leftWall.setFillColor(sf::Color(139, 69, 19));
+        leftWall.setOutlineColor(sf::Color::Black); 
+        leftWall.setOutlineThickness(1.0f); 
+        window->draw(leftWall); // Mur gauche
+    }
+    for (int x = 1; x <= 2*width + 2; ++x) {
+        sf::RectangleShape bottomWall(sf::Vector2f(cellSize/2, cellSize/2));
+        bottomWall.setPosition(x * (cellSize/2), cellSize * height);
+        bottomWall.setFillColor(sf::Color(139, 69, 19));
+        bottomWall.setOutlineColor(sf::Color::Black); 
+        bottomWall.setOutlineThickness(1.0f); 
+        window->draw(bottomWall); // Mur bas
+    }
+    for (int y = 0; y < 2*height; ++y) {
+        sf::RectangleShape rightWall(sf::Vector2f(cellSize/2, cellSize/2));
+        rightWall.setPosition(cellSize * width + cellSize, y * (cellSize/2));
+        rightWall.setFillColor(sf::Color(139, 69, 19));
+        rightWall.setOutlineColor(sf::Color::Black); 
+        rightWall.setOutlineThickness(1.0f); 
+        window->draw(rightWall); // Mur droit
+    }
+}
 
 
 void SFMLGame::drawTetramino(const json& tetraPiece) {
@@ -556,7 +689,27 @@ void SFMLGame::drawEndGame(const json& endGameData) {
 
 }
 
+sf::Color SFMLGame::fromShapeSymbolSFML(const std::string& symbol) {
+    if (symbol == "I") return sf::Color::Cyan;
+    if (symbol == "O") return sf::Color::Yellow;
+    if (symbol == "T") return sf::Color(128, 0, 128); // Violet
+    if (symbol == "S") return sf::Color::Green;
+    if (symbol == "Z") return sf::Color::Red;
+    if (symbol == "J") return sf::Color::Blue;
+    if (symbol == "L") return sf::Color(255, 165, 0); // Orange
+    return sf::Color::White; // Default
+}
 
+sf::Color SFMLGame::fromSFML(int value) {
+    if (value == 4) return sf::Color::Cyan;
+    if (value == 2) return sf::Color::Yellow;
+    if (value == 6) return sf::Color(128, 0, 128); // Violet
+    if (value == 3) return sf::Color::Green;
+    if (value == 1) return sf::Color::Red;
+    if (value == 5) return sf::Color::Blue;
+    if (value == 7) return sf::Color(255, 165, 0); // Orange
+    return sf::Color::White; // Default
+}
 void SFMLGame::chatMenu() {
     // Display the chat background
     displayBackground(textures->chat);
@@ -743,4 +896,33 @@ void SFMLGame::diplayMessage(const std::string& message, bool isSent) {
     // Mettre à jour la position Y pour le prochain message
     MessagesY += 30; // Ajuster l'espacement entre les messages
 }
+void SFMLGame::drawScore(const json& scoreData) {
+    try {
+        // Version sécurisée avec vérifications
+        int score = scoreData.value("score", 0); // Valeur par défaut 0 si "current" n'existe pas
+        int combo = scoreData.value("combo", 0);
+        
+        sf::Text scoreText;
+        scoreText.setFont(font);
+        scoreText.setString("Score: " + std::to_string(score));
+        scoreText.setCharacterSize(24);
+        scoreText.setFillColor(sf::Color::White);
+        scoreText.setPosition(cellSize*12 + 10, cellSize); // Positionnement recommandé
 
+        sf::Text comboText;
+        comboText.setFont(font);
+        comboText.setString("Combo: " + std::to_string(combo));
+        comboText.setCharacterSize(24);
+        comboText.setFillColor(sf::Color::White);
+        comboText.setPosition(cellSize*12 + 10, 2*cellSize + 10);
+        
+        window->draw(scoreText);
+        window->draw(comboText);
+    } catch (const json::exception& e) {
+        std::cerr << "Erreur d'affichage du score: " << e.what() << std::endl;
+        // Version de secours
+        sf::Text errorText("Score: N/A", font, 24);
+        errorText.setPosition(20, 20);
+        window->draw(errorText);
+    }
+}

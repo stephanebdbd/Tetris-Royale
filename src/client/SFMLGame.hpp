@@ -146,8 +146,17 @@ class SFMLGame {
 
         //notification
         void notificationMenu(const std::vector<std::string>& notifications);
+        void drawGrid(const json& grid);
+    
+        void displayGame();
+
+
         void drawTetramino(const json& tetraPiece);
+        sf::Color fromShapeSymbolSFML(const std::string& symbol);
+        sf::Color fromSFML(int value);
+        void drawScore(const json& scoreData);
         void CreateOrJoinGame();
+        void ChoiceGameMode();
         void drawEndGame(const json& endGameData);
 
 };
