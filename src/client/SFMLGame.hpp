@@ -9,7 +9,11 @@
 #include "Button.hpp"
 #include "Text.hpp"
 #include "../common/MenuState.hpp"
-
+#include "../common/json.hpp"
+#include "../common/jsonKeys.hpp"
+#include <memory>
+#include <vector>
+#include "../common/GameState.hpp"
 
 //resources path
 const std::string FONT_PATH = "../../res/fonts/Arial.ttf";
@@ -71,8 +75,6 @@ class SFMLGame {
         std::unique_ptr<Textures> textures;
         std::vector<std::unique_ptr<Button>> buttons;
         std::vector<std::unique_ptr<TextField>> texts;
-        std::vector<std::pair<std::string, std::string>> messages;
-        std::vector<std::string> contacts;
         sf::Font font;
         MenuState currentState;
         std::string contact;
@@ -80,12 +82,14 @@ class SFMLGame {
         float friendsListOffset = 0.0f; // Décalage vertical pour la liste des amis
         float chatContactsOffset = 0.0f; // Décalage vertical pour les contacts du chat
         int MessagesY = 60; // Position Y pour afficher les messages
+        int MessagesSentX = 400; // Position X pour afficher les messages
+        int MessagesReceivedX = 220; // Position X pour afficher les messages
+        int cellSize = 30;
 
         
         //draw
         void drawButtons();
         void drawTextFields();
-        void drawMessages();
 
         //handle events
         void handleTextFieldEvents(sf::Event& event);
@@ -132,7 +136,7 @@ class SFMLGame {
 
         // Chat Menu
         void chatMenu();
-        void displayMessage(const std::string&sender, const std::string& message);
+        void diplayMessage(const std::string& message, bool isSent);
         void ChatRoomMenu();
 
         //friends
@@ -142,6 +146,10 @@ class SFMLGame {
 
         //notification
         void notificationMenu(const std::vector<std::string>& notifications);
+        void drawTetramino(const json& tetraPiece);
+        void CreateOrJoinGame();
+        void drawEndGame(const json& endGameData);
+
 };
 
 #endif // SFMLGAME_HPP

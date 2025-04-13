@@ -12,7 +12,7 @@
 
 //window size
 const unsigned int WINDOW_WIDTH = 800;
-const unsigned int WINDOW_HEIGHT = 600;
+const unsigned int WINDOW_HEIGHT = 650;
 const std::string WINDOW_TITLE = "Tetris Royal";
 
 
@@ -42,15 +42,6 @@ void SFMLGame::drawButtons() {
 void SFMLGame::drawTextFields() {
     for (const auto& text : texts) {
         text->draw(*window);
-    }
-}
-
-void SFMLGame::drawMessages() {
-    for (std::size_t i = 0; i < messages.size(); ++i) {
-        const auto& msg = messages[i];
-        MessagesY += 50 * i+1; // Adjust the Y position for each message
-        displayMessage(msg.first, msg.second);
-        MessagesY = 60; // Reset Y position for the next message
     }
 }
 
@@ -141,12 +132,39 @@ void SFMLGame::handleEvents() {
         if (event.type == sf::Event::TextEntered) {
             handleTextFieldEvents(event);
         }
+        if (event.type == sf::Event::KeyPressed) {
+            std::string input;
+        
+            switch (event.key.code) {
+                case sf::Keyboard::Left:
+                    input = std::string(1, static_cast<char>(KEY_LEFT)); 
+                    break;
+                case sf::Keyboard::Right:
+                    input = std::string(1, static_cast<char>(KEY_RIGHT));
+                    break;
+                case sf::Keyboard::Down:
+                    input = std::string(1, static_cast<char>(KEY_DOWN)); 
+                    break;
+                case sf::Keyboard::Up:
+                    input = std::string(1, static_cast<char>(KEY_UP)); 
+                    break;
+                case sf::Keyboard::Space:
+                    input = " ";
+                    break;
+            
+                default:
+                    break;
+            }
+        
+            if (!input.empty()) {
+                client.sendInputFromSFML(input);
+            }
+        }
     }
 }
 
 void SFMLGame::refreshMenu() {
     auto newState = client.getCurrentMenuState();
-    
     if(newState != currentState) {
         currentState = newState;
         std::cout << "State changed to: " << static_cast<int>(currentState) << std::endl;
@@ -166,7 +184,7 @@ void SFMLGame::refreshMenu() {
             //rankingMenu();
             break;
         case MenuState::Settings:
-            //settingsMenu();
+            //to do  
             break;
         case MenuState::Notifications:
             //notificationsMenu();
@@ -189,12 +207,18 @@ void SFMLGame::refreshMenu() {
         case MenuState::CreateRoom:
             //createRoomMenu();
             break;
-        case MenuState::Game:
-            //gameMenu();
+        case MenuState::JoinOrCreateGame:
+            CreateOrJoinGame();
             break;
         case MenuState::Pause:
             //gamePauseMenu();
+            
             break;
+        case MenuState::CreateGame:
+            ChoiceGameMode();
+            break;
+        case MenuState::Play:
+            displayGame();
         default:
             break;
     }
@@ -371,7 +395,10 @@ void SFMLGame::mainMenu(){
         //pass
     }
     else if(buttons[1]->isClicked(*window)) {
-        //pass
+        j["action"] = "createjoin";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
     }
     else if(buttons[2]->isClicked(*window)) {
         // On passe à l'état du chat
@@ -397,6 +424,136 @@ void SFMLGame::mainMenu(){
     }else if(buttons[6]->isClicked(*window)) {
         //pass
     }
+}
+void SFMLGame::CreateOrJoinGame(){
+    displayBackground(textures->logoConnexion);
+    if(buttons.empty()){
+        std ::cout << "Creating buttons" << std::endl;
+        // Création des boutons
+        Button CreateButton("Créer", font, 24, sf::Color::White, sf::Color(65, 105, 225), 
+                        sf::Vector2f(310, 300), sf::Vector2f(180, 45));
+        Button JoinButton("Rejoindre", font, 24, sf::Color::White, sf::Color(65, 105, 225),
+                        sf::Vector2f(310, 360), sf::Vector2f(180, 45));
+        // Création du bouton "Exit" avec une photo dans sf::Texture logoChat dans le coin supérieur gauche
+        Button quitButton("", font, 24, sf::Color::Transparent, sf::Color::White,
+                        sf::Vector2f(10, 20), sf::Vector2f(40, 40), sf::Color::Transparent);
+        quitButton.drawPhoto(textures->logoExit);
+
+        // Création du bouton "Settings" avec une photo dans sf::Texture logoSettings dans le coin supérieur droit
+        Button settingsButton("", font, 24, sf::Color::Transparent, sf::Color::White,
+            sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
+        settingsButton.drawPhoto(textures->logoSettings);
+
+        //Creation du button "Notification" avec une photo dans sf::Texture logoNotification dans le coin supérieur gauche
+        Button notificationButton("", font, 24, sf::Color::Transparent, sf::Color::White,
+            sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45), sf::Color::Transparent);
+        notificationButton.drawPhoto(textures->logoNotification);
+        
+        // Création du bouton "Profile" avec une photo dans sf::Texture logoTeams dans le coin supérieur droit
+        Button profileButton("", font, 24, sf::Color::Transparent, sf::Color::White,
+            sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
+        //profileButton.drawPhoto(avatarduClient);
+        
+        // Ajout des boutons au vecteur
+        buttons.emplace_back(std::make_unique<Button>(CreateButton));
+        buttons.emplace_back(std::make_unique<Button>(JoinButton));
+        buttons.emplace_back(std::make_unique<Button>(quitButton));
+        buttons.emplace_back(std::make_unique<Button>(settingsButton));
+        buttons.emplace_back(std::make_unique<Button>(notificationButton));
+        buttons.emplace_back(std::make_unique<Button>(profileButton));
+    }
+    
+    //draw buttons
+    drawButtons();
+    json j;
+    
+    if(buttons[0]->isClicked(*window)) {
+        j["action"] = "choiceMode";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+    else if(buttons[0]->isClicked(*window)){
+        //to do 
+    }
+}
+
+
+
+void SFMLGame::drawTetramino(const json& tetraPiece) {
+    // Récupération des informations
+    int x = tetraPiece[jsonKeys::X];
+    int y = tetraPiece[jsonKeys::Y];
+    std::vector<std::vector<std::string>> shape = tetraPiece[jsonKeys::SHAPE];
+    int shapeSymbol = tetraPiece[jsonKeys::SHAPE_SYMBOL];
+
+    // Taille d’un bloc de tétrimino en pixels
+
+    sf::Color color = SFMLGame::fromShapeSymbolSFML(std::string(1, shapeSymbol));
+
+    for (size_t row = 0; row < shape.size(); ++row) {
+        for (size_t col = 0; col < shape[row].size(); ++col) {
+            if (shape[row][col][0] != ' ') {
+                sf::RectangleShape block(sf::Vector2f(cellSize-1, cellSize-1));
+                block.setFillColor(color);
+
+                block.setPosition(((x + col) * cellSize) , (y + row) * cellSize);
+
+                window->draw(block);
+            }
+        }
+    }
+
+}
+
+void SFMLGame::drawEndGame(const json& endGameData) {
+    std::string message = endGameData[jsonKeys::TITLE];
+    sf::Color color;
+    if (message == "GAME OVER"){
+        color = sf::Color::Red;
+    }
+    else{
+        color = sf::Color::Green;
+    }
+
+    sf::Text endGameText(message, font, 50);
+    endGameText.setFillColor(color);
+    endGameText.setPosition(WINDOW_WIDTH / 2 - endGameText.getGlobalBounds().width / 2, WINDOW_HEIGHT / 4 - endGameText.getGlobalBounds().height / 2);
+    window->draw(endGameText);
+
+    if(buttons.empty()){
+        
+        Button Rejouer("rejouer", font, 24, sf::Color::White, sf::Color(65, 105, 225), 
+                        sf::Vector2f(200, 310), sf::Vector2f(180, 45));
+        Button Retour("retour au menu", font, 24, sf::Color::White, sf::Color(65, 105, 225),
+                        sf::Vector2f(450, 310), sf::Vector2f(180, 45));
+
+        
+        buttons.emplace_back(std::make_unique<Button>(Rejouer));
+        buttons.emplace_back(std::make_unique<Button>(Retour));
+        
+    }
+    
+    drawButtons();
+
+    json j;
+    
+    if(buttons[0]->isClicked(*window)) {
+        j["action"] = "rejouer";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setGameStateUpdated(false);
+        client.setGameStateIsEnd(false);
+        cleanup();
+        return;
+    }else if(buttons[1]->isClicked(*window)){
+        j["action"] = "retour au menu";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setGameStateUpdated(false);
+        client.setGameStateIsEnd(false);
+        cleanup();
+        return;
+    }
+
 }
 
 
@@ -427,7 +584,6 @@ void SFMLGame::chatMenu() {
         texts.emplace_back(std::make_unique<TextField>(messageField));
         texts.emplace_back(std::make_unique<TextField>(searchField));
     }
-
     if (buttons.empty()) {
         // Bouton pour revenir au menu principal
         Button backButton("", font, 20, sf::Color::Transparent, sf::Color::White,
@@ -447,15 +603,12 @@ void SFMLGame::chatMenu() {
     
     drawTextFields();
     drawButtons();
-    drawMessages();
-    
-    if (!client.getServerData().empty() && client.getServerData().contains("data")) {
-        contacts = client.getServerData()["data"];
-        client.clearServerData();
-    }
+
+    // Récupérer la liste des contacts
+    auto contacts = client.getServerData()["data"];
     //float contactY = 100 - chatContactsOffset; // Appliquer le décalage vertical
 
-    /** 
+    /*
     for (size_t i = 0; i < contacts.size(); ++i) {
         if (contactY + i * 50 >= 100 && contactY + i * 50 <= WINDOW_HEIGHT - 50) { // Afficher uniquement les contacts visibles
             sf::Text contactName(std::string(contacts[i]), font, 20);
@@ -480,12 +633,10 @@ void SFMLGame::chatMenu() {
     // Ensuite vérifier le sendButton
     if (!clickHandled && buttons[1]->isClicked(*window)) {
         json j = {
+            {"action", "sendMessage"},
             {"message", texts[0]->getText()},
         };
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        messages.push_back({"You", texts[0]->getText()});
-        //messages.push_back({contact, "hellllllo"});
-        texts[0]->clear(); // Effacer le champ de texte après l'envoi
         clickHandled = true; // Marquer le clic comme traité
         return;
     }
@@ -507,55 +658,51 @@ void SFMLGame::chatMenu() {
                 buttons.emplace_back(std::make_unique<Button>(contactButton));
             }
             float contactY = 100.0f + i * contactHeight;
+        
+        
+            // Load avatar texture
+            const std::string avatarPath = "../../res/avatar/avatar" + std::to_string(i + 1) + ".png";
+            
+            if (avatarTextures[i].loadFromFile(avatarPath)) {
+                // Create sprite with circular clipping effect
+                sf::Sprite avatarSprite(avatarTextures[i]);
 
-            // Check if avatar is already drawn for this contact
-            static std::map<std::string, sf::Sprite> drawnAvatars;
-            if (drawnAvatars.find(contacts[i]) == drawnAvatars.end()) {
-                // Load avatar texture
-                const std::string avatarPath = "../../res/avatar/avatar" + std::to_string(i + 1) + ".png";
+                // Get size and compute scale to fit in the circle
+                sf::Vector2u textureSize = avatarTextures[i].getSize();
+                float scale = (avatarRadius * 2) / std::max(textureSize.x, textureSize.y);
+                avatarSprite.setScale(scale, scale);
 
-                // Check if the texture is already loaded
-                if (avatarTextures[i].loadFromFile(avatarPath)) {
-                    // Create sprite with circular clipping effect
-                    sf::Sprite avatarSprite(avatarTextures[i]);
+                // Re-center the image inside the circle
+                float newWidth = textureSize.x * scale;
+                float newHeight = textureSize.y * scale;
+                float offsetX = avatarRadius - newWidth / 2;
+                float offsetY = avatarRadius - newHeight / 2;
 
-                    // Get size and compute scale to fit in the circle
-                    sf::Vector2u textureSize = avatarTextures[i].getSize();
-                    float scale = (avatarRadius * 2) / std::max(textureSize.x, textureSize.y);
-                    avatarSprite.setScale(scale, scale);
+                avatarSprite.setPosition(20 + offsetX, contactY + offsetY);
 
-                    // Re-center the image inside the circle
-                    float newWidth = textureSize.x * scale;
-                    float newHeight = textureSize.y * scale;
-                    float offsetX = avatarRadius - newWidth / 2;
-                    float offsetY = avatarRadius - newHeight / 2;
-
-                    avatarSprite.setPosition(20 + offsetX, contactY + offsetY);
-
-                    // Store the sprite in the map
-                    drawnAvatars[contacts[i]] = avatarSprite;
-                } else {
-                    // Fallback: grey circle + initial
-                    sf::CircleShape avatarCircle(avatarRadius);
-                    avatarCircle.setPosition(20, contactY);
-                    avatarCircle.setFillColor(sf::Color::White);
-
-                    std::string contactStr = contacts[i];
-                    char initial = contactStr.empty() ? '?' : static_cast<char>(std::toupper(contactStr[0]));
-                    sf::Text initialText(std::string(1, initial), font, 24);
-                    initialText.setFillColor(sf::Color::White);
-                    initialText.setStyle(sf::Text::Bold);
-                    initialText.setPosition(20 + avatarRadius - 8, contactY + avatarRadius - 14);
-
-                    // Draw fallback avatar
-                    window->draw(avatarCircle);
-                    window->draw(initialText);
-                    continue;
-                }
+                // Apply circular mask using a shader (optional, for better visuals)
+                sf::CircleShape mask(avatarRadius);
+                mask.setPosition(20, contactY + 8);
+                mask.setTexture(&avatarTextures[i]);
+                mask.setTextureRect(sf::IntRect(0, 0, textureSize.x, textureSize.y));
+                mask.setFillColor(sf::Color::White); // Ensure the mask is visible
+                window->draw(mask);
+            } else {
+                // Fallback: grey circle + initial
+                // Background circle (like WhatsApp mask)
+                sf::CircleShape avatarCircle(avatarRadius);
+                avatarCircle.setPosition(20, contactY);
+                avatarCircle.setFillColor(sf::Color::White); // Optional border or background
+                std::string contactStr = contacts[i];
+                char initial = contactStr.empty() ? '?' : static_cast<char>(std::toupper(contactStr[0]));
+                sf::Text initialText(std::string(1, initial), font, 24);
+                initialText.setFillColor(sf::Color::White);
+                initialText.setStyle(sf::Text::Bold);
+                // Center text inside the circle
+                initialText.setPosition(20 + avatarRadius - 8, contactY + avatarRadius - 14);
+                window->draw(avatarCircle);
+                window->draw(initialText);
             }
-
-            // Draw the avatar sprite
-            window->draw(drawnAvatars[contacts[i]]);
         }
         
 
@@ -581,42 +728,19 @@ void SFMLGame::chatMenu() {
         contactName.setStyle(sf::Text::Bold);
         contactName.setPosition(260, 10);
         window->draw(contactName);
-
-        // Afficher les message de l'utilisateur
-        auto message = client.getServerData();
-        if (message.contains("sender") && message["sender"] == contact) {
-            messages.push_back({contact, message["message"]});
-        }
-        client.clearServerData();
     }
     clickHandled = false; // Réinitialiser le drapeau après le traitement des clics
+
 }
 
-void SFMLGame::displayMessage(const std::string& sender, const std::string& message) {
-    const bool isYou = sender == "You";
-    const float bubbleHeight = 30.f;
-    const float bubbleWidth = std::min(300.f, message.length() * 13.f);
-    const float cornerRadius = 10.f;
-    const float bubbleX = isYou ? WINDOW_WIDTH - 5 - bubbleWidth : 210;
-    const sf::Color bubbleColor = isYou ? sf::Color(70, 130, 180) : sf::Color(90, 90, 110);
+void SFMLGame::diplayMessage(const std::string& message, bool isSent) {
+    // Afficher le message dans la zone de chat
+    sf::Text chatMessage(message, font, 20);
+    chatMessage.setFillColor(isSent ? sf::Color::Green : sf::Color::White);
+    chatMessage.setPosition(20, MessagesY);
+    window->draw(chatMessage);
 
-    // Create and draw the main bubble
-    sf::RectangleShape mainRect(sf::Vector2f(bubbleWidth - 2 * cornerRadius, bubbleHeight));
-    mainRect.setPosition(bubbleX + cornerRadius, MessagesY);
-    mainRect.setFillColor(bubbleColor);
-    mainRect.setOutlineColor(sf::Color(120, 120, 140));
-    mainRect.setOutlineThickness(1);
-    window->draw(mainRect);
-
-
-    // Draw message text
-    sf::Text messageText(message, font, 16);
-    messageText.setFillColor(sf::Color::White);
-    
-    const sf::FloatRect textBounds = messageText.getLocalBounds();
-    messageText.setPosition(
-        bubbleX + cornerRadius + 5.f, 
-        MessagesY + (bubbleHeight - textBounds.height) / 2 - textBounds.top
-    );
-    window->draw(messageText);
+    // Mettre à jour la position Y pour le prochain message
+    MessagesY += 30; // Ajuster l'espacement entre les messages
 }
+
