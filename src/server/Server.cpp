@@ -76,10 +76,6 @@ void Server::handleClient(int clientSocket, int clientId) {
         auto lastRefreshTime = std::chrono::steady_clock::now();
 
         while (true) {
-            if (getRunningChat(clientSocket)) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                continue;
-            }
 
             memset(buffer, 0, sizeof(buffer));
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
@@ -949,8 +945,7 @@ void Server::keyInputChatMenu(int clientSocket, int clientId, const std::string&
     }
     else if(action == "4") {
         sendChatModeToClient(clientSocket);
-        setRunningChat(clientSocket, true);
-        chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, menu.getChatMenu());
+        //chat->processClientChat(clientSocket, clientId, *this, MenuState::chat, menu.getChatMenu());
     }
     else if(action == "5") {
         clientStates[clientId] = MenuState::Main;
@@ -1263,19 +1258,6 @@ void Server::sendChatModeToClient(int clientSocket) {
     message[jsonKeys::MODE] = "chat";
     std::string msg = message.dump() + "\n";
     send(clientSocket, msg.c_str(), msg.size(), 0);
-}
-
-
-bool Server::getRunningChat(int clientId) {
-    auto it = runningChats.find(clientId);
-    if (it != runningChats.end()) {
-        return it->second;
-    }
-    return false;
-}
-
-void Server::setRunningChat(int clientId, bool value) {
-    runningChats[clientId] = value;
 }
 
 void Server::setClientState(int clientId, MenuState state) {
