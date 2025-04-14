@@ -75,6 +75,8 @@ class SFMLGame {
         std::unique_ptr<Textures> textures;
         std::vector<std::unique_ptr<Button>> buttons;
         std::vector<std::unique_ptr<TextField>> texts;
+        std::vector<std::pair<std::string, std::string>> messages;
+        std::vector<std::string> contacts;
         sf::Font font;
         MenuState currentState;
         std::string contact;
@@ -90,6 +92,7 @@ class SFMLGame {
         //draw
         void drawButtons();
         void drawTextFields();
+        void drawMessages();
 
         //handle events
         void handleTextFieldEvents(sf::Event& event);
@@ -136,7 +139,7 @@ class SFMLGame {
 
         // Chat Menu
         void chatMenu();
-        void diplayMessage(const std::string& message, bool isSent);
+        void displayMessage(const std::string&sender, const std::string& message);
         void ChatRoomMenu();
 
         //friends

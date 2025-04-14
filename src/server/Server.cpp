@@ -68,61 +68,71 @@ void Server::acceptClients() {
     clientThread.detach();
 }
 
+
 void Server::handleClient(int clientSocket, int clientId) {
-    char buffer[1024];
-    std::mutex clientMutex; // Protect shared resources for this client
+ char buffer[1024];
+ std::mutex clientMutex; // Protect shared resources for this client
 
-    try {
-        auto lastRefreshTime = std::chrono::steady_clock::now();
+ try {
+     auto lastRefreshTime = std::chrono::steady_clock::now();
 
-        while (true) {
+     while (true) {
+         memset(buffer, 0, sizeof(buffer));
+         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
 
-            memset(buffer, 0, sizeof(buffer));
-            int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
+         if (bytesReceived == -1) {
+             if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                 // Refresh the menu 30 times per second
+                 auto currentTime = std::chrono::steady_clock::now();
+                 auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRefreshTime).count();
+                 if (elapsedTime >= 15) { // ~16ms for 15 FPS
+                     refreshMenu(clientSocket, clientId);
+                     lastRefreshTime = currentTime;
+                 }
+                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                 continue;
+             } else {
+                 std::cerr << "Erreur lors de la réception des données du client #" << clientId << ": " << strerror(errno) << std::endl;
+                 break;
+             }
+         }
 
-            if (bytesReceived == -1) {
-                if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    // Refresh the menu 30 times per second
-                    auto currentTime = std::chrono::steady_clock::now();
-                    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRefreshTime).count();
-                    if (elapsedTime >= 15) { // ~16ms for 15 FPS
-                        refreshMenu(clientSocket, clientId);
-                        lastRefreshTime = currentTime;
-                    }
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                    continue;
-                } else {
-                    std::cerr << "Erreur lors de la réception des données du client #" << clientId << ": " << strerror(errno) << std::endl;
-                    break;
-                }
-            }
+         if (bytesReceived == 0) {
+             std::cout << "Client #" << clientId << " déconnecté." << std::endl;
+             return;
+         }
 
-            if (bytesReceived == 0) {
-                std::cout << "Client #" << clientId << " déconnecté." << std::endl;
-                return;
-            }
 
-            try {
-                std::cout << "Client #" << clientId << " a envoyé: " << buffer << std::endl;
-                json receivedData = json::parse(buffer);
+         try {
 
-                if (!receivedData.contains(jsonKeys::ACTION) || !receivedData[jsonKeys::ACTION].is_string()) {
-                    std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
-                    continue;
-                }
+             std::cout << "Client #" << clientId << " a envoyé: " << buffer << std::endl;
+             json receivedData = json::parse(buffer);
 
-                std::string action = receivedData[jsonKeys::ACTION];
-                handleGUIActions(clientSocket, clientId, receivedData);
-                handleMenu(clientSocket, clientId, action);
-            } catch (json::parse_error& e) {
-                std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
-            }
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception dans handleClient pour le client #" << clientId << ": " << e.what() << std::endl;
-    }
+
+             if(receivedData.contains("message")) {
+                auto receiver = receiverOfMessages[clientId];
+                chat->processClientChat(pseudoTosocket[receiver], clientPseudo[clientId], receiverOfMessages[clientId], receivedData, false);
+                continue;
+             }
+
+             if (!receivedData.contains(jsonKeys::ACTION) || !receivedData[jsonKeys::ACTION].is_string()) {
+                 std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
+                 continue;
+             }
+
+             std::string action = receivedData[jsonKeys::ACTION];
+             handleGUIActions(clientSocket, clientId, receivedData);
+             handleMenu(clientSocket, clientId, action);
+         } catch (json::parse_error& e) {
+             std::cerr << "Erreur de parsing JSON: " << e.what() << std::endl;
+         }
+     }
+ } catch (const std::exception& e) {
+     std::cerr << "Exception dans handleClient pour le client #" << clientId << ": " << e.what() << std::endl;
+ }
 
 }
+
 
 
 
@@ -244,6 +254,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         else if(actionType == "openChat"){
             //gerer l'ouverture du chat
             std::string contact = action["contact"];
+            receiverOfMessages[clientId] = contact;
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat avec " << contact << "." << std::endl;
             //chat->processClientChat(clientSocket, clientId, *this, clientStates[clientId]);
             return;
@@ -284,8 +295,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             return;
 
         }
-        
-        
     }
 }
 
