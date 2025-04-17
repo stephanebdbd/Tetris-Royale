@@ -11,10 +11,10 @@ class Menu {
         //register & login  
         json getRegisterMenu1() const;
         json getRegisterMenuFailed() const;
-        json getRegisterMenu2WithPseudo(const std::string& pseudo) const; 
+        json getRegisterMenu2WithPseudo() const; 
         json getLoginMenu1() const;
         json getLoginMenuFailed1() const;
-        json getLoginMenu2WithPseudo(const std::string& pseudo) const ;
+        json getLoginMenu2WithPseudo() const ;
         json getLoginMenuFailed2() const;
         //chat
         json getChatWithRoomMenu(const std::vector<std::string>& chatRooms) const ;

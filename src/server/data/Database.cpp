@@ -1,4 +1,4 @@
-#include "database.hpp"
+#include "Database.hpp"
 #include "query_result.hpp"
 
 #include <iostream>
@@ -8,7 +8,7 @@
 #include <ctime>
 
 #define DATABASE_DIR "data/DDL_user_db.sql"
-#define DB_NAME "mama.db"
+#define DB_NAME "data/database.db"
 
 
 
@@ -97,7 +97,7 @@ QueryResult DataBase::deleteEntry(const std::string &table_name, const std::stri
     std::string sql = "DELETE FROM " + table_name + " WHERE " + condition + ";";
     QueryResult result = executeQuery(sql);
     //int num_del_rows = sqlite3_changes(db);
-    return executeQuery(sql);
+    return result;
 }
 
 
@@ -121,8 +121,11 @@ void DataBase::rollBack(){
 }
 
 
-void DataBase::closeConnection(){
-        sqlite3_close(this->db);    
+void DataBase::closeConnection() {
+    if (this->db != nullptr) {
+        sqlite3_close(this->db);
+        this->db = nullptr; // Réinitialiser le pointeur après fermeture
+    }
 }
 
 

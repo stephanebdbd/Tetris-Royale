@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <atomic>
-#include "database.hpp"
+#include "Database.hpp"
 
 class Chat{
 private:
@@ -30,11 +30,13 @@ public:
     QueryResult getAllUserMsg(const std::string &id_user);
         
     // thread pour gérer un chat d'un client
-    void processClientChat(int receiversocket, int sendersocket,  const std::string& sender, const std::string& receiver);
-    void sendHistory(int receiversocket, const json& historique) ;
+    bool processClientChat(int senderSocket, const std::string& sender, const std::string& receiver, json& msg, std::vector<int> receiverSockets) ;
 
     // envoi d'un message à un client
-    void sendMessage(int receiversocket, const json& msg) ;
+    void sendMessage(json& msg, std::vector<int>& receiverSockets) ;
+
+    // envoi des anciennes conversations
+    void sendOldMessages(int senderSocket, const std::string& sender, const std::string& receiver) ;
     
     //getter des données du fichier json du client
     std::vector<std::string> getMyRooms(const std::string& pseudo);

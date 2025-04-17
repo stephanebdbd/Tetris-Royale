@@ -17,7 +17,7 @@ class DataBase {
         static int callback(void *data, int argc, char **argv, char **az_col_name);
     
     public:
-    DataBase() {
+        DataBase() {
             createDb();
             createTables();
         }
@@ -37,46 +37,3 @@ class DataBase {
         
         std::string getTime();
 };
-/*
-class DataBase
-{
-private:
-
-    sqlite3 *db; // the pointer to the sqlite database 
-
-    QueryResult createDb();
-
-    QueryResult createTables();
-
-
-    static int callback(void *data, int argc, char **argv, char **az_col_name);
-
-
-
-
-public:
-
-    DataBase(){
-        createDb();
-        createTables();
-    };
-
-    ~DataBase(){closeConnection();};
-    QueryResult executeQuery(std::string& sql_query);
-
-
-    QueryResult insertEntry(const std::string &table_name, const std::string& columns, const std::string& values);
-
-
-    QueryResult deleteEntry(const std::string &table_name, const std::string& condition);
-
-    QueryResult updateEntry(const std::string& table_name, const std::string& columns, const std::string& condition);
-
-    QueryResult selectFromTable(const std::string& table_name, const std::string& columns, const std::string& condition);
-
-
-    void rollBack();
-
-    void closeConnection();
-};
-*/

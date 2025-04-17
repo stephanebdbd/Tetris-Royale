@@ -1,24 +1,20 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "Game.hpp"
-#include "GameMode.hpp"
-#include "Grid.hpp"
-#include "Tetramino.hpp"
-#include "Score.hpp"
-#include "GameRoom.hpp"
-//#include "chat.hpp"
-#include "./data/DataManager.hpp"  // Inclure le gestionnaire d'utilisateurs
-#include "./data/chatRoom.hpp"  // Inclure la base de données
-#include "./data/chat.hpp"  // Inclure la base de données
+#include "Game.hpp"                 // Inclure la classe Game
+#include "GameMode.hpp"             // Inclure la classe GameMode
+#include "Grid.hpp"                 // Inclure la classe Grid
+#include "Tetramino.hpp"            // Inclure la classe Tetramino
+#include "Score.hpp"                // Inclure la classe Score
+#include "GameRoom.hpp"             // Inclure la classe GameRoom
+#include "./data/UserManager.hpp"   // Inclure le gestionnaire d'utilisateurs
+#include "./data/chatRoom.hpp"      // Inclure la base de données
+#include "./data/chat.hpp"          // Inclure la base de données
 #include "Menu.hpp"
 #include <atomic>
 #include <unordered_map>
 #include <mutex>
-//#include "FriendList.hpp"
-//#include "chatRoom.hpp"
-//#include "FriendList.hpp"
-//#include "chatRoom.hpp"
+
 
 enum class MenuState {
     Welcome,
@@ -47,6 +43,7 @@ enum class MenuState {
             JoinRoom,
             RoomsRequest,
             ChatRooms,
+                ChatRoom,
                 
             ManageRooms,
                 ManageRoom,
@@ -59,7 +56,8 @@ enum class MenuState {
                             ConfirmDeleteRoom,
                             ConfirmQuitRoom,
         Friends,
-            ChatFriends,
+            ChooseContact,
+                PrivateChat,
             AddFriend,
             FriendList,
             FriendRequestList,
@@ -111,6 +109,7 @@ public:
     bool start();
     void acceptClients();
     void handleClient(int clientSocket, int clientId);
+    void cleanupClient(int clientSocket, int clientId);
     void stop();
     void loopGame(int clientSocket, int clientId);
     std::shared_ptr<std::vector<int>> joinRoom(const std::string& roomName, int clientSocket) ;
@@ -143,7 +142,6 @@ public:
     void keyInputAddAdmin(int clientSocket, int clientId, const std::string& action);
     void keyInputRequestList(int clientSocket, int clientId, const std::string& action);
     void keyInputQuitRoom(int clientSocket, int clientId, const std::string& action);
-    void loadChatRooms();
     void keyInputConfirmDeleteRoom(int clientSocket, int clientId, const std::string& action);
     void keyInputChatRoomsMenu(int clientSocket, int clientId, const std::string& action) ;
 
@@ -159,10 +157,8 @@ public:
     void shiftGameRooms(int index);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
-    void handleMenu(int clientSocket, int clientId, const std::string& action);
+    void handleMenu(int clientSocket, int clientId, const std::string& action, bool refreshMenu=false);
     std::string convertUnicodeToText(const std::string& unicode);
-    void setRunningChat(int clientSocket, bool value);
-    void setClientState(int clientId, MenuState state);
     bool getRunningChat(int clientSocket);
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
     std::unordered_map<int, std::string> getSocketPseudo() { return sockToPseudo; }

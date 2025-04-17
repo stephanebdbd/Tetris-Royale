@@ -1,7 +1,7 @@
 #include "Menu.hpp"
 #include "../common/jsonKeys.hpp"
 
-const std::string messageHelp = "Appuyez sur /quit pour revenir en arrière et /quit pour revenir au menu principal.";
+const std::string messageHelp = "Appuyez sur /back pour revenir en arrière et /back pour revenir au menu principal.";
 
 json Menu::getMainMenu0() const {
     json menu = {
@@ -56,14 +56,13 @@ json Menu::getRegisterMenuFailed() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getRegisterMenu2WithPseudo(const std::string& pseudo) const {
+json Menu::getRegisterMenu2WithPseudo() const {
     json menu = {
         {jsonKeys::TITLE, "Création de compte - Etape 2"},
         {jsonKeys::OPTIONS, {
             {"Veuillez choisir un mot de passe", ":"},
         }},
         {jsonKeys::INPUT, ""},
-        {jsonKeys::PSEUDO, pseudo}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON make
 }
@@ -93,14 +92,13 @@ json Menu::getLoginMenuFailed1() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getLoginMenu2WithPseudo(const std::string& pseudo) const {
+json Menu::getLoginMenu2WithPseudo() const {
     json menu = {
         {jsonKeys::TITLE, "Connexion au compte  - Etape 2"},
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer votre mot de passe", ":"},
         }},
         {jsonKeys::INPUT, ""},
-        {jsonKeys::PSEUDO, pseudo}
     };
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
@@ -148,7 +146,7 @@ json Menu::getChatRoomsMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 json Menu::getChatMenu(const std::vector<std::string>& data) const {
-    return getListe(data, "Liste des amis, tapez son pseudo pour chater avec lui ", "Taper './quit' pour quitter:  ");
+    return getListe(data, "Liste des amis, tapez son pseudo pour chater avec lui ", "Taper '/back' pour quitter:  ");
 }
 
 
@@ -170,7 +168,7 @@ json Menu::getJoinChatRoomMenu() const {
         {jsonKeys::OPTIONS, {
             {"Veuillez insérer le nom de la Room", ":"},
         }},
-        {jsonKeys::INPUT, "Tapez le nom de la room à rejoindre ou './quit' pour quitter:    "}
+        {jsonKeys::INPUT, "Tapez le nom de la room à rejoindre ou '/back' pour quitter:    "}
     };
 
     return menu.dump() + "\n";  // Affichage formaté
@@ -178,7 +176,7 @@ json Menu::getJoinChatRoomMenu() const {
 
 
 json Menu::getInvitationsRoomsMenu(const std::vector<std::string>& invitations) const {
-    return getListe(invitations, "Invitations en attente:", "Tapez 'accept.roomName' ou 'reject.roomName' ou '/quit' : ");
+    return getListe(invitations, "Invitations en attente:", "Tapez 'accept.roomName' ou 'reject.roomName' ou '/back' : ");
 }
 
 json Menu::getListe(const std::vector<std::string>& data, std::string title, const std::string& input) const {
@@ -200,7 +198,7 @@ json Menu::getListe(const std::vector<std::string>& data, std::string title, con
 
 
 json Menu::getListeMembers(const std::vector<std::string>& data) const {
-    return getListe(data, "Liste des membres", "Taper './quit' pour quitter:  ");
+    return getListe(data, "Liste des membres", "Taper '/back' pour quitter:  ");
 }
 
 json Menu::getManageChatRoomsMenu(const std::vector<std::string>& chatRooms) const {
@@ -210,11 +208,11 @@ json Menu::getManageChatRoomsMenu(const std::vector<std::string>& chatRooms) con
             {jsonKeys::OPTIONS, {
                 {"Vous n'avez aucun room à gérer.", ""}
             }},
-            {jsonKeys::INPUT, "Tapez './quit' pour quitter: "}
+            {jsonKeys::INPUT, "Tapez '/back' pour quitter: "}
         };
         return menu.dump() + "\n";  // Convertir en chaîne JSON
     } else {
-        return getListe(chatRooms, "Mes Rooms", "Tapez le nom d'une room pour la gérer ou './quit' pour quitter: ");
+        return getListe(chatRooms, "Mes Rooms", "Tapez le nom d'une room pour la gérer ou '/back' pour quitter: ");
     }
 }
 json Menu::getChatWithRoomMenu(const std::vector<std::string>& chatRooms) const {
@@ -224,11 +222,11 @@ json Menu::getChatWithRoomMenu(const std::vector<std::string>& chatRooms) const 
             {jsonKeys::OPTIONS, {
                 {"Vous n'avez aucune room disponible pour chatter.", ""}
             }},
-            {jsonKeys::INPUT, "Tapez './quit' pour quitter: "}
+            {jsonKeys::INPUT, "Tapez '/back' pour quitter: "}
         };
         return menu.dump() + "\n";  // Convertir en chaîne JSON
     } else {
-        return getListe(chatRooms, "Chatter dans une Room", "Tapez le nom d'une room pour chatter ou './quit' pour quitter: ");
+        return getListe(chatRooms, "Chatter dans une Room", "Tapez le nom d'une room pour chatter ou '/back' pour quitter: ");
     }
 }
 std::string getKey(int &index){
@@ -354,7 +352,7 @@ json Menu::displayMessage(const std::string& message) const {
 
 json Menu::getFriendListMenu(const std::vector<std::string>& friends) const {
 
-    return getListe(friends, "Liste de vos amis", "Taper '/quit' pour quitter:  ");
+    return getListe(friends, "Liste de vos amis", "Taper '/back' pour quitter:  ");
 }
 
 
@@ -407,7 +405,7 @@ json Menu::getLobbyMenu1() const {
         {jsonKeys::TITLE, "Configuration des paramètres de la partie:"},
         {jsonKeys::OPTIONS, {
             {"/max/<number> ", "Nombre maximal de joueurs"},
-            {"/quit ", "Quitter la partie"}
+            {"/back ", "Quitter la partie"}
         }},
 
         {jsonKeys::INPUT, "entrez le paramètre: "}
@@ -435,7 +433,7 @@ json Menu::getLobbyMenu2(int maxPlayers, const std::string& mode, int amountOfPl
             {"/invite/viewer/<name> ", "Inviter un spectateur"},
             {"/speed/<vitesse> (supérieure à 100) ", "déterminer la vitesse du jeu"},
             {cmd, desc},
-            {"/quit ", "Quitter la partie"}
+            {"/back ", "Quitter la partie"}
 
         }},
 
@@ -450,7 +448,7 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
     json menu = {
         {jsonKeys::TITLE, "Liste des demandes du rejoindre un jeu: "},
         {jsonKeys::OPTIONS, json::array()},
-        {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande ou '/quit' pour faire un retour:    "}
+        {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande ou '/back' pour faire un retour:    "}
     };
 
     int index = 1;

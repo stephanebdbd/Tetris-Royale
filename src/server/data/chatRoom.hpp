@@ -11,13 +11,11 @@
 #include <unistd.h>
 #include <iostream>
 #include <atomic>   
-// #include <ctime>
-#include <iostream>
 #include "../../common/json.hpp"
 #include <memory>
 #include <regex>
 #include <sodium.h>
-#include"database.hpp"
+#include"Database.hpp"
 
 class ChatRoom {
     private:
@@ -26,7 +24,7 @@ class ChatRoom {
     public:
         // Constructeur avec un pointeur partagé sur la base de données
         ChatRoom(std::shared_ptr<DataBase> db){ this->db = db;}
-        //bool deleteRoom();   
+        //bool deleteRoom();
         // Initialiser la chat room
          // Créer une salle de discussion
         bool createRoom(const std::string &room_name, const std::string &admin_pseudo);

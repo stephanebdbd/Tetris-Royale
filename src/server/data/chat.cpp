@@ -9,115 +9,58 @@
 #include <regex>
 #include <sodium.h>
 
-void Chat::sendHistory(int receiversocket, const json& historique) {
-    std::string jsonStr = historique.dump() + "\n";  // Historique = tableau JSON
-    send(receiversocket, jsonStr.c_str(), jsonStr.size(), 0);
-}
-/*void Chat::processRoomChat(int senderSocket, const std::string& sender, const std::string& roomName, std::shared_ptr<std::vector<int>> roomSockets) {
-    std::cout << "Room chat started in room: " << roomName << std::endl;
-    
-    char buffer[1024];
-    while (true) {
-        memset(buffer, 0, sizeof(buffer));
-        int bytes_received = recv(senderSocket, buffer, sizeof(buffer), 0);
 
-        if (bytes_received <= 0) {
-            std::cerr << "Client disconnected from room or error occurred." << std::endl;
-            close(senderSocket);
-            break;
+bool Chat::processClientChat(int senderSocket, const std::string& sender, const std::string& receiver, json& msg, std::vector<int> receiverSockets) {
+    (void)senderSocket; // Suppression de l'avertissement sur l'argument non utilisé
+    try {
+        
+        if (msg["message"] != "/exit") {
+            msg["sender"] = sender;
+            msg["receiver"] = receiver;
+            sendMessage(msg, receiverSockets);
+            return true;
+        }else{
+            std::cout << "Le client a quitté la conversation." << std::endl;
+            return false;
         }
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error (sending  messages): " << e.what() << std::endl;
+    }
+    return false;   
+}
 
-        try {
-            json msg = json::parse(std::string(buffer, bytes_received));
 
-            if (msg.is_object() && msg.contains("message")) {
-                if (msg["message"] == "exit") {
-                    std::cout << sender << " a quitté la room " << roomName << std::endl;
-                    break;
-                }
+void Chat::sendMessage(json& msg, std::vector<int>& receiverSockets) {
+    for (int receiverSocket : receiverSockets) {
+        // Enregistrement du message dans la base de données
+        if (!saveMessage(msg["sender"], msg["receiver"], msg["message"]))
+            std::cerr << "Failed to save message: " << msg["message"] << std::endl;
 
-                msg["sender"] = sender;
-
-                std::string serializedMsg = msg.dump()+ "\n";
-
-                // Envoyer le message à tous les membres sauf l'expéditeur
-                for (int socket : *roomSockets) {
-                    if (socket != senderSocket) {
-                        send(socket, serializedMsg.c_str(), serializedMsg.size(), 0);
-                    }
-                }
-            } else {
-                std::cerr << "JSON invalide reçu dans room chat." << std::endl;
-            }
-        } catch (const std::exception& e) {
-            std::cerr << "Erreur (room chat) : " << e.what() << std::endl;
+        // Envoi du message au socket du destinataire
+        std::string jsonStr = msg.dump() + "\n"; // Convertir le message en chaîne JSON
+        if(send(receiverSocket, jsonStr.c_str(), jsonStr.size(), 0) == -1) {
+            std::cerr << "Erreur d'envoi du message au socket " << receiverSocket << std::endl;
         }
     }
 }
-*/
-void Chat::processClientChat(int receiversocket, int sendersocket,  const std::string& sender, const std::string& receiver) {
-    std::cout << "Chat process started for client " << receiversocket << std::endl;
-    char buffer[1024];
+
+void Chat::sendOldMessages(int senderSocket, const std::string& sender, const std::string& receiver) {
     bool lumessage = false; // Variable pour savoir si l'historique a été envoyé
     if (!lumessage) {
         std::string previousMessages = getMsgBetweenUsers(sender, receiver);
     
         if (!previousMessages.empty() && previousMessages != "[]") {
-            send(receiversocket, previousMessages.c_str(), previousMessages.size(), 0);
-            send(sendersocket, previousMessages.c_str(), previousMessages.size(), 0);
+            send(senderSocket, previousMessages.c_str(), previousMessages.size(), 0);
 
         } else {
             std::cout << "Aucun message précédent à envoyer." << std::endl;
         }
-    
+        std::cout << "Historique envoyé." << std::endl;
+        std::cout << previousMessages << std::endl;
         lumessage = true;
-    }   
-    while (true) {
-        memset(buffer, 0, sizeof(buffer));
-        int bytes_received = recv(sendersocket, buffer, sizeof(buffer), 0);
-
-        if (bytes_received <= 0) {
-            close(sendersocket);
-            break;
-        }
-
-        try {
-            json msg = json::parse(std::string(buffer, bytes_received));
-        
-            if (msg.is_object() && msg.contains("message")) {
-                if (msg["message"] != "exit") {
-                    msg["sender"] = sender;
-                    msg["receiver"] = receiver;
-                    sendMessage(receiversocket,msg);
-                } else {
-                    break;
-                }
-            } else {
-                std::cerr << "Reçu JSON invalide ou pas un objet avec 'message'" << std::endl;
-            }
-        
-        } catch (const std::exception& e) {
-            std::cerr << "Error (sending  messages): " << e.what() << std::endl;
-        }
-        
     }
 }
-void Chat::sendMessage(int receiversocket, const json& msg) {
-
-    if (saveMessage(msg["sender"], msg["receiver"], msg["message"])) {
-        std::cout << "Message saved: " << msg["message"] << std::endl;
-    } else {
-        std::cerr << "Failed to save message: " << msg["message"] << std::endl;
-    }
-    std::string jsonStr = msg.dump() + "\n";
-
-    std::cout << "Sending message: " << jsonStr << std::endl;
-    send(receiversocket, jsonStr.c_str(), jsonStr.size(), 0);
-
-
-}
-
-
 
 
 bool Chat::saveMessage(const std::string &sender, const std::string &receiver, const std::string &msg){
@@ -128,9 +71,10 @@ bool Chat::saveMessage(const std::string &sender, const std::string &receiver, c
     std::string columns = "sender, receiver, msg, msg_date_time";
     std::string values = "'" + sender + "', '" + receiver + "', '" + msg + "', '" + time +  "'";
     QueryResult result = db->insertEntry("Messages", columns, values);
-    std::cout<<result.getError()<<std::endl;
     return result.isOk();
 }
+
+
 std::string Chat::getMsgBetweenUsers(const std::string &id_user, const std::string &id_friend) {
     std::string columns = "sender, receiver, msg, msg_date_time";
     std::string condition = "(sender = '" + id_user + "' AND receiver = '" + id_friend + "')" \
@@ -155,9 +99,9 @@ std::string Chat::getMsgBetweenUsers(const std::string &id_user, const std::stri
 
     if (messagesJson.empty()) {
         std::cout << "Aucun message trouvé entre " << id_user << " et " << id_friend << std::endl;
+    }else{
+        std::cout << messagesJson.dump()+"\n" << std::endl;
     }
-    std::cout << messagesJson.dump()+"\n" << std::endl;
 
     return messagesJson.dump()+"\n";  // renvoie une string du tableau JSON (vide ou non)
 }
-
