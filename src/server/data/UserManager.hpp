@@ -3,15 +3,14 @@
 #include <sqlite3.h>
 #include <fstream>
 #include <sstream>
-// #include <ctime>
 #include <iostream>
 #include <memory>
 #include <regex>
 #include <sodium.h>
 
 
+#include "Database.hpp"
 
-#include"database.hpp"
 
 class DataManager
 {
@@ -72,6 +71,7 @@ public:
     std::vector<std::string> getRequestList(const std::string& user) ;
     bool userExists(const std::string& username) const;
     bool userNotExists(const std::string& username) const;
+    bool hasSentRequest(const std::string& sender, const std::string& receiver) const;
 
     std::vector<std::string> getList(const std::string& user, const std::string& status);
     //bool areFriends(const std::string& user1, const std::string& user2);  // Vérifier si deux utilisateurs sont amis

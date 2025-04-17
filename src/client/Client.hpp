@@ -15,7 +15,6 @@ private:
     ClientNetwork network;  // Chaque client a son propre network
     ClientChat chat;        // Chaque client a son propre chat
 
-    std::string pseudo;
     std::string serverIP;
     int port;
     int clientSocket;

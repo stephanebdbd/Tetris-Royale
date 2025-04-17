@@ -7,15 +7,16 @@
 
 
 std::mutex mtx; // Mutex pour synchroniser l'accès aux fenêtres ncurses
-#define INPUT_HEIGHT 6  // Hauteur de la zone de saisie
+#define INPUT_HEIGHT 4  // Hauteur de la zone de saisie
 
-
-void ClientChat::run(std::string pseudo) {
-    initscr();       // Initialise ncurses
-    cbreak();        // Désactive le buffering de ligne
+void ClientChat::run() {
     noecho();        // Empêche l'affichage automatique des entrées utilisateur
-    keypad(stdscr, TRUE); // Active la gestion des touches spéciales
-    scrollok(stdscr, TRUE); // Permet le défilement du texte
+    curs_set(1); // Rendre le curseur visible
+    keypad(stdscr, TRUE); // Activer les touches spéciales
+    nodelay(stdscr, TRUE); // Ne pas bloquer l'entrée utilisateur
+    //start_color();
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);  // Vos messages
+    init_pair(2, COLOR_WHITE, COLOR_BLACK); // Messages reçus
 
     int height, width;
     getmaxyx(stdscr, height, width); // Récupère les dimensions du terminal
@@ -30,18 +31,16 @@ void ClientChat::run(std::string pseudo) {
     inputWin = newwin(INPUT_HEIGHT, width, height - INPUT_HEIGHT, 0);
     scrollok(inputWin, TRUE); // Activer le défilement pour cette fenêtre
     box(inputWin, 0, 0); // Dessiner une bordure autour de la fenêtre
-    curs_set(1); // Rendre le curseur visible
+    
     wrefresh(inputWin); // Rafraîchir la fenêtre
-    pseudo_name = pseudo; // Stocker le pseudo
-    std::thread sendThread(&ClientChat::sendChatMessages, this);
-    sendThread.join();  // Attendre la fin du thread d'envoi de messages
+
+    std::thread sendThread(&ClientChat::sendChatMessages, this); // Lancer le thread d'envoi de messages
+    sendThread.join(); // Attendre la fin du thread d'envoi
 
     delwin(displayWin);
     delwin(inputWin);
-    echo(); // Réactiver l'affichage automatique des entrées utilisateur
     curs_set(0); // Rendre le curseur invisible
-    endwin(); // Terminer ncurses
-
+    echo(); // Réactiver l'affichage automatique des entrées utilisateur
 }
 
 
@@ -60,24 +59,29 @@ void ClientChat::sendChatMessages() {
         mtx.unlock();
 
         ch = getch();
+        // Vérifier si la touche up ou down est pressée
+        if (ch == KEY_UP) {
+            // Gérer les flèches haut/bas
+            continue;
+        }
         if (ch == 10) {  // Entrée
             if (inputStr.empty()) continue;
 
             msg_json = {
-                {"message", inputStr,},
-                {"sender", pseudo_name},
-                //{"receiver", constReceiver},
-                //{"mode", "chat"}
-
+                {"message", inputStr},
             };
             
-            if (!network.sendData(msg_json.dump()+"\n", clientSocket)) {
+            if (!network.sendData(msg_json.dump(), clientSocket)) {
                 std::cerr << "Erreur d'envoi du message !\n";
             }
             if (inputStr == "/exit") {
+                std::cout << "Déconnexion du chat." << std::endl;
                 break;
             }
-            displayChatMessage("Moi", inputStr);
+            // Afficher le message dans la fenêtre de chat
+            msg_json["sender"] = MyPseudo;
+            addChatMessage(msg_json);
+            displayChatMessages();
             inputStr.clear();
 
         } else if (ch == 127 || ch == KEY_BACKSPACE) {
@@ -91,73 +95,109 @@ void ClientChat::sendChatMessages() {
 
 
 void ClientChat::receiveChatMessages(const json& msg) {
-    try {
-        // Vérifier si le message est un objet JSON
-        if (msg.is_object()) {
-            // Si c'est un message de chat avec un "sender" et "msg"
-            if (msg.contains("sender") && msg.contains("message")) {
-                std::string sender = msg["sender"];
-                std::string message = msg["message"];
-                displayChatMessage(sender, message);
-            }
-            else {
-                std::cerr << "Message JSON invalide, il manque 'sender' ou 'msg'" << std::endl;
-            }
-        }
-        // Si le message est un tableau (peut-être un historique de messages)
-        else if (msg.is_array()) {
-            for (const auto& entry : msg) {
-                if (entry.is_object() && entry.contains("message") && entry["receiver"]=="Room") {
-                    std::string sender = entry["sender"];
-                    std::string message = entry["message"];
-                    displayChatMessage(sender, message);
-                } else {
-                    std::string sender = entry["sender"];
-                    std::string message = entry["message"];
-                    displayChatMessage(sender, message);
-                }
-            }
-        }
-        else {
-            std::cerr << "Message JSON inattendu (ni objet ni tableau)" << std::endl;
-        }
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Erreur lors du traitement du message : " << e.what() << std::endl;
-    }
+    chatMessages.push_back(msg);
+    displayChatMessages();
 }
 
 
+void ClientChat::displayMessage(const std::string& sender, const std::string& message) {
+    mtx.lock();
+    int max_y, max_x;
+    getmaxyx(displayWin, max_y, max_x);
+    int current_y = getcury(displayWin);
 
-void ClientChat::displayChatMessage(const std::string& sender, const std::string& message) {
-    mtx.lock();  // Verrouiller l'accès à la fenêtre ncurses
-
-    if (y == LINES - INPUT_HEIGHT - 1) {
-        wclear(displayWin);
-        box(displayWin, 0, 0);
-        y = 1;
-        wrefresh(displayWin);
+    // Si on est en bas de la fenêtre, faire défiler
+    if (current_y >= max_y - 2) {
+        scroll(displayWin);
+        current_y = max_y - 2;
     }
 
-    // Vérifier si le sender est "moi" pour afficher le message à droite
-    if (sender == pseudo_name || sender == "Moi") {
-        // Affichage à droite (en tenant compte de la longueur du message)
-        int maxWidth = COLS - 5;  // Largeur totale de la fenêtre moins les marges
-        int textLength = message.length() + sender.length() + 4; // Taille du texte avec l'espace et le formatage
-        int startPos = maxWidth - textLength; // Calcul de la position à droite
-          
-        mvwprintw(displayWin, y, startPos, "[Moi] : %s", message.c_str());
-    } else {
-        // Affichage à gauche pour les autres expéditeurs
-        mvwprintw(displayWin, y, 1, "[%s] : %s", sender.c_str(), message.c_str());
+    bool isMyMessage = (sender == MyPseudo);
+    std::string formatted_msg = "[" + sender + "]: " + message;
+
+    // Calculer la position x
+    int x_pos = isMyMessage ? (max_x - formatted_msg.length() - 3) : 2;
+
+    // Si le message est trop long, le diviser en plusieurs lignes
+    size_t start = 0;
+    while (start < formatted_msg.length()) {
+        int available_width = isMyMessage ? (max_x - x_pos - 2) : (max_x - 4);
+        std::string line = formatted_msg.substr(start, available_width);
+        
+        if (isMyMessage) {
+            // Recalculer la position pour chaque ligne (au cas où)
+            x_pos = max_x - line.length() - 3;
+            if (x_pos < 2) x_pos = 2; // Ne pas dépasser à gauche
+        }
+        
+        mvwprintw(displayWin, current_y++, x_pos, "%s", line.c_str());
+        start += available_width;
+
+        // Si on atteint le bas après avoir ajouté une ligne, faire défiler
+        if (current_y >= max_y - 2) {
+            scroll(displayWin);
+            current_y = max_y - 2;
+        }
     }
 
-    y++;
     wrefresh(displayWin);
-    mtx.unlock();  // Déverrouiller l'accès
+    mtx.unlock();
 }
 
+void ClientChat::displayChatMessages() {
+    mtx.lock();
+    werase(displayWin);
+    
+    int max_y, max_x;
+    getmaxyx(displayWin, max_y, max_x);
+    int current_y = 1; // Commencer sous la bordure
+    
+    for (const auto& msg : chatMessages) {
+        std::string sender = msg["sender"];
+        std::string message = msg["message"];
+        bool isMyMessage = (sender == MyPseudo);
+        
+        std::string formatted_msg = "[" + sender + "]: " + message;
+        int x_pos = isMyMessage ? (max_x - formatted_msg.length() - 3) : 2;
+
+        // Gestion du multi-ligne
+        size_t start = 0;
+        while (start < formatted_msg.length()) {
+            int available_width = isMyMessage ? (max_x - x_pos - 2) : (max_x - 4);
+            std::string line = formatted_msg.substr(start, available_width);
+            
+            if (isMyMessage) {
+                // Recalculer la position pour chaque ligne
+                x_pos = max_x - line.length() - 3;
+                if (x_pos < 2) x_pos = 2;
+                wattron(displayWin, COLOR_PAIR(1));
+            }else{
+                wattron(displayWin, COLOR_PAIR(2));
+            }
+            
+            mvwprintw(displayWin, current_y++, x_pos, "%s", line.c_str());
+            wattroff(displayWin, COLOR_PAIR(isMyMessage ? 1 : 2));
+            start += available_width;
+
+            if (current_y >= max_y - 1) {
+                scroll(displayWin);
+                current_y = max_y - 2;
+            }
+        }
+    }
+    box(displayWin, 0, 0);
+    wrefresh(displayWin);
+    mtx.unlock();
+}
+
+void ClientChat::addChatMessage(const json& msg) {
+    chatMessages.push_back(msg);
+}
 
 void ClientChat::setClientSocket(int clientSocket) {
     this->clientSocket = clientSocket;
+}
+
+void ClientChat::setMyPseudo(const std::string& pseudo) {
+    MyPseudo = pseudo;
 }

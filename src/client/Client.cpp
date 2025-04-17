@@ -105,42 +105,52 @@ void Client::receiveDisplay() {
                 std::string jsonStr = received.substr(0, pos);  // Extraire un JSON complet
                 received.erase(0, pos + 1);  // Supprimer le JSON traité
                 try {
+                    // Parser le JSON
                     json data = json::parse(jsonStr);  // Parser uniquement un JSON complet
-                    if (data.contains(jsonKeys::PSEUDO)) {
-                        this->pseudo = data["pseudo"].get<std::string>();
-                        //mvprintw(0, 0, "Connecté en tant que : %s", this->pseudo.c_str());
-                    }
-
+                    
+                    // Si c'est une grid de jeu
                     if (data.contains(jsonKeys::GRID)) {
                         isPlaying = true;
                         chatMode = false;
                         display.displayGame(data);
-
                     }
+
                     // Si c'est un message de chat
                     else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
                         chatMode = true;
                         isPlaying = false;
-                        // Lancer le chat dans un thread
-                        std::thread chatThread(&ClientChat::run, &chat,pseudo);
-                        chatThread.detach();
-        
+                        chat.setMyPseudo(data["pseudo"]); // Mettre à jour le pseudo du client
+                        //lancer thread pour gerer les fenetre de chat et l envoi de message
+                        std::thread chatThread(&ClientChat::run, &chat);
+                        chatThread.detach(); // Lancer le thread de chat
                     }
+
                     // Si c'est un message de chat
                     else if (data.contains("message")) {
                         chat.receiveChatMessages(data); // Traitement des messages si l'objet contient "message"
                     }
+
                     // Si "data" est un tableau et que l'élément 0 contient "msg", alors
-                    
-                    else if (data.is_array() && !data.empty() ) {
-                        chat.receiveChatMessages(data); // Traitement du tableau de messages
+                    else if (data.is_array()) {
+                        if(data.empty()) {
+                            std::cerr << "Tableau vide reçu." << std::endl;
+                            continue;
+                        }
+                        std::cout << "Tableau de messages reçu." << std::endl;
+                        for (const auto& msg : data) {
+                            if (msg.is_object() && msg.contains("message")) { // Ensure msg is an object
+                                chat.addChatMessage(msg);
+                            }
+                        }
+                        chat.displayChatMessages(); // Afficher les messages de chat
                     }
+
                     else {
                         chatMode = false;
                         isPlaying = false;
                         display.displayMenu(data);
                     }
-  
+
                     refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
                 } catch (json::parse_error& e) {
                     std::cerr << "Erreur de parsing JSON CLIENT: " << e.what() << std::endl;

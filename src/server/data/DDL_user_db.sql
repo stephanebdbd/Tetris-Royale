@@ -6,13 +6,16 @@ CREATE TABLE IF NOT EXISTS Users (
     CHECK(username <> '')
 );
 
-
-
 CREATE TABLE IF NOT EXISTS ChatRooms (
     id_room INTEGER PRIMARY KEY AUTOINCREMENT,
-    room_name TEXT UNIQUE NOT NULL
+    room_name TEXT UNIQUE NOT NULL,
+    room_properietors INTEGER NOT NULL,
+    FOREIGN KEY (room_properietors) REFERENCES Users(id_user)
+        ON DELETE CASCADE 
+        ON UPDATE NO ACTION,
+    CHECK(room_name <> ''),
+    CHECK(room_properietors <> '')
 );
-
 
 CREATE TABLE IF NOT EXISTS ChatRoomMembers (
     id_room INTEGER NOT NULL,
@@ -22,6 +25,7 @@ CREATE TABLE IF NOT EXISTS ChatRoomMembers (
     FOREIGN KEY (id_room) REFERENCES ChatRooms(id_room) ON DELETE CASCADE,
     FOREIGN KEY (id_user) REFERENCES Users(id_user) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS ChatMessages (
     id_message INTEGER PRIMARY KEY AUTOINCREMENT,
     id_room INTEGER NOT NULL,

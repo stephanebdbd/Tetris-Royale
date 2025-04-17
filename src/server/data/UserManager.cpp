@@ -1,5 +1,5 @@
-#include "DataManager.hpp"
-#include "database.hpp"
+#include "UserManager.hpp"
+#include "Database.hpp"
 #include "security.hpp"
 #include <iostream>
 
@@ -206,6 +206,30 @@ void printList(const std::vector<std::string>& list) {
         }
     }
 }
+
+/*
+bool DataManager::hasSentRequest(const std::string& sender, const std::string& receiver) const {
+    // Récupérer les IDs des utilisateurs
+    QueryResult senderIdResult = getUserId(sender);
+    QueryResult receiverIdResult = getUserId(receiver);
+
+    if (senderIdResult.data.empty() || receiverIdResult.data.empty()) {
+        return false;  // L'un des utilisateurs (ou les deux) n'existe pas
+    }
+
+    std::string senderId = senderIdResult.getFirst();
+    std::string receiverId = receiverIdResult.getFirst();
+
+    // Condition pour vérifier si une demande a été envoyée
+    std::string condition =
+        "id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "' AND status = 'pending'";
+
+    // Vérification dans la base de données
+    QueryResult checkRequest = db->selectFromTable("Friendships", "COUNT(*)", condition);
+
+    // Vérifier si le résultat contient un nombre supérieur à 0
+    return (!checkRequest.data.empty() && checkRequest.getFirst() != "0");
+}*/
 
 std::vector<std::string> DataManager::getList(const std::string& user, const std::string& status) {
     std::vector<std::string> list;

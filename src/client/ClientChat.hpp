@@ -6,33 +6,29 @@
 #include <ncurses.h>
 #include <thread>
 
-#include <chrono>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-/**
- * @class ClientChat
- * @brief A class representing a client chat.
- */
+
 class ClientChat{
     private:
         int clientSocket;                    ///< The client socket.
         ClientNetwork network;               ///< The client network.
+        std::string MyPseudo;               ///< The client's pseudo.
         static bool messagesWaitForDisplay;  ///< A boolean indicating if the message is waiting for display.
+        std::vector<json> chatMessages;   ///< A vector of chat messages.
         int y = 1;                            ///< The y position of the chat message.
         WINDOW * inputWin, *displayWin;       ///< The input and display window.
-        std::string pseudo_name;                  ///< The pseudo of the client.
+
     public:
-
         ClientChat() = default;
+        ~ClientChat() = default;
 
-        void run(std::string pseudo);
+        void run();
         void sendChatMessages();
         void receiveChatMessages(const json& msg);
-        void displayChatMessage(const std::string& sender, const std::string& message);
-
-
+        void displayMessage(const std::string& sender, const std::string& message);
+        void displayChatMessages();
+        void addChatMessage(const json& msg);
         void setClientSocket(int clientSocket);
+        void setMyPseudo(const std::string& pseudo);
 };
 
 #endif // CLIENTCHAT_HPP
