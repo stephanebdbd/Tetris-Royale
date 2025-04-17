@@ -18,6 +18,7 @@ private:
     std::string serverIP;
     int port;
     int clientSocket;
+    std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
     bool isPlaying = false;
     bool chatMode = false;
     bool stopInputThread;

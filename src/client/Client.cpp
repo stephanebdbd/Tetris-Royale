@@ -37,7 +37,6 @@ void Client::run() {
 
 void Client::handleUserInput() {
     halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
-    std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
     while (true) {
         
         if (chatMode) {
@@ -148,7 +147,7 @@ void Client::receiveDisplay() {
                     else {
                         chatMode = false;
                         isPlaying = false;
-                        display.displayMenu(data);
+                        display.displayMenu(data, inputBuffer); // Afficher le menu
                     }
 
                     refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu

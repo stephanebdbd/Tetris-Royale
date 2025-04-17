@@ -7,7 +7,7 @@
 class ClientDisplay {
 
     public:
-        void displayMenu(const json& data);
+        void displayMenu(const json& data, const std::string & inputBuffer);
         void displayTetramino(const json& data);
         void displayGame(const json& data);
 
