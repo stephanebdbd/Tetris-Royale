@@ -283,18 +283,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             clientStates[clientId] = MenuState::Settings;
             
         }
-        else if(actionType == "rejouer"){
-            clientStates[clientId] = MenuState::JoinOrCreateGame;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu play.");
-            return;
-        }
-
-        else if(actionType == "retour au menu"){
-            clientStates[clientId] = MenuState::Main;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu principal.");
-            return;
-
-        }
     }
 }
 
