@@ -231,7 +231,9 @@ void SFMLGame::refreshMenu() {
             break;
         case MenuState::Play:
             displayGame();
+            break;
         default:
+            //std::cerr << "Unhandled MenuState: " << static_cast<int>(currentState) << std::endl;
             break;
     }
     window->display();
@@ -246,6 +248,9 @@ void SFMLGame::run() {
 
     window->create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE);
     window->setFramerateLimit(60);
+
+    //window->setVerticalSyncEnabled(true);
+    //std::cout << "Vertical sync enabled (if supported by the system)." << std::endl;
 
     while (window->isOpen()) {
         handleEvents();
@@ -408,7 +413,7 @@ void SFMLGame::mainMenu(){
     else if(buttons[1]->isClicked(*window)) {
         j["action"] = "createjoin";
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
+        //cleanup();
         return;
     }
     else if(buttons[2]->isClicked(*window)) {
@@ -481,7 +486,7 @@ void SFMLGame::CreateOrJoinGame(){
     if(buttons[0]->isClicked(*window)) {
         j["action"] = "choiceMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
+        //cleanup();
         return;
     }
     else if(buttons[0]->isClicked(*window)){
@@ -541,12 +546,12 @@ void SFMLGame::ChoiceGameMode(){
     if(buttons[0]->isClicked(*window)) {
         j["action"] = "EndlessMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
+        //cleanup();
         return;
     }else if(buttons[0]->isClicked(*window)){
         j["action"] = "DuelMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
+        //cleanup();
         return;
     }
 
@@ -687,14 +692,14 @@ void SFMLGame::drawEndGame(const json& endGameData) {
         network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
         client.setGameStateIsEnd(false);
-        cleanup();
+        //cleanup();
         return;
     }else if(buttons[1]->isClicked(*window)){
         j["action"] = "retour au menu";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
         client.setGameStateIsEnd(false);
-        cleanup();
+        //cleanup();
         return;
     }
 

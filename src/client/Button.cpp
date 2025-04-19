@@ -1,5 +1,6 @@
 // Button.cpp
 #include "Button.hpp"
+#include <iostream>
 
 Rectangle::Rectangle(const sf::Vector2f& position, const sf::Vector2f& size, 
                      const sf::Color& FillColor, const sf::Color& outLineColor) {
@@ -101,7 +102,10 @@ bool Button::isClicked(sf::RenderWindow& window) {
     bool isPressed = isMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left);
     
     // Détection du clic : relâchement après un appui
+    //std::cout << "isPressed: " << isPressed << ", wasPressed: " << wasPressed << std::endl;
+
     if (!isPressed && wasPressed && clickTimer.getElapsedTime().asMilliseconds() > 100) {
+        //std::cout<< "Button clicked!" << std::endl;
         wasPressed = false;
         return true;
     }

@@ -61,6 +61,7 @@ void Server::acceptClients() {
 
     clear();
     sendMenuToClient(clientSocket, menu.getMainMenu0()); 
+    menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu d'accueil.");
     refresh();
 
     // Lancer un thread pour gérer ce client
@@ -160,6 +161,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                     
                 }
             }
+            return;
         }
         else if(actionType == "registre") {
             //gerer l'enregistrement
@@ -176,6 +178,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 std::cout << "Le pseudo existe déjà." << std::endl;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo existe déjà.");
             }
+            return;
         }
         else if(actionType == "welcome") {
             //gerer le menu d'accueil
@@ -243,6 +246,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             }
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Liste d'amis", friends);
             std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
+            return;
         }
         else if(actionType == "addFriend"){
             //gerer l'ajout d'amis
@@ -275,12 +279,14 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             clientStates[clientId] = MenuState::Play;
             this->keyInputCreateGameRoom(clientId, GameModeName::Endless);
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu modeJeu Endless.");
+            return;
          
             
             
         }
         else if(actionType == "DuelMode") {
             clientStates[clientId] = MenuState::Settings;
+            return;
             
         }
         else if(actionType == "rejouer"){
