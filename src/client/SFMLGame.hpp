@@ -73,8 +73,6 @@ class SFMLGame {
         std::unique_ptr<sf::RenderWindow> window;
         std::unique_ptr<ClientNetwork> network;
         std::unique_ptr<Textures> textures;
-        //std::vector<std::unique_ptr<Button>> buttons;
-        //std::vector<std::unique_ptr<TextField>> texts;
         std::map<std::string, std::unique_ptr<Button>> buttons;
         std::map<std::string, std::unique_ptr<TextField>> texts;
         std::vector<std::pair<std::string, std::string>> messages;

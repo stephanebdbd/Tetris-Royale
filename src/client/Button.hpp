@@ -55,8 +55,8 @@ class Button {
         sf::Color originalColor;
         sf::Color hoverColor;
         sf::Color clickColor;
-        bool clicked = false;
-        bool wasPressed = false; // Nouvel état pour suivre l'état précédent
+        bool clicked = false ; // État du bouton
+        bool wasPressed = false ; // Nouvel état pour suivre l'état précédent
         sf::Clock clickTimer; // Pour gérer les délais entre les clics
         std::shared_ptr<sf::Texture> buttonTexture; // Texture pour le bouton (optionnel)
 };

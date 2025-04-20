@@ -40,7 +40,7 @@ Button::Button(const std::string& text, const sf::Font& font, unsigned int chara
                const sf::Color& textColor, const sf::Color& backgroundColor, 
                const sf::Vector2f& position, const sf::Vector2f& size, 
                const sf::Color& rectangleColor)
-    : clicked(false){
+    {
     // Configuration des couleurs
     this->originalColor = backgroundColor;
     this->hoverColor = sf::Color(
