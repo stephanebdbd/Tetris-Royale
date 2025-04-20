@@ -34,14 +34,30 @@ SFMLGame::SFMLGame(Client& client) :
     }
 
 void SFMLGame::drawButtons() {
-    for (const auto& button : buttons) {
+    for (const auto& [_, button] : buttons) {
         button->draw(*window);
     }
 }
 
+// Affichage des champs de texte
 void SFMLGame::drawTextFields() {
-    for (const auto& text : texts) {
-        text->draw(*window);
+    for (const auto& [_, field] : texts) {
+        field->draw(*window);
+    }
+}
+
+// Gestion des champs de texte
+void SFMLGame::handleTextFieldEvents(sf::Event& event) {
+    for (const auto& [_, field] : texts) {
+        field->handleInput(event);
+    }
+}
+
+// Gestion des boutons
+void SFMLGame::handleButtonEvents() {
+    for (const auto& [_, button] : buttons) {
+        button->update();
+        button->setBackgroundColor(*window);
     }
 }
 
@@ -57,17 +73,6 @@ void SFMLGame::drawMessages() {
 
 
 
-void SFMLGame::handleTextFieldEvents(sf::Event& event) {
-    for (const auto& text : texts) {
-        text->handleInput(event);
-    }
-}
-void SFMLGame::handleButtonEvents() {
-    for (const auto& button : buttons) {
-        button->update();
-        button->setBackgroundColor(*window);
-    }
-}
 
 void SFMLGame::LoadResources() {
     //map  texture->filePath
@@ -126,7 +131,7 @@ void SFMLGame::handleEvents() {
 
         // Gestion des clics sur les TextField
         if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-            for (const auto& text : texts) {
+            for (const auto& [_, text] : texts) {
                 if (text->isMouseOver(*window)) {
                     text->setActive(true);
                 } else {
@@ -211,7 +216,7 @@ void SFMLGame::refreshMenu() {
             //friendRequestListMenu();
             break;
         case MenuState::chat:
-            chatMenu();
+            //chatMenu();
             break;
         case MenuState::ManageRoom:
             //teamsMenu();
@@ -306,9 +311,9 @@ void SFMLGame::welcomeMenu() {
                             sf::Vector2f(300, 560), sf::Vector2f(200, 35));
         
         // Ajout des boutons au vecteur
-        buttons.emplace_back(std::make_unique<Button>(loginButton));
-        buttons.emplace_back(std::make_unique<Button>(registreButton));
-        buttons.emplace_back(std::make_unique<Button>(quitButton));
+        buttons["login"]= std::make_unique<Button>(loginButton);
+        buttons["registre"] = std::make_unique<Button>(registreButton);
+        buttons["quit"] = std::make_unique<Button>(quitButton);
     }
     if(texts.empty()){
         // Création des champs de texte
@@ -316,9 +321,9 @@ void SFMLGame::welcomeMenu() {
             sf::Vector2f(300, 400), sf::Vector2f(200, 35), "Username");
         TextField passwordField(font, 24, sf::Color::Black, sf::Color::White,
             sf::Vector2f(300, 440), sf::Vector2f(200, 35), "Password", true);
-        // Ajout des champs de texte au vecteur
-        texts.emplace_back(std::make_unique<TextField>(usernameField));
-        texts.emplace_back(std::make_unique<TextField>(passwordField));
+        // Ajout des champs de texte à la map
+        texts["username"] = std::make_unique<TextField>(usernameField);
+        texts["password"] = std::make_unique<TextField>(passwordField);
     }
     
     //draw buttons
@@ -327,29 +332,29 @@ void SFMLGame::welcomeMenu() {
     drawTextFields();
 
     // Quitter le jeu
-    if (buttons[2]->isClicked(*window)) {
+    if (buttons["quit"]->isClicked(*window)) {
         // Envoyer une requête de déconnexion au serveur
         cleanup();
         window->close();
         return;
     }
 
-    if (texts[0]->getText().empty() || texts[1]->getText().empty()) {
+    if (texts["username"]->getText().empty() || texts["password"]->getText().empty()) {
         return;
     }
     
     //gerer les evenements
     json j = {
-        {"username", texts[0]->getText()},
-        {"password", texts[1]->getText()}
+        {"username", texts["username"]->getText()},
+        {"password", texts["password"]->getText()}
     };
 
-    if (buttons[0]->isClicked(*window)) {
+    if (buttons["login"]->isClicked(*window)) {
         j["action"] = "login";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
-    else if (buttons[1]->isClicked(*window)) {
+    else if (buttons["registre"]->isClicked(*window)) {
         j["action"] = "registre";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
@@ -392,14 +397,14 @@ void SFMLGame::mainMenu(){
         //profileButton.drawPhoto(avatarduClient);
         
         // Ajout des boutons au vecteur
-        buttons.emplace_back(std::make_unique<Button>(teamsButton));
-        buttons.emplace_back(std::make_unique<Button>(playButton));
-        buttons.emplace_back(std::make_unique<Button>(chatButton));
-        buttons.emplace_back(std::make_unique<Button>(friendsButton));
-        buttons.emplace_back(std::make_unique<Button>(quitButton));
-        buttons.emplace_back(std::make_unique<Button>(settingsButton));
-        buttons.emplace_back(std::make_unique<Button>(notificationButton));
-        buttons.emplace_back(std::make_unique<Button>(profileButton));
+        buttons["teams"] = std::make_unique<Button>(teamsButton);
+        buttons["play"] = std::make_unique<Button>(playButton);
+        buttons["chat"] = std::make_unique<Button>(chatButton);
+        buttons["friends"] = std::make_unique<Button>(friendsButton);
+        buttons["quit"] = std::make_unique<Button>(quitButton);
+        buttons["settings"] = std::make_unique<Button>(settingsButton);
+        buttons["notification"] = std::make_unique<Button>(notificationButton);
+        buttons["profile"] = std::make_unique<Button>(profileButton);
     }
     
     //draw buttons
@@ -407,39 +412,39 @@ void SFMLGame::mainMenu(){
 
     json j;
     
-    if(buttons[0]->isClicked(*window)) {
+    if(buttons["teams"]->isClicked(*window)) {
         //pass
     }
-    else if(buttons[1]->isClicked(*window)) {
+    else if(buttons["play"]->isClicked(*window)) {
         j["action"] = "createjoin";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         //cleanup();
         return;
     }
-    else if(buttons[2]->isClicked(*window)) {
+    else if(buttons["chat"]->isClicked(*window)) {
         // On passe à l'état du chat
         j["action"] = "chat";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         std::cout << "Chat button clicked" << std::endl;
         return;
     }
-    else if(buttons[3]->isClicked(*window)) {
+    else if(buttons["friends"]->isClicked(*window)) {
         j["action"] = "friends";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         std::cout << "Friends button clicked" << j << std::endl;
         return;
     }
-    else if(buttons[4]->isClicked(*window)) {
+    else if(buttons["quit"]->isClicked(*window)) {
         j["action"] = "welcome";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         std::cout << "Exit button clicked" << j << std::endl;
         return;
     }
-    else if(buttons[5]->isClicked(*window)) {
+    /*else if(buttons[5]->isClicked(*window)) {
         //pass
     }else if(buttons[6]->isClicked(*window)) {
         //pass
-    }
+    }*/
 }
 void SFMLGame::CreateOrJoinGame(){
     displayBackground(textures->logoConnexion);
@@ -471,12 +476,12 @@ void SFMLGame::CreateOrJoinGame(){
         //profileButton.drawPhoto(avatarduClient);
         
         // Ajout des boutons au vecteur
-        buttons.emplace_back(std::make_unique<Button>(CreateButton));
-        buttons.emplace_back(std::make_unique<Button>(JoinButton));
-        buttons.emplace_back(std::make_unique<Button>(quitButton));
-        buttons.emplace_back(std::make_unique<Button>(settingsButton));
-        buttons.emplace_back(std::make_unique<Button>(notificationButton));
-        buttons.emplace_back(std::make_unique<Button>(profileButton));
+        buttons["create"] = std::make_unique<Button>(CreateButton);
+        buttons["join"] = std::make_unique<Button>(JoinButton);
+        buttons["quit"] = std::make_unique<Button>(quitButton);
+        buttons["settings"] = std::make_unique<Button>(settingsButton);
+        buttons["notification"] = std::make_unique<Button>(notificationButton);
+        buttons["profile"] = std::make_unique<Button>(profileButton);
     }
     
     //draw buttons
@@ -528,14 +533,14 @@ void SFMLGame::ChoiceGameMode(){
         //profileButton.drawPhoto(avatarduClient);
         
         // Ajout des boutons au vecteur
-        buttons.emplace_back(std::make_unique<Button>(EndlessButton));
-        buttons.emplace_back(std::make_unique<Button>(DuelButton));
-        buttons.emplace_back(std::make_unique<Button>(ClassicButton));
-        buttons.emplace_back(std::make_unique<Button>(RoyaleButton));
-        buttons.emplace_back(std::make_unique<Button>(quitButton));
-        buttons.emplace_back(std::make_unique<Button>(settingsButton));
-        buttons.emplace_back(std::make_unique<Button>(notificationButton));
-        buttons.emplace_back(std::make_unique<Button>(profileButton));
+        buttons["endless"] = std::make_unique<Button>(EndlessButton);
+        buttons["duel"] = std::make_unique<Button>(DuelButton);
+        buttons["classic"] = std::make_unique<Button>(ClassicButton);
+        buttons["royale"] = std::make_unique<Button>(RoyaleButton);
+        buttons["quit"] = std::make_unique<Button>(quitButton);
+        buttons["settings"] = std::make_unique<Button>(settingsButton);
+        buttons["notification"] = std::make_unique<Button>(notificationButton);
+        buttons["profile"] = std::make_unique<Button>(profileButton);
 
     }
     
@@ -543,12 +548,12 @@ void SFMLGame::ChoiceGameMode(){
     drawButtons();
     json j;
     
-    if(buttons[0]->isClicked(*window)) {
+    if(buttons["endless"]->isClicked(*window)) {
         j["action"] = "EndlessMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         //cleanup();
         return;
-    }else if(buttons[0]->isClicked(*window)){
+    }else if(buttons["endless"]->isClicked(*window)){
         j["action"] = "DuelMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         //cleanup();
@@ -678,8 +683,8 @@ void SFMLGame::drawEndGame(const json& endGameData) {
                         sf::Vector2f(450, 310), sf::Vector2f(180, 45));
 
         
-        buttons.emplace_back(std::make_unique<Button>(Rejouer));
-        buttons.emplace_back(std::make_unique<Button>(Retour));
+        buttons["rejouer"] = std::make_unique<Button>(Rejouer);
+        buttons["retour"] = std::make_unique<Button>(Retour);
         
     }
     
@@ -687,14 +692,14 @@ void SFMLGame::drawEndGame(const json& endGameData) {
 
     json j;
     
-    if(buttons[0]->isClicked(*window)) {
+    if(buttons["rejouer"]->isClicked(*window)) {
         j["action"] = "createjoin";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
         client.setGameStateIsEnd(false);
         //cleanup();
         return;
-    }else if(buttons[1]->isClicked(*window)){
+    }else if(buttons["retour"]->isClicked(*window)){
         j["action"] = "main";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
@@ -727,7 +732,7 @@ sf::Color SFMLGame::fromSFML(int value) {
     return sf::Color::White; // Default
 }
 
-
+/*
 void SFMLGame::chatMenu() {
     // Display the chat background
     displayBackground(textures->chat);
@@ -752,8 +757,8 @@ void SFMLGame::chatMenu() {
             sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Search");
 
         // Ajout des champs de texte au vecteur
-        texts.emplace_back(std::make_unique<TextField>(messageField));
-        texts.emplace_back(std::make_unique<TextField>(searchField));
+        texts["messageField"] = std::make_unique<TextField>(messageField);
+        texts["searchField"] = std::make_unique<TextField>(searchField);
     }
 
     if (buttons.empty()) {
@@ -768,8 +773,8 @@ void SFMLGame::chatMenu() {
         
 
         // Ajout des boutons au vecteur
-        buttons.emplace_back(std::make_unique<Button>(backButton));
-        buttons.emplace_back(std::make_unique<Button>(sendButton));
+        buttons["backButton"] = std::make_unique<Button>(backButton);
+        buttons["sendButton"] = std::make_unique<Button>(sendButton);
         
     }
     
@@ -786,7 +791,7 @@ void SFMLGame::chatMenu() {
     bool clickHandled = false;
 
     // Vérifier d'abord le backButton
-    if (buttons[0]->isClicked(*window)) {
+    if (buttons["backButton"]->isClicked(*window)) {
         json j;
         j["action"] = "main";
         network->sendData(j.dump() + "\n", client.getClientSocket());
@@ -795,14 +800,13 @@ void SFMLGame::chatMenu() {
     }
 
     // Ensuite vérifier le sendButton
-    if (!clickHandled && buttons[1]->isClicked(*window)) {
+    if (!clickHandled && buttons["sendButton"]->isClicked(*window)) {
         json j = {
-            {"message", texts[0]->getText()},
+            {"message", texts["messageField"]->getText()},
         };
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        messages.push_back({"You", texts[0]->getText()});
-        //messages.push_back({contact, "hellllllo"});
-        texts[0]->clear(); // Effacer le champ de texte après l'envoi
+        messages.push_back({"You", texts["messageField"]->getText()});
+        texts["messageField"]->clear(); // Effacer le champ de texte après l'envoi
         clickHandled = true; // Marquer le clic comme traité
         return;
     }
@@ -821,7 +825,7 @@ void SFMLGame::chatMenu() {
                 // Create a new button for the contact
                 Button contactButton(contacts[i], font, 20, sf::Color::White, sf::Color::Transparent,
                                      sf::Vector2f(0, 100 + i * 50), sf::Vector2f(200, 50), sf::Color::Transparent);
-                buttons.emplace_back(std::make_unique<Button>(contactButton));
+                buttons[contacts[i]] = std::make_unique<Button>(contactButton);
             }
             float contactY = 100.0f + i * contactHeight;
 
@@ -877,17 +881,19 @@ void SFMLGame::chatMenu() {
         
 
         // Vérifier les boutons de contact
-        for (size_t i = 0; i < buttons.size() - 2; ++i) {
-            if (buttons[i + 2]->isClicked(*window)) {
-                std::cout << "Contact " << contacts[i] << " clicked!" << std::endl;
+        size_t i = 0;
+        for (const auto& [key, button] : buttons) {
+            if (i >= 2 && button->isClicked(*window)) { // Skip the first two buttons
+                std::cout << "Contact " << contacts[i - 2] << " clicked!" << std::endl;
                 json j = {
                     {"action", "openChat"},
-                    {"contact", contacts[i]}
+                    {"contact", contacts[i - 2]}
                 };
-                contact = contacts[i];
+                contact = contacts[i - 2];
                 network->sendData(j.dump() + "\n", client.getClientSocket());
                 break; // Sortir de la boucle après avoir trouvé le contact cliqué
             }
+            ++i;
         }
     }
     // Afficher les anciens messages entre l'utilisateur et le contact après avoir cliqué sur le contact
@@ -909,7 +915,7 @@ void SFMLGame::chatMenu() {
     }
     clickHandled = false; // Réinitialiser le drapeau après le traitement des clics
 }
-
+*/
 void SFMLGame::displayMessage(const std::string& sender, const std::string& message) {
     const bool isYou = sender == "You";
     const float bubbleHeight = 30.f;
