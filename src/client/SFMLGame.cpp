@@ -34,15 +34,15 @@ SFMLGame::SFMLGame(Client& client) :
     }
 
 void SFMLGame::drawButtons() {
-    for (const auto& button : buttons) {
-        button.second->draw(*window);
+    for (const auto& [_, button] : buttons) {
+        button->draw(*window);
     }
 }
 
 // Affichage des champs de texte
 void SFMLGame::drawTextFields() {
-    for (const auto& text : texts) {
-        text.second->draw(*window);
+    for (const auto& [_, text] : texts) {
+        text->draw(*window);
     }
 }
 
@@ -59,14 +59,14 @@ void SFMLGame::drawMessages() {
 
 
 void SFMLGame::handleTextFieldEvents(sf::Event& event) {
-    for (const auto& text : texts) {
-        text.second->handleInput(event);
+    for (const auto& [_, text] : texts) {
+        text->handleInput(event);
     }
 }
 void SFMLGame::handleButtonEvents() {
-    for (const auto& button : buttons) {
-        button.second->update();
-        button.second->setBackgroundColor(*window);
+    for (const auto& [_, button] : buttons) {
+        button->update();
+        button->setBackgroundColor(*window);
     }
 }
 
@@ -127,11 +127,11 @@ void SFMLGame::handleEvents() {
 
         // Gestion des clics sur les TextField
         if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-            for (const auto& text : texts) {
-                if (text.second->isMouseOver(*window)) {
-                    text.second->setActive(true);
+            for (const auto& [_, text] : texts) {
+                if (text->isMouseOver(*window)) {
+                    text->setActive(true);
                 } else {
-                    text.second->setActive(false);
+                    text->setActive(false);
                 }
             }
         }
