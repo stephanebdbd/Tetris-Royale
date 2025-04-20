@@ -179,53 +179,7 @@ void SFMLGame::handleEvents() {
         }
     }
 }
-void SFMLGame::registerMenu() {
-    // Afficher l'arrière-plan du formulaire d'inscription
-    displayBackground(textures->connexion);
 
-    // Ajouter les champs de texte et le bouton s'ils n'existent pas
-    if (texts.empty()) {
-        texts[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                    sf::Vector2f(300, 400), sf::Vector2f(200, 35), "Username");
-        texts[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                    sf::Vector2f(300, 440), sf::Vector2f(200, 35), "Password", true);
-    }
-
-    if (buttons.empty()) {
-        buttons[ButtonKey::Registre] = std::make_unique<Button>("S'inscrire", font, 24, sf::Color::White, sf::Color(100, 149, 237),
-                                                                sf::Vector2f(300, 500), sf::Vector2f(200, 35));
-        buttons[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 24, sf::Color::White, sf::Color(255, 99, 71),
-                                                              sf::Vector2f(300, 560), sf::Vector2f(200, 35));
-    }
-
-    // Dessiner les champs de texte et les boutons
-    drawTextFields();
-    drawButtons();
-
-    // Gérer les clics sur les boutons
-    if (buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
-        currentState = MenuState::Welcome; // Retourner au menu de bienvenue
-        cleanup();
-        return;
-    }
-
-    if (buttons.count(ButtonKey::Registre) && buttons[ButtonKey::Registre]->isClicked(*window)) {
-        // Récupérer les données des champs de texte
-        std::string username = texts[TextFieldKey::Username]->getText();
-        std::string password = texts[TextFieldKey::Password]->getText();
-
-        if (!username.empty() && !password.empty()) {
-            json j = {
-                {"action", "register"},
-                {"username", username},
-                {"password", password}
-            };
-            network->sendData(j.dump() + "\n", client.getClientSocket());
-            currentState = MenuState::Welcome; // Retourner au menu de bienvenue après l'inscription
-            cleanup();
-        }
-    }
-}
 void SFMLGame::refreshMenu() {
     auto newState = client.getCurrentMenuState();
     if(newState != currentState) {
@@ -242,10 +196,6 @@ void SFMLGame::refreshMenu() {
             break;
         case MenuState::Main:
             mainMenu();
-            break;
-        case MenuState::Register:
-            registerMenu();
-            //loginMenu();
             break;
         case MenuState::classement:
             //rankingMenu();
@@ -368,27 +318,10 @@ void SFMLGame::welcomeMenu() {
     
     //draw buttons
     drawButtons();
-    if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
-        cleanup();
-        window->close();
-        return;
-    }
-
-    if (buttons.count(ButtonKey::Registre) && buttons[ButtonKey::Registre]->isClicked(*window)) {
-        currentState = MenuState::Register; // Passer à l'état d'inscription
-        cleanup();
-        return;
-    }
-
-    if (buttons.count(ButtonKey::Login) && buttons[ButtonKey::Login]->isClicked(*window)) {
-        // Implémentez ici la logique pour le bouton Login
-        return;
-    }
-
-    /*drawTextFields();
+    drawTextFields();
 
     // Quitter le jeu
-    if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
+    if (buttons[ButtonKey::Quit]->isClicked(*window)) {
         cleanup();
         window->close();
         return;
@@ -415,7 +348,7 @@ void SFMLGame::welcomeMenu() {
         j["action"] = "registre";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
-    }*/
+    }
 }
 
 void SFMLGame::mainMenu() {
@@ -511,9 +444,11 @@ void SFMLGame::CreateOrJoinGame() {
         j["action"] = "choiceMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
-    } 
+    }
     // TO DO FOR 
 }
+
+
 void SFMLGame::ChoiceGameMode(){
     displayBackground(textures->logoConnexion);
     if (buttons.empty()) {
@@ -711,7 +646,7 @@ sf::Color SFMLGame::fromSFML(int value) {
     return sf::Color::White; // Default
 }
 
-/*
+/**
 void SFMLGame::chatMenu() {
     // Display the chat background
     displayBackground(textures->chat);
@@ -736,8 +671,8 @@ void SFMLGame::chatMenu() {
             sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Search");
 
         // Ajout des champs de texte au vecteur
-        texts["messageField"] = std::make_unique<TextField>(messageField);
-        texts["searchField"] = std::make_unique<TextField>(searchField);
+        texts[TextFieldKey::MessageField] = std::make_unique<TextField>(messageField);
+        texts[TextFieldKey::SearchField] = std::make_unique<TextField>(searchField);
     }
 
     if (buttons.empty()) {
@@ -752,8 +687,8 @@ void SFMLGame::chatMenu() {
         
 
         // Ajout des boutons au vecteur
-        buttons["backButton"] = std::make_unique<Button>(backButton);
-        buttons["sendButton"] = std::make_unique<Button>(sendButton);
+        buttons[ButtonKey::Retour] = std::make_unique<Button>(backButton);
+        buttons[ButtonKey::Send] = std::make_unique<Button>(sendButton);
         
     }
     
@@ -770,7 +705,7 @@ void SFMLGame::chatMenu() {
     bool clickHandled = false;
 
     // Vérifier d'abord le backButton
-    if (buttons["backButton"]->isClicked(*window)) {
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         j["action"] = "main";
         network->sendData(j.dump() + "\n", client.getClientSocket());
@@ -779,13 +714,13 @@ void SFMLGame::chatMenu() {
     }
 
     // Ensuite vérifier le sendButton
-    if (!clickHandled && buttons["sendButton"]->isClicked(*window)) {
+    if (!clickHandled && buttons[ButtonKey::Send]->isClicked(*window) && !texts[TextFieldKey::MessageField]->getText().empty()) {
         json j = {
-            {"message", texts["messageField"]->getText()},
+            {"message", texts[TextFieldKey::MessageField]->getText()},
         };
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        messages.push_back({"You", texts["messageField"]->getText()});
-        texts["messageField"]->clear(); // Effacer le champ de texte après l'envoi
+        messages.push_back({"You", texts[TextFieldKey::MessageField]->getText()});
+        texts[TextFieldKey::MessageField]->clear(); // Effacer le champ de texte après l'envoi
         clickHandled = true; // Marquer le clic comme traité
         return;
     }
@@ -804,7 +739,7 @@ void SFMLGame::chatMenu() {
                 // Create a new button for the contact
                 Button contactButton(contacts[i], font, 20, sf::Color::White, sf::Color::Transparent,
                                      sf::Vector2f(0, 100 + i * 50), sf::Vector2f(200, 50), sf::Color::Transparent);
-                buttons[contacts[i]] = std::make_unique<Button>(contactButton);
+                buttons[ButtonKey::Contacts] = std::make_unique<Button>(contactButton);
             }
             float contactY = 100.0f + i * contactHeight;
 
@@ -893,8 +828,10 @@ void SFMLGame::chatMenu() {
         client.clearServerData();
     }
     clickHandled = false; // Réinitialiser le drapeau après le traitement des clics
-}
-*/
+}*/
+
+
+
 void SFMLGame::displayMessage(const std::string& sender, const std::string& message) {
     const bool isYou = sender == "You";
     const float bubbleHeight = 30.f;

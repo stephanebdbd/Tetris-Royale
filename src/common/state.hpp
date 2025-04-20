@@ -8,6 +8,8 @@ enum class ButtonKey {
     Teams,          // Bouton pour gérer les équipes
     Play,           // Bouton pour jouer
     Chat,           // Bouton pour accéder au chat
+    Send,           // Bouton pour envoyer un message
+    Contacts,       // Bouton pour afficher les contacts
     Friends,        // Bouton pour gérer les amis
     Settings,       // Bouton pour accéder aux paramètres
     Notification,   // Bouton pour afficher les notifications
