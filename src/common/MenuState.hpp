@@ -15,6 +15,8 @@ enum class MenuState {
     Register,
         RegisterPseudo,
         RegisterPassword,
+        RegisterConfirmPassword,
+        
     Main,
         Notifications,
         Game,      

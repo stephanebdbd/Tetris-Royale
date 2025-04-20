@@ -14,6 +14,7 @@
 #include <memory>
 #include <vector>
 #include "../common/GameState.hpp"
+#include "../common/state.hpp"
 
 //resources path
 const std::string FONT_PATH = "../../res/fonts/Arial.ttf";
@@ -73,8 +74,11 @@ class SFMLGame {
         std::unique_ptr<sf::RenderWindow> window;
         std::unique_ptr<ClientNetwork> network;
         std::unique_ptr<Textures> textures;
-        std::map<std::string, std::unique_ptr<Button>> buttons;
-        std::map<std::string, std::unique_ptr<TextField>> texts;
+        //std::vector<std::unique_ptr<Button>> buttons;
+        //std::vector<std::unique_ptr<TextField>> texts;
+        std::map<ButtonKey, std::unique_ptr<Button>> buttons;
+        std::map<TextFieldKey, std::unique_ptr<TextField>> texts;
+        
         std::vector<std::pair<std::string, std::string>> messages;
         std::vector<std::string> contacts;
         sf::Font font;
@@ -121,6 +125,7 @@ class SFMLGame {
 
         // Main Menu
         void mainMenu();
+        void registerMenu();
 
         // Game Menu
         void gameMenu();
