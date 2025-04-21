@@ -1,5 +1,15 @@
 #include <SFML/Graphics.hpp>
 
+class Text{
+    public:
+        Text(const std::string& text, const sf::Font& font, unsigned int characterSize, 
+             const sf::Color& textColor, const sf::Vector2f& position, sf::Uint32 style = sf::Text::Bold);
+    
+        void draw(sf::RenderWindow& window) const;
+    
+    private:
+        sf::Text text;
+};
 
 // Classe pour les champs de texte
 class TextField {

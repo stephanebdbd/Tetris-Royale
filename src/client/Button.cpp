@@ -2,6 +2,8 @@
 #include "Button.hpp"
 #include <iostream>
 
+
+// Constructeur de la classe Rectangle
 Rectangle::Rectangle(const sf::Vector2f& position, const sf::Vector2f& size, 
                      const sf::Color& FillColor, const sf::Color& outLineColor) {
     shape.setPosition(position);
@@ -11,31 +13,53 @@ Rectangle::Rectangle(const sf::Vector2f& position, const sf::Vector2f& size,
     shape.setOutlineColor(outLineColor);
 }
 
+// Fonction pour dessiner le rectangle
 void Rectangle::draw(sf::RenderWindow& window) const {
     window.draw(shape);
 }
 
-Circle::Circle(const sf::Vector2f& position, const sf::Vector2f& size, 
+// Fonction pour dessiner une photo sur le rectangle
+void Rectangle::drawPhoto(const sf::Texture& texture) {
+    sf::Sprite sprite(texture);
+    sprite.setPosition(shape.getPosition());
+    // Conserver les proportions de l'image
+    float scaleX = shape.getSize().x / texture.getSize().x;
+    float scaleY = shape.getSize().y / texture.getSize().y;
+    sprite.setScale(scaleX, scaleY);
+    shape.setTexture(&texture);
+}
+
+
+// Constructeur de la classe Circle
+Circle::Circle(const sf::Vector2f& position, const float& radius, 
                const sf::Color& FillColor, const sf::Color& outLineColor) {
     shape.setPosition(position);
-    shape.setRadius(size.x / 2);
+    shape.setRadius(radius);
     shape.setFillColor(FillColor);
     shape.setOutlineThickness(2);
     shape.setOutlineColor(outLineColor);
 }
 
+// Fonction pour dessiner le cercle
 void Circle::draw(sf::RenderWindow& window) {
-    if(texture) {
-        shape.setTexture(texture.get());
-    }
     window.draw(shape);
 }
 
-void Circle::setTexture(const std::shared_ptr<sf::Texture>& texture) {
-    this->texture = texture;
-    shape.setTexture(texture.get(), true);
+// Fonction pour dessiner une photo sur le cercle
+void Circle::drawPhoto(const sf::Texture& texture, sf::RenderWindow& window) {
+    //sf::Texture texture;
+    sf::Sprite sprite(texture);
+    sprite.setPosition(shape.getPosition());
+    // Conserver les proportions de l'image
+    float scaleX = shape.getRadius() / texture.getSize().x;
+    float scaleY = shape.getRadius() / texture.getSize().y;
+    sprite.setScale(scaleX, scaleY);
+    shape.setTexture(&texture);
+    window.draw(sprite);
 }
 
+
+// Constructeur de la classe Button
 Button::Button(const std::string& text, const sf::Font& font, unsigned int characterSize, 
                const sf::Color& textColor, const sf::Color& backgroundColor, 
                const sf::Vector2f& position, const sf::Vector2f& size, 

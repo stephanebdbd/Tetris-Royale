@@ -22,11 +22,6 @@ const std::string LogoBackGround = "../../res/background/logo.png";
 const std::string ConnexionBackGround = "../../res/background/connexion.png";
 const std::string MainMenuBackGround = "../../res/background/main_menu.png";
 const std::string GameMenuBackGround = "../../res/background/game_menu.png";
-const std::string GameOverBackGround = "../../res/background/game_over.png";
-const std::string GameVictoryBackGround = "../../res/background/game_victory.png";
-const std::string GameLostBackGround = "../../res/background/game_lost.png";
-const std::string GamePauseBackGround = "../../res/background/game_pause.png";
-const std::string SettingsBackGround = GamePauseBackGround;
 const std::string GridBackGround = "../../res/background/grid.png";
 const std::string ChatBackGround = "../../res/background/chat.png";
 const std::string NotificationBackGround = "../../res/background/notification.png";
@@ -46,13 +41,8 @@ struct Textures{
     sf::Texture connexion;
     sf::Texture grid;
     sf::Texture game;
-    sf::Texture gameOver;
-    sf::Texture gameVictory;
-    sf::Texture gameLost;
-    sf::Texture gamePause;
     sf::Texture settings;
     sf::Texture chat;
-    sf::Texture notification;
     sf::Texture logoConnexion;
     sf::Texture logoNotification;
     sf::Texture logoSettings;
@@ -74,16 +64,14 @@ class SFMLGame {
         std::unique_ptr<sf::RenderWindow> window;
         std::unique_ptr<ClientNetwork> network;
         std::unique_ptr<Textures> textures;
-        //std::vector<std::unique_ptr<Button>> buttons;
-        //std::vector<std::unique_ptr<TextField>> texts;
         std::map<ButtonKey, std::unique_ptr<Button>> buttons;
         std::map<TextFieldKey, std::unique_ptr<TextField>> texts;
-        
+        std::map<std::string, std::unique_ptr<Button>> chatContacts;
         std::vector<std::pair<std::string, std::string>> messages;
         std::vector<std::string> contacts;
         sf::Font font;
         MenuState currentState;
-        std::string contact;
+        std::string clickedContact;
         float scrollSpeed = 0.5f; // Vitesse de défilement
         float friendsListOffset = 0.0f; // Décalage vertical pour la liste des amis
         float chatContactsOffset = 0.0f; // Décalage vertical pour les contacts du chat
@@ -97,6 +85,8 @@ class SFMLGame {
         void drawButtons();
         void drawTextFields();
         void drawMessages();
+        void drawContacts();
+        void drawFriends();
 
         //handle events
         void handleTextFieldEvents(sf::Event& event);
@@ -144,6 +134,7 @@ class SFMLGame {
 
         // Chat Menu
         void chatMenu();
+        std::vector<std::string> getContactsContainElement(const std::string& element);
         void displayMessage(const std::string&sender, const std::string& message);
         void ChatRoomMenu();
 

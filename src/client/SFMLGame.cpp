@@ -16,13 +16,14 @@ const unsigned int WINDOW_HEIGHT = 650;
 const std::string WINDOW_TITLE = "Tetris Royal";
 
 
-SFMLGame::SFMLGame(Client& client) : 
+SFMLGame::SFMLGame(Client& client):
     client(client),
     window(std::make_unique<sf::RenderWindow>()), 
     network(std::make_unique<ClientNetwork>()),
     textures(std::make_unique<Textures>()),
-    currentState(MenuState::Welcome)
-    {   
+    currentState(MenuState::Welcome),
+    clickedContact("")
+    {
         std::cout << "SFMLGame constructor called" << std::endl;
         // Load font
         if (!font.loadFromFile(FONT_PATH)) {
@@ -59,14 +60,16 @@ void SFMLGame::handleButtonEvents() {
         button->update();
         button->setBackgroundColor(*window);
     }
+    for(const auto& [_, contact] : chatContacts) {
+        contact->update();
+        contact->setBackgroundColor(*window);
+    }
 }
 
-void SFMLGame::drawMessages() {
-    for (std::size_t i = 0; i < messages.size(); ++i) {
-        const auto& msg = messages[i];
-        MessagesY += 50 * i+1; // Adjust the Y position for each message
-        displayMessage(msg.first, msg.second);
-        MessagesY = 60; // Reset Y position for the next message
+void SFMLGame::drawContacts() {
+    // Afficher la liste des contacts
+    for(auto& [contact, button] : chatContacts) {
+        button->draw(*window);
     }
 }
 
@@ -81,14 +84,8 @@ void SFMLGame::LoadResources() {
         {&textures->connexion, ConnexionBackGround},
         //{&textures->grid, GridBackGround},
         //{&textures->game, GameMenuBackGround},
-        //{&textures->gameOver, GameOverBackGround},
-        //{&textures->gameVictory, GameVictoryBackGround},
-        //{&textures->gameLost, GameLostBackGround},
-        //{&textures->gamePause, GamePauseBackGround},
         //{&textures->settings, SettingsBackGround},
         {&textures->chat, ChatBackGround},
-        //{&textures->notification, NotificationBackGround},
-        //{&textures->logoChat, LogoChat},
         {&textures->logoNotification, LogoNotification},
         {&textures->logoTeams, LogoTeams},
         {&textures->logoRanking, LogoRanking},
@@ -111,6 +108,7 @@ void SFMLGame::handleEvents() {
     sf::Event event;
     while (window->pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
+            // Quitter le jeu
             cleanup();
             window->close();
             return;
@@ -216,7 +214,7 @@ void SFMLGame::refreshMenu() {
             //friendRequestListMenu();
             break;
         case MenuState::chat:
-            //chatMenu();
+            chatMenu();
             break;
         case MenuState::ManageRoom:
             //teamsMenu();
@@ -592,10 +590,8 @@ void SFMLGame::drawEndGame(const json& endGameData) {
         color = sf::Color::Green;
     }
 
-    sf::Text endGameText(message, font, 50);
-    endGameText.setFillColor(color);
-    endGameText.setPosition(WINDOW_WIDTH / 2 - endGameText.getGlobalBounds().width / 2, WINDOW_HEIGHT / 4 - endGameText.getGlobalBounds().height / 2);
-    window->draw(endGameText);
+    Text endGameText(message, font, 50, color, sf::Vector2f(WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 4 - 50));
+    endGameText.draw(*window);
 
     if (buttons.empty()) {
         buttons[ButtonKey::Rejouer] = std::make_unique<Button>("Rejouer", font, 24, sf::Color::White, sf::Color(65, 105, 225),
@@ -646,7 +642,7 @@ sf::Color SFMLGame::fromSFML(int value) {
     return sf::Color::White; // Default
 }
 
-/**
+
 void SFMLGame::chatMenu() {
     // Display the chat background
     displayBackground(textures->chat);
@@ -656,23 +652,20 @@ void SFMLGame::chatMenu() {
     sidebar.draw(*window);
 
     // Header for contacts list
-    sf::Text contactsHeader("Contacts", font, 28);
-    contactsHeader.setFillColor(sf::Color::White);
-    contactsHeader.setStyle(sf::Text::Bold);
-    contactsHeader.setPosition(10, 10);
-    window->draw(contactsHeader);
+    Text header("Contacts", font, 24, sf::Color::White, sf::Vector2f(20, 10));
+    header.draw(*window);
 
     if (texts.empty()) {
         // Création des champs de texte
+        TextField searchField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
+            sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Search");
+        // Champ de texte pour envoyer un message
         TextField messageField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
             sf::Vector2f(205, WINDOW_HEIGHT - 40), sf::Vector2f(WINDOW_WIDTH - 250, 35), "Enter un message");
 
-        TextField searchField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
-            sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Search");
-
         // Ajout des champs de texte au vecteur
-        texts[TextFieldKey::MessageField] = std::make_unique<TextField>(messageField);
         texts[TextFieldKey::SearchField] = std::make_unique<TextField>(searchField);
+        texts[TextFieldKey::MessageField] = std::make_unique<TextField>(messageField);
     }
 
     if (buttons.empty()) {
@@ -680,156 +673,108 @@ void SFMLGame::chatMenu() {
         Button backButton("", font, 20, sf::Color::Transparent, sf::Color::White,
                           sf::Vector2f(7, 50), sf::Vector2f(25, 35));
         backButton.drawPhoto(textures->logoMain);
-        
         // Bouton pour envoyer le message
         Button sendButton(">", font, 20, sf::Color::White, sf::Color(70, 200, 70),
                           sf::Vector2f(WINDOW_WIDTH - 40, WINDOW_HEIGHT - 40), sf::Vector2f(35, 35));
-        
-
         // Ajout des boutons au vecteur
         buttons[ButtonKey::Retour] = std::make_unique<Button>(backButton);
         buttons[ButtonKey::Send] = std::make_unique<Button>(sendButton);
-        
     }
-    
+
     drawTextFields();
     drawButtons();
-    drawMessages();
+    drawContacts();
     
     if (!client.getServerData().empty() && client.getServerData().contains("data")) {
         contacts = client.getServerData()["data"];
         client.clearServerData();
     }
 
-    // Drapeau pour indiquer si un clic a été traité
-    bool clickHandled = false;
-
     // Vérifier d'abord le backButton
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         j["action"] = "main";
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        clickHandled = true; // Marquer le clic comme traité
         return; // Sortir immédiatement après avoir traité le clic
     }
 
     // Ensuite vérifier le sendButton
-    if (!clickHandled && buttons[ButtonKey::Send]->isClicked(*window) && !texts[TextFieldKey::MessageField]->getText().empty()) {
+    if (buttons[ButtonKey::Send]->isClicked(*window) && !texts[TextFieldKey::MessageField]->getText().empty()) {
         json j = {
             {"message", texts[TextFieldKey::MessageField]->getText()},
         };
         network->sendData(j.dump() + "\n", client.getClientSocket());
         messages.push_back({"You", texts[TextFieldKey::MessageField]->getText()});
         texts[TextFieldKey::MessageField]->clear(); // Effacer le champ de texte après l'envoi
-        clickHandled = true; // Marquer le clic comme traité
         return;
     }
 
-    // Gérer les boutons de contact uniquement si aucun autre clic n'a été traité
-    if (!clickHandled) {
-        static std::vector<sf::Texture> avatarTextures(20); // Persistent storage for textures
-        const float avatarRadius = 15.0f;
-        const float contactHeight = 50.0f;
+    static std::vector<sf::Texture> avatarTextures(20); // Persistent storage for textures
+    const float avatarRadius = 30.0f;
+    const float contactHeight = 50.0f;
+    float contactY = 100.0f;
 
-        for (size_t i = 0; i < contacts.size() && i < 20; ++i) {
-            bool exists = std::any_of(buttons.begin(), buttons.end(), [&](const auto& button) {
-                return button->getText().compare(contacts[i]) == 0; ;
-            });
-            if (!exists) {
-                // Create a new button for the contact
-                Button contactButton(contacts[i], font, 20, sf::Color::White, sf::Color::Transparent,
-                                     sf::Vector2f(0, 100 + i * 50), sf::Vector2f(200, 50), sf::Color::Transparent);
-                buttons[ButtonKey::Contacts] = std::make_unique<Button>(contactButton);
-            }
-            float contactY = 100.0f + i * contactHeight;
-
-            // Check if avatar is already drawn for this contact
-            static std::map<std::string, sf::Sprite> drawnAvatars;
-            if (drawnAvatars.find(contacts[i]) == drawnAvatars.end()) {
-                // Load avatar texture
-                const std::string avatarPath = "../../res/avatar/avatar" + std::to_string(i + 1) + ".png";
-
-                // Check if the texture is already loaded
-                if (avatarTextures[i].loadFromFile(avatarPath)) {
-                    // Create sprite with circular clipping effect
-                    sf::Sprite avatarSprite(avatarTextures[i]);
-
-                    // Get size and compute scale to fit in the circle
-                    sf::Vector2u textureSize = avatarTextures[i].getSize();
-                    float scale = (avatarRadius * 2) / std::max(textureSize.x, textureSize.y);
-                    avatarSprite.setScale(scale, scale);
-
-                    // Re-center the image inside the circle
-                    float newWidth = textureSize.x * scale;
-                    float newHeight = textureSize.y * scale;
-                    float offsetX = avatarRadius - newWidth / 2;
-                    float offsetY = avatarRadius - newHeight / 2;
-
-                    avatarSprite.setPosition(20 + offsetX, contactY + offsetY);
-
-                    // Store the sprite in the map
-                    drawnAvatars[contacts[i]] = avatarSprite;
-                } else {
-                    // Fallback: grey circle + initial
-                    sf::CircleShape avatarCircle(avatarRadius);
-                    avatarCircle.setPosition(20, contactY);
-                    avatarCircle.setFillColor(sf::Color::White);
-
-                    std::string contactStr = contacts[i];
-                    char initial = contactStr.empty() ? '?' : static_cast<char>(std::toupper(contactStr[0]));
-                    sf::Text initialText(std::string(1, initial), font, 24);
-                    initialText.setFillColor(sf::Color::White);
-                    initialText.setStyle(sf::Text::Bold);
-                    initialText.setPosition(20 + avatarRadius - 8, contactY + avatarRadius - 14);
-
-                    // Draw fallback avatar
-                    window->draw(avatarCircle);
-                    window->draw(initialText);
-                    continue;
-                }
-            }
-
-            // Draw the avatar sprite
-            window->draw(drawnAvatars[contacts[i]]);
+    for (size_t i = 0; i < contacts.size() && i < 20; ++i) {
+        contactY = 100 + i * contactHeight;
+        bool exists = chatContacts.find(contacts[i]) != chatContacts.end();
+        if (!exists) {
+            // Create a new button for the contact
+            Button contactButton(contacts[i], font, 20, sf::Color::White, sf::Color::Transparent,
+                                 sf::Vector2f(0, contactY), sf::Vector2f(200, contactHeight), sf::Color::Transparent);
+            chatContacts[contacts[i]] = std::make_unique<Button>(contactButton);
         }
-        
 
-        // Vérifier les boutons de contact
-        size_t i = 0;
-        for (const auto& [key, button] : buttons) {
-            if (i >= 2 && button->isClicked(*window)) { // Skip the first two buttons
-                std::cout << "Contact " << contacts[i - 2] << " clicked!" << std::endl;
-                json j = {
-                    {"action", "openChat"},
-                    {"contact", contacts[i - 2]}
-                };
-                contact = contacts[i - 2];
-                network->sendData(j.dump() + "\n", client.getClientSocket());
-                break; // Sortir de la boucle après avoir trouvé le contact cliqué
-            }
-            ++i;
+        // Draw the contact avatar
+        if(avatarTextures[i].loadFromFile("../../res/avatar/avatar" + std::to_string(i+1) + ".png")){
+            Circle avatar(sf::Vector2f(7, contactY + 8), avatarRadius, sf::Color::White, sf::Color::Transparent);
+            avatar.drawPhoto(avatarTextures[i], *window);
+        }else{
+            //dessiner le cercle avec la lettre initiale du contact
+            //to do
         }
     }
+
+    // Vérifier les boutons de contact
+    for (const auto& [contact, button] : chatContacts) {
+        if(button->isClicked(*window)) {
+            std::cout << "Contact " << contact << " is clicked" << std::endl;
+            json j = {
+                {"action", "openChat"},
+                {"contact", contact}
+            };
+            clickedContact = contact;
+            network->sendData(j.dump() + "\n", client.getClientSocket());
+            break; // Sortir de la boucle après avoir trouvé le contact cliqué
+        }
+    }
+
     // Afficher les anciens messages entre l'utilisateur et le contact après avoir cliqué sur le contact
-    if (!contact.empty()) {
+    if (!clickedContact.empty()) {
         Rectangle sidebar(sf::Vector2f(202, 0), sf::Vector2f(WINDOW_WIDTH - 200, 50), sf::Color(50, 50, 70), sf::Color(100, 100, 120));
         sidebar.draw(*window);
-        sf::Text contactName(contact, font, 20);
-        contactName.setFillColor(sf::Color::White);
-        contactName.setStyle(sf::Text::Bold);
-        contactName.setPosition(260, 10);
-        window->draw(contactName);
+        Text header(clickedContact, font, 24, sf::Color::White, sf::Vector2f(250, 10));
+        header.draw(*window);
+        // Draw the contact avatar
+        Circle avatar(sf::Vector2f(215, 10), avatarRadius, sf::Color::White, sf::Color::Transparent);
+        avatar.drawPhoto(avatarTextures[0], *window);
 
         // Afficher les message de l'utilisateur
         auto message = client.getServerData();
-        if (message.contains("sender") && message["sender"] == contact) {
-            messages.push_back({contact, message["message"]});
+        if (message.contains("sender") && message["sender"] == clickedContact) {
+            messages.push_back({message["sender"], message["message"]});
         }
         client.clearServerData();
     }
-    clickHandled = false; // Réinitialiser le drapeau après le traitement des clics
-}*/
+    drawMessages();
+}
 
+void SFMLGame::drawMessages() {
+    for (auto& [sender, message] : messages) {
+        displayMessage(sender, message);
+        MessagesY += 40; // Adjust the Y position for each message
+    }
+    MessagesY = 60; // Reset Y position after all messages are drawn
+}
 
 
 void SFMLGame::displayMessage(const std::string& sender, const std::string& message) {
@@ -840,25 +785,12 @@ void SFMLGame::displayMessage(const std::string& sender, const std::string& mess
     const float bubbleX = isYou ? WINDOW_WIDTH - 5 - bubbleWidth : 210;
     const sf::Color bubbleColor = isYou ? sf::Color(70, 130, 180) : sf::Color(90, 90, 110);
 
-    // Create and draw the main bubble
-    sf::RectangleShape mainRect(sf::Vector2f(bubbleWidth - 2 * cornerRadius, bubbleHeight));
-    mainRect.setPosition(bubbleX + cornerRadius, MessagesY);
-    mainRect.setFillColor(bubbleColor);
-    mainRect.setOutlineColor(sf::Color(120, 120, 140));
-    mainRect.setOutlineThickness(1);
-    window->draw(mainRect);
-
+    Rectangle bubble(sf::Vector2f(bubbleX, MessagesY), sf::Vector2f(bubbleWidth, bubbleHeight), bubbleColor, sf::Color(100, 100, 120));
+    bubble.draw(*window);
 
     // Draw message text
-    sf::Text messageText(message, font, 16);
-    messageText.setFillColor(sf::Color::White);
-    
-    const sf::FloatRect textBounds = messageText.getLocalBounds();
-    messageText.setPosition(
-        bubbleX + cornerRadius + 5.f, 
-        MessagesY + (bubbleHeight - textBounds.height) / 2 - textBounds.top
-    );
-    window->draw(messageText);
+    Text messageText(message, font, 16, sf::Color::White, sf::Vector2f(bubbleX + cornerRadius + 5.f, MessagesY));
+    messageText.draw(*window);
 }
 
 

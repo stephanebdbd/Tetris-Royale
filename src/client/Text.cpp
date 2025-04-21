@@ -1,5 +1,19 @@
 #include "Text.hpp"
 
+Text::Text(const std::string& text, const sf::Font& font, unsigned int characterSize, 
+    const sf::Color& textColor, const sf::Vector2f& position, sf::Uint32 style)
+    : text(text, font, characterSize)
+{
+    this->text.setFillColor(textColor);
+    this->text.setPosition(position);
+    this->text.setStyle(style);
+    this->text.setOutlineThickness(0);
+}
+
+void Text::draw(sf::RenderWindow& window) const {
+    window.draw(text);
+}
+
 
 TextField::TextField(const sf::Font& font, unsigned int characterSize, 
     const sf::Color& textColor, const sf::Color& backgroundColor, 

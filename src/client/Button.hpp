@@ -5,7 +5,7 @@
 
 class Rectangle {
     public:
-        Rectangle(const sf::Vector2f& position, const sf::Vector2f& size, 
+        Rectangle(const sf::Vector2f& position, const sf::Vector2f& radius, 
                 const sf::Color& FillColor, const sf::Color& outLineColor);
         void draw(sf::RenderWindow& window) const;
         void drawPhoto(const sf::Texture& texture);
@@ -16,15 +16,13 @@ class Rectangle {
 
 class Circle {
     public:
-        Circle(const sf::Vector2f& position, const sf::Vector2f& size, 
+        Circle(const sf::Vector2f& position, const float& size, 
             const sf::Color& FillColor, const sf::Color& outLineColor);
         void draw(sf::RenderWindow& window);
-        void setTexture(const std::shared_ptr<sf::Texture>& texture);
-        void drawPhoto(const sf::Texture& texture);
+        void drawPhoto(const sf::Texture& texture, sf::RenderWindow& window);
         
     private:
         sf::CircleShape shape;
-        std::shared_ptr<sf::Texture> texture;
 };
 
 class Button {
