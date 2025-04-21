@@ -130,8 +130,7 @@ void Client::receiveDisplay() {
                     if (data.contains(jsonKeys::GRID)) {
                         isPlaying = true;
                         chatMode = false;
-                        serverData = data;
-                        //display.displayGame(data);
+                        display.displayGame(data);
                         setGameStateFromServer(data);
                     }
                     // Si c'est un message de chat
