@@ -2,6 +2,25 @@
 #define JSONKEYS_HPP
 
 namespace jsonKeys {
+    constexpr char REGISTER[] = "register";
+    constexpr char REGISTER_MENU[] = "registerMenu";
+    constexpr char LOGIN_MENU[] = "loginMenu";
+    constexpr char LOGIN[] = "login";
+    constexpr char USERNAME[] = "username"; 
+    constexpr char PASSWORD[] = "password";
+    constexpr char PSEUDO[] = "pseudo";
+    constexpr char FRIEND[] = "friend";
+    constexpr char WELCOME[] = "welcome";
+    constexpr char MAIN[] = "main";
+    constexpr char FRIENDS[] = "friends";
+    constexpr char ADD_FRIEND[] = "addFriend";
+    constexpr char FRIEND_REQUEST[] = "friendRequest";
+    constexpr char FRIEND_LIST[] = "friendList";
+    constexpr char FRIEND_REQUEST_LIST[] = "friendRequestList";
+    constexpr char ACTION_TYPE[] = "actionType";
+    constexpr char ACTION_TYPE_FRIEND[] = "actionTypeFriend";
+    constexpr char ACTION_TYPE_FRIEND_REQUEST[] = "actionTypeFriendRequest";
+
     constexpr char TITLE[] = "title";
     constexpr char OPTIONS[] = "options";
     constexpr char TEXT[] = "text";
@@ -22,7 +41,7 @@ namespace jsonKeys {
     constexpr char NEXT_PIECE[] = "nextPiece";
     constexpr char SHAPE[] = "shape";
     constexpr char SHAPE_SYMBOL[] = "shapeSymbol";
-
+    
     constexpr char MESSAGE_CIBLE[] = "messageCible";
 
     constexpr char PROPOSITION_CIBLE[] = "propositionCible";

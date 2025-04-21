@@ -21,7 +21,27 @@ enum class ButtonKey {
     Classic,        // Bouton pour le mode classique
     Royale,         // Bouton pour le mode royale
     Rejouer,        // Bouton pour rejouer
-    Retour          // Bouton pour revenir en arrière
+    Retour,
+
+    FriendRequests,
+    ChatFriend,
+    CreateRoom,
+    JoinRoom,
+    AddMembre,
+    AddFriend,
+    FriendList,
+    FriendRequestList,
+    ListRoomMembres,
+    ConfirmDeleteRoom,
+    ConfirmQuitRoom,
+    ManageRoom,
+    CreateGame,
+    JoinGame,
+    GameOver,
+    GameVictory,
+
+
+
 };
 
 // Enum pour les champs de texte
@@ -29,5 +49,6 @@ enum class TextFieldKey {
     Username,       // Champ de texte pour le nom d'utilisateur
     Password,       // Champ de texte pour le mot de passe
     MessageField,   // Champ de texte pour les messages
-    SearchField     // Champ de texte pour la recherche
+    SearchField,     // Champ de texte pour la recherche
+    ConfirmPassword
 };

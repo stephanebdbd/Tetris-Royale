@@ -10,20 +10,28 @@
 #include <memory>
 
 
-//window size
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 650;
 const std::string WINDOW_TITLE = "Tetris Royal";
 
+float buttonWidth = 175;
+float buttonHeight = 50;
+float spacing = 20;
+float startX = (WINDOW_WIDTH - (4 * buttonWidth + 3 * spacing)) / 2;
+float y = 560;
 
-SFMLGame::SFMLGame(Client& client):
+// Couleurs harmonisées
+sf::Color background = sf::Color(30, 30, 30, 180); // noir semi-transparent
+sf::Color outline = sf::Color(0, 255, 100);        // vert fluo
+sf::Color text = sf::Color::White;
+
+SFMLGame::SFMLGame(Client& client) : 
     client(client),
     window(std::make_unique<sf::RenderWindow>()), 
     network(std::make_unique<ClientNetwork>()),
     textures(std::make_unique<Textures>()),
-    currentState(MenuState::Welcome),
-    clickedContact("")
-    {
+    currentState(MenuState::Welcome)
+    {   
         std::cout << "SFMLGame constructor called" << std::endl;
         // Load font
         if (!font.loadFromFile(FONT_PATH)) {
@@ -60,16 +68,14 @@ void SFMLGame::handleButtonEvents() {
         button->update();
         button->setBackgroundColor(*window);
     }
-    for(const auto& [_, contact] : chatContacts) {
-        contact->update();
-        contact->setBackgroundColor(*window);
-    }
 }
 
-void SFMLGame::drawContacts() {
-    // Afficher la liste des contacts
-    for(auto& [contact, button] : chatContacts) {
-        button->draw(*window);
+void SFMLGame::drawMessages() {
+    for (std::size_t i = 0; i < messages.size(); ++i) {
+        const auto& msg = messages[i];
+        MessagesY += 50 * i+1; // Adjust the Y position for each message
+        displayMessage(msg.first, msg.second);
+        MessagesY = 60; // Reset Y position for the next message
     }
 }
 
@@ -84,8 +90,14 @@ void SFMLGame::LoadResources() {
         {&textures->connexion, ConnexionBackGround},
         //{&textures->grid, GridBackGround},
         //{&textures->game, GameMenuBackGround},
+        //{&textures->gameOver, GameOverBackGround},
+        //{&textures->gameVictory, GameVictoryBackGround},
+        //{&textures->gameLost, GameLostBackGround},
+        //{&textures->gamePause, GamePauseBackGround},
         //{&textures->settings, SettingsBackGround},
         {&textures->chat, ChatBackGround},
+        //{&textures->notification, NotificationBackGround},
+        //{&textures->logoChat, LogoChat},
         {&textures->logoNotification, LogoNotification},
         {&textures->logoTeams, LogoTeams},
         {&textures->logoRanking, LogoRanking},
@@ -108,7 +120,6 @@ void SFMLGame::handleEvents() {
     sf::Event event;
     while (window->pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
-            // Quitter le jeu
             cleanup();
             window->close();
             return;
@@ -136,6 +147,9 @@ void SFMLGame::handleEvents() {
                     text->setActive(false);
                 }
             }
+        }
+        if (event.type == sf::Event::Resized) {
+            handleResize(event.size.width, event.size.height);
         }
 
         // Gestion des événements de la souris pour les boutons
@@ -177,6 +191,244 @@ void SFMLGame::handleEvents() {
         }
     }
 }
+void SFMLGame::friendsMenu() {
+    displayBackground(textures->connexion); // fond dédié, genre un mur bleu clair
+
+    // Bouton "Ajouter un ami" en haut à droite
+    buttons[ButtonKey::AddFriend] = std::make_unique<Button>(textures->logoAddFriend,
+        sf::Vector2f(window->getSize().x - 150, 20), sf::Vector2f(120, 35));
+    // Barre de recherche d'amis
+    sf::RectangleShape searchBox(sf::Vector2f(300, 35));
+    searchBox.setPosition(50, 20);
+    searchBox.setFillColor(sf::Color(230, 230, 250));
+    window->draw(searchBox);
+
+    sf::Text searchText("Rechercher...", font, 18);
+    searchText.setFillColor(sf::Color::Black);
+    searchText.setPosition(60, 25);
+    window->draw(searchText);
+
+    // Affichage de la liste d'amis (exemple visuel)
+    float startY = 80;
+    float spacing = 70;
+    friends = client.getServerData()["data"]; // Récupérer la liste d'amis
+    //affichage de la liste d'amis sur le terminal
+    std::cout << "Liste d'amis : " << std::endl;
+    for (const auto& friendName : friends) {
+        std::cout << friendName << std::endl;
+    }
+    
+    for (size_t i = 0; i < friends.size(); ++i) {
+        sf::RectangleShape friendCard(sf::Vector2f(600, 60));
+        friendCard.setPosition(50, startY + i * spacing);
+        friendCard.setFillColor(sf::Color(245, 245, 245));
+        friendCard.setOutlineThickness(1);
+        friendCard.setOutlineColor(sf::Color(200, 200, 200));
+        window->draw(friendCard);
+
+        // Avatar fictif
+        sf::CircleShape avatar(20);
+        avatar.setFillColor(sf::Color(100, 149, 237));
+        avatar.setPosition(60, startY + i * spacing + 10);
+        window->draw(avatar);
+
+        // Nom de l’ami
+        sf::Text name(friends[i], font, 20);
+        name.setFillColor(sf::Color::Black);
+        name.setPosition(100, startY + i * spacing + 15);
+        window->draw(name);
+    }
+    buttons[ButtonKey::Retour] = std::make_unique<Button>(
+        "Retour", font, 22, sf::Color::White, sf::Color(220, 20, 60),
+        sf::Vector2f(50, window->getSize().y - 70), sf::Vector2f(150, 40));
+    // Bouton retour en bas
+
+    drawButtons();
+
+    // Gestion des clics
+    if (buttons[ButtonKey::AddFriend]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+}
+
+
+void SFMLGame::welcomeMenu() {
+    // Afficher l'arrière-plan du menu de bienvenue
+    displayBackground(textures->connexion);
+
+    // Ajouter les boutons s'ils n'existent pas
+    if (buttons.empty()) {
+        buttons[ButtonKey::Login] = std::make_unique<Button>("Login", font, 24, sf::Color::White, sf::Color(100, 149, 237),
+                                                             sf::Vector2f(190, 500), sf::Vector2f(200, 35));
+        buttons[ButtonKey::Registre] = std::make_unique<Button>("Registre", font, 24, sf::Color::White, sf::Color(255, 165, 0),
+                                                                sf::Vector2f(410, 500), sf::Vector2f(200, 35));
+        buttons[ButtonKey::Quit] = std::make_unique<Button>("Exit", font, 24, sf::Color::White, sf::Color(255, 99, 71),
+                                                            sf::Vector2f(300, 560), sf::Vector2f(200, 35));
+    }
+
+    // Dessiner les boutons
+    drawButtons();
+    json j;
+    // Gérer les clics sur les boutons
+    if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
+        cleanup();
+        window->close();
+        return;
+    }
+
+    if (buttons.count(ButtonKey::Registre) && buttons[ButtonKey::Registre]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::REGISTER_MENU;
+        //currentState = MenuState::Register; // Passer à l'état d'inscription
+        //std::cout << "Register button clicked" << std::endl;
+        //std::cout << "currentState: " << static_cast<int>(currentState) << std::endl;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+
+        cleanup();
+        return;
+    }
+
+    if (buttons.count(ButtonKey::Login) && buttons[ButtonKey::Login]->isClicked(*window)) {
+        //currentState = MenuState::Login; // Passer à l'état de connexion
+        j[jsonKeys::ACTION] = jsonKeys::LOGIN_MENU;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+
+        cleanup();
+        return;
+    }
+}
+void SFMLGame::registerMenu() {
+    std::cout<<"1--hello"<<std::endl;
+
+    // Afficher l'arrière-plan du formulaire d'inscription
+    displayBackground(textures->connexion);
+
+    // Ajouter les champs de texte et les boutons s'ils n'existent pas
+    if (texts.empty()) {
+        texts[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
+                                                                    sf::Vector2f(300, 350), sf::Vector2f(200, 35), "Username.");
+        texts[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
+                                                                    sf::Vector2f(300, 400), sf::Vector2f(200, 35), "Password", true);
+        texts[TextFieldKey::ConfirmPassword] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
+                                                                           sf::Vector2f(300, 450), sf::Vector2f(200, 35), "Confirm Password", true);
+    }
+
+    if (buttons.empty()) {
+        buttons[ButtonKey::Registre] = std::make_unique<Button>("S'inscrire", font, 24, sf::Color::White, sf::Color(100, 149, 237),
+                                                                sf::Vector2f(300, 500), sf::Vector2f(200, 35));
+        buttons[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 24, sf::Color::White, sf::Color(255, 99, 71),
+                                                              sf::Vector2f(300, 560), sf::Vector2f(200, 35));
+    }
+
+    // Dessiner les champs de texte et les boutons
+    drawTextFields();
+    drawButtons();
+
+    // Gérer les clics sur les boutons
+    if (buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
+        //currentState = MenuState::Welcome; // Retourner au menu de bienvenue
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::WELCOME;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        //std::cout << "Retour button clicked" << std::endl;
+        cleanup();
+        return;
+    }
+
+    if (buttons.count(ButtonKey::Registre) && buttons[ButtonKey::Registre]->isClicked(*window)) {
+        // Récupérer les données des champs de texte
+        std::string username = texts[TextFieldKey::Username]->getText();
+        std::string password = texts[TextFieldKey::Password]->getText();
+        std::string confirmPassword = texts[TextFieldKey::ConfirmPassword]->getText();
+
+        if (username.empty() || password.empty() || confirmPassword.empty()) {
+            std::cerr << "Tous les champs doivent être remplis !" << std::endl;
+            return;
+        }
+
+        if (password != confirmPassword) {
+            std::cerr << "Les mots de passe ne correspondent pas !" << std::endl;
+            return;
+        }
+
+        json j = {
+            {jsonKeys::ACTION, "register"},
+            {jsonKeys::USERNAME, username},
+            {jsonKeys::PASSWORD, password}
+        };
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        //currentState = MenuState::Welcome; // Retourner au menu de bienvenue après l'inscription
+        cleanup();
+    }
+}
+void SFMLGame::connexionMenu() {
+    // Afficher l'arrière-plan du menu de connexion
+    displayBackground(textures->connexion);
+
+    // Ajouter les champs de texte et les boutons s'ils n'existent pas
+    if (texts.empty()) {
+        texts[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
+                                                                    sf::Vector2f(300, 400), sf::Vector2f(200, 35), "Username.");
+        texts[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
+                                                                    sf::Vector2f(300, 450), sf::Vector2f(200, 35), "Password", true);
+    }
+
+    if (buttons.empty()) {
+        buttons[ButtonKey::Login] = std::make_unique<Button>("Se connecter", font, 24, sf::Color::White, sf::Color(100, 149, 237),
+                                                             sf::Vector2f(300, 500), sf::Vector2f(200, 35));
+        buttons[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 24, sf::Color::White, sf::Color(255, 99, 71),
+                                                              sf::Vector2f(300, 560), sf::Vector2f(200, 35));
+    }
+
+    // Dessiner les champs de texte et les boutons
+    drawTextFields();
+    drawButtons();
+
+    // Gérer les clics sur les boutons
+    if (buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
+        //currentState = MenuState::Welcome; // Retourner au menu de bienvenue
+        cleanup();
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::WELCOME;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+
+    if (buttons.count(ButtonKey::Login) && buttons[ButtonKey::Login]->isClicked(*window)) {
+        // Récupérer les données des champs de texte
+        std::string username = texts[TextFieldKey::Username]->getText();
+        std::string password = texts[TextFieldKey::Password]->getText();
+
+        if (username.empty() || password.empty()) {
+            std::cerr << "Tous les champs doivent être remplis !" << std::endl;
+            return;
+        }
+
+        json j = {
+            {jsonKeys::ACTION, jsonKeys::LOGIN},
+            {jsonKeys::USERNAME, username},
+            {jsonKeys::PASSWORD, password}
+        };
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        //currentState = MenuState::Main; // Passer au menu principal après la connexion
+        cleanup();
+    }
+}
+
+
+
+
 
 void SFMLGame::refreshMenu() {
     auto newState = client.getCurrentMenuState();
@@ -185,12 +437,19 @@ void SFMLGame::refreshMenu() {
         std::cout << "State changed to: " << static_cast<int>(currentState) << std::endl;
         this->cleanup();
     }
+    
 
     window->clear();
     
     switch (currentState) {
         case MenuState::Welcome:
             welcomeMenu();
+            break;
+        case MenuState::Register:
+            registerMenu();
+            break;
+        case MenuState::Login:
+            connexionMenu();
             break;
         case MenuState::Main:
             mainMenu();
@@ -205,7 +464,7 @@ void SFMLGame::refreshMenu() {
             //notificationsMenu();
             break;
         case MenuState::Friends:
-            //friendsMenu();
+            friendsMenu();
             break;
         case MenuState::AddFriend:
             //addFriendMenu();
@@ -214,7 +473,7 @@ void SFMLGame::refreshMenu() {
             //friendRequestListMenu();
             break;
         case MenuState::chat:
-            chatMenu();
+            //chatMenu();
             break;
         case MenuState::ManageRoom:
             //teamsMenu();
@@ -293,61 +552,6 @@ void SFMLGame::displayBackground(sf::Texture& texture) {
 }
 
 
-void SFMLGame::welcomeMenu() {
-
-    // Display the welcome menu background
-    displayBackground(textures->connexion);
-
-    //ajouter les boutons et les champs de texte si ils n'existent pas
-    if (buttons.empty()) {
-        buttons[ButtonKey::Login] = std::make_unique<Button>("Login", font, 24, sf::Color::White, sf::Color(100, 149, 237),
-                                                             sf::Vector2f(190, 500), sf::Vector2f(200, 35));
-        buttons[ButtonKey::Registre] = std::make_unique<Button>("Registre", font, 24, sf::Color::White, sf::Color(255, 165, 0),
-                                                                sf::Vector2f(410, 500), sf::Vector2f(200, 35));
-        buttons[ButtonKey::Quit] = std::make_unique<Button>("Exit", font, 24, sf::Color::White, sf::Color(255, 99, 71),
-                                                            sf::Vector2f(300, 560), sf::Vector2f(200, 35));
-    }
-    if (texts.empty()) {
-        texts[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                    sf::Vector2f(300, 400), sf::Vector2f(200, 35), "Username");
-        texts[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                    sf::Vector2f(300, 440), sf::Vector2f(200, 35), "Password", true);
-    }
-    
-    //draw buttons
-    drawButtons();
-    drawTextFields();
-
-    // Quitter le jeu
-    if (buttons[ButtonKey::Quit]->isClicked(*window)) {
-        cleanup();
-        window->close();
-        return;
-    }
-
-    // Vérifier si les champs de texte sont vides
-    if (texts.count(TextFieldKey::Username) && texts.count(TextFieldKey::Password)) {
-        if (texts[TextFieldKey::Username]->getText().empty() || texts[TextFieldKey::Password]->getText().empty()) {
-            return;
-        }
-    }
-
-    // Gérer les événements
-    json j = {
-        {"username", texts[TextFieldKey::Username]->getText()},
-        {"password", texts[TextFieldKey::Password]->getText()}
-    };
-
-    if (buttons.count(ButtonKey::Login) && buttons[ButtonKey::Login]->isClicked(*window)) {
-        j["action"] = "login";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        return;
-    } else if (buttons.count(ButtonKey::Registre) && buttons[ButtonKey::Registre]->isClicked(*window)) {
-        j["action"] = "registre";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        return;
-    }
-}
 
 void SFMLGame::mainMenu() {
     // Afficher l'arrière-plan du menu principal
@@ -355,25 +559,18 @@ void SFMLGame::mainMenu() {
 
     // Ajouter les boutons s'ils n'existent pas
     if (buttons.empty()) {
-        buttons[ButtonKey::Teams] = std::make_unique<Button>("Teams", font, 24, sf::Color::White, sf::Color(70, 200, 70),
-                                                             sf::Vector2f(80, 560), sf::Vector2f(150, 35));
-        buttons[ButtonKey::Play] = std::make_unique<Button>("Play", font, 24, sf::Color::White, sf::Color(70, 70, 200),
-                                                            sf::Vector2f(230, 560), sf::Vector2f(150, 35));
-        buttons[ButtonKey::Chat] = std::make_unique<Button>("Chat", font, 24, sf::Color::White, sf::Color(70, 200, 70),
-                                                            sf::Vector2f(410, 560), sf::Vector2f(150, 35));
-        buttons[ButtonKey::Friends] = std::make_unique<Button>("Friends", font, 24, sf::Color::White, sf::Color(70, 200, 70),
-                                                               sf::Vector2f(630, 560), sf::Vector2f(150, 35));
-        buttons[ButtonKey::Quit] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
-                                                            sf::Vector2f(10, 20), sf::Vector2f(40, 40), sf::Color::Transparent);
-        buttons[ButtonKey::Quit]->drawPhoto(textures->logoExit);
+// Boutons principaux
+        buttons[ButtonKey::Teams] = std::make_unique<Button>("Teams", font, 26, text, background, sf::Vector2f(startX, y), sf::Vector2f(buttonWidth, buttonHeight), outline);
+        buttons[ButtonKey::Play] = std::make_unique<Button>("Play", font, 26, text, background, sf::Vector2f(startX + (buttonWidth + spacing), y), sf::Vector2f(buttonWidth, buttonHeight), outline);
+        buttons[ButtonKey::Chat] = std::make_unique<Button>("Chat", font, 26, text, background, sf::Vector2f(startX + 2 * (buttonWidth + spacing), y), sf::Vector2f(buttonWidth, buttonHeight), outline);
+        buttons[ButtonKey::Friends] = std::make_unique<Button>("Friends", font, 26, text, background, sf::Vector2f(startX + 3 * (buttonWidth + spacing), y), sf::Vector2f(buttonWidth, buttonHeight), outline);
 
-        buttons[ButtonKey::Settings] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
-                                                                sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
-        buttons[ButtonKey::Settings]->drawPhoto(textures->logoSettings);
+        buttons[ButtonKey::Quit]= std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
 
-        buttons[ButtonKey::Notification] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
-                                                                    sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45), sf::Color::Transparent);
-        buttons[ButtonKey::Notification]->drawPhoto(textures->logoNotification);
+        buttons[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings,sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
+     
+
+        buttons[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
 
         buttons[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
                                                                sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
@@ -388,19 +585,19 @@ void SFMLGame::mainMenu() {
     if (buttons.count(ButtonKey::Teams) && buttons[ButtonKey::Teams]->isClicked(*window)) {
         // Action pour le bouton "Teams"
     } else if (buttons.count(ButtonKey::Play) && buttons[ButtonKey::Play]->isClicked(*window)) {
-        j["action"] = "createjoin";
+        j[jsonKeys::ACTION] = "createjoin";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Chat) && buttons[ButtonKey::Chat]->isClicked(*window)) {
-        j["action"] = "chat";
+        j[jsonKeys::ACTION] = "chat";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Friends) && buttons[ButtonKey::Friends]->isClicked(*window)) {
-        j["action"] = "friends";
+        j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
-        j["action"] = "welcome";
+        j[jsonKeys::ACTION] = jsonKeys::WELCOME;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
@@ -416,17 +613,12 @@ void SFMLGame::CreateOrJoinGame() {
                                                               sf::Vector2f(310, 300), sf::Vector2f(180, 45));
         buttons[ButtonKey::Join] = std::make_unique<Button>("Rejoindre", font, 24, sf::Color::White, sf::Color(65, 105, 225),
                                                             sf::Vector2f(310, 360), sf::Vector2f(180, 45));
-        buttons[ButtonKey::Quit] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
-                                                            sf::Vector2f(10, 20), sf::Vector2f(40, 40), sf::Color::Transparent);
-        buttons[ButtonKey::Quit]->drawPhoto(textures->logoExit);
 
-        buttons[ButtonKey::Settings] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
-                                                                sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
-        buttons[ButtonKey::Settings]->drawPhoto(textures->logoSettings);
+        buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
 
-        buttons[ButtonKey::Notification] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
-                                                                    sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45), sf::Color::Transparent);
-        buttons[ButtonKey::Notification]->drawPhoto(textures->logoNotification);
+        buttons[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings, sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
+
+        buttons[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
 
         buttons[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
                                                                sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
@@ -439,14 +631,12 @@ void SFMLGame::CreateOrJoinGame() {
     // Gérer les clics sur les boutons
     json j;
     if (buttons.count(ButtonKey::Create) && buttons[ButtonKey::Create]->isClicked(*window)) {
-        j["action"] = "choiceMode";
+        j[jsonKeys::ACTION] = "choiceMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
-    }
+    } 
     // TO DO FOR 
 }
-
-
 void SFMLGame::ChoiceGameMode(){
     displayBackground(textures->logoConnexion);
     if (buttons.empty()) {
@@ -461,9 +651,7 @@ void SFMLGame::ChoiceGameMode(){
                                                                sf::Vector2f(310, 370), sf::Vector2f(180, 45));
         buttons[ButtonKey::Royale] = std::make_unique<Button>("Mode Royale", font, 24, sf::Color::White, sf::Color(65, 105, 225),
                                                               sf::Vector2f(310, 430), sf::Vector2f(180, 45));
-        buttons[ButtonKey::Quit] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
-                                                            sf::Vector2f(10, 20), sf::Vector2f(40, 40), sf::Color::Transparent);
-        buttons[ButtonKey::Quit]->drawPhoto(textures->logoExit);
+        buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
     }
     
     //draw buttons
@@ -471,11 +659,11 @@ void SFMLGame::ChoiceGameMode(){
     json j;
     
     if (buttons.count(ButtonKey::Endless) && buttons[ButtonKey::Endless]->isClicked(*window)) {
-        j["action"] = "EndlessMode";
+        j[jsonKeys::ACTION] = "EndlessMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Duel) && buttons[ButtonKey::Duel]->isClicked(*window)) {
-        //j["action"] = "DuelMode";
+        //j[jsonKeys::ACTION] = "DuelMode";
         //network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
@@ -590,8 +778,10 @@ void SFMLGame::drawEndGame(const json& endGameData) {
         color = sf::Color::Green;
     }
 
-    Text endGameText(message, font, 50, color, sf::Vector2f(WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 4 - 50));
-    endGameText.draw(*window);
+    sf::Text endGameText(message, font, 50);
+    endGameText.setFillColor(color);
+    endGameText.setPosition(WINDOW_WIDTH / 2 - endGameText.getGlobalBounds().width / 2, WINDOW_HEIGHT / 4 - endGameText.getGlobalBounds().height / 2);
+    window->draw(endGameText);
 
     if (buttons.empty()) {
         buttons[ButtonKey::Rejouer] = std::make_unique<Button>("Rejouer", font, 24, sf::Color::White, sf::Color(65, 105, 225),
@@ -605,13 +795,13 @@ void SFMLGame::drawEndGame(const json& endGameData) {
     json j;
     
     if (buttons.count(ButtonKey::Rejouer) && buttons[ButtonKey::Rejouer]->isClicked(*window)) {
-        j["action"] = "createjoin";
+        j[jsonKeys::ACTION] = "createjoin";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
         client.setGameStateIsEnd(false);
         return;
     } else if (buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
-        j["action"] = "main";
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
         client.setGameStateIsEnd(false);
@@ -619,7 +809,30 @@ void SFMLGame::drawEndGame(const json& endGameData) {
     }
 
 }
+void SFMLGame::handleResize(unsigned int newWidth, unsigned int newHeight) {
+    // Ajuster la vue pour correspondre à la nouvelle taille de la fenêtre
+    sf::View view = window->getView();
+    view.setSize(newWidth, newHeight);
+    view.setCenter(newWidth / 2.0f, newHeight / 2.0f);
+    window->setView(view);
 
+    // Recalculer les positions et tailles des éléments
+    float scaleX = static_cast<float>(newWidth) / WINDOW_WIDTH;
+    float scaleY = static_cast<float>(newHeight) / WINDOW_HEIGHT;
+
+    // Redimensionner les boutons
+    for (auto& [_, button] : buttons) {
+        button->resize(scaleX, scaleY);
+    }
+
+    // Redimensionner les champs de texte
+    for (auto& [_, text] : texts) {
+        text->resize(scaleX, scaleY);
+    }
+
+    // Redimensionner les autres éléments si nécessaire
+    // Exemple : ajuster la taille des messages ou des grilles
+}
 sf::Color SFMLGame::fromShapeSymbolSFML(const std::string& symbol) {
     if (symbol == "I") return sf::Color::Cyan;
     if (symbol == "O") return sf::Color::Yellow;
@@ -670,10 +883,7 @@ void SFMLGame::chatMenu() {
 
     if (buttons.empty()) {
         // Bouton pour revenir au menu principal
-        Button backButton("", font, 20, sf::Color::Transparent, sf::Color::White,
-                          sf::Vector2f(7, 50), sf::Vector2f(25, 35));
-        backButton.drawPhoto(textures->logoMain);
-        // Bouton pour envoyer le message
+        Button backButton(textures->logoMain,sf::Vector2f(7, 50), sf::Vector2f(25, 35));        // Bouton pour envoyer le message
         Button sendButton(">", font, 20, sf::Color::White, sf::Color(70, 200, 70),
                           sf::Vector2f(WINDOW_WIDTH - 40, WINDOW_HEIGHT - 40), sf::Vector2f(35, 35));
         // Ajout des boutons au vecteur
@@ -693,7 +903,7 @@ void SFMLGame::chatMenu() {
     // Vérifier d'abord le backButton
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         json j;
-        j["action"] = "main";
+        j[jsonKeys::ACTION] = "main";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return; // Sortir immédiatement après avoir traité le clic
     }
@@ -723,7 +933,6 @@ void SFMLGame::chatMenu() {
                                  sf::Vector2f(0, contactY), sf::Vector2f(200, contactHeight), sf::Color::Transparent);
             chatContacts[contacts[i]] = std::make_unique<Button>(contactButton);
         }
-
         // Draw the contact avatar
         if(avatarTextures[i].loadFromFile("../../res/avatar/avatar" + std::to_string(i+1) + ".png")){
             Circle avatar(sf::Vector2f(7, contactY + 8), avatarRadius, sf::Color::White, sf::Color::Transparent);
@@ -731,6 +940,7 @@ void SFMLGame::chatMenu() {
         }else{
             //dessiner le cercle avec la lettre initiale du contact
             //to do
+
         }
     }
 

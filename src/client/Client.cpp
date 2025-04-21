@@ -156,6 +156,7 @@ void Client::receiveDisplay() {
                         isPlaying = false;
                         // changer le menuState dans le cas de GUI
                         if(data.contains("state")) {
+                            std::cout << "MenuState: " << data["state"] << std::endl;
                             currentMenuState = menuStateManager.deserialize(data["state"]);
                             serverData = data;
                             

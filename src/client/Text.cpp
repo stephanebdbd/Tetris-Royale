@@ -141,7 +141,26 @@ void TextField::handleInput(sf::Event event) {
         }
     }
 }
+void TextField::resize(float scaleX, float scaleY) {
+    // Redimensionner la forme du champ de texte
+    sf::Vector2f newSize = shape.getSize();
+    newSize.x *= scaleX;
+    newSize.y *= scaleY;
+    shape.setSize(newSize);
 
+    // Repositionner le champ de texte
+    sf::Vector2f newPosition = shape.getPosition();
+    newPosition.x *= scaleX;
+    newPosition.y *= scaleY;
+    shape.setPosition(newPosition);
+
+    // Repositionner le texte
+    sf::FloatRect textBounds = text.getLocalBounds();
+    text.setPosition(
+        shape.getPosition().x + 5, // Décalage pour l'alignement
+        shape.getPosition().y + (shape.getSize().y - textBounds.height) / 2 - textBounds.top
+    );
+}
 std::string TextField::getText() const {
     return textString;
 }

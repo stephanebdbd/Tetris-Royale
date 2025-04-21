@@ -69,6 +69,7 @@ class SFMLGame {
         std::map<std::string, std::unique_ptr<Button>> chatContacts;
         std::vector<std::pair<std::string, std::string>> messages;
         std::vector<std::string> contacts;
+        std::vector<std::string> friends;
         sf::Font font;
         MenuState currentState;
         std::string clickedContact;
@@ -112,6 +113,8 @@ class SFMLGame {
 
         // Welcome Menu
         void welcomeMenu();
+        void connexionMenu() ;
+        void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
         // Main Menu
         void mainMenu();

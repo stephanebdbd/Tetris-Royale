@@ -142,16 +142,26 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         
         std::string actionType = action[jsonKeys::ACTION];
         std::cout << "Client #" << clientId << " a demandé l'action: " << actionType << std::endl;
-
-        if(actionType == "login") {
+        if (actionType == jsonKeys::REGISTER_MENU) {
+            clientStates[clientId] = MenuState::Register;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu d'inscription.");
+            return;
+        }
+        else if(actionType == jsonKeys::LOGIN_MENU) {
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu de connexion." << std::endl;
+            clientStates[clientId] = MenuState::Login;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu de connexion.");
+            return;
+        }  
+        else if(actionType == jsonKeys::LOGIN) {
             //gerer le login
-            if(userManager->userNotExists(action["username"])){
+            if(userManager->userNotExists(action[jsonKeys::USERNAME])){
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo n'existe pas.");
             }else{
-                if (userManager->authenticateUser(action["username"], action["password"])) { // Si le mot de passe est correct
+                if (userManager->authenticateUser(action[jsonKeys::USERNAME], action[jsonKeys::PASSWORD])) { // Si le mot de passe est correct
                     clientStates[clientId] = MenuState::Main;
                     menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu principal.");
-                    clientPseudo[clientId] = action["username"];
+                    clientPseudo[clientId] = action[jsonKeys::USERNAME];
                     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
                     sockToPseudo[clientSocket] = clientPseudo[clientId];
                     std::cout << "Client #" << clientId << " connecté avec succès." << std::endl;
@@ -163,31 +173,31 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             }
             return;
         }
-        else if(actionType == "registre") {
+        else if(actionType == jsonKeys::REGISTER) {
             //gerer l'enregistrement
             std::cout << "Client #" << clientId << " a demandé de s'enregistrer." << std::endl;
-            if(userManager->userNotExists(action["username"])){
+            if(userManager->userNotExists(action[jsonKeys::USERNAME])){
                 std::cout << "Le pseudo n'existe pas." << std::endl;
-                userManager->registerUser(action["username"], action["password"]);
+                userManager->registerUser(action[jsonKeys::USERNAME], action[jsonKeys::PASSWORD]);
                 clientStates[clientId] = MenuState::Main;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo n'existe pas.");
-                clientPseudo[clientId] = action["username"];
-                sockToPseudo[clientSocket] = action["username"];
-                pseudoTosocket[action["username"]] = clientSocket;
+                clientPseudo[clientId] = action[jsonKeys::USERNAME];
+                sockToPseudo[clientSocket] = action[jsonKeys::USERNAME];
+                pseudoTosocket[action[jsonKeys::USERNAME]] = clientSocket;
             }else{
                 std::cout << "Le pseudo existe déjà." << std::endl;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo existe déjà.");
             }
             return;
         }
-        else if(actionType == "welcome") {
+        else if(actionType == jsonKeys::WELCOME) {
             //gerer le menu d'accueil
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu d'accueil." << std::endl;
             clientStates[clientId] = MenuState::Welcome;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu d'accueil.");
             return;
         }
-        else if(actionType == "main"){
+        else if(actionType == jsonKeys::MAIN) {
             //gerer le menu principal
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu principal." << std::endl;
             clientStates[clientId] = MenuState::Main;
@@ -230,20 +240,27 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le chat.", friends);
             return;
         }
-        else if(actionType == "friends") {
+        else if(actionType == jsonKeys::FRIENDS) {
             //gerer les amis
             std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
             clientStates[clientId] = MenuState::Friends;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans la liste d'amis.");
+            auto friends = friendList->getFriendList(clientPseudo[clientId]);
+
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans la liste d'amis.", friends);
             return;
         }
-        else if(actionType == "friendsList"){
+        else if(actionType == jsonKeys::FRIEND_LIST) {
             //la liste des amis
             auto friends = friendList->getFriendList(clientPseudo[clientId]);
             if(friends.empty()){
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Aucun ami trouvé.");
                 return;
             }
+            std::cout<<"---> Affichege Liste d'amis : " << std::endl;
+            for (const auto& friendName : friends) {
+                std::cout << friendName << std::endl;
+            }
+
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Liste d'amis", friends);
             std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
             return;

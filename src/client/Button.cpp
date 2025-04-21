@@ -98,7 +98,13 @@ Button::Button(const std::string& text, const sf::Font& font, unsigned int chara
     this->text.setPosition(position.x + size.x / 2.0f,
                         position.y + size.y / 2.0f);
 }
-
+// Constructeur image
+Button::Button(const sf::Texture& texture, const sf::Vector2f& position, const sf::Vector2f& size) {
+    shape.setSize(size);
+    shape.setPosition(position);
+    shape.setFillColor(sf::Color::White); // ou transparent selon ton style
+    buttonTexture = std::make_shared<sf::Texture>(texture);
+}
 // Fonction pour dessiner le bouton
 void Button::draw(sf::RenderWindow& window) const {
     if(buttonTexture) {
@@ -170,15 +176,29 @@ void Button::resetColor() {
     shape.setFillColor(originalColor);
 }
 
-// Fonction pour dessiner une photo sur le bouton
-void Button::drawPhoto(const sf::Texture& texture) {
-    sf::Sprite sprite(texture);
-    sprite.setPosition(shape.getPosition());
-    sprite.setScale(shape.getSize().x / texture.getSize().x, shape.getSize().y / texture.getSize().y);
-    shape.setTexture(&texture);
-}
+
 
 // Fonction pour obtenir le texte du bouton
 std::string Button::getText() const {
     return text.getString();
+}
+void Button::resize(float scaleX, float scaleY) {
+    // Redimensionner la forme du bouton
+    sf::Vector2f newSize = shape.getSize();
+    newSize.x *= scaleX;
+    newSize.y *= scaleY;
+    shape.setSize(newSize);
+
+    // Repositionner le bouton
+    sf::Vector2f newPosition = shape.getPosition();
+    newPosition.x *= scaleX;
+    newPosition.y *= scaleY;
+    shape.setPosition(newPosition);
+
+    // Repositionner le texte
+    sf::FloatRect textBounds = text.getLocalBounds();
+    text.setPosition(
+        shape.getPosition().x + (shape.getSize().x - textBounds.width) / 2 - textBounds.left,
+        shape.getPosition().y + (shape.getSize().y - textBounds.height) / 2 - textBounds.top
+    );
 }

@@ -28,6 +28,8 @@ class TextField {
         void updateCursor();
         void validateInput();
         void clear();
+        void resize(float scaleX, float scaleY) ;
+
     
     private:
         sf::RectangleShape shape;

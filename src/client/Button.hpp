@@ -31,6 +31,7 @@ class Button {
             const sf::Color& textColor, const sf::Color& backgroundColor, 
             const sf::Vector2f& position, const sf::Vector2f& size, 
             const sf::Color& rectangleColor = sf::Color::Black);
+        Button(const sf::Texture& texture, const sf::Vector2f& position, const sf::Vector2f& size);
         
         void draw(sf::RenderWindow& window) const;
         bool isMouseOver(const sf::RenderWindow& window) const;
@@ -38,8 +39,10 @@ class Button {
         void update();
         void setBackgroundColor(sf::RenderWindow& window);
         void resetColor();
-        void drawPhoto(const sf::Texture& texture);
+        //void drawPhoto(const sf::Texture& texture);
         std::string getText() const;
+        void resize(float scaleX, float scaleY) ;
+
         
         bool operator==(const Button& other) const {
             return text.getString() == other.text.getString();
