@@ -36,6 +36,7 @@ void ClientChat::run() {
 
     std::thread sendThread(&ClientChat::sendChatMessages, this); // Lancer le thread d'envoi de messages
     sendThread.join(); // Attendre la fin du thread d'envoi
+    chatMessages.clear(); // Vider les messages du chat
 
     delwin(displayWin);
     delwin(inputWin);
@@ -146,11 +147,17 @@ void ClientChat::displayMessage(const std::string& sender, const std::string& me
 
 void ClientChat::displayChatMessages() {
     mtx.lock();
-    werase(displayWin);
+    if (!displayWin) { // Check if displayWin is valid
+        std::cerr << "Error: displayWin is not initialized.\n";
+        mtx.unlock();
+        return;
+    }
+
+    werase(displayWin); // Clear the window
     
     int max_y, max_x;
     getmaxyx(displayWin, max_y, max_x);
-    int current_y = 1; // Commencer sous la bordure
+    int current_y = 1; // Start below the border
     
     for (const auto& msg : chatMessages) {
         std::string sender = msg["sender"];
@@ -160,18 +167,17 @@ void ClientChat::displayChatMessages() {
         std::string formatted_msg = "[" + sender + "]: " + message;
         int x_pos = isMyMessage ? (max_x - formatted_msg.length() - 3) : 2;
 
-        // Gestion du multi-ligne
+        // Handle multi-line messages
         size_t start = 0;
         while (start < formatted_msg.length()) {
             int available_width = isMyMessage ? (max_x - x_pos - 2) : (max_x - 4);
             std::string line = formatted_msg.substr(start, available_width);
             
             if (isMyMessage) {
-                // Recalculer la position pour chaque ligne
                 x_pos = max_x - line.length() - 3;
                 if (x_pos < 2) x_pos = 2;
                 wattron(displayWin, COLOR_PAIR(1));
-            }else{
+            } else {
                 wattron(displayWin, COLOR_PAIR(2));
             }
             

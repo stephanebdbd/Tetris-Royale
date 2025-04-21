@@ -10,14 +10,13 @@
 #include <sodium.h>
 
 
-bool Chat::processClientChat(int senderSocket, const std::string& sender, const std::string& receiver, json& msg, std::vector<int> receiverSockets) {
+bool Chat::processClientChat(int senderSocket, const std::string& sender, const std::map<std::string, int>& receiver, json& msg){
     (void)senderSocket; // Suppression de l'avertissement sur l'argument non utilisé
     try {
         
         if (msg["message"] != "/exit") {
             msg["sender"] = sender;
-            msg["receiver"] = receiver;
-            sendMessage(msg, receiverSockets);
+            sendMessage(msg, receiver);
             return true;
         }else{
             std::cout << "Le client a quitté la conversation." << std::endl;
@@ -31,12 +30,16 @@ bool Chat::processClientChat(int senderSocket, const std::string& sender, const 
 }
 
 
-void Chat::sendMessage(json& msg, std::vector<int>& receiverSockets) {
-    for (int receiverSocket : receiverSockets) {
+void Chat::sendMessage(json& msg, const std::map<std::string, int>& receiver) {
+    //save the message in the db
+    if(receiver.size() == 1){
+        auto receiverOfMessage = receiver.begin()->first;
         // Enregistrement du message dans la base de données
-        if (!saveMessage(msg["sender"], msg["receiver"], msg["message"]))
+        if (!saveMessage(msg["sender"], receiverOfMessage, msg["message"]))
             std::cerr << "Failed to save message: " << msg["message"] << std::endl;
+    }
 
+    for (const auto& [receiverName, receiverSocket] : receiver) {
         // Envoi du message au socket du destinataire
         std::string jsonStr = msg.dump() + "\n"; // Convertir le message en chaîne JSON
         if(send(receiverSocket, jsonStr.c_str(), jsonStr.size(), 0) == -1) {
@@ -46,19 +49,13 @@ void Chat::sendMessage(json& msg, std::vector<int>& receiverSockets) {
 }
 
 void Chat::sendOldMessages(int senderSocket, const std::string& sender, const std::string& receiver) {
-    bool lumessage = false; // Variable pour savoir si l'historique a été envoyé
-    if (!lumessage) {
-        std::string previousMessages = getMsgBetweenUsers(sender, receiver);
+    std::string previousMessages = getMsgBetweenUsers(sender, receiver);
     
-        if (!previousMessages.empty() && previousMessages != "[]") {
-            send(senderSocket, previousMessages.c_str(), previousMessages.size(), 0);
+    if (!previousMessages.empty() && previousMessages != "[]") {
+        send(senderSocket, previousMessages.c_str(), previousMessages.size(), 0);
 
-        } else {
-            std::cout << "Aucun message précédent à envoyer." << std::endl;
-        }
-        std::cout << "Historique envoyé." << std::endl;
-        std::cout << previousMessages << std::endl;
-        lumessage = true;
+    } else {
+        std::cout << "Aucun message précédent à envoyer." << std::endl;
     }
 }
 
@@ -96,12 +93,5 @@ std::string Chat::getMsgBetweenUsers(const std::string &id_user, const std::stri
             std::cerr << "Ligne ignorée : pas assez de colonnes (attendu >= 4)" << std::endl;
         }
     }
-
-    if (messagesJson.empty()) {
-        std::cout << "Aucun message trouvé entre " << id_user << " et " << id_friend << std::endl;
-    }else{
-        std::cout << messagesJson.dump()+"\n" << std::endl;
-    }
-
     return messagesJson.dump()+"\n";  // renvoie une string du tableau JSON (vide ou non)
 }

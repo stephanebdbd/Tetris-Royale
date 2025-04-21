@@ -9,12 +9,12 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS ChatRooms (
     id_room INTEGER PRIMARY KEY AUTOINCREMENT,
     room_name TEXT UNIQUE NOT NULL,
-    room_properietors INTEGER NOT NULL,
-    FOREIGN KEY (room_properietors) REFERENCES Users(id_user)
+    room_properietor INTEGER NOT NULL,
+    FOREIGN KEY (room_properietor) REFERENCES Users(id_user)
         ON DELETE CASCADE 
         ON UPDATE NO ACTION,
     CHECK(room_name <> ''),
-    CHECK(room_properietors <> '')
+    CHECK(room_properietor <> '')
 );
 
 CREATE TABLE IF NOT EXISTS ChatRoomMembers (

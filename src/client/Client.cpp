@@ -109,15 +109,12 @@ void Client::receiveDisplay() {
                     
                     // Si c'est une grid de jeu
                     if (data.contains(jsonKeys::GRID)) {
-                        isPlaying = true;
-                        chatMode = false;
                         display.displayGame(data);
                     }
 
                     // Si c'est un message de chat
                     else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
-                        chatMode = true;
-                        isPlaying = false;
+                        chatMode = true; // Passer en mode chat
                         chat.setMyPseudo(data["pseudo"]); // Mettre à jour le pseudo du client
                         //lancer thread pour gerer les fenetre de chat et l envoi de message
                         std::thread chatThread(&ClientChat::run, &chat);
@@ -126,6 +123,7 @@ void Client::receiveDisplay() {
 
                     // Si c'est un message de chat
                     else if (data.contains("message")) {
+                        if(!chatMode) continue; // Si on n'est pas en mode chat, ignorer le message
                         chat.receiveChatMessages(data); // Traitement des messages si l'objet contient "message"
                     }
 
@@ -145,8 +143,7 @@ void Client::receiveDisplay() {
                     }
 
                     else {
-                        chatMode = false;
-                        isPlaying = false;
+                        chatMode = false; // Sortir du mode chat
                         display.displayMenu(data, inputBuffer); // Afficher le menu
                     }
 

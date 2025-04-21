@@ -66,8 +66,7 @@ class ChatRoom {
         
         bool saveMessageToRoom(const std::string& sender, const std::string& room_name, const std::string& msg) ;
         std::string getMessagesFromRoom(const std::string& room_name) ;
-        void processRoomChat(int senderSocket, const std::string& sender, const std::string& roomName, std::shared_ptr<std::vector<int>> roomSockets) ;
-
+        void sendOldMessages(int clientSocket, const std::string& roomName) ;
 
 
 };

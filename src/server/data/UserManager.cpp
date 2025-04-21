@@ -197,15 +197,6 @@ bool DataManager::userExists(const std::string& username) const {
 bool DataManager::userNotExists(const std::string& username) const {
     return !userExists(username);  // Inverse de userExists
 }
-void printList(const std::vector<std::string>& list) {
-    if (list.empty()) {
-        std::cout << "La liste est vide." << std::endl;
-    } else {
-        for (const auto& username : list) {
-            std::cout << username << std::endl;
-        }
-    }
-}
 
 /*
 bool DataManager::hasSentRequest(const std::string& sender, const std::string& receiver) const {
@@ -253,7 +244,6 @@ std::vector<std::string> DataManager::getList(const std::string& user, const std
     for (const auto& row : result.getData()) {
         if (!row.empty()) list.push_back(row[0]);  // username
     }
-    printList(list);
     return list;
 }
 bool DataManager::deleteFriend(const std::string& user1, const std::string& user2) {
@@ -289,7 +279,6 @@ std::vector<std::string> DataManager::getFriendList(const std::string& user) {
 
 // Obtenir la liste des demandes d'amis en attente
 std::vector<std::string> DataManager::getRequestList(const std::string& user) {
-    std::cout << " yaw yaw yaw yaw  aw" << std::endl;
     return getList(user, "pending");
 }
 

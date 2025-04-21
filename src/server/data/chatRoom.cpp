@@ -10,9 +10,9 @@ bool ChatRoom::createRoom(const std::string &room_name, const std::string &admin
         return false;
     }
 
-    // Créer la salle dans la table ChatRooms
-    std::string columns = "room_name";
-    std::string values = "'" + room_name + "'";
+    // Créer la salle dans la table ChatRooms avec le propriétaire
+    std::string columns = "room_name, room_properietor";
+    std::string values = "'" + room_name + "', '" + idAdmin.getFirst() + "'";
     QueryResult result = db->insertEntry("ChatRooms", columns, values);
     if (!result.isOk()) {
         std::cout << "Error creating room: " << result.getError() << std::endl;
@@ -593,211 +593,20 @@ std::string ChatRoom::getMessagesFromRoom(const std::string& room_name) {
             msg["message"] = row[1];
             msg["msg_date_time"] = row[2];
             msg["receiver"] = "Room";
+            std::cout << msg << std::endl;
             messagesJson.push_back(msg);
         }
     }
 
     return messagesJson.dump() + "\n";
 }
-void ChatRoom::processRoomChat(int senderSocket, const std::string& sender, const std::string& roomName, std::shared_ptr<std::vector<int>> roomSockets) {
-    std::cout << "Room chat started in room: " << roomName << std::endl;
-    bool historiqueEnvoye = false;
-    if (!historiqueEnvoye) {
-        std::string historique = getMessagesFromRoom(roomName);
-        
-        if (!historique.empty() && historique != "[]\n") {
-            std::cout << "Historique de la room " << roomName << " : " << historique << std::endl;
-            std::cout << "----> Envoi de l'historique à " << sender << std::endl;
-            send(senderSocket, historique.c_str(), historique.size(), 0);
-        } else {
-            std::cout << "Aucun historique à envoyer pour la room " << roomName << std::endl;
-        }
-
-        historiqueEnvoye = true;
-    }
-    char buffer[1024];
-    while (true) {
-        memset(buffer, 0, sizeof(buffer));
-        int bytes_received = recv(senderSocket, buffer, sizeof(buffer), 0);
-
-        if (bytes_received <= 0) {
-            std::cerr << "Client disconnected from room or error occurred." << std::endl;
-            close(senderSocket);
-            break;
-        }
-
-        try {
-            json msg = json::parse(std::string(buffer, bytes_received));
-
-            if (msg.is_object() && msg.contains("message")) {
-                if (msg["message"] == "exit") {
-                    std::cout << sender << " a quitté la room " << roomName << std::endl;
-                    break;
-                }
-
-                msg["sender"] = sender;
-                //msg["receiver"] = roomName;  // Important pour saveMessage
-                std::cout << "Message reçu dans la room "<< sender << "------" << roomName << ": " << msg["message"] << std::endl;
 
 
-                if (saveMessageToRoom(sender, roomName, msg["message"])) {
-                    std::cout << "Message de " << sender << " sauvegardé dans la room " << roomName << std::endl;
-                } else {
-                    std::cerr << "Erreur lors de la sauvegarde du message dans la room " << roomName << std::endl;
-                }
-
-                std::string jsonStr = msg.dump() + "\n";
-
-                // Envoyer à tous sauf l’expéditeur
-                for (int socket : *roomSockets) {
-                    if (socket != senderSocket) {
-                        send(socket, jsonStr.c_str(), jsonStr.size(), 0);
-                    }
-                }
-            } else {
-                std::cerr << "JSON invalide reçu dans room chat." << std::endl;
-            }
-        } catch (const std::exception& e) {
-            std::cerr << "Erreur (room chat) : " << e.what() << std::endl;
-        }
+void ChatRoom::sendOldMessages(int socket, const std::string& roomName) {
+    std::string historique = getMessagesFromRoom(roomName);
+    if (!historique.empty() && historique != "[]\n") {
+        send(socket, historique.c_str(), historique.size(), 0);
+    } else {
+        std::cout << "Aucun historique à envoyer pour la room " << roomName << std::endl;
     }
 }
-
-
-/*std::vector<std::string> ChatRoom::getMembers(const std::string& room_name) {
-    std::vector<std::string> clients;
-
-    std::string query = 
-        "SELECT username "
-        "FROM Users "
-        "JOIN ChatRoomMembers ON Users.id_user = ChatRoomMembers.id_user "
-        "JOIN ChatRooms ON ChatRoomMembers.id_room = ChatRooms.id_room "
-        "WHERE ChatRooms.room_name = '" + room_name + "'";
-
-    QueryResult result = db->executeQuery(query);
-
-    if (!result.isOk() || result.getVector().empty()) {
-        std::cout << "Erreur : Aucun client trouvé dans cette salle." << std::endl;
-        return clients;
-    }
-
-    clients = result.getVector();
-    return clients;
-}
-*/
-/*std::vector<std::string> ChatRoom::getAdminPseudo(const std::string& room_name) {
-    std::vector<std::string> adminPseudos;
-
-    // Récupérer les ID des admins de la salle
-    std::string condition = "room_name = '" + room_name + "'";
-    QueryResult roomResult = db->selectFromTable("ChatRooms", "id_admin", condition);
-    
-    if (!roomResult.isOk() || roomResult.getFirst().empty()) {
-        return {"Erreur : Salle introuvable ou sans admin."};
-    }
-
-    // Pour chaque ID d'admin, récupérer son pseudo
-    for (const std::string& idAdmin : roomResult.getVector()) {
-        std::string userCondition = "id_user = " + idAdmin;
-        QueryResult adminResult = db->selectFromTable("Users", "username", userCondition);
-        
-        if (adminResult.isOk() && !adminResult.getFirst().empty()) {
-            adminPseudos.push_back(adminResult.getFirst());
-        }
-    }
-
-    if (adminPseudos.empty()) {
-        return {"Erreur : Aucun administrateur trouvé."};
-    }
-
-    return adminPseudos;
-}
-*/
-
-
-/*
-bool ChatRoom::isAdmin(const std::string& pseudo, const std::string& room_name) const {
-    std::string condition = "cr.room_name = '" + room_name + "' AND u.username = '" + pseudo + "'";
-    std::string sql = 
-        "SELECT crm.id_user, crm.is_admin, u.username "
-        "FROM ChatRoomMembers crm "
-        "JOIN Users u ON crm.id_user = u.id_user "
-        "JOIN ChatRooms cr ON crm.id_room = cr.id_room "
-        "WHERE " + condition;
-    
-    QueryResult result = db->executeQuery(sql);
-    
-    if (result.isOk() && !result.getFirst().empty()) {
-        // L'utilisateur existe dans la salle
-        std::string isAdmin = result.getFirst();  // récupère le rôle
-        if (isAdmin == "admin") {
-            std::cout << pseudo << " is an admin." << std::endl;
-            return true;  // Si c'est un admin, ce n'est pas un client
-        }
-        return false;  // Si ce n'est pas un admin, c'est un client
-    }
-    
-    return false;  // Si aucun résultat, l'utilisateur n'est pas dans cette salle
-}
-bool ChatRoom::isClient(const std::string& pseudo, const std::string& room_name ) const {
-    return !isAdmin(pseudo, room_name); // Inverse la logique
-}
-*/
-/*bool ChatRoom::isPendingReq(const std::string& pseudo, const std::string& room_name) const {
-    // Récupérer l'ID de la salle
-    std::string condition = "room_name = '" + room_name + "'";
-    std::string roomId = db->selectFromTable("ChatRooms", "id_room", condition).getFirst();
-
-    // Vérifier si l'utilisateur a une requête en attente
-    condition = "cr.room_name = '" + room_name + "' AND u.username = '" + pseudo + "' AND crm.status = 'pending'";
-    std::string sql = 
-        "SELECT crm.status "
-        "FROM ChatRoomMembers crm "
-        "JOIN Users u ON crm.id_user = u.id_user "
-        "JOIN ChatRooms cr ON crm.id_room = cr.id_room "
-        "WHERE " + condition;
-
-    QueryResult result = db->executeQuery(sql);
-    return result.isOk() && !result.getFirst().empty();
-}
-*/
-/*
-bool ChatRoom::addAdmin(const std::string& admin_pseudo, const std::string& client_pseudo, const std::string& room_name) {
-    // Vérifier si le demandeur est un admin
-    if (!isAdmin(admin_pseudo, room_name)) {
-        std::cout << "Erreur : Seul un administrateur peut ajouter un autre admin." << std::endl;
-        return false;
-    }
-
-    // Récupérer l'id de l'utilisateur cible
-    std::string condition = "username = '" + client_pseudo + "'";
-    QueryResult idUserResult = db->selectFromTable("Users", "id_user", condition);
-    if (!idUserResult.isOk() || idUserResult.getFirst().empty()) {
-        std::cout << "Erreur : Utilisateur cible introuvable." << std::endl;
-        return false;
-    }
-    std::string idUser = idUserResult.getFirst();
-
-    // Récupérer l'id de la salle
-    condition = "room_name = '" + room_name + "'";
-    QueryResult idRoomResult = db->selectFromTable("ChatRooms", "id_room", condition);
-    if (!idRoomResult.isOk() || idRoomResult.getFirst().empty()) {
-        std::cout << "Erreur : Salle de discussion introuvable." << std::endl;
-        return false;
-    }
-    std::string idRoom = idRoomResult.getFirst();
-
-    // Vérifier si le membre est déjà dans la salle
-    condition = "id_room = " + idRoom + " AND id_user = " + idUser;
-    QueryResult memberCheck = db->selectFromTable("ChatRoomMembers", "status", condition);
-    if (!memberCheck.isOk() || memberCheck.getFirst().empty()) {
-        std::cout << "Erreur : L'utilisateur n'est pas membre de cette salle." << std::endl;
-        return false;
-    }
-
-    // Mettre à jour son statut en 'admin'
-    std::string updateQuery = "status = 'admin'";
-    return db->updateEntry("ChatRoomMembers", updateQuery, condition).isOk();
-}
-
-*/

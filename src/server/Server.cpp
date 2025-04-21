@@ -112,8 +112,32 @@ void Server::handleClient(int clientSocket, int clientId) {
                 if (receivedData.contains(jsonKeys::MESSAGE)) {
                     // Handle chat messages
                     auto receiver = receiverOfMessages[clientId];
-                    if(!chat.processClientChat(clientSocket, clientPseudo[clientId], receiver, receivedData, {pseudoTosocket[receiver]}))
-                        clientStates[clientId] = MenuState::Friends;
+                    bool isRoom = chatRoomsManage.checkroomExist(receiver);
+                    std::map<std::string, int> receivers;
+                    if (isRoom) {
+                        auto members = chatRoomsManage.getMembers(receiver);
+                        for (const auto& member : members) {
+                            if (pseudoTosocket.find(member) != pseudoTosocket.end() && member != clientPseudo[clientId]) {
+                                receivers[member] = pseudoTosocket[member];
+                            } else {
+                                std::cerr << "Member " << member << " not found in pseudoTosocket." << std::endl;
+                            }
+                        }
+                    } else {
+                        receivers[receiver] = pseudoTosocket[receiver];
+                    }
+    
+                    if(!chat.processClientChat(clientSocket, clientPseudo[clientId], receivers, receivedData)){
+                        if(isRoom){
+                            clientStates[clientId] = MenuState::Rooms;
+                        }else{
+                            clientStates[clientId] = MenuState::Friends;
+                        }
+                    }else{
+                        if(isRoom){
+                            chatRoomsManage.saveMessageToRoom(clientPseudo[clientId], receiver, receivedData[jsonKeys::MESSAGE]);
+                        }
+                    }
 
                 } else if (receivedData.contains(jsonKeys::ACTION)) {
                     std::string action = receivedData[jsonKeys::ACTION];
@@ -136,7 +160,8 @@ void Server::handleClient(int clientSocket, int clientId) {
         auto currentTime = std::chrono::steady_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRefreshTime).count();
         
-        if (elapsedTime >= 200) { // Reduced to 5 FPS (200ms) for better performance
+        if (elapsedTime >= 83) { // 12 FPS (83ms) for better performance
+            // Refresh the menu
             handleMenu(clientSocket, clientId, "", true); // Refresh only
             lastRefreshTime = currentTime;
         }
@@ -222,7 +247,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             else keyInputRoomsRequest(clientSocket, clientId, action);
             break;
         case MenuState::ChatRooms:
-            if (refreshMenu) sendMenuToClient(clientSocket, menu.getChatRoomsMenu());
+            if (refreshMenu) sendMenuToClient(clientSocket, menu.getChooseContactMenu(chatRoomsManage.getChatRoomsForUser(sockToPseudo[clientSocket]), false));
             else keyInputChatRoomsChooseMenu(clientSocket, clientId, action);
             break;
         case MenuState::ManageRooms:
@@ -262,7 +287,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             else keyInputFriendsMenu(clientSocket, clientId, action);
             break;
         case MenuState::ChooseContact:
-            if (refreshMenu) sendMenuToClient(clientSocket, menu.getChatWithRoomMenu(dataManager.getFriendList(clientPseudo[clientId])));
+            if (refreshMenu) sendMenuToClient(clientSocket, menu.getChooseContactMenu(dataManager.getFriendList(clientPseudo[clientId]), true));
             else keyInputChatFriendsMenu(clientSocket, clientId, action);
             break;
         case MenuState::AddFriend:
@@ -586,8 +611,6 @@ void Server::receiveInputFromClient(int clientSocket, int clientId) {
     auto gameRoom = gameRooms[clientGameRoomId[clientId]];
     char buffer[1024];
 
-    std::cout << "Dans la réception des entrées du client " << gameRoom << std::endl;
-    std::cout << "reception des entrées du client " << clientId << std::endl;
     while (true) {
         while ((clientStates[clientId] == MenuState::Play) && !gameRoom->getCanPlay()) continue;  // La partie commencera juste après la boucle
         memset(buffer, 0, sizeof(buffer));
@@ -762,7 +785,7 @@ void Server::keyInputLoginPseudoMenu(int clientSocket, int clientId, const std::
         std::cout << "Pseudo n'existe pas" << std::endl;
         // si pseudo n'existe pas on annule et on retourne à l'étape 1 (dc dmd de pseudo)
         clientStates[clientId] = MenuState::RegisterPseudo;
-        sendMenuToClient(clientSocket, menu.getLoginMenuFailed1());
+        //sendMenuToClient(clientSocket, menu.getLoginMenuFailed1());
     }
 }
 
@@ -854,7 +877,7 @@ void Server::keyInputChatFriendsMenu(int clientSocket, int clientId, const std::
     }else{
         receiverOfMessages[clientId] = action;                                  //stocker le pseudo du destinataire
         sendChatModeToClient(clientSocket);                                     //envoyer le mode de chat au client
-        sleep(0.2); // Attendre un peu pour s'assurer que le client a reçu le mode de chat
+        sleep(0.1); // Attendre un peu pour s'assurer que le client a reçu le mode de chat
         chat.sendOldMessages(clientSocket, sockToPseudo[clientSocket], action); //envoyer les anciens messages
         clientStates[clientId] = MenuState::PrivateChat;
     }
@@ -912,12 +935,9 @@ void Server::keyInputChatRoomsChooseMenu(int clientSocket, int clientId, const s
         if (chatRoomsManage.isClient(sockToPseudo[clientSocket], action)) {
             receiverOfMessages[clientId] = action;
             sendChatModeToClient(clientSocket);
-
-            // 🟢 1. Ajouter le client dans la liste des sockets de la room
-            auto roomSockets = joinRoom(action, clientSocket);
-
-            // 🟢 2. Démarrer le chat de groupe (room)
-            chatRoomsManage.processRoomChat(clientSocket, clientPseudo[clientId], action, roomSockets);
+            sleep(0.1); // Attendre un peu pour s'assurer que le client a reçu le mode de chat
+            chatRoomsManage.sendOldMessages(clientSocket, action); //envoyer les anciens messages
+            clientStates[clientId] = MenuState::ChatRoom;
         } else {
             returnToMenu(clientSocket, clientId, MenuState::Rooms, "Vous n'êtes pas membre de cette room.");
         }
@@ -1270,8 +1290,6 @@ void Server::keyInputSendGameRequestMenu(int /*clientSocket*/, int /*clientId*/,
 
 void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action, std::shared_ptr<GameRoom> gameRoom) {
 
-    std::cout << "Received action: " << action << " from client #" << clientId << std::endl;
-
     // Vérifier si l'action commence par \invite
     if (action.find("/invite") == 0) {
         // Extraire le statut et le receiver de l'action
@@ -1384,7 +1402,6 @@ int main() {
     
     try {
         std::ofstream serverLog("server.log"); // Créer un fichier de log
-        // Rediriger std::cout et std::cerr vers le fichier log
         std::cout.rdbuf(serverLog.rdbuf());
         std::cerr.rdbuf(serverLog.rdbuf());
 

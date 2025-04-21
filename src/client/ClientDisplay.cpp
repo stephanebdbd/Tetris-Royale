@@ -18,7 +18,7 @@ void ClientDisplay::displayMenu(const json& data, const std::string & inputBuffe
         std::string line = key + value.get<std::string>();
         mvprintw(y++, 10, "%s", line.c_str());
     }
-    mvprintw(y++, 10, "%s %s", input.c_str(), inputBuffer.c_str());
+    mvprintw(y++, 10, "%s%s", input.c_str(), inputBuffer.c_str());
 
     refresh(); 
 }

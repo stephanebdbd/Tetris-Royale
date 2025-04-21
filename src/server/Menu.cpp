@@ -7,9 +7,9 @@ json Menu::getMainMenu0() const {
     json menu = {
         {jsonKeys::TITLE, "Bienvenue dans Tetris Royal !"},
         {jsonKeys::OPTIONS, {
-            {"1. ", "Se connecter"},
-            {"2. ", "Créer un compte"},
-            {"3. ", "Quitter"}
+            {"  1. ", "Se connecter"},
+            {"  2. ", "Créer un compte"},
+            {"  3. ", "Quitter"}
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -20,12 +20,12 @@ json Menu::getMainMenu1() const {
     json menu = {
         {jsonKeys::TITLE, "Menu principal"},
         {jsonKeys::OPTIONS, {
-            {"1. ", "Jouer"},
-            {"2. ", "Amis"},
-            {"3. ", "Classement"},
-            {"4. ", "Chat Rooms"},
-            {"5. ", "Paramètres"},
-            {"6. ", "Retour"}
+            {"  1. ", "Jouer"},
+            {"  2. ", "Amis"},
+            {"  3. ", "Classement"},
+            {"  4. ", "Chat Rooms"},
+            {"  5. ", "Paramètres"},
+            {"  6. ", "Retour"}
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -120,9 +120,9 @@ json Menu::getJoinOrCreateGame() const {
     json menu = {
         {jsonKeys::TITLE, "Rejoindre ou créer une partie"},
         {jsonKeys::OPTIONS, {
-            {"1. ", "créer"},
-            {"2. ", "rejoindre"},
-            {"3. ", "Retour"}
+            {"  1. ", "créer"},
+            {"  2. ", "rejoindre"},
+            {"  3. ", "Retour"}
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -134,12 +134,12 @@ json Menu::getChatRoomsMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Menu du chat"},
         {jsonKeys::OPTIONS, {
-            {"1. ", "Créer une Room"},
-            {"2. ", "Rejoindre une Room"},
-            {"3. ", "chater dans une Room"},
-            {"4. ", "Invitations en attente"},
-            {"5. ", "Gerer mes Rooms"},
-            {"6. ", "Retour"},
+            {"  1. ", "Créer une Room"},
+            {"  2. ", "Rejoindre une Room"},
+            {"  3. ", "chater dans une Room"},
+            {"  4. ", "Invitations en attente"},
+            {"  5. ", "Gerer mes Rooms"},
+            {"  6. ", "Retour"},
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -215,20 +215,27 @@ json Menu::getManageChatRoomsMenu(const std::vector<std::string>& chatRooms) con
         return getListe(chatRooms, "Mes Rooms", "Tapez le nom d'une room pour la gérer ou '/back' pour quitter: ");
     }
 }
-json Menu::getChatWithRoomMenu(const std::vector<std::string>& chatRooms) const {
-    if (chatRooms.empty()) {
+//json Menu::getChatWithRoomMenu(const std::vector<std::string>& contacts, bool room) const {
+json Menu::getChooseContactMenu(const std::vector<std::string>& contacts, bool prive) const {
+    const std::string title = prive ? "Chatter avec un ami" : "Chatter dans une Room";
+    const std::string input = prive ? "Tapez le pseudo de l'ami" : "Tapez le nom de la room";
+    if (contacts.empty()) {
         json menu = {
-            {jsonKeys::TITLE, "Chatter dans une Room"},
+            //{jsonKeys::TITLE, room ? "Chatter avec une Room" : "Chatter avec un ami"},
+            {jsonKeys::TITLE, title},
             {jsonKeys::OPTIONS, {
-                {"Vous n'avez aucune room disponible pour chatter.", ""}
+                {"Vous n'avez aucune contact disponible pour chatter.", ""}
             }},
             {jsonKeys::INPUT, "Tapez '/back' pour quitter: "}
         };
         return menu.dump() + "\n";  // Convertir en chaîne JSON
     } else {
-        return getListe(chatRooms, "Chatter dans une Room", "Tapez le nom d'une room pour chatter ou '/back' pour quitter: ");
+        return getListe(contacts, title, input + "pour chatter ou '/back' pour quitter: ");
     }
 }
+
+
+// Fonction utilitaire pour générer une clé de menu
 std::string getKey(int &index){
     return "    " + std::to_string(++index) + ". ";
 }
@@ -313,11 +320,11 @@ json Menu::getFriendMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Créer une Room"},
         {jsonKeys::OPTIONS, {
-            {"1. ", "Ajouter un ami"},
-            {"2. ", "liste des amis"},
-            {"3. ", "liste des demandes d'amis"},
-            {"4. ", "chater avec un ami"},
-            {"5. ", "Retour"}
+            {"  1. ", "Ajouter un ami"},
+            {"  2. ", "liste des amis"},
+            {"  3. ", "liste des demandes d'amis"},
+            {"  4. ", "chater avec un ami"},
+            {"  5. ", "Retour"}
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -377,8 +384,8 @@ json Menu::getEndGameMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Game Over"},
         {jsonKeys::OPTIONS, {
-            {"1. ", "Rejouer"},
-            {"2. ", "Retour au menu principal"}
+            {"  1. ", "Rejouer"},
+            {"  2. ", "Retour au menu principal"}
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };
@@ -389,11 +396,11 @@ json Menu::getGameModeMenu() const {
     json menu = {
         {jsonKeys::TITLE, "Game Mode"},
         {jsonKeys::OPTIONS, {
-            {"1. ", "Endless"},
-            {"2. ", "Duel"},
-            {"3. ", "Classic"},
-            {"4. ", "Royal Competition"},
-            {"5. ", "Retour"}
+            {"  1. ", "Endless"},
+            {"  2. ", "Duel"},
+            {"  3. ", "Classic"},
+            {"  4. ", "Royal Competition"},
+            {"  5. ", "Retour"}
         }},
         {jsonKeys::INPUT, "Votre choix: "}
     };

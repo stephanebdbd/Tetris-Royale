@@ -17,12 +17,11 @@ class Menu {
         json getLoginMenu2WithPseudo() const ;
         json getLoginMenuFailed2() const;
         //chat
-        json getChatWithRoomMenu(const std::vector<std::string>& chatRooms) const ;
+        json getChooseContactMenu(const std::vector<std::string>& contacts, bool prive) const;
 
         json getQuitRoomConfirmationMenu(const std::string& roomName) const;
         json getChatRoomsMenu() const ;
         json getChatMenu(const std::vector<std::string>& data) const;
-        json getPrivateChatMenu() const;
         json getCreateChatRoomMenu() const;
         json getJoinChatRoomMenu() const;
         json getInvitationsRoomsMenu(const std::vector<std::string>& invitations) const;
