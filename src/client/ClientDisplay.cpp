@@ -7,7 +7,7 @@
 #include "../common/jsonKeys.hpp"
 #include <iostream>
 
-void ClientDisplay::displayMenu(const json& data) {
+void ClientDisplay::displayMenu(const json& data, const std::string& inputBuffer) {
     clear();
 
     std::string title = data[jsonKeys::TITLE];
@@ -27,7 +27,7 @@ void ClientDisplay::displayMenu(const json& data) {
         mvprintw(y++, 10, "%s", line.c_str());
     }
 
-    mvprintw(y++, 10, "%s", input.c_str());
+    mvprintw(y++, 10, "%s%s", input.c_str(), inputBuffer.c_str());
     refresh(); 
 }
 

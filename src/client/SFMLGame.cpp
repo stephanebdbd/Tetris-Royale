@@ -70,17 +70,6 @@ void SFMLGame::handleButtonEvents() {
     }
 }
 
-void SFMLGame::drawMessages() {
-    for (std::size_t i = 0; i < messages.size(); ++i) {
-        const auto& msg = messages[i];
-        MessagesY += 50 * i+1; // Adjust the Y position for each message
-        displayMessage(msg.first, msg.second);
-        MessagesY = 60; // Reset Y position for the next message
-    }
-}
-
-
-
 
 
 void SFMLGame::LoadResources() {
@@ -977,6 +966,14 @@ void SFMLGame::chatMenu() {
     }
     drawMessages();
 }
+
+void SFMLGame::drawContacts() {
+    // Afficher la liste des contacts
+    for(auto& [contact, button] : chatContacts) {
+        button->draw(*window);
+    }
+}
+
 
 void SFMLGame::drawMessages() {
     for (auto& [sender, message] : messages) {

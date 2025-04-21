@@ -29,6 +29,7 @@ private:
     std::string serverIP;               // Adresse IP du serveur
     int port;                           // Port du serveur
     int clientSocket;                   // Socket du client
+    std::string inputBuffer;                  // Tampon d'entrée pour les données du client
     bool isPlaying = false;             // Indique si le client est en mode jeu
     bool chatMode = false;                  // Indique si le client est en mode chat
     MenuState currentMenuState;            // État du menu actuel

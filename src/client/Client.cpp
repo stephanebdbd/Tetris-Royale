@@ -55,7 +55,6 @@ bool Client::connect() {
 
 void Client::handleUserInput() {
     halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
-    std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
     
     while (!stop_threads) {
         
@@ -146,9 +145,9 @@ void Client::receiveDisplay() {
                     }
                     // Si c'est un message de chat
                     else if (data.contains("sender")) {
-                        chat.receiveChatMessages(data);
+                        if(chatMode)
+                            chat.receiveChatMessages(data);
                         serverData = data;
-                        std::cout << data << std::endl;
                     }
                     // Sinon, c'est un menu
                     else {
@@ -161,7 +160,7 @@ void Client::receiveDisplay() {
                             serverData = data;
                             
                         } else {
-                            display.displayMenu(data);
+                            display.displayMenu(data, inputBuffer);
                             setGameStateFromServer(data);
 
 

@@ -105,7 +105,7 @@ public:
     void sendInputToGameRoom(int clientId, const std::string& action);
     void keyInputRankingMenu(int clientSocket, int clientId, const std::string& action);
     void keyInputGameOverMenu(int clientSocket, int clientId, const std::string& action);
-    void handleMenu(int clientSocket, int clientId, const std::string& action);
+    void handleMenu(int clientSocket, int clientId, const std::string& action, bool refresh = false);
     std::string convertUnicodeToText(const std::string& unicode);
     void setClientState(int clientId, MenuState state);
     std::unordered_map<std::string, int> getPseudoSocket() { return pseudoTosocket; }
@@ -129,8 +129,6 @@ public:
 
     void startGame(int clientSocket, int clientId);
 
-    // refresh le menu
-    void refreshMenu(int clientSocket, int clientId);
 
     //GUI
     void handleGUIActions(int clientSocket, int clientId, const json& action);
