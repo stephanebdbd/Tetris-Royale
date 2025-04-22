@@ -2,6 +2,7 @@
 #define JSONKEYS_HPP
 
 namespace jsonKeys {
+    constexpr char TEMPORARY_DISPLAY[] = "temporaryDisplay";
     constexpr char REGISTER[] = "register";
     constexpr char REGISTER_MENU[] = "registerMenu";
     constexpr char LOGIN_MENU[] = "loginMenu";
@@ -12,6 +13,7 @@ namespace jsonKeys {
     constexpr char FRIEND[] = "friend";
     constexpr char WELCOME[] = "welcome";
     constexpr char MAIN[] = "main";
+
     constexpr char FRIENDS[] = "friends";
     constexpr char ADD_FRIEND[] = "addFriend";
     constexpr char FRIEND_REQUEST[] = "friendRequest";

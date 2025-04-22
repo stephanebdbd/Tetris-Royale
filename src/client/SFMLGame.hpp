@@ -80,14 +80,22 @@ class SFMLGame {
         int MessagesSentX = 400; // Position X pour afficher les messages
         int MessagesReceivedX = 220; // Position X pour afficher les messages
         int cellSize = 30;
-
+        sf::Clock erreurClock;
+        bool afficherErreurActive = false;
+        std::string erreurMessageActuel;
         
+        
+
+        void afficherErreur(const std::string& message) ;
+        void drawErreurMessage() ;
+
         //draw
         void drawButtons();
         void drawTextFields();
         void drawMessages();
         void drawContacts();
         void drawFriends();
+        void displayErrorMessage(const std::string& message) ;
 
         //handle events
         void handleTextFieldEvents(sf::Event& event);
@@ -106,6 +114,7 @@ class SFMLGame {
     public:
         SFMLGame(Client& client);
         ~SFMLGame() = default;
+        void update() ;
 
         void run();
         void refreshMenu();

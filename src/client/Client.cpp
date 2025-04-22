@@ -41,6 +41,17 @@ void Client::run() {
     delwin(stdscr);
     endwin();
 }
+void Client::setTemporaryMessage(const std::string& msg) {
+    std::lock_guard<std::mutex> lock(messageMutex);
+    temporaryMessage = msg;
+}
+
+std::string Client::getTemporaryMessage() {
+    std::lock_guard<std::mutex> lock(messageMutex);
+    std::string msg = temporaryMessage;
+    temporaryMessage.clear();  // Efface le message après l'avoir lu
+    return msg;
+}
 
 bool Client::connect() {
     if (!network.connectToServer(serverIP, port, clientSocket)) {
@@ -142,6 +153,11 @@ void Client::receiveDisplay() {
                         chatThread.detach();
         
                     }
+                    else if (data.contains(jsonKeys::TEMPORARY_DISPLAY)) {
+                        std::string message = data[jsonKeys::TEMPORARY_DISPLAY];
+                        setTemporaryMessage(message);  // Stocke le message pour l'affichage temporaire
+                    }
+                    
                     // Si c'est un message de chat
                     else if (data.contains("sender")) {
                         if(chatMode)

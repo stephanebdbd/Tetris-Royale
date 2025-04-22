@@ -28,7 +28,9 @@ void Rectangle::drawPhoto(const sf::Texture& texture) {
     sprite.setScale(scaleX, scaleY);
     shape.setTexture(&texture);
 }
-
+sf::Vector2f Rectangle:: getPosition() const{
+    return shape.getPosition();  // Accède à la position de sf::RectangleShape
+}
 
 // Constructeur de la classe Circle
 Circle::Circle(const sf::Vector2f& position, const float& radius, 

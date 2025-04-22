@@ -43,6 +43,10 @@ private:
     std::thread receiveThread;
     std::string receivedData;
     std::mutex receiveMutex;
+    std::string temporaryMessage;
+    std::mutex messageMutex;
+
+
 
 
 
@@ -58,7 +62,8 @@ public:
         void stopThreads() { stop_threads = true; }
         MenuState getCurrentMenuState();
         json getServerData() const { return serverData; }
-        
+        void setTemporaryMessage(const std::string& msg);
+        std::string getTemporaryMessage();
 
         const GameState getGameState();
         void setGameStateFromServer(const json& data);

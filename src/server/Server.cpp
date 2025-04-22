@@ -144,6 +144,8 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             return;
         }
         else if(actionType == jsonKeys::LOGIN_MENU) {
+            
+
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu de connexion." << std::endl;
             clientStates[clientId] = MenuState::Login;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu de connexion.");
@@ -153,6 +155,8 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             //gerer le login
             if(userManager->userNotExists(action[jsonKeys::USERNAME])){
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo n'existe pas.");
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Le pseudo n'existe pas.");
+
             }else{
                 if (userManager->authenticateUser(action[jsonKeys::USERNAME], action[jsonKeys::PASSWORD])) { // Si le mot de passe est correct
                     clientStates[clientId] = MenuState::Main;
@@ -164,6 +168,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 }else{
                     std::cout << "Le mot de passe est incorrect." << std::endl;
                     menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le mot de passe est incorrect.");
+                    menuStateManager->sendTemporaryDisplay(clientSocket, "Le mot de passe est incorrect.");
                     
                 }
             }
@@ -183,11 +188,14 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             }else{
                 std::cout << "Le pseudo existe déjà." << std::endl;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo existe déjà.");
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Le pseudo existe déjà.");
             }
             return;
         }
         else if(actionType == jsonKeys::WELCOME) {
             //gerer le menu d'accueil
+            menuStateManager->sendTemporaryDisplay(clientSocket, "Bienvenue dans le menu d'accueil.");
+
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu d'accueil." << std::endl;
             clientStates[clientId] = MenuState::Welcome;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu d'accueil.");

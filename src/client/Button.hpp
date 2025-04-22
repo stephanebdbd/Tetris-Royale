@@ -9,7 +9,7 @@ class Rectangle {
                 const sf::Color& FillColor, const sf::Color& outLineColor);
         void draw(sf::RenderWindow& window) const;
         void drawPhoto(const sf::Texture& texture);
-        
+        sf::Vector2f getPosition() const ;
     private:
         sf::RectangleShape shape;
 };

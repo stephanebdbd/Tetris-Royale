@@ -67,6 +67,7 @@ public:
     // Send the MenuState to the client
     
     void sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message = "", const std::vector<std::string>& data = {});
+    void sendTemporaryDisplay(int clientSocket, const std::string& message) ;
 
 };
 
