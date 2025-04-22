@@ -298,8 +298,6 @@ void SFMLGame::welcomeMenu() {
     }
 }
 void SFMLGame::registerMenu() {
-    std::cout<<"1--hello"<<std::endl;
-
     // Afficher l'arrière-plan du formulaire d'inscription
     displayBackground(textures->connexion);
 
@@ -462,7 +460,7 @@ void SFMLGame::refreshMenu() {
             //friendRequestListMenu();
             break;
         case MenuState::chat:
-            //chatMenu();
+            chatMenu();
             break;
         case MenuState::ManageRoom:
             //teamsMenu();
@@ -507,6 +505,7 @@ void SFMLGame::run() {
         handleEvents();
         refreshMenu();
     }
+    cleanup();
 }
 
 void SFMLGame::cleanup() {
@@ -929,7 +928,6 @@ void SFMLGame::chatMenu() {
         }else{
             //dessiner le cercle avec la lettre initiale du contact
             //to do
-
         }
     }
 
