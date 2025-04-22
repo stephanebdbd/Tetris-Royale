@@ -92,8 +92,6 @@ class SFMLGame {
         //draw
         void drawButtons();
         void drawTextFields();
-        void drawMessages();
-        void drawContacts();
         void drawFriends();
         void displayErrorMessage(const std::string& message) ;
 
@@ -147,8 +145,11 @@ class SFMLGame {
         // Chat Menu
         void chatMenu();
         std::vector<std::string> getContactsContainElement(const std::string& element);
+        void handleContacts();
+        void getMessagesFromServer();
+        void drawMessages();
+        void drawContacts();
         void displayMessage(const std::string&sender, const std::string& message);
-        void ChatRoomMenu();
 
         //friends
         void friendsMenu();

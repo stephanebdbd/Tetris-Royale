@@ -54,25 +54,48 @@ bool TextField::isMouseOver(const sf::RenderWindow& window) const {
 }
 
 void TextField::draw(sf::RenderWindow& window) const {
+    // Draw the background shape
     window.draw(shape);
-    
+
+    // Determine whether to draw the placeholder or the actual text
     if (textString.empty() && !isActive) {
         window.draw(placeholderText);
-        
     } else {
+        // Calculate the maximum allowed width for the text
+        float maxWidth = shape.getSize().x - 2 * padding;
 
-        if(hiddenText) {
-            std::string maskedText = std::string(textString.size(), '*');
-            sf::Text maskedPlaceholder = placeholderText;
-            maskedPlaceholder.setString(maskedText.substr(maskedText.size() > 15 ? maskedText.size() - 15 : 0));
-            window.draw(maskedPlaceholder);
-        } else {
-            sf::Text visibleText = text;
-            visibleText.setString(textString.substr(textString.size() > 15 ? textString.size() - 15 : 0));
-            window.draw(visibleText);   
+        // Create a copy of the text to display
+        sf::Text displayText = text;
+        std::string displayString = hiddenText ? std::string(textString.size(), '*') : textString;
+        displayText.setString(displayString);
+
+        // Trim the text to fit within the maximum width
+        while (displayText.getLocalBounds().width > maxWidth && !displayString.empty()) {
+            displayString.erase(0, 1); // Remove the first character
+            displayText.setString(displayString);
         }
 
+        // Center the text vertically within the text field
+        displayText.setPosition(
+            shape.getPosition().x + padding,
+            shape.getPosition().y + (shape.getSize().y - displayText.getLocalBounds().height) / 2 - displayText.getLocalBounds().top
+        );
+
+        // Draw the text
+        window.draw(displayText);
+
+        // Draw the cursor if the text field is active and the cursor is visible
         if (isActive && showCursor) {
+            // Calculer la position du curseur
+            float cursorX = displayText.findCharacterPos(displayText.getString().getSize()).x;
+            float maxCursorX = shape.getPosition().x + shape.getSize().x - padding;
+            
+            // Créer une vue mutable temporaire du curseur
+            const_cast<TextField*>(this)->cursor.setPosition(
+                std::min(cursorX, maxCursorX),
+                shape.getPosition().y + 5
+            );
+            
             window.draw(cursor);
         }
     }

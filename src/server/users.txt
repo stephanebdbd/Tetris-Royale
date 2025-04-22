@@ -1,4 +1,3 @@
-aa:aa:1200
+qq:qq:0
 zz:zz:0
-ismail:ismail:0
-mm:mm:0
+aa:aa:0
