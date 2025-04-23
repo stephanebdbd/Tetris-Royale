@@ -274,6 +274,9 @@ void SFMLGame::refreshMenu() {
         case MenuState::Play:
             displayGame();
             break;
+        case MenuState::Observer:
+            displayGame();
+            break;
         case MenuState::GameOver:
             drawEndGame();
             break;

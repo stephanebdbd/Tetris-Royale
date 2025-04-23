@@ -180,7 +180,7 @@ void GameRoom::keyInputchooseVictim(int playerId, int victim) {
 
 void GameRoom::setAmountOfPlayers(int amount) {
     amountOfPlayers = amount;
-    if ((amountOfPlayers == maxPlayers - 1))
+    if ((amountOfPlayers ==  1) || (getGameModeName() == GameModeName::Endless))
         endGame();
 }
 
@@ -224,6 +224,29 @@ void GameRoom::setGameMode(GameModeName gameMode) {
 
 void GameRoom::addViewer(int viewerId) {
     viewersId.push_back(viewerId);
+    observerCurrentPlayer[viewerId] = players[0];
+
+}
+
+void GameRoom::observerNextPlayer(int observerId) {
+    if (observerCurrentPlayer.find(observerId) != observerCurrentPlayer.end()) {
+        //observerCurrentPlayer[observerId] = (observerCurrentPlayer[observerId] + 1) % players.size();
+        int currentPlayer = observerCurrentPlayer[observerId];
+        int indxPlayer = getPlayerId(currentPlayer);
+        int nextPlayer = indxPlayer + 1;
+        observerCurrentPlayer[observerId] = players[nextPlayer % players.size()];
+        
+
+    }
+}
+
+void GameRoom::observerPrevPlayer(int observerId) {
+    if (observerCurrentPlayer.find(observerId) != observerCurrentPlayer.end()) {
+        int currentPlayer = observerCurrentPlayer[observerId];
+        int indxPlayer = getPlayerId(currentPlayer);
+        int prevPlayer = indxPlayer - 1;
+        observerCurrentPlayer[observerId] = players[prevPlayer % players.size()];
+    }
 }
 
 bool GameRoom::getInProgress() const {
@@ -285,10 +308,34 @@ void GameRoom::keyInputGame(int playerId, const std::string& unicodeAction) {
     games[playerId]->moveTetramino(action);
 }
 
-void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
+void GameRoom::input(int playerServerId, const std::string& unicodeAction,std::string status) {
     std::cout << "GameRoom #" << roomId << " received input from player #" << playerServerId << ": " << unicodeAction << std::endl;
+    
+    if (status == "observer") {
+        if (std::find(viewersId.begin(), viewersId.end(), playerServerId) != viewersId.end()) {
+            std::string action = convertUnicodeToText(unicodeAction);
+            if (action == "left") {
+                observerPrevPlayer(playerServerId); // Passer au joueur précédent
+                std::cout << "Observateur #" << playerServerId << " observe maintenant le joueur précédent." << std::endl;
+            } else if (action == "right") {
+                observerNextPlayer(playerServerId); // Passer au joueur suivant
+                std::cout << "Observateur #" << playerServerId << " observe maintenant le joueur suivant." << std::endl;
+            } else {
+                std::cerr << "Action inconnue pour l'observateur #" << playerServerId << ": " << unicodeAction << std::endl;
+            }
+        } else {
+            std::cerr << "Erreur : Observateur #" << playerServerId << " non trouvé." << std::endl;
+        }
+        return; // Terminer ici pour les observateurs
+    }
+    
+    
+    
+    else if (std::find(players.begin(), players.end(), playerServerId) != players.end()){
+    
     if (!getSettingsDone())
         inputLobby(playerServerId, unicodeAction);
+    
     int playerId = getPlayerId(playerServerId);
     if ((playerId == -1) || getOwnerQuit())
         return;
@@ -355,7 +402,7 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
                         if(getGameModeName() == GameModeName::Classic)
                             applyMalus[playerId] = true;
                         
-                    }
+                   }
                         
             
 
@@ -368,6 +415,8 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
         else
             keyInputGame(playerId, unicodeAction);
     }
+    }
+    
     
 }
 

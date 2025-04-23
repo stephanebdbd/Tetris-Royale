@@ -33,6 +33,8 @@ class GameRoom {
     std::vector<int> players;
     std::vector<std::shared_ptr<Game>> games;
     std::vector<int> viewersId;
+    std::map<int, int> observerCurrentPlayer;
+
     using MessageMap = std::unordered_map<std::string, bool>;
     MessageMap Cmessages = {
     {jsonKeys::PROPOSITION_CIBLE, false},
@@ -72,7 +74,7 @@ public:
     void setNeedToSendGame(bool needToSendGame, int playerServerId);
     void setRoomId(int roomId) { this->roomId = roomId; }
     bool getSettingsDone() const;
-    void input(int playerId, const std::string& unicodeAction);
+    void input(int playerServerId, const std::string& unicodeAction,std::string status);
     GameModeName getGameModeName() const { return gameModeName; }
     int getAmountOfPlayers() const { return amountOfPlayers; }
     void setAmountOfPlayers(int amount);
@@ -102,6 +104,20 @@ public:
     json messageToJson(int playerServerId)const;
 
     void choiceVictimRandomly(int playerId);
+    void observerNextPlayer(int observerId);
+    void observerPrevPlayer(int observerId);
+    std::vector<int> getViewers() {return viewersId;}
+
+    int getclientobserverId(int observerId) {
+        if (observerCurrentPlayer.find(observerId) != observerCurrentPlayer.end()) {
+            int observedPlayerIndex = observerCurrentPlayer[observerId];
+            if (observedPlayerIndex >= 0 && observedPlayerIndex < static_cast<int>(games.size())) {
+                std::cout << "Client ID: " << players[observedPlayerIndex] << std::endl;
+            }
+            return observedPlayerIndex;
+        }
+        return -1;
+    }
 };
 
 #endif
