@@ -304,9 +304,34 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         }
         else if(actionType == "DuelMode") {
             clientStates[clientId] = MenuState::Settings;
+            this->keyInputCreateGameRoom(clientId, GameModeName::Duel);
+            
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Mode Duel activé");
             return;
             
         }
+
+        else if(actionType == "ClassicMode") {
+            clientStates[clientId] = MenuState::Settings;
+            this->keyInputCreateGameRoom(clientId, GameModeName::Classic);
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Mode Classique activé");
+        }
+        else if(actionType == "RoyaleMode") {
+            clientStates[clientId] = MenuState::Settings;
+            this->keyInputCreateGameRoom(clientId, GameModeName::Royal_Competition);
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Mode Royale activé");
+        }
+        else if(actionType == "Rejoindre"){
+            std::cout << "Client #" << clientId << " a demandé de choisir le mode de jeu ." << std::endl;
+            clientStates[clientId] = MenuState::JoinGame;
+            std::string currentUser = clientPseudo[clientId];
+            std::vector<std::vector<std::string>> invitations = friendList->getListGameRequest(currentUser);
+            //sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu choisir GameRoom ."/*,invitations*/);
+            return;
+        }
+
+        
     }
 }
 
@@ -686,8 +711,12 @@ void Server::sendInputToGameRoom(int clientId, const std::string& action) {
 }
 
 void Server::letPlayersPlay(const std::vector<int>& players) {
-    for (int player : players)
+    for (int player : players){
         clientStates[player] = MenuState::Play;
+        menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "Bienvenue dans menu modeJeu .");
+    }
+        
+
 }
 
 void Server::loopGame(int ownerId) {

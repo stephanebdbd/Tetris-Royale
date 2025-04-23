@@ -125,6 +125,9 @@ class SFMLGame {
             return network->sendData(j.dump() + "\n", client.getClientSocket());
             cleanup();
         }
+        bool duel = false;
+        bool classic = false;
+        bool royale = false;
 
     public:
         SFMLGame(Client& client);
@@ -189,7 +192,9 @@ class SFMLGame {
         void drawScore(const json& scoreData);
         void CreateOrJoinGame();
         void ChoiceGameMode();
-        void drawEndGame(const json& endGameData);
+        void drawEndGame();
+        
+        void drawMessageMalusBonus(const json& msg);
 
 };
 

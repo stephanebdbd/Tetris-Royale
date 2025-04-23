@@ -11,7 +11,7 @@
 
 
 const unsigned int WINDOW_WIDTH = 800;
-const unsigned int WINDOW_HEIGHT = 650;
+const unsigned int WINDOW_HEIGHT = 750;
 const std::string WINDOW_TITLE = "Tetris Royal";
 
 SFMLGame::SFMLGame(Client& client) : 
@@ -210,7 +210,7 @@ void SFMLGame::refreshMenu() {
     auto newState = client.getCurrentMenuState();
     if(newState != currentState) {
         currentState = newState;
-        //std::cout << "State changed to: " << static_cast<int>(currentState) << std::endl;
+        std::cout << "State changed to: " << static_cast<int>(currentState) << std::endl;
         this->cleanup();
     }
     
@@ -234,6 +234,7 @@ void SFMLGame::refreshMenu() {
             rankingMenu();
             break;
         case MenuState::Settings:
+            displayWaitingRoom();
             //to do  
             break;
         case MenuState::Notifications:
@@ -260,6 +261,9 @@ void SFMLGame::refreshMenu() {
         case MenuState::JoinOrCreateGame:
             CreateOrJoinGame();
             break;
+        case MenuState::JoinGame:
+            displayJoinGame();
+            break;
         case MenuState::Pause:
             //gamePauseMenu();
             
@@ -269,6 +273,9 @@ void SFMLGame::refreshMenu() {
             break;
         case MenuState::Play:
             displayGame();
+            break;
+        case MenuState::GameOver:
+            drawEndGame();
             break;
         default:
             //std::cerr << "Unhandled MenuState: " << static_cast<int>(currentState) << std::endl;
@@ -923,8 +930,15 @@ void SFMLGame::CreateOrJoinGame() {
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } 
-    // TO DO FOR 
+    
+    else if (buttons.count(ButtonKey::Join) && buttons[ButtonKey::Join]->isClicked(*window)){
+        j[jsonKeys::ACTION] = "Rejoindre";
+        client.sendInputFromSFML("2");
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
 }
+
 void SFMLGame::ChoiceGameMode(){
     displayBackground(textures->logoConnexion);
     if (buttons.empty()) {
@@ -951,31 +965,43 @@ void SFMLGame::ChoiceGameMode(){
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Duel) && buttons[ButtonKey::Duel]->isClicked(*window)) {
-        //j[jsonKeys::ACTION] = "DuelMode";
-        //network->sendData(j.dump() + "\n", client.getClientSocket());
+        duel = true;
+        j[jsonKeys::ACTION] = "DuelMode";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+
+    else if(buttons.count(ButtonKey::Classic) && buttons[ButtonKey::Classic]->isClicked(*window)){
+        classic = true;
+        j[jsonKeys::ACTION] = "ClassicMode";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }else if(buttons.count(ButtonKey::Royale) && buttons[ButtonKey::Royale]->isClicked(*window)){
+        royale = true;
+        j[jsonKeys::ACTION] = "RoyaleMode";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
 
 }
 void SFMLGame::displayGame(){
     
+    GameState gameData = client.getGameState();
+
     if (client.isGameStateUpdated()) {
         
-        GameState gameData = client.getGameState();
         if(gameData.isGame){
             drawGrid(gameData.gridData);
             drawTetramino(gameData.currentPieceData);
             drawTetramino(gameData.nextPieceData);
             drawScore(gameData.scoreData);
-        }
-        
-        else if (gameData.isEnd){
-            drawEndGame(gameData.menu);
-        }
+            drawMessageMalusBonus(gameData.message);
+        } 
     }
 }
 
 void SFMLGame::drawGrid(const json& grid) {
+    if(grid[jsonKeys::LIGHT_GRID]) return;
     int width = grid[jsonKeys::WIDTH]; 
     int height = grid[jsonKeys::HEIGHT]; 
     const json& cells = grid[jsonKeys::CELLS];
@@ -1028,6 +1054,7 @@ void SFMLGame::drawGrid(const json& grid) {
 
 void SFMLGame::drawTetramino(const json& tetraPiece) {
     // Récupération des informations
+    if(tetraPiece[jsonKeys::LIGHT_TETRA]) return;
     int x = tetraPiece[jsonKeys::X];
     int y = tetraPiece[jsonKeys::Y];
     std::vector<std::vector<std::string>> shape = tetraPiece[jsonKeys::SHAPE];
@@ -1051,7 +1078,9 @@ void SFMLGame::drawTetramino(const json& tetraPiece) {
     }
 }
 
-void SFMLGame::drawEndGame(const json& endGameData) {
+void SFMLGame::drawEndGame() {
+    GameState gameData = client.getGameState();
+    json endGameData = gameData.menu;
     std::string message = endGameData[jsonKeys::TITLE];
     sf::Color color;
     if (message == "GAME OVER"){
@@ -1168,5 +1197,194 @@ void SFMLGame::drawScore(const json& scoreData) {
         sf::Text errorText("Score: N/A", font, 24);
         errorText.setPosition(20, 20);
         window->draw(errorText);
+    }
+}
+
+
+
+
+void SFMLGame::drawMessageMalusBonus(const json& msg){
+
+    if (msg[jsonKeys::CLEAR]){
+        std::cout << "clear" << std::endl;
+        cleanup();
+        return;
+    }
+
+    if(msg[jsonKeys::CHOICE_CIBLE]) {
+        std::string message = "Joueur Cible";
+        std::cout << "Joueur Cible nkhtar ana" << std::endl;
+
+        if (buttons.empty() && texts.empty()) {
+            
+            //std::cout<<"ana hna bach tkhtar" << std::endl;
+
+            texts[TextFieldKey::Victime] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
+                sf::Vector2f(190, 670), sf::Vector2f(90, 30), "Victime");
+            buttons[ButtonKey::Valider] = std::make_unique<Button>("Valider", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(300, 670), sf::Vector2f(90, 30));
+        }
+
+        drawTextFields();
+        drawButtons();
+
+        if (buttons.count(ButtonKey::Valider) && buttons[ButtonKey::Valider]->isClicked(*window)) {
+            std::string id = texts[TextFieldKey::Victime]->getText();
+            if(id.empty()) {
+                std::cerr << "Rempliez le champs de Victime " << std::endl;
+                return;
+            }
+            //std::cout << "Victime choisi: " << id << std::endl;
+            client.sendInputFromSFML(id);
+            texts[TextFieldKey::Victime]->setText("");
+            return;
+        }
+        
+        sf::Text messageText(message, font, 24);
+        messageText.setFillColor(sf::Color::White);
+        messageText.setPosition(1,650);
+        window->draw(messageText);
+
+    }
+    
+    
+    /*--------------------------------------------------------------------------------*/
+    else if(msg[jsonKeys::PROPOSITION_CIBLE]){
+        int id = msg[jsonKeys::CIBLE_ID];
+        std::string message = std::string("Joueur Cible") + " "+  std::to_string(id);
+
+        if (buttons.empty()) {
+            //std::cout<<"ana yes or no" << std::endl;
+            buttons[ButtonKey::Yes] = std::make_unique<Button>("Yes", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(290, 670), sf::Vector2f(90, 30));
+
+            buttons[ButtonKey::No] = std::make_unique<Button>("No", font, 24, sf::Color::White, sf::Color::Red,
+                sf::Vector2f(410, 670), sf::Vector2f(90, 30));
+            
+            
+        }
+
+        drawButtons();
+
+        if (buttons.count(ButtonKey::Yes) && buttons[ButtonKey::Yes]->isClicked(*window)) {
+            //std::cout << "ana Yes" << std::endl;
+            client.sendInputFromSFML("y");
+            return;
+        }
+
+        if (buttons.count(ButtonKey::No) && buttons[ButtonKey::No]->isClicked(*window)) {
+            //std::cout << "ana No" << std::endl;
+            client.sendInputFromSFML("n");
+            return;
+        }
+
+        sf::Text messageText(message, font, 30);
+        messageText.setFillColor(sf::Color::White);
+        messageText.setPosition(1,670);
+        window->draw(messageText);
+    }
+
+    /*--------------------------------------------------------------------------------------*/
+
+    else if(msg[jsonKeys::CHOICE_MALUS_BONUS]){
+        if (buttons.empty()) {
+            buttons[ButtonKey::Malus] = std::make_unique<Button>("Malus", font, 24, sf::Color::White, sf::Color::Red,
+                sf::Vector2f(50, 670), sf::Vector2f(100, 30));
+
+            buttons[ButtonKey::Bonus] = std::make_unique<Button>("Bonus", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(200, 670), sf::Vector2f(100, 30));
+        }
+
+        drawButtons();
+
+        if (buttons.count(ButtonKey::Malus) && buttons[ButtonKey::Malus]->isClicked(*window)) {
+            //std::cout << "ana malus" << std::endl;
+            client.sendInputFromSFML("1");
+            return;
+        }
+
+        if (buttons.count(ButtonKey::Bonus) && buttons[ButtonKey::Bonus]->isClicked(*window)) {
+            //std::cout << "ana bonus" << std::endl;
+            client.sendInputFromSFML("2");
+            return;
+        }
+
+    }
+
+    else if(msg[jsonKeys::CHOICE_MALUS]){
+        if (buttons.empty()) {
+            buttons[ButtonKey::Inversion] = std::make_unique<Button>("Inversion", font, 24, sf::Color::White, sf::Color::Red,
+                sf::Vector2f(50, 670), sf::Vector2f(100, 30));
+
+            buttons[ButtonKey::Blocage] = std::make_unique<Button>("Blocage", font, 24, sf::Color::White, sf::Color::Red,
+                sf::Vector2f(200, 670), sf::Vector2f(100, 30));
+
+            buttons[ButtonKey::ChuteRapide] = std::make_unique<Button>("Chute rapide", font, 24, sf::Color::White, sf::Color::Red,
+                sf::Vector2f(350, 670), sf::Vector2f(100, 30));
+
+            buttons[ButtonKey::Suppression] = std::make_unique<Button>("Suppression", font, 24, sf::Color::White, sf::Color::Red,
+                sf::Vector2f(500, 670), sf::Vector2f(100, 30));
+
+            buttons[ButtonKey::EcranNoir] = std::make_unique<Button>("Ecran noir", font, 24, sf::Color::White, sf::Color::Red,
+                sf::Vector2f(650, 670), sf::Vector2f(100, 30));
+
+        }
+
+        drawButtons();
+
+        if (buttons.count(ButtonKey::Inversion) && buttons[ButtonKey::Inversion]->isClicked(*window)) {
+            //std::cout << "ana inversion" << std::endl;
+            client.sendInputFromSFML("1");
+            return;
+        }
+
+        if (buttons.count(ButtonKey::Blocage) && buttons[ButtonKey::Blocage]->isClicked(*window)) {
+            //std::cout << "ana blocage" << std::endl;
+            client.sendInputFromSFML("2");
+            return;
+        }
+
+        if (buttons.count(ButtonKey::ChuteRapide) && buttons[ButtonKey::ChuteRapide]->isClicked(*window)) {
+            //std::cout << "ana chute" << std::endl;
+            client.sendInputFromSFML("3");
+            return;
+        }
+
+        if (buttons.count(ButtonKey::Suppression) && buttons[ButtonKey::Suppression]->isClicked(*window)) {
+            //std::cout << "ana suppri" << std::endl;
+            client.sendInputFromSFML("4");
+            return;
+        }
+
+        if (buttons.count(ButtonKey::EcranNoir) && buttons[ButtonKey::EcranNoir]->isClicked(*window)) {
+            //std::cout << "ana noir" << std::endl;
+            client.sendInputFromSFML("5");
+            return;
+        }
+
+    }
+
+    else if(msg[jsonKeys::CHOICE_BONUS]){
+        if (buttons.empty()) {
+
+            buttons[ButtonKey::Ralentir] = std::make_unique<Button>("Ralentir", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(50, 670), sf::Vector2f(100, 30));
+
+            buttons[ButtonKey::MiniBlocs] = std::make_unique<Button>("Mini-blocs", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(200, 670), sf::Vector2f(100, 30));  
+        }
+
+        drawButtons();
+
+        if (buttons.count(ButtonKey::Ralentir) && buttons[ButtonKey::Ralentir]->isClicked(*window)) {
+            //std::cout << "ana ralentir" << std::endl;
+            client.sendInputFromSFML("1");
+            return;
+        }
+
+        if (buttons.count(ButtonKey::MiniBlocs) && buttons[ButtonKey::MiniBlocs]->isClicked(*window)) {
+            client.sendInputFromSFML("2");
+            return;
+        }
     }
 }
