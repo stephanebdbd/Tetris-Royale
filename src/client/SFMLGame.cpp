@@ -13,16 +13,6 @@
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 650;
 const std::string WINDOW_TITLE = "Tetris Royal";
-float buttonWidth = 175;
-float buttonHeight = 50;
-float spacing = 20;
-float startX = (WINDOW_WIDTH - (4 * buttonWidth + 3 * spacing)) / 2;
-float y = 560;
-
-// Couleurs harmonisées
-sf::Color background = sf::Color(30, 30, 30, 180); // noir semi-transparent
-sf::Color outline = sf::Color(0, 255, 100);        // vert fluo
-sf::Color text = sf::Color::White;
 
 SFMLGame::SFMLGame(Client& client) : 
     client(client),
@@ -38,8 +28,8 @@ SFMLGame::SFMLGame(Client& client) :
         std::cerr << "Erreur: Impossible de charger la police." << std::endl;
     }
 
-    // Chargement des textures
-    LoadResources();
+    // Load textures
+    textures->loadTextures();
 }
 void SFMLGame::update() {
     // Autres mises à jour de logique du jeu...
@@ -137,40 +127,6 @@ void SFMLGame::cleanup() {
     if(texts.empty()){
         std::cout << "Texts cleared" << std::endl;
     }
-}
-
-
-void SFMLGame::LoadResources() {
-    //map  texture->filePath
-    const std::map<sf::Texture*, std::string> textureFiles = {
-        {&textures->logoConnexion, LogoBackGround},
-        {&textures->connexion, ConnexionBackGround},
-        //{&textures->grid, GridBackGround},
-        //{&textures->game, GameMenuBackGround},
-        //{&textures->gameOver, GameOverBackGround},
-        //{&textures->gameVictory, GameVictoryBackGround},
-        //{&textures->gameLost, GameLostBackGround},
-        //{&textures->gamePause, GamePauseBackGround},
-        //{&textures->settings, SettingsBackGround},
-        {&textures->chat, ChatBackGround},
-        //{&textures->notification, NotificationBackGround},
-        //{&textures->logoChat, LogoChat},
-        {&textures->logoNotification, LogoNotification},
-        {&textures->logoTeams, LogoTeams},
-        {&textures->logoRanking, LogoRanking},
-        {&textures->logoSettings, LogoSettings},
-        {&textures->logoMain, LogoMain},
-        {&textures->logoExit, LogoExit},
-        {&textures->logoAddFriend, LogoAddFriend},
-        //{&textures->logoFrindsRequest, LogoFrindsRequest}
-        
-    };
-    for (const auto& [texture, filePath] : textureFiles) {
-        if (!texture->loadFromFile(filePath)) {
-            std::cerr << "Erreur: Impossible de charger l'image " << filePath << "." << std::endl;
-        }
-    }
-
 }
 
 void SFMLGame::handleEvents() {
@@ -275,7 +231,7 @@ void SFMLGame::refreshMenu() {
             mainMenu();
             break;
         case MenuState::classement:
-            //rankingMenu();
+            rankingMenu();
             break;
         case MenuState::Settings:
             //to do  
@@ -529,21 +485,28 @@ void SFMLGame::mainMenu() {
     // Afficher l'arrière-plan du menu principal
     displayBackground(textures->logoConnexion);
 
+    float buttonWidth = 120;
+    float buttonHeight = 50;
+    float spacing = 40;
+    float startX = 100;
+    float y = 560;
+
+    // Couleurs harmonisées
+    sf::Color background = sf::Color(30, 30, 30, 180); // noir semi-transparent
+    sf::Color outline = sf::Color(135, 206, 250);        // bleu ciel
+    sf::Color text = sf::Color::White;
+
     // Ajouter les boutons s'ils n'existent pas
     if (buttons.empty()) {
     // Boutons principaux
-        buttons[ButtonKey::Teams] = std::make_unique<Button>("Teams", font, 26, text, background, sf::Vector2f(startX, y), sf::Vector2f(buttonWidth, buttonHeight), outline);
-        buttons[ButtonKey::Play] = std::make_unique<Button>("Play", font, 26, text, background, sf::Vector2f(startX + (buttonWidth + spacing), y), sf::Vector2f(buttonWidth, buttonHeight), outline);
-        buttons[ButtonKey::Chat] = std::make_unique<Button>("Chat", font, 26, text, background, sf::Vector2f(startX + 2 * (buttonWidth + spacing), y), sf::Vector2f(buttonWidth, buttonHeight), outline);
+        buttons[ButtonKey::Ranking] = std::make_unique<Button>("Ranking", font, 26, text, background, sf::Vector2f(sf::Vector2f(startX, y)), sf::Vector2f(buttonWidth, buttonHeight), outline);
+        buttons[ButtonKey::Play] = std::make_unique<Button>("Play", font, 26, text, background, sf::Vector2f(startX + (buttonWidth + spacing), y + 30), sf::Vector2f(buttonWidth, buttonHeight), outline);
+        buttons[ButtonKey::Chat] = std::make_unique<Button>("Chat", font, 26, text, background, sf::Vector2f(startX + 2 * (buttonWidth + spacing), y + 30), sf::Vector2f(buttonWidth, buttonHeight), outline);
         buttons[ButtonKey::Friends] = std::make_unique<Button>("Friends", font, 26, text, background, sf::Vector2f(startX + 3 * (buttonWidth + spacing), y), sf::Vector2f(buttonWidth, buttonHeight), outline);
-
+        
         buttons[ButtonKey::Quit]= std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
-
         buttons[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings,sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
-     
-
         buttons[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
-
         buttons[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
                                                                sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
         // buttons[ButtonKey::Profile]->drawPhoto(avatarduClient);
@@ -568,7 +531,20 @@ void SFMLGame::mainMenu() {
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
-    } else if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
+    } 
+    else if(buttons.count(ButtonKey::Ranking) && buttons[ButtonKey::Ranking]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::RANKING;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+    else if(buttons.count(ButtonKey::Settings) && buttons[ButtonKey::Settings]->isClicked(*window)) {
+        // Action pour le bouton "Settings"
+    } else if (buttons.count(ButtonKey::Notification) && buttons[ButtonKey::Notification]->isClicked(*window)) {
+        // Action pour le bouton "Notification"
+    } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
+        // Action pour le bouton "Profile"
+    }
+    else if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::WELCOME;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
@@ -576,39 +552,142 @@ void SFMLGame::mainMenu() {
 }
 
 /*
-Friends Menu
+Ranking Menu
 */
-
-void SFMLGame::friendsMenu() {
-    displayBackground(textures->connexion); // fond dédié, genre un mur bleu clair
-
-    // Bouton "Ajouter un ami" en haut à droite
-    buttons[ButtonKey::AddFriend] = std::make_unique<Button>(textures->logoAddFriend,
-        sf::Vector2f(window->getSize().x - 150, 20), sf::Vector2f(120, 35));
-    // Barre de recherche d'amis
-    sf::RectangleShape searchBox(sf::Vector2f(300, 35));
-    searchBox.setPosition(50, 20);
-    searchBox.setFillColor(sf::Color(230, 230, 250));
-    window->draw(searchBox);
-
-    sf::Text searchText("Rechercher...", font, 18);
-    searchText.setFillColor(sf::Color::Black);
-    searchText.setPosition(60, 25);
-    window->draw(searchText);
-
+void SFMLGame::rankingMenu(){
+    //afficher la background
+    displayBackground(textures->ranking);
+    // Header for ranking list
+    Text header("LeaderBoard", font, 24, sf::Color::White, sf::Vector2f(60, 20));
+    header.draw(*window);
+    if(buttons.empty()){
+        buttons[ButtonKey::Retour]= std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
+        buttons[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings,sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
+        buttons[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
+        buttons[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
+                                    sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
+    }
+    if (texts.empty()) {
+        texts[TextFieldKey::SearchField] = std::make_unique<TextField>(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
+                                        sf::Vector2f(50, 20), sf::Vector2f(300, 35), "Search");
+    }
+    drawButtons();
     // Affichage de la liste d'amis (exemple visuel)
     float startY = 80;
     float spacing = 70;
-    friends = client.getServerData()["data"]; // Récupérer la liste d'amis
-    //affichage de la liste d'amis sur le terminal
-    std::cout << "Liste d'amis : " << std::endl;
-    for (const auto& friendName : friends) {
-        std::cout << friendName << std::endl;
+    ranking = client.getServerData()["dataPair"]; // Récupérer la liste d'amis
+    for (size_t i = 0; i < ranking.size() && i < 10; ++i) {
+        // Rectangle fictif pour la carte du joueur
+        Rectangle friendCard(sf::Vector2f(90, startY + i * spacing), sf::Vector2f(600, 60), sf::Color::Transparent, sf::Color(200, 200, 200));
+        friendCard.draw(*window);
+        //Nom du joueur
+        Text name(ranking[i].first, font, 20, sf::Color::Black, sf::Vector2f(150, startY + i * spacing + 15));
+        name.draw(*window);
+        //Score du joueur
+        Text score(std::to_string(ranking[i].second), font, 20, sf::Color::Black, sf::Vector2f(570, startY + i * spacing + 15));
+        score.draw(*window);
+        // Avatar fictif
+        //Circle avatar();
+        //avatar.draw(*window);
     }
-    
+    if(buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+    else if (buttons.count(ButtonKey::Settings) && buttons[ButtonKey::Settings]->isClicked(*window)) {
+        // Action pour le bouton "Settings"
+    } else if (buttons.count(ButtonKey::Notification) && buttons[ButtonKey::Notification]->isClicked(*window)) {
+        // Action pour le bouton "Notification"
+    } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
+        // Action pour le bouton "Profile"
+    }
+
+}
+
+/*
+Friends Menu
+*/
+/**
+void SFMLGame::friendsMenu() {
+    // Display the friends background
+    sf::RectangleShape background(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
+    background.setFillColor(sf::Color(30, 40, 50));
+    window->draw(background);
+
+    // tres blanc verticale dans x = 200
+    sf::RectangleShape verticalLine(sf::Vector2f(2, WINDOW_HEIGHT));
+    verticalLine.setFillColor(sf::Color(255, 255, 255));
+    verticalLine.setPosition(200, 0);
+    window->draw(verticalLine);
+
+    // Header for friends list
+    sf::Text friendsHeader("Friends", font, 18);
+    friendsHeader.setFillColor(sf::Color::White);
+    friendsHeader.setStyle(sf::Text::Bold);
+    friendsHeader.setPosition(50, 10);
+    window->draw(friendsHeader);
+
+    // Affichage de la liste d'amis
+    drawButtons();
+    //buttons[3]->drawPhotoInTheSide(*window, textures->logoAddFriend);
+    drawTextFields();
+
+    // Récupérer la liste des amis
+    auto friends = client.getServerData()["data"];
+    float friendY = 150 - friendsListOffset; // Appliquer le décalage vertical
+
+    for (size_t i = 0; i < friends.size() && i < 20; ++i) {
+        if (friendY + i * 30 >= 150 && friendY + i * 30 <= WINDOW_HEIGHT - 30) { // Afficher uniquement les amis visibles
+            sf::Text friendName(std::string(friends[i]), font, 20);
+            friendName.setFillColor(sf::Color::White);
+            friendName.setPosition(20, friendY + i * 30);
+            window->draw(friendName);
+        }
+    }
+}**/
+
+void SFMLGame::friendsMenu() {
+    // Display the friends background
+    Rectangle background(sf::Vector2f(0, 0), sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT), sf::Color(70, 130, 180), sf::Color::Transparent); // Bleu acier
+    background.draw(*window);
+
+    // tres blanc verticale dans x = 200
+    Rectangle verticalLine(sf::Vector2f(200, 0), sf::Vector2f(2, WINDOW_HEIGHT), sf::Color::Black, sf::Color::Transparent);   
+    verticalLine.draw(*window);
+
+    // Header for friends list
+    Text header("Friends", font, 24, sf::Color::White, sf::Vector2f(60, 20));
+    header.draw(*window);
+
+    if(buttons.empty()){
+        buttons[ButtonKey::Retour]= std::make_unique<Button>(textures->logoMain, sf::Vector2f(10, 20), sf::Vector2f(35, 35));
+        buttons[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings,sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
+        buttons[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
+        buttons[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
+                                                               sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
+        buttons[ButtonKey::FriendList] = std::make_unique<Button>("Friend List", font, 24, sf::Color::White, sf::Color::Transparent,
+                                                                  sf::Vector2f(0, 80), sf::Vector2f(200, 40));
+        buttons[ButtonKey::FriendRequests] = std::make_unique<Button>("friend requests", font, 24, sf::Color::White, sf::Color::Transparent,
+                                                                        sf::Vector2f(0, 122), sf::Vector2f(200, 40));
+        buttons[ButtonKey::AddFriend] = std::make_unique<Button>("Add Friend", font, 24, sf::Color::White, sf::Color::Transparent,
+                                                                  sf::Vector2f(0, 164), sf::Vector2f(200, 40));
+    }
+    if(texts.empty()){
+        texts[TextFieldKey::SearchField] = std::make_unique<TextField>(font, 20, sf::Color::Black, sf::Color::White,
+                                        sf::Vector2f(230, 20), sf::Vector2f(350, 32), "Search");
+    }
+
+
+    // Affichage de la liste d'amis
+    //float startY = 80;
+    //float spacing = 70;
+    //friends = client.getServerData()["data"]; // Récupérer la liste d'amis
+    /*
     for (size_t i = 0; i < friends.size(); ++i) {
-        sf::RectangleShape friendCard(sf::Vector2f(600, 60));
-        friendCard.setPosition(50, startY + i * spacing);
+        sf::RectangleShape friendCard(sf::Vector2f(400, 60));
+        friendCard.setPosition(230, startY + i * spacing);
         friendCard.setFillColor(sf::Color(245, 245, 245));
         friendCard.setOutlineThickness(1);
         friendCard.setOutlineColor(sf::Color(200, 200, 200));
@@ -625,29 +704,23 @@ void SFMLGame::friendsMenu() {
         name.setFillColor(sf::Color::Black);
         name.setPosition(100, startY + i * spacing + 15);
         window->draw(name);
-    }
-    buttons[ButtonKey::Retour] = std::make_unique<Button>(
-        "Retour", font, 22, sf::Color::White, sf::Color(220, 20, 60),
-        sf::Vector2f(50, window->getSize().y - 70), sf::Vector2f(150, 40));
-    // Bouton retour en bas
+    }*/
 
     drawButtons();
+    drawTextFields();
 
-    // Gestion des clics
-    if (buttons[ButtonKey::AddFriend]->isClicked(*window)) {
-        json j;
-        j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
-        return;
-    }
-
-    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+    if(buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         j[jsonKeys::ACTION] = jsonKeys::MAIN;
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
         return;
+    }
+    else if (buttons.count(ButtonKey::Settings) && buttons[ButtonKey::Settings]->isClicked(*window)) {
+        // Action pour le bouton "Settings"
+    } else if (buttons.count(ButtonKey::Notification) && buttons[ButtonKey::Notification]->isClicked(*window)) {
+        // Action pour le bouton "Notification"
+    } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
+        // Action pour le bouton "Profile"
     }
 }
 
@@ -691,14 +764,19 @@ void SFMLGame::chatMenu() {
         buttons[ButtonKey::Send] = std::make_unique<Button>(sendButton);
     }
 
+    // Dessiner les champs de texte et les boutons
     drawTextFields();
     drawButtons();
-    drawContacts();
     
+
     if (!client.getServerData().empty() && client.getServerData().contains("data")) {
         contacts = client.getServerData()["data"];
         client.clearServerData();
     }
+    // Gérer les clics sur les contacts
+    handleContacts();
+    //dessiner les contacts
+    drawContacts();
 
     // Vérifier d'abord le backButton
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
@@ -718,8 +796,6 @@ void SFMLGame::chatMenu() {
         texts[TextFieldKey::MessageField]->clear(); // Effacer le champ de texte après l'envoi
         return;
     }
-    // Gérer les clics sur les contacts
-    handleContacts();
     // Gérer les messages du serveur
     getMessagesFromServer();
     // Afficher les messages
@@ -784,11 +860,10 @@ void SFMLGame::drawContacts() {
 
 void SFMLGame::drawMessages() {
     for (auto& [sender, message] : messages) {
-        if(sender != clickedContact && sender != "You") {
-            continue; // Ignore messages not from the selected contact
-        }
-        displayMessage(sender, message);
+        if(sender == clickedContact || sender == "You") {
+            displayMessage(sender, message);
         MessagesY += 40; // Adjust the Y position for each message
+        }
     }
     MessagesY = 60; // Reset Y position after all messages are drawn
 }
@@ -898,10 +973,6 @@ void SFMLGame::displayGame(){
             drawEndGame(gameData.menu);
         }
     }
-
-  
-
-    
 }
 
 void SFMLGame::drawGrid(const json& grid) {
@@ -978,7 +1049,6 @@ void SFMLGame::drawTetramino(const json& tetraPiece) {
             }
         }
     }
-
 }
 
 void SFMLGame::drawEndGame(const json& endGameData) {

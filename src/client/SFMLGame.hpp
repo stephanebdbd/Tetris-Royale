@@ -21,6 +21,7 @@ const std::string FONT_PATH = "../../res/fonts/Arial.ttf";
 const std::string LogoBackGround = "../../res/background/logo.png";
 const std::string ConnexionBackGround = "../../res/background/connexion.png";
 const std::string MainMenuBackGround = "../../res/background/main_menu.png";
+const std::string RankingBackGround = "../../res/background/ranking.png";
 const std::string GameMenuBackGround = "../../res/background/game_menu.png";
 const std::string GridBackGround = "../../res/background/grid.png";
 const std::string ChatBackGround = "../../res/background/chat.png";
@@ -38,26 +39,41 @@ const std::string LogoFrindsRequest = "../../res/logo/friendRequest.png";
 
 
 struct Textures{
-    sf::Texture connexion;
-    sf::Texture grid;
-    sf::Texture game;
-    sf::Texture settings;
-    sf::Texture chat;
-    sf::Texture logoConnexion;
-    sf::Texture logoNotification;
-    sf::Texture logoSettings;
-    sf::Texture logoTeams;
-    sf::Texture logoRanking;
-    sf::Texture logoChat;
-    sf::Texture logoMain;
-    sf::Texture logoExit;
-    sf::Texture logoAddFriend;
-    sf::Texture logoFrindsRequest;
+    sf::Texture connexion, grid, game, settings, 
+                chat, ranking, logoConnexion,logoNotification,
+                logoSettings, logoTeams, logoRanking,
+                logoChat,logoMain,logoExit,logoAddFriend,
+                logoFrindsRequest;
+
+    Textures() = default;
+    ~Textures() = default;
+
+    void loadTexture(sf::Texture& texture, const std::string& filePath) {
+        if (!texture.loadFromFile(filePath)) {
+            std::cerr << "Erreur: Impossible de charger la texture depuis " << filePath << std::endl;
+        }
+    }
+    void loadTextures() {
+        loadTexture(connexion, ConnexionBackGround);
+        //loadTexture(grid, GridBackGround);
+        //loadTexture(game, GameMenuBackGround);
+        loadTexture(chat, ChatBackGround);
+        loadTexture(ranking, RankingBackGround);
+        loadTexture(logoConnexion, LogoBackGround);
+        loadTexture(logoNotification, LogoNotification);
+        loadTexture(logoSettings, LogoSettings);
+        loadTexture(logoTeams, LogoTeams);
+        loadTexture(logoRanking, LogoRanking);
+        loadTexture(logoChat, LogoChat);
+        loadTexture(logoMain, LogoMain);
+        loadTexture(logoExit, LogoExit);
+        loadTexture(logoAddFriend, LogoAddFriend);
+        loadTexture(logoFrindsRequest, LogoFrindsRequest);
+    }
 };
 
 
 class SFMLGame {
-
     private:
 
         Client& client;
@@ -70,6 +86,7 @@ class SFMLGame {
         std::vector<std::pair<std::string, std::string>> messages;
         std::vector<std::string> contacts;
         std::vector<std::string> friends;
+        std::vector<std::pair<std::string, int>> ranking;
         sf::Font font;
         MenuState currentState;
         std::string clickedContact;
@@ -121,11 +138,14 @@ class SFMLGame {
         // Welcome Menu
         void welcomeMenu();
         void connexionMenu() ;
+        void registerMenu();
         void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
         // Main Menu
         void mainMenu();
-        void registerMenu();
+
+        //classement
+        void rankingMenu();
 
         // Game Menu
         void gameMenu();

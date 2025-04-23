@@ -5,6 +5,7 @@ enum class ButtonKey {
     Login,          // Bouton pour se connecter
     Registre,       // Bouton pour s'inscrire
     Quit,           // Bouton pour quitter
+    Ranking,       // Bouton pour afficher le classement
     Teams,          // Bouton pour gérer les équipes
     Play,           // Bouton pour jouer
     Chat,           // Bouton pour accéder au chat

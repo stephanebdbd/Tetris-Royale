@@ -13,7 +13,9 @@ namespace jsonKeys {
     constexpr char FRIEND[] = "friend";
     constexpr char WELCOME[] = "welcome";
     constexpr char MAIN[] = "main";
-
+    constexpr char SETTINGS[] = "settings";
+    constexpr char NOTIFICATION[] = "notification";
+    constexpr char RANKING[] = "ranking";
     constexpr char FRIENDS[] = "friends";
     constexpr char ADD_FRIEND[] = "addFriend";
     constexpr char FRIEND_REQUEST[] = "friendRequest";

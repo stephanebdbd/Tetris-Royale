@@ -5,7 +5,7 @@
 
 class Rectangle {
     public:
-        Rectangle(const sf::Vector2f& position, const sf::Vector2f& radius, 
+        Rectangle(const sf::Vector2f& position, const sf::Vector2f& size, 
                 const sf::Color& FillColor, const sf::Color& outLineColor);
         void draw(sf::RenderWindow& window) const;
         void drawPhoto(const sf::Texture& texture);
@@ -16,7 +16,7 @@ class Rectangle {
 
 class Circle {
     public:
-        Circle(const sf::Vector2f& position, const float& size, 
+        Circle(const sf::Vector2f& position, const float& radius, 
             const sf::Color& FillColor, const sf::Color& outLineColor);
         void draw(sf::RenderWindow& window);
         void drawPhoto(const sf::Texture& texture, sf::RenderWindow& window);

@@ -215,11 +215,12 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le jeu.");
             return;
         }
-        else if(actionType == "classement") {
+        else if(actionType == jsonKeys::RANKING) {
             //gerer le classement
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le classement." << std::endl;
+            auto ranking = userManager->getRanking();
             clientStates[clientId] = MenuState::classement;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le classement.");
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le classement.", {}, ranking);
             return;
         }
         else if(actionType == "settings") {
@@ -259,10 +260,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             if(friends.empty()){
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Aucun ami trouvé.");
                 return;
-            }
-            std::cout<<"---> Affichege Liste d'amis : " << std::endl;
-            for (const auto& friendName : friends) {
-                std::cout << friendName << std::endl;
             }
 
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Liste d'amis", friends);

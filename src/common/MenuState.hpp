@@ -66,7 +66,7 @@ public:
     MenuState deserialize(const std::string& data);
     // Send the MenuState to the client
     
-    void sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message = "", const std::vector<std::string>& data = {});
+    void sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message = "", const std::vector<std::string>& data = {}, const std::vector<std::pair<std::string, int>>& dataPair = {}) ;
     void sendTemporaryDisplay(int clientSocket, const std::string& message) ;
 
 };

@@ -15,11 +15,12 @@ MenuState MenuStateManager::deserialize(const std::string& data) {
 }
 
 // Send MenuState to Client
-void MenuStateManager::sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message, const std::vector<std::string>& data) {
+void MenuStateManager::sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message, const std::vector<std::string>& data, const std::vector<std::pair<std::string, int>>& dataPair) {
     json jsonData;
     jsonData["state"] = serialize(state);
     jsonData["message"] = message;
     jsonData["data"] = data;
+    jsonData["dataPair"] = dataPair;
     std::string serializedState = jsonData.dump() + "\n";
     
     // Add error handling for send
