@@ -40,6 +40,22 @@ enum class ButtonKey {
     JoinGame,
     GameOver,
     GameVictory,
+    Valider,
+    ValiderNb,
+    ValiderEnergie,
+    InvitePlayer,
+    InviteObserver,
+    Yes,
+    No,
+    Malus,
+    Bonus,
+    Inversion,
+    Blocage,
+    ChuteRapide,
+    Suppression,
+    EcranNoir,
+    Ralentir,
+    MiniBlocs
 
 
 
@@ -51,5 +67,11 @@ enum class TextFieldKey {
     Password,       // Champ de texte pour le mot de passe
     MessageField,   // Champ de texte pour les messages
     SearchField,     // Champ de texte pour la recherche
-    ConfirmPassword
+    ConfirmPassword,
+    Speed,
+    NbreJoueurs,
+    Energie,
+    NomJoueur,
+    Victime,
+    Room
 };

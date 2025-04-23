@@ -56,7 +56,7 @@ public:
     }
     
     void applyMiniTetraminoBonus(){
-        currentPiece.applyMiniTetraminoBonus();
+        nextPiece.applyMiniTetraminoBonus();
     }
 
     void applySpeedBonusMalus(int speed);
