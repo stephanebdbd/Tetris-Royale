@@ -28,6 +28,7 @@ enum class MenuState {
                         Classic,
                         Royal_Competition,
                             Settings,
+                            Observer,
                             Help,
                 JoinGame,
                     GameRequestList,
