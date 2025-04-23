@@ -10,7 +10,7 @@
 #include <memory>
 
 
-const unsigned int WINDOW_WIDTH = 800;
+const unsigned int WINDOW_WIDTH = 1500;
 const unsigned int WINDOW_HEIGHT = 750;
 const std::string WINDOW_TITLE = "Tetris Royal";
 
@@ -996,9 +996,48 @@ void SFMLGame::displayGame(){
             drawTetramino(gameData.nextPieceData);
             drawScore(gameData.scoreData);
             drawMessageMalusBonus(gameData.message);
+            if(gameData.miniUpdate){
+                int i = 0;
+                for(const auto& miniGrid : gameData.miniGrid) {
+                    drawMiniGrid(miniGrid["grid"], miniGridPositions[i]);
+                    drawMiniTetra(miniGrid["tetra"], miniGridPositions[i]);
+                    i++;
+                }
+            }
         } 
     }
 }
+
+void SFMLGame::drawMiniGrid(const json& miniGrid, sf::Vector2f pos) {
+    // Récupération des informations
+
+
+    if(miniGrid[jsonKeys::LIGHT_GRID]) return;
+    int width = miniGrid[jsonKeys::WIDTH]; 
+    int height = miniGrid[jsonKeys::HEIGHT]; 
+    const json& cells = miniGrid[jsonKeys::CELLS];
+    sf::Color color ;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            sf::RectangleShape cell(sf::Vector2f(15 - 1, 15 - 1)); 
+            cell.setPosition(x * 15 + pos.x, y * 15 + pos.y);  
+            
+            bool occupied = cells[y][x][jsonKeys::OCCUPIED]; 
+            if (occupied) {
+                int colorValue = cells[y][x][jsonKeys::COLOR];
+                sf::Color color = fromSFML(colorValue);
+                cell.setFillColor(color);
+            }else{
+                cell.setFillColor(sf::Color(50, 50, 50));
+            }
+
+            window->draw(cell);  
+        }
+    }
+    
+}
+
+
 
 void SFMLGame::drawGrid(const json& grid) {
     if(grid[jsonKeys::LIGHT_GRID]) return;

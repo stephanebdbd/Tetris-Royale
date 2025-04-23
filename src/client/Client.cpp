@@ -138,10 +138,10 @@ void Client::receiveDisplay() {
                     json data = json::parse(jsonStr);
                     
                     // Si c'est une grille de jeu
-                    if (data.contains(jsonKeys::GRID)) {
+                    if (data.contains(jsonKeys::GRID)|| data.contains("otherPlayersGrids")) {
                         isPlaying = true;
                         chatMode = false;
-                        display.displayGame(data);
+                        //display.displayGame(data);
                         setGameStateFromServer(data);
                     }
                     // Si c'est un message de chat
@@ -222,6 +222,10 @@ void Client::setGameStateFromServer(const json& data) {
         gameState.isGame = true;
         gameState.message = data[jsonKeys::MESSAGE_CIBLE];
 
+    }
+    else if (data.contains("otherPlayersGrids")){
+        gameState.miniGrid = data["otherPlayersGrids"];
+        gameState.miniUpdate = true;
     }
     else{
         gameState.isGame = false;

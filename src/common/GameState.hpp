@@ -14,6 +14,8 @@ struct GameState {
     bool isEnd = false;
     bool isGame = false;
     json message;
+    json miniGrid;
+    bool miniUpdate = false;
 
     
 };
