@@ -29,6 +29,7 @@ class TextField {
         void validateInput();
         void clear();
         void resize(float scaleX, float scaleY) ;
+        void setText(const std::string& newText);
 
     
     private:
@@ -44,4 +45,5 @@ class TextField {
         sf::RectangleShape cursor;
         float padding;
         bool hiddenText = false;
+        
 };

@@ -220,6 +220,8 @@ void Client::setGameStateFromServer(const json& data) {
         gameState.nextPieceData = data[jsonKeys::NEXT_PIECE];
         gameState.scoreData = data[jsonKeys::SCORE];
         gameState.isGame = true;
+        gameState.message = data[jsonKeys::MESSAGE_CIBLE];
+
     }
     else{
         gameState.isGame = false;
@@ -258,5 +260,4 @@ void Client::sendInputFromSFML(const std::string& input) {
         controller.sendInput(input, clientSocket);
     }
 }
-
 

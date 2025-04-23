@@ -13,6 +13,8 @@ struct GameState {
     json menu;
     bool isEnd = false;
     bool isGame = false;
+    json message;
+
     
 };
 

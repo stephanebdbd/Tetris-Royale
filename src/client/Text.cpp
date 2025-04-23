@@ -192,3 +192,15 @@ void TextField::clear() {
     textString.clear();
     text.setString(textString);
 }
+
+void TextField::setText(const std::string& newText) {
+    textString = newText;  // Stocke le texte original
+    
+    // Affiche le texte normal ou masqué selon le besoin
+    text.setString(hiddenText ? std::string(newText.length(), '*') : newText);
+    
+    // Positionne le curseur à la fin du texte
+    if (isActive) {
+        updateCursor();
+    }
+}
