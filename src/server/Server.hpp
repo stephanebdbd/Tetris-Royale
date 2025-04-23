@@ -132,6 +132,8 @@ public:
 
     //GUI
     void handleGUIActions(int clientSocket, int clientId, const json& action);
+    void sendMiniGameToPlayer(int clientId, int clientSocket, std::shared_ptr<GameRoom> gameRoom);
+
 
 };
 

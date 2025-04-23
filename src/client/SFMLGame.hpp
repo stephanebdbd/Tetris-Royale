@@ -128,6 +128,11 @@ class SFMLGame {
         bool duel = false;
         bool classic = false;
         bool royale = false;
+        std::vector<sf::Vector2f> miniGridPositions = {
+            {550.f, 0.f}, {550.f, 320.f}, {720.f, 0.f}, {720.f, 320.f},
+            {890.f, 0.f}, {890.f, 320.f}, {1060.f, 0.f}, {1060.f, 320.f},
+
+        };
 
     public:
         SFMLGame(Client& client);
@@ -196,6 +201,9 @@ class SFMLGame {
         void displayWaitingRoom();
         void displayJoinGame();
         void drawMessageMalusBonus(const json& msg);
+
+        void drawMiniGrid(const json& miniGrid, sf::Vector2f pos);
+        void drawMiniTetra(const json& miniTetra, sf::Vector2f pos);
 
 };
 

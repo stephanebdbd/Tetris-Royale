@@ -763,6 +763,7 @@ void Server::loopGame(int ownerId) {
                         gameRoom->updatePlayerGame(player);
                         if (gameRoom->getNeedToSendGame(player)) {
                             sendGameToPlayer(player, clientIdToSocket[player], gameRoom);
+                            sendMiniGameToPlayer(player, clientIdToSocket[player], gameRoom);
                             gameRoom->setNeedToSendGame(false, player);
                         }
                     }
@@ -1284,6 +1285,32 @@ void Server::sendGameToPlayer(int clientId, int clientSocket, std::shared_ptr<Ga
     message[jsonKeys::NEXT_PIECE] = tetraminos[jsonKeys::NEXT_PIECE];
 
     message[jsonKeys::MESSAGE_CIBLE] = gameRoom->messageToJson(clientId);
+    std::string msg = message.dump() + "\n";
+
+    send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi
+}
+
+void Server::sendMiniGameToPlayer(int clientId, int clientSocket, std::shared_ptr<GameRoom> gameRoom) {
+    json message;
+
+
+
+    json otherPlayersGrids = json::array();
+    for (int otherPlayerId : gameRoom->getPlayers()) {
+        if (otherPlayerId != clientId) { // Ne pas inclure la grille du joueur principal
+            std::shared_ptr<Game> otherGame = gameRoom->getGame(otherPlayerId);
+
+            json otherPlayerData;
+            otherPlayerData["playerId"] = otherPlayerId;
+            otherPlayerData["grid"] = otherGame->gridToJson();
+            otherPlayerData["tetra"] = otherGame->tetraminoToJson()[jsonKeys::TETRA_PIECE];
+            otherPlayersGrids.push_back(otherPlayerData);
+            
+        }
+    }
+    message["otherPlayersGrids"] = otherPlayersGrids;
+
+
     std::string msg = message.dump() + "\n";
 
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi

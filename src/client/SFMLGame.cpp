@@ -1037,7 +1037,32 @@ void SFMLGame::drawMiniGrid(const json& miniGrid, sf::Vector2f pos) {
     
 }
 
+void SFMLGame::drawMiniTetra(const json& miniTetra, sf::Vector2f pos) {
+    // Récupération des informations
+    if(miniTetra[jsonKeys::LIGHT_TETRA]) return;
+    int x = miniTetra[jsonKeys::X];
+    int y = miniTetra[jsonKeys::Y];
+    std::vector<std::vector<std::string>> shape = miniTetra[jsonKeys::SHAPE];
+    int shapeSymbol = miniTetra[jsonKeys::SHAPE_SYMBOL];
 
+    // Taille d’un bloc de tétrimino en pixels
+
+    sf::Color color = SFMLGame::fromShapeSymbolSFML(std::string(1, shapeSymbol));
+
+    for (size_t row = 0; row < shape.size(); ++row) {
+        for (size_t col = 0; col < shape[row].size(); ++col) {
+            if (shape[row][col][0] != ' ') {
+                sf::RectangleShape block(sf::Vector2f(15-1, 15-1));
+                block.setFillColor(color);
+
+                block.setPosition(((x + col) * 15 + pos.x - 15) , (y + row) * 15 + pos.y);
+
+                window->draw(block);
+            }
+        }
+    }
+
+}
 
 void SFMLGame::drawGrid(const json& grid) {
     if(grid[jsonKeys::LIGHT_GRID]) return;
