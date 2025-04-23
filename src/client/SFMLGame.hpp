@@ -193,7 +193,8 @@ class SFMLGame {
         void CreateOrJoinGame();
         void ChoiceGameMode();
         void drawEndGame();
-        
+        void displayWaitingRoom();
+        void displayJoinGame();
         void drawMessageMalusBonus(const json& msg);
 
 };

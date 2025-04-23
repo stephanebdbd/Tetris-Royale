@@ -1201,7 +1201,218 @@ void SFMLGame::drawScore(const json& scoreData) {
 }
 
 
+void SFMLGame::displayWaitingRoom() {
+    window->clear(sf::Color(30, 30, 60));
+    
 
+    sf::Text title("SALLE D'ATTENTE", font, 50);
+    title.setFillColor(sf::Color::White);
+    title.setStyle(sf::Text::Bold);
+    title.setPosition((WINDOW_WIDTH - title.getLocalBounds().width)/2, 50);
+    window->draw(title);
+
+    if (buttons.empty() && texts.empty()) {
+        texts[TextFieldKey::Speed] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
+            sf::Vector2f(50, 150), sf::Vector2f(200, 50), "Speed");
+        buttons[ButtonKey::Valider] = std::make_unique<Button>("Valider", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+            sf::Vector2f(270, 150), sf::Vector2f(100, 50));
+        
+
+        if (classic || royale) {
+            texts[TextFieldKey::NbreJoueurs] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
+                sf::Vector2f(50, 220), sf::Vector2f(200, 50), "Nbre joueurs");
+            buttons[ButtonKey::ValiderNb] = std::make_unique<Button>("Valider Nb", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(270, 220), sf::Vector2f(100, 50));
+
+           
+            
+        }
+
+        if (royale) {
+            texts[TextFieldKey::Energie] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
+                sf::Vector2f(50, 290), sf::Vector2f(200, 50), "Énergie");
+            buttons[ButtonKey::ValiderEnergie] = std::make_unique<Button>("Valider Energie", font, 24, sf::Color::White, sf::Color(255, 165, 0),
+                sf::Vector2f(270, 290), sf::Vector2f(150, 50));
+
+            
+        }
+
+        float yPos = 250;
+        if (royale) yPos = 360;
+        else if (classic) yPos = 290;
+
+        texts[TextFieldKey::NomJoueur] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
+            sf::Vector2f(50, yPos), sf::Vector2f(420, 50), "Nom du joueur");
+
+        yPos += 70;
+        buttons[ButtonKey::InvitePlayer] = std::make_unique<Button>("Invite Player", font, 24, sf::Color::White, sf::Color(65, 105, 225),
+                sf::Vector2f(50, yPos), sf::Vector2f(200, 50));
+        buttons[ButtonKey::InviteObserver] = std::make_unique<Button>("Invite Observer", font, 24, sf::Color::White, sf::Color(100, 149, 237),
+            sf::Vector2f(270, yPos), sf::Vector2f(200, 50));
+
+        
+    }
+
+    drawTextFields();
+    drawButtons();
+
+
+    
+
+
+    if (buttons.count(ButtonKey::Valider) && buttons[ButtonKey::Valider]->isClicked(*window)) {
+            std::string speed = texts[TextFieldKey::Speed]->getText();
+            if(speed.empty()) {
+                std::cerr << "Rempliez le champs de Vitesse " << std::endl;
+                return;
+            }
+            std::cout << "Vitesse: " << "/speed/" + speed << std::endl;
+            client.sendInputFromSFML("/speed/" + speed);
+            texts[TextFieldKey::Speed]->setText("");
+            return;
+            
+    }
+
+    if ((classic || royale)  && buttons.count(ButtonKey::ValiderNb) && buttons[ButtonKey::ValiderNb]->isClicked(*window)) {
+            std::string nbPlayers = texts[TextFieldKey::NbreJoueurs]->getText();
+            if(nbPlayers.empty()) {
+                std::cerr << "Rempliez le champs de Nombre de joueurs " << std::endl;
+                return;
+            }
+            if (std::stoi(nbPlayers) > 0) {
+                std::cout << "Nombre de joueurs: " << "/max/" + nbPlayers << std::endl;
+                client.sendInputFromSFML("/max/" + nbPlayers);
+                
+            }
+            texts[TextFieldKey::NbreJoueurs]->setText("");
+
+            return;
+    }
+
+    if (royale  && buttons.count(ButtonKey::ValiderEnergie) && buttons[ButtonKey::ValiderEnergie]->isClicked(*window)) {
+            std::string energy = texts[TextFieldKey::Energie]->getText();
+            if(energy.empty()) {
+                std::cerr << "Rempliez le champs d'énergie " << std::endl;
+                return;
+            }
+            if (std::stoi(energy) > 0) {
+                std::cout << "Énergie: " << "/energy/" + energy << std::endl;
+                client.sendInputFromSFML("/energy/" + energy);
+                
+            }
+            texts[TextFieldKey::Energie]->setText("");
+            
+            return;
+       
+    }
+
+    
+
+    if (buttons.count(ButtonKey::InvitePlayer) && buttons[ButtonKey::InvitePlayer]->isClicked(*window)) {
+        std::string name = texts[TextFieldKey::NomJoueur]->getText();
+        if(name.empty()) {
+            std::cerr << "Rempliez le champs de Nom du joueur " << std::endl;
+            return;
+        }
+        std::cout << "Invite Player: " <<"/invite/player/" + name<< std::endl;
+        client.sendInputFromSFML("/invite/player/" + name);
+        texts[TextFieldKey::NomJoueur]->setText("");
+        return;
+        
+    }
+
+    if (buttons.count(ButtonKey::InviteObserver) && buttons[ButtonKey::InviteObserver]->isClicked(*window)) {
+        std::string name = texts[TextFieldKey::NomJoueur]->getText();
+        if(name.empty()) {
+            std::cerr << "Rempliez le champs de Nom du joueur " << std::endl;
+            return;
+        }
+        std::cout << "Invite Observer: " <<"/invite/observer/" + name<< std::endl;
+        client.sendInputFromSFML("/invite/observer/" + name);
+        texts[TextFieldKey::NomJoueur]->setText("");
+        return;
+    }
+}
+
+void SFMLGame::displayJoinGame() {
+    // Effacer la fenêtre avec un fond uni
+    window->clear(sf::Color(30, 30, 60)); // Fond bleu nuit
+
+    // Créer et configurer le texte du titre
+    sf::Text title("DEMANDES DE JEU", font, 40); // Taille réduite à 40
+    title.setFillColor(sf::Color::White); // Couleur blanche simple
+    title.setStyle(sf::Text::Bold); // Gras seulement
+
+    // Centrer horizontalement en haut de l'écran
+    sf::FloatRect titleRect = title.getLocalBounds();
+    title.setOrigin(titleRect.left + titleRect.width/2.0f, 0);
+    title.setPosition(WINDOW_WIDTH/2.0f, 30); // 30px depuis le haut
+
+    if (client.isGameStateUpdated()) {
+        
+        GameState gameData = client.getGameState();
+        json requests = gameData.menu[jsonKeys::OPTIONS];
+        std::string titre = gameData.menu[jsonKeys::TITLE];
+
+        sf::Text t(titre, font, 40);
+        t.setFillColor(sf::Color::White);
+        t.setPosition(20, 100); // Positionner le texte à 100 pixels du haut
+        window->draw(t);
+
+
+        std::string line;
+        if(requests.empty()) {
+            line = "Aucune demande de jeu";
+            sf::Text requ(line, font, 40);
+            requ.setFillColor(sf::Color::White);
+            requ.setPosition(20, 150); // Positionner le texte à 100 pixels du haut
+            window->draw(requ);
+        }
+
+        int i = 0;
+        for (auto& [key, value] : requests.items()) {
+            line = key + value.get<std::string>();
+            std::string message = line;
+            sf::Text requ(message, font, 20);
+            requ.setFillColor(sf::Color::White);
+            requ.setPosition(20, 150 + i); // Positionner le texte à 100 pixels du haut
+            window->draw(requ);
+            i+=50;
+        }
+
+
+        if (buttons.empty() && texts.empty()) {
+            texts[TextFieldKey::Room] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
+                sf::Vector2f(50, 150 + i), sf::Vector2f(200, 50), "room");
+
+            buttons[ButtonKey::Valider] = std::make_unique<Button>("Valider", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(270, 150 + i), sf::Vector2f(100, 50));
+            
+        }
+    
+        drawTextFields();
+        drawButtons();
+        json j;
+
+        if (buttons.count(ButtonKey::Valider) && buttons[ButtonKey::Valider]->isClicked(*window)) {
+            std::string room = texts[TextFieldKey::Room]->getText();
+            if(room.empty()) {
+                std::cerr << "Rempliez le champs de Room " << std::endl;
+                return;
+            }
+            std::cout << "Room choisi: " << room << std::endl;
+            client.sendInputFromSFML("accept." + room);
+            texts[TextFieldKey::Room]->setText("");
+            j[jsonKeys::ACTION] = "AcceptRejoindre";
+            network->sendData(j.dump() + "\n", client.getClientSocket());
+            return;
+        }
+    }
+
+
+    // Dessiner le titre
+    window->draw(title);
+}
 
 void SFMLGame::drawMessageMalusBonus(const json& msg){
 

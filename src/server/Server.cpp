@@ -331,7 +331,29 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             return;
         }
 
-        
+        else if(actionType == "AcceptRejoindre"){
+            std::cout << "Client #" << clientId << " accepte a rejoindre une Gameroom ." << std::endl;
+            //clientStates[clientId] = MenuState::Settings;
+            
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu modeJeu ."/*,invitations*/);
+            return;
+        }
+
+        else if(actionType == "rejouer"){
+            std::cout << "Client #" << clientId << " choisi rejouer" << std::endl;
+            clientStates[clientId] = MenuState::JoinOrCreateGame;
+            
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu join or create."/*,invitations*/);
+            return;
+        }
+
+        else if(actionType == "retour au menu"){
+            std::cout << "Client #" << clientId << " choisi retour au menu" << std::endl;
+            clientStates[clientId] = MenuState::Main;
+            
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu main ."/*,invitations*/);
+            return;
+        }
     }
 }
 
