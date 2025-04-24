@@ -973,16 +973,16 @@ void Server::keyInputAddMembre(int clientSocket, int clientId, const std::string
         returnToMenu(clientSocket, clientId, MenuState::ManageTeam);
     }
     else if (chatRoomsManage.isClient(action, roomName)) { 
-        returnToMenu(clientSocket, clientId, MenuState::AddMembre, "User is already in the room.");
+        returnToMenu(clientSocket, clientId, MenuState::ManageTeam, "User is already in the room.");
     }
     else if (userManager.userNotExists(action)) {
-        returnToMenu(clientSocket, clientId, MenuState::AddMembre, "User does not exist.");
+        returnToMenu(clientSocket, clientId, MenuState::ManageTeam, "User does not exist.");
     }
     else if (chatRoomsManage.sendInvitationToClient(action, roomName)) {
         returnToMenu(clientSocket, clientId, MenuState::ManageTeam, "Request sent successfully.");
     }
     else {
-        returnToMenu(clientSocket, clientId, MenuState::AddMembre, "Failed to add user.");
+        returnToMenu(clientSocket, clientId, MenuState::ManageTeam, "User has already sent a Request to Join Room !");
     }
 }
 
