@@ -43,3 +43,6 @@ def display_database_contents(db_path):
 # Chemin vers la base de données
 db_path = "../server/data/database.db"
 display_database_contents(db_path)
+
+#command for test
+#python3 database.py

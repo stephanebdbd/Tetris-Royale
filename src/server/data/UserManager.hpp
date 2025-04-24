@@ -32,7 +32,7 @@ public:
     QueryResult getUserId(const std::string& username);
 
     QueryResult updateUserName(const std::string &username, const std::string &pwd, const std::string &new_username);
-    
+    QueryResult updateHighScore(const std::string& username, const int& bestScore);
     QueryResult updatePwd(const std::string &username, const std::string &pwd, const std::string &new_pwd);
     
     bool deleteFriend(const std::string &username, const std::string &friend_username);
@@ -73,7 +73,7 @@ public:
     bool userNotExists(const std::string& username) const;
     bool hasSentRequest(const std::string& sender, const std::string& receiver) const;
 
-    std::vector<std::string> getList(const std::string& user, const std::string& status);
+    std::vector<std::string> getList(const std::string& user, const std::string& status, bool doubleSens=true);
     //bool areFriends(const std::string& user1, const std::string& user2);  // Vérifier si deux utilisateurs sont amis
     std::vector<std::pair<std::string, int>> getRanking() const;  // Récupérer le classement des utilisateurs
 

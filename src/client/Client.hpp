@@ -15,10 +15,11 @@ private:
     ClientNetwork network;  // Chaque client a son propre network
     ClientChat chat;        // Chaque client a son propre chat
 
+
     std::string serverIP;
     int port;
     int clientSocket;
-    std::string inputBuffer;  // Buffer pour stocker l'entrée utilisateur
+    std::string inputBuffer;
     bool isPlaying = false;
     bool chatMode = false;
     bool stopInputThread;
@@ -28,6 +29,8 @@ public:
         void run();
         void receiveDisplay();
         void handleUserInput();
+        void displayMenu(const json& data);
+
 };
 
 #endif

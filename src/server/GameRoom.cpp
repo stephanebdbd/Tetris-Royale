@@ -3,27 +3,19 @@
 #include <unistd.h>
 
 
-GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName, int maxPlayers)
-    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(maxPlayers) {
+GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName)
+    : roomId(roomId), ownerId(clientId), gameModeName(gameModeName), maxPlayers(1) {
     
     gameModes.emplace_back(std::make_shared<ClassicMode>());
     gameModes.emplace_back(std::make_shared<RoyalMode>());
-        
-    setGameMode(gameModeName);
-    if (gameModeName == GameModeName::Endless)
-        setSpeed(1000);
 
-    if ((gameModeName == GameModeName::Endless) && (maxPlayers != 1)){
-        this->maxPlayers = 1;
-    }
+    setGameMode(gameModeName);
         
-    else if ((gameModeName == GameModeName::Duel) && (maxPlayers != 2)){
-        this->maxPlayers = 2;
+    if ((gameModeName == GameModeName::Duel)){
+        playersVictim.push_back(1);
+        playersVictim.push_back(0);
     }
-        
-    else if (((gameModeName == GameModeName::Royal_Competition) || (gameModeName == GameModeName::Classic)) && (maxPlayers < 2)){
-        this->maxPlayers = 3;
-    }
+
     addPlayer(clientId);
     std::cout << "Max players: " << maxPlayers << std::endl;
     std::cout << "GameRoom #" << roomId << " created at " << this << std::endl;
@@ -35,6 +27,11 @@ void GameRoom::addPlayer(int playerId) {
         energyOrClearedLines.push_back(0);
         playersVictim.push_back(-1);
         playersMalusOrBonus.push_back(-1);
+        messageList.push_back(Cmessages);
+        applyMalus.push_back(false);
+        showmessage.push_back(true);
+        keyClear.push_back(false);
+
         std::cout << "Joueur #" << players[getAmountOfPlayers()] << " ajouté dans la GameRoom " << getRoomId() << std::endl;
         amountOfPlayers++;
     }
@@ -50,6 +47,10 @@ bool GameRoom::removePlayer(int playerId) {
             energyOrClearedLines.pop_back();
             playersVictim.pop_back();
             playersMalusOrBonus.pop_back();
+            messageList.pop_back();
+            applyMalus.pop_back();
+            showmessage.pop_back();
+            keyClear.pop_back();
             return true;
         }
     }
@@ -65,101 +66,66 @@ bool GameRoom::getIsFull() const {
     return getAmountOfPlayers() == getMaxPlayers();
 }
 
-void GameRoom::setToStartGame(){
-    started = true;
+void GameRoom::startGame() {
     inProgress = true;
-}
-
-bool GameRoom::getHasStarted() const {
-    return started;
 }
 
 bool GameRoom::getSettingsDone() const {
     bool done = (getSpeed() > 100) && getIsFull();
     if (getGameModeName() == GameModeName::Royal_Competition)
-        done = done && (energyLimit < 15);
+        done = done && (energyLimit < 15) && (energyLimit > 0);
     return done;
 
 }
 
-void GameRoom::startGame() {
-    std::cout << "Let's create GameRoom #" << roomId << " at " << this << std::endl;
-
-    if (getGameModeName() != GameModeName::Endless) {
-        while(!(getSettingsDone() || getOwnerQuit())) continue;
-
-        if (getOwnerQuit()) {
-            endGame();
-            return;
-        }
-
-        if (getGameModeName() == GameModeName::Duel) {
-            playersVictim[0] = 1;
-            playersVictim[1] = 0;
-        }
-    }
-
-    int speed = getSpeed();
-
+void GameRoom::createGames(){
     for (int idx = 0; idx < getMaxPlayers(); idx++){
         games.emplace_back(std::make_shared<Game>(10, 20, speed));
-        std::cout << "Game #" << idx << " created at " << &games[idx] << std::endl;
-    }
-
-    setCanGetGames();
-
-    while (!getHasStarted()) continue;
-
-    int countGameOvers = 0;
-    
-    if (getGameModeName() != GameModeName::Endless)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-
-    setCanPlay();
-
-    while (getInProgress()) {
-    
-        countGameOvers = 0;
-
-        for (int i = 0; i < getMaxPlayers(); ++i) {
-
-            if (getGameIsOver(i, true))
-                countGameOvers++;
-
-            else {
-                games[i]->updateGame();
-                if (getGameModeName() != GameModeName::Endless)
-                    handleMalusOrBonus(i);
-            }
-
-            amountOfPlayers = getMaxPlayers() - countGameOvers;
-        }
-
-        // Conditions de fin
-        if ((countGameOvers == getMaxPlayers() - 1) && (getGameModeName() != GameModeName::Endless))
-            endGame();
-        else if ((countGameOvers == 1) && (getGameModeName() == GameModeName::Endless))
-            endGame();
+        std::cout << "Game #" << idx << " created at " << games[idx] << std::endl;
     }
 }
 
+void GameRoom::updatePlayerGame(int playerServerId) {
+    int playerId = getPlayerId(playerServerId);
+    if (playerId != -1) {
+        games[playerId]->updateGame();
+        handleMalusOrBonus(playerId);
+    }
+}
 
 void GameRoom::handleMalusOrBonus(int playerId) {
     if (getGameModeName() == GameModeName::Royal_Competition) {
-        energyOrClearedLines[playerId] += games[playerId]->getLinesCleared();;
-        if ((energyOrClearedLines[playerId] >= energyLimit) && (playersMalusOrBonus[playerId] != -1) && (playersVictim[playerId] != -1)) {
-            applyFeatureMode(playerId);
-            reinitializeMalusOrBonus(playerId);
-        }
-    }
-    else if ((getGameModeName() == GameModeName::Duel) || (getGameModeName() == GameModeName::Classic)) {
-        playersMalusOrBonus[playerId] = games[playerId]->getLinesCleared();
-        if (playersMalusOrBonus[playerId] > 1) {
-            if (getGameModeName() == GameModeName::Duel){
+        energyOrClearedLines[playerId] += games[playerId]->getLinesCleared();
+        if(energyOrClearedLines[playerId] >= energyLimit){
+            if((playersMalusOrBonus[playerId] == -1) && (playersVictim[playerId] == -1) && (showmessage[playerId])){
+                messageList[playerId][jsonKeys::CHOICE_MALUS_BONUS] = true;
+                showmessage[playerId] = false;
+            }
+            else if ((playersMalusOrBonus[playerId] != -1) && (playersVictim[playerId] != -1)) {
                 applyFeatureMode(playerId);
                 reinitializeMalusOrBonus(playerId);
             }
-            else if (playersVictim[playerId] != -1) {
+        }
+    }
+    else if ((getGameModeName() == GameModeName::Duel) || (getGameModeName() == GameModeName::Classic)) {
+        // playersMalusOrBonus[playerId] = games[playerId]->getLinesCleared();
+        int linesCleared = games[playerId]->getLinesCleared();
+        if (linesCleared > 1 || applyMalus[playerId]) {
+            if (getGameModeName() == GameModeName::Duel){
+                playersMalusOrBonus[playerId] = linesCleared;
+                applyFeatureMode(playerId);
+                reinitializeMalusOrBonus(playerId);
+            }
+            else if(getGameModeName() == GameModeName::Classic && showmessage[playerId]) {
+                playersMalusOrBonus[playerId] = linesCleared;
+                std::cout<<"raha true"<<std::endl;
+                messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = true;
+                choiceVictimRandomly(playerId);
+                showmessage[playerId] = false;
+                
+            }
+            if (playersVictim[playerId] != -1) {
+                std::cout<<"hna ghadi nsift malus"<<std::endl;
                 applyFeatureMode(playerId);
                 reinitializeMalusOrBonus(playerId);
             } 
@@ -171,10 +137,14 @@ void GameRoom::reinitializeMalusOrBonus(int playerId) {
     energyOrClearedLines[playerId] = 0;
     playersMalusOrBonus[playerId] = -1;
     playersVictim[playerId] = -1;
+    showmessage[playerId] = true;
+    applyMalus[playerId] = false;
 }
 
 bool GameRoom::getCanUseMalusOrBonus(int playerId) const {
     if (getGameModeName() == GameModeName::Royal_Competition) {
+        std::cout<<"energyOrClearedLines[playerId]: "<<energyOrClearedLines[playerId]<<std::endl;
+        std::cout<<"energyLimit: "<<energyLimit<<std::endl;
         return energyOrClearedLines[playerId] >= energyLimit;
     }
     else if ((getGameModeName() == GameModeName::Duel) || (getGameModeName() == GameModeName::Classic)) {
@@ -185,11 +155,19 @@ bool GameRoom::getCanUseMalusOrBonus(int playerId) const {
 
 void GameRoom::keyInputchooseMalusorBonus(int playerId, int malusOrBonus) {
     if (getGameModeName() == GameModeName::Royal_Competition){
-        if ((malusOrBonus > 0) && (malusOrBonus < 8)){
+        if(messageList[playerId][jsonKeys::CHOICE_MALUS]){
             playersMalusOrBonus[playerId] = malusOrBonus;
-            if (malusOrBonus > 5)
-                playersVictim[playerId] = playerId; // Bonus appliqué sur soi-même
+            messageList[playerId][jsonKeys::CHOICE_MALUS] = false;
+            messageList[playerId][jsonKeys::CHOICE_CIBLE] = true;
         }
+        else if(messageList[playerId][jsonKeys::CHOICE_BONUS]){
+            playersMalusOrBonus[playerId] = malusOrBonus + 5;
+            playersVictim[playerId] = playerId; // Bonus appliqué sur soi-même
+            messageList[playerId][jsonKeys::CHOICE_BONUS] = false;
+        }
+
+        keyClear[playerId] = true;
+        applyMalus[playerId] = true;
     } 
 }
 
@@ -198,6 +176,12 @@ void GameRoom::keyInputchooseVictim(int playerId, int victim) {
         if (victim <= getMaxPlayers())
             playersVictim[playerId] = victim-1;
     }
+}
+
+void GameRoom::setAmountOfPlayers(int amount) {
+    amountOfPlayers = amount;
+    if ((amountOfPlayers == maxPlayers - 1))
+        endGame();
 }
 
 void GameRoom::endGame() {
@@ -212,10 +196,6 @@ void GameRoom::applyFeatureMode(int playerId) {
     }
 }
 
-void GameRoom::setInProgress(bool status) {
-    inProgress = status;
-}
-
 void GameRoom::setSpeed(int newSpeed) {
     std::cout << "Speed: " << newSpeed << std::endl;
     if (newSpeed > 100)
@@ -227,17 +207,18 @@ void GameRoom::setGameMode(GameModeName gameMode) {
         gameModeName = gameMode;
     if (getGameModeName() == GameModeName::Endless) {
         gameModeIndex = -1;
-        setMaxPlayers(1);
+        this->setSpeed(1000);
+        this->setMaxPlayers(1);
     }
-    else if (getGameModeName() == GameModeName::Royal_Competition) {
-        gameModeIndex = 1;
+    else if ((getGameModeName() == GameModeName::Royal_Competition) || (getGameModeName() == GameModeName::Classic)) {
+        gameModeIndex = (getGameModeName() == GameModeName::Royal_Competition) ? 1 : 0;
         if (getMaxPlayers() < 3)
-            setMaxPlayers(3);
+            this->setMaxPlayers(3);
     }
     else {
         gameModeIndex = 0;
-        if (getMaxPlayers() < 2)
-            setMaxPlayers((getGameModeName() == GameModeName::Duel) ? 2 : 3);
+        if (getMaxPlayers() != 2)
+            this->setMaxPlayers(2);
     }
 }
 
@@ -259,19 +240,15 @@ void GameRoom::setOwnerQuit() { ownerQuit = true; }
 
 bool GameRoom::getOwnerQuit() const { return ownerQuit; }
 
-void GameRoom::setCanGetGames() { canGetGames = true; }
-
-bool GameRoom::getCanGetGames() const { return canGetGames; }
-
-void GameRoom::setCanPlay() { canPlay = true; }
-
-bool GameRoom::getCanPlay() const { return canPlay; }
-
 void GameRoom::setMaxPlayers(int max) {
     if ((getGameModeName() != GameModeName::Endless) && (getGameModeName() != GameModeName::Duel)){
         if ((max > 2) && (max < 10) && (getAmountOfPlayers() <= max))
             maxPlayers = max;    
     }
+    else if ((getGameModeName() == GameModeName::Duel))
+        maxPlayers = 2;
+    else
+        maxPlayers = 1;
 }
 
 std::string GameRoom::convertUnicodeToText(const std::string& unicodeAction) {
@@ -315,15 +292,78 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
     int playerId = getPlayerId(playerServerId);
     if ((playerId == -1) || getOwnerQuit())
         return;
-    if (getHasStarted()) {
+    if (getInProgress()) {
         if (getCanUseMalusOrBonus(playerId)) {
-            int action = convertStringToInt(unicodeAction);
-            if (action != -1) {
-                if ((playersMalusOrBonus[playerId] == -1) && (getGameModeName() == GameModeName::Royal_Competition))
-                    keyInputchooseMalusorBonus(playerId, action);
-                else
-                    keyInputchooseVictim(playerId, action);
+            
+            std::cout<<"unicodeAction: "<<unicodeAction<<std::endl;
+
+            if(std::find(boolInputs.begin(), boolInputs.end(), unicodeAction) != boolInputs.end()){
+                std::cout<<"i am hier1"<<std::endl;
+                if (unicodeAction == "N" || unicodeAction == "n") {
+                    messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = false;
+                    messageList[playerId][jsonKeys::CHOICE_CIBLE] = true;
+                    keyClear[playerId] =  true;
+                }
+
+                else if (unicodeAction == "Y" || unicodeAction == "y") {
+                    messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = false;
+                    playersVictim[playerId] = victimRandom;
+                    std::cout<<"raha false"<<std::endl;
+                    applyMalus[playerId] = true;
+                    keyClear[playerId] = true;
+                }
             }
+            
+
+            else{
+                std::cout<<"i am hier2"<<std::endl;
+                int action = convertStringToInt(unicodeAction);
+                if (action != -1) {
+                    std::cout<<"i am hier3"<<std::endl;
+                    if ((playersMalusOrBonus[playerId] == -1) && (getGameModeName() == GameModeName::Royal_Competition) && (!applyMalus[playerId])) {
+                        std::cout<<"i am hier4"<<std::endl;
+                        if((messageList[playerId][jsonKeys::CHOICE_MALUS_BONUS]) && (action == 1)){
+                            std::cout<<"i am hier5"<<std::endl;
+                            messageList[playerId][jsonKeys::CHOICE_MALUS] = true;
+                            messageList[playerId][jsonKeys::CHOICE_MALUS_BONUS] = false;
+                            keyClear[playerId] = true;
+
+                        }
+
+                        else if((messageList[playerId][jsonKeys::CHOICE_MALUS_BONUS]) && (action == 2)){
+
+                            messageList[playerId][jsonKeys::CHOICE_BONUS] = true;
+                            messageList[playerId][jsonKeys::CHOICE_MALUS_BONUS] = false;
+                            keyClear[playerId] = true;
+
+                        }
+
+                        else if (messageList[playerId][jsonKeys::CHOICE_MALUS] || 
+                            messageList[playerId][jsonKeys::CHOICE_BONUS]) {
+
+                            keyInputchooseMalusorBonus(playerId, action);
+                            
+                        }
+
+                    }
+                        
+                    else{
+                        keyInputchooseVictim(playerId, action);
+                        keyClear[playerId] = true;
+                        messageList[playerId][jsonKeys::CHOICE_CIBLE] = false;
+                        
+                        if(getGameModeName() == GameModeName::Classic)
+                            applyMalus[playerId] = true;
+                        
+                    }
+                        
+            
+
+                }
+            }
+            
+
+            
         }
         else
             keyInputGame(playerId, unicodeAction);
@@ -377,11 +417,8 @@ void GameRoom::inputLobby(int clientId, const std::string& action){
     }
 }
 
-void GameRoom::setOwnerId(int clientId) { ownerId = clientId; }
-
-Score& GameRoom::getScore(int playerServerId) {
-    int playerId = getPlayerId(playerServerId);
-    return games[playerId]->getScore();
+int GameRoom::getScoreValue() const {
+    return games[0]->getScore();
 }
 
 std::shared_ptr<Game> GameRoom::getGame(int playerServerId) {
@@ -394,13 +431,6 @@ std::shared_ptr<Game> GameRoom::getGame(int playerServerId) {
 
     std::cout << "Game #" << playerId << " at : " << games[playerId].get() << std::endl;
     return games[playerId];
-}
-
-void GameRoom::setGameIsOver(int playerServerId) {
-    std::cout << "GameRoom #" << roomId << " received game over from player #" << playerServerId << std::endl;
-    int playerId = getPlayerId(playerServerId);
-    if ((playerId != -1) && (playerId < getAmountOfPlayers()))
-    games[playerId]->setGameOver();
 }
 
 void GameRoom::setNeedToSendGame(bool needToSendGame, int playerServerId) {
@@ -434,7 +464,12 @@ bool GameRoom::getGameIsOver(int playerServerId, bool fromGameRoom) const {
         std::cerr << "Erreur: Tentative d'accès à un index invalide dans `games` : " << playerId << " et gamesSize : " << gamesSize << std::endl;
         return true;
     }
-    return games[playerId]->getIsGameOver();
+    if (games[playerId]->getIsGameOver()) {
+        if (!messageList[playerId].at(jsonKeys::GAME_OVER))
+            messageList[playerId][jsonKeys::GAME_OVER] = true;
+        return true;
+    }
+    return false;
 }
 
 void GameRoom::setEnergyLimit(int newEnergyLimit) {
@@ -446,7 +481,30 @@ int GameRoom::getEnergyLimit() const {
     return energyLimit;
 }
 
-int GameRoom::getEnergyOfPlayer(int playerServerId) const {
+void GameRoom::choiceVictimRandomly(int playerId) {
+    while (true) {
+        int possible = rand() % players.size();
+        if ((possible != playerId) && (!getGameIsOver(possible))) {
+            this->victimRandom = possible;
+            break;
+        }
+    }
+    
+}
+json GameRoom::messageToJson(int playerServerId) const {
     int playerId = getPlayerId(playerServerId);
-    return energyOrClearedLines[playerId];
+    json smessage;
+    for (const auto& m : messageList[playerId]) {
+        smessage[m.first] = m.second;
+    }
+    smessage[jsonKeys::CIBLE_ID] = victimRandom;
+    if(keyClear[playerId]){
+        std::cout<<"i am here from server clear"<<std::endl;
+        smessage[jsonKeys::CLEAR] = true;
+        keyClear[playerId] = false;
+    }
+        
+
+    return smessage;
+    
 }

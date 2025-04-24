@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS Users (
     username TEXT NOT NULL UNIQUE,
     hash_pwd TEXT NOT NULL,
     salt TEXT NOT NULL,
+    best_score INTEGER DEFAULT 0,
     CHECK(username <> '')
 );
 
@@ -17,10 +18,12 @@ CREATE TABLE IF NOT EXISTS ChatRooms (
     CHECK(room_properietor <> '')
 );
 
+-- 'invitation' when an admin send an invitation to client
+-- 'pending' when an client send a request to join a room
 CREATE TABLE IF NOT EXISTS ChatRoomMembers (
     id_room INTEGER NOT NULL,
     id_user INTEGER NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'member', 'admin')),
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('invitation', 'pending', 'member', 'admin')),
     PRIMARY KEY (id_room, id_user),
     FOREIGN KEY (id_room) REFERENCES ChatRooms(id_room) ON DELETE CASCADE,
     FOREIGN KEY (id_user) REFERENCES Users(id_user) ON DELETE CASCADE

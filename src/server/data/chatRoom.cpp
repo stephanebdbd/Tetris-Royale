@@ -1,7 +1,7 @@
 #include "chatRoom.hpp"
 #include <algorithm> 
 
-bool ChatRoom::createRoom(const std::string &room_name, const std::string &admin_pseudo) {
+bool ChatRoom::createTeam(const std::string &room_name, const std::string &admin_pseudo) {
     // Récupérer l'id de l'admin à partir du pseudo
     std::string condition = "username = '" + admin_pseudo + "'";
     QueryResult idAdmin = db->selectFromTable("Users", "id_user", condition);
@@ -261,7 +261,7 @@ void ChatRoom::acceptClientRequest(const std::string& client_pseudo, const std::
     std::string idRoom = idRoomResult.getFirst();
 
     // Vérifier si l'utilisateur a une demande en attente
-    condition = "id_room = " + idRoom + " AND id_user = " + idUser + " AND status = 'pending'";
+    condition = "id_room = " + idRoom + " AND id_user = " + idUser + " AND (status = 'pending' OR status = 'invitation')";
     QueryResult pendingCheck = db->selectFromTable("ChatRoomMembers", "status", condition);
     if (!pendingCheck.isOk() || pendingCheck.getFirst().empty()) {
         std::cout << "Erreur : L'utilisateur n'a pas de demande en attente dans cette salle." << std::endl;
@@ -297,7 +297,7 @@ void ChatRoom::refuseClientRequest(const std::string& client_pseudo, const std::
     std::string idRoom = idRoomResult.getFirst();
 
     // Vérifier si l'utilisateur a une demande en attente
-    condition = "id_room = " + idRoom + " AND id_user = " + idUser + " AND status = 'pending'";
+    condition = "id_room = " + idRoom + " AND id_user = " + idUser + " AND (status = 'pending' OR status = 'invitation')";
     QueryResult pendingCheck = db->selectFromTable("ChatRoomMembers", "status", condition);
     if (!pendingCheck.isOk() || pendingCheck.getFirst().empty()) {
         std::cout << "Erreur : L'utilisateur n'a pas de demande en attente dans cette salle." << std::endl;
@@ -312,6 +312,43 @@ void ChatRoom::refuseClientRequest(const std::string& client_pseudo, const std::
     }
 }
 
+bool ChatRoom::sendInvitationToClient( const std::string& pseudo, const std::string& room_name){
+    // Récupérer l'ID de l'utilisateur
+    std::string condition = "username = '" + pseudo + "'";
+    QueryResult idUserResult = db->selectFromTable("Users", "id_user", condition);
+    if (!idUserResult.isOk() || idUserResult.getFirst().empty()) {
+        std::cout << "Erreur : Utilisateur introuvable." << std::endl;
+        return false;
+    }
+    std::string idUser = idUserResult.getFirst();
+
+    // Récupérer l'ID de la salle
+    condition = "room_name = '" + room_name + "'";
+    QueryResult idRoomResult = db->selectFromTable("ChatRooms", "id_room", condition);
+    if (!idRoomResult.isOk() || idRoomResult.getFirst().empty()) {
+        std::cout << "Erreur : Salle introuvable." << std::endl;
+        return false;
+    }
+    std::string idRoom = idRoomResult.getFirst();
+
+    // Vérifier s'il y a déjà une demande ou une appartenance
+    condition = "id_room = " + idRoom + " AND id_user = " + idUser + " AND (status = member OR status = admin)";
+    QueryResult memberCheck = db->selectFromTable("ChatRoomMembers", "status", condition);
+    if (memberCheck.isOk() && !memberCheck.getFirst().empty()) {
+        std::cout << "Ce client est déja un membre/admin dans cette room" << std::endl;
+        return false ;
+    }
+
+    // Insérer dans ChatRoomMembers avec le statut "pending"
+    std::string columns = "id_room, id_user, status";
+    std::string values = idRoom + ", " + idUser + ", 'invitation'";
+    if (db->insertEntry("ChatRoomMembers", columns, values).isOk()) {
+        std::cout << "Votre invitation a été bien envoyé au client '" << room_name << "' est en attente de validation." << std::endl;
+        return true;
+    }
+    return false;
+}
+
 bool ChatRoom::checkroomExist(const std::string& room_name) const {
     // Vérifier si la salle existe
     std::string condition = "room_name = '" + room_name + "'";
@@ -319,7 +356,7 @@ bool ChatRoom::checkroomExist(const std::string& room_name) const {
     return result.isOk() && !result.getFirst().empty();
 }
 
-void ChatRoom::joinRoom(const std::string& pseudo, const std::string& room_name) {
+void ChatRoom::joinTeam(const std::string& pseudo, const std::string& room_name) {
     // Récupérer l'ID de l'utilisateur
     std::string condition = "username = '" + pseudo + "'";
     QueryResult idUserResult = db->selectFromTable("Users", "id_user", condition);
@@ -531,6 +568,32 @@ std::vector<std::string> ChatRoom::getChatRoomsForUser(const std::string& userna
         "JOIN Users ON ChatRoomMembers.id_user = Users.id_user "
         "WHERE Users.username = '" + username + "' "
         "AND (ChatRoomMembers.status = 'member' OR ChatRoomMembers.status = 'admin');";
+
+    QueryResult result = db->executeQuery(query);
+
+    if (result.isOk()) {
+        chatRooms = result.getVector(0);
+        if (chatRooms.empty()) {
+            std::cout << "Aucune salle où l'utilisateur \"" << username << "\" est membre ou admin." << std::endl;
+        }
+    } else {
+        std::cout << "Erreur : Impossible de récupérer les salles. Détails : " << result.getError() << std::endl;
+    }
+
+    return chatRooms;
+}
+
+
+std::vector<std::string> ChatRoom::getTeamsInvitaionForUser(const std::string& username) const{
+    std::vector<std::string> chatRooms;
+
+    std::string query =
+        "SELECT ChatRooms.room_name "
+        "FROM ChatRooms "
+        "JOIN ChatRoomMembers ON ChatRooms.id_room = ChatRoomMembers.id_room "
+        "JOIN Users ON ChatRoomMembers.id_user = Users.id_user "
+        "WHERE Users.username = '" + username + "' "
+        "AND ChatRoomMembers.status = 'invitation' ;";
 
     QueryResult result = db->executeQuery(query);
 

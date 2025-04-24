@@ -105,6 +105,7 @@ bool DataManager::sendFriendRequest(const std::string& sender, const std::string
 
 
 bool DataManager::acceptFriendRequest(const std::string& receiver, const std::string& sender) {
+
     // Récupérer les IDs des utilisateurs
     QueryResult senderIdResult = getUserId(sender);
     QueryResult receiverIdResult = getUserId(receiver);
@@ -118,8 +119,8 @@ bool DataManager::acceptFriendRequest(const std::string& receiver, const std::st
 
     // Vérifie l'existence d'une demande d'ami en attente
     std::string condition = 
-        "id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "' AND status = 'pending'";
-
+        "(id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "' AND status = 'pending')";
+    std::cout << condition << std::endl;
     QueryResult checkRequest = db->selectFromTable("Friendships", "status", condition);
     if (checkRequest.data.empty()) {
         return false;
@@ -222,20 +223,23 @@ bool DataManager::hasSentRequest(const std::string& sender, const std::string& r
     return (!checkRequest.data.empty() && checkRequest.getFirst() != "0");
 }*/
 
-std::vector<std::string> DataManager::getList(const std::string& user, const std::string& status) {
+std::vector<std::string> DataManager::getList(const std::string& user, const std::string& status, bool doubleSens) {
     std::vector<std::string> list;
 
     QueryResult userIdResult = getUserId(user);
     if (userIdResult.data.empty()) return list;
 
     std::string userId = userIdResult.getFirst();
+    std::string condition = "((u.id_user = f.id_sender AND f.id_receiver = '" + userId + "')";
+    if(doubleSens) condition += "OR (u.id_user = f.id_receiver AND f.id_sender = '" + userId + "')";
+    condition += ")";
+    
 
     std::string sql =
         "SELECT u.username "
         "FROM Friendships f "
         "JOIN Users u ON ("
-            "(u.id_user = f.id_sender AND f.id_receiver = '" + userId + "') OR "
-            "(u.id_user = f.id_receiver AND f.id_sender = '" + userId + "')"
+            + condition +
         ") "
         "WHERE f.status = '" + status + "';";
 
@@ -279,7 +283,7 @@ std::vector<std::string> DataManager::getFriendList(const std::string& user) {
 
 // Obtenir la liste des demandes d'amis en attente
 std::vector<std::string> DataManager::getRequestList(const std::string& user) {
-    return getList(user, "pending");
+    return getList(user, "pending", false);
 }
 
 
@@ -312,7 +316,14 @@ QueryResult DataManager::updatePwd(const std::string &id_user, const std::string
 }
 
 
-
+QueryResult DataManager::updateHighScore(const std::string& username, const int& bestScore){
+    QueryResult result;
+    // Update the username for the specified user
+    std::string set_clause = "best_score = '" + std::to_string(bestScore) + "'";
+    std::string condition = "username = '" + username + "'";
+    result = db->updateEntry("Users", set_clause, condition);
+    return result;
+}
 
 
 QueryResult DataManager::deleteAccount(const std::string &id_user, const std::string &pwd) {

@@ -27,7 +27,7 @@ class ChatRoom {
         //bool deleteRoom();
         // Initialiser la chat room
          // Créer une salle de discussion
-        bool createRoom(const std::string &room_name, const std::string &admin_pseudo);
+        bool createTeam(const std::string &room_name, const std::string &admin_pseudo);
 
         // Vérifie si l'utilisateur est admin dans la salle spécifiée
         bool isAdmin(const std::string& pseudo, const std::string& room_name) const;
@@ -51,12 +51,17 @@ class ChatRoom {
         bool removeClient( const std::string& client_pseudo, const std::string& room_name);
 
         void refuseClientRequest( const std::string& client_pseudo, const std::string& room_name) ;
-
         void acceptClientRequest( const std::string& client_pseudo, const std::string& room_name) ;
+        bool sendInvitationToClient( const std::string& pseudo, const std::string& room_name) ;
+        
+        //verfication de la room
         bool checkroomExist(const std::string& room_name) const; // Vérifier si la salle existe
+        ////////////////////////////// c est deux méthodes a refaire ////////////////////////////
         std::vector<std::string> getChatRoomsForUser(const std::string& username) const ;
+        std::vector<std::string> getTeamsInvitaionForUser(const std::string& username) const ;
+        /////////////////////////////////////////////////////////////////////////////////////////
 
-        void joinRoom(const std::string& pseudo, const std::string& room_name) ;
+        void joinTeam(const std::string& pseudo, const std::string& room_name) ;
         std::vector<std::string> getMembers(const std::string& room_name) const ;
         std::vector<std::string> getAdmins(const std::string& room_name) ;
         std::vector<std::string> getClientPending(const std::string& room_name) ;
@@ -67,6 +72,4 @@ class ChatRoom {
         bool saveMessageToRoom(const std::string& sender, const std::string& room_name, const std::string& msg) ;
         std::string getMessagesFromRoom(const std::string& room_name) ;
         void sendOldMessages(int clientSocket, const std::string& roomName) ;
-
-
 };
