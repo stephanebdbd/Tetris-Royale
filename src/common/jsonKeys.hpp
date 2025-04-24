@@ -18,13 +18,15 @@ namespace jsonKeys {
     constexpr char RANKING[] = "ranking";
     constexpr char FRIENDS[] = "friends";
     constexpr char ADD_FRIEND[] = "addFriend";
+    constexpr char ADD_FRIEND_MENU[] = "addFriendMenu";
     constexpr char FRIEND_REQUEST[] = "friendRequest";
     constexpr char FRIEND_LIST[] = "friendList";
     constexpr char FRIEND_REQUEST_LIST[] = "friendRequestList";
     constexpr char ACTION_TYPE[] = "actionType";
     constexpr char ACTION_TYPE_FRIEND[] = "actionTypeFriend";
     constexpr char ACTION_TYPE_FRIEND_REQUEST[] = "actionTypeFriendRequest";
-
+    constexpr char ACCEPT_FRIEND_REQUEST[] = "acceptFriendRequest";
+    constexpr char REJECT_FRIEND_REQUEST[] = "rejectFriendRequest";
     constexpr char TITLE[] = "title";
     constexpr char OPTIONS[] = "options";
     constexpr char TEXT[] = "text";
@@ -47,7 +49,7 @@ namespace jsonKeys {
     constexpr char SHAPE_SYMBOL[] = "shapeSymbol";
     
     constexpr char MESSAGE_CIBLE[] = "messageCible";
-
+    constexpr char REMOVE_FRIEND[] = "removeFriend";
     constexpr char PROPOSITION_CIBLE[] = "propositionCible";
     constexpr char CHOICE_CIBLE[] = "choiceCible";
     constexpr char CHOICE_MALUS_BONUS[] = "choiceMalusBonus";

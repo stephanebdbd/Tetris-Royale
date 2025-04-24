@@ -62,6 +62,7 @@ public:
     void handleClient(int clientSocket, int clientId);
     void stop();
     void loopGame(int ownerId);
+    void keyInputAddFriendMenuGUI(int clientSocket,int clientId,const std::string& action);
 
     void sendMenuToClient(int clientSocket, const std::string& screen);
     void sendMenuStateToClient(int clientSocket, MenuState state, const std::string& message = "");

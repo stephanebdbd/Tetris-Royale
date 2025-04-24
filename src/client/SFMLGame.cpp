@@ -204,7 +204,239 @@ void SFMLGame::handleEvents() {
         }
     }
 }
+void SFMLGame::addFriendMenu() {
+    // Affichage de l'arrière-plan
+    displayBackground(textures->chat);
 
+    // Titre principal
+    Text title("Ajouter un ami", font, 30, sf::Color::White, sf::Vector2f(250, 30));
+    title.draw(*window);
+
+    // Slogan ou aide en dessous du titre
+    Text subtitle("Entre le pseudo de ton futur ami 🎉", font, 18, sf::Color(200, 200, 220), sf::Vector2f(250, 80));
+    subtitle.draw(*window);
+
+    // Création du champ de texte si pas encore fait
+    if (texts.empty()) {
+        TextField pseudoField(font, 20, sf::Color::Black, sf::Color::White,
+                              sf::Vector2f(250, 130), sf::Vector2f(300, 40), "Pseudo");
+        texts[TextFieldKey::AddFriendField] = std::make_unique<TextField>(pseudoField);
+    }
+
+    // Création des boutons si pas encore fait
+    if (buttons.empty()) {
+        Button sendButton("Envoyer", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                          sf::Vector2f(250, 190), sf::Vector2f(140, 45));
+
+        Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                          sf::Vector2f(410, 190), sf::Vector2f(140, 45));
+
+        buttons[ButtonKey::Send] = std::make_unique<Button>(sendButton);
+        buttons[ButtonKey::Retour] = std::make_unique<Button>(backButton);
+    }
+
+    // Dessin des éléments
+    drawTextFields();
+    drawButtons();
+
+    // Traitement du bouton envoyer
+    if (buttons[ButtonKey::Send]->isClicked(*window) && !texts[TextFieldKey::AddFriendField]->getText().empty()) {
+        std::string friendName = texts[TextFieldKey::AddFriendField]->getText();
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND;
+        j["friend"] = friendName;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+
+        std::cout << "Requête envoyée pour ajouter l'ami : " << friendName << std::endl;
+
+        texts[TextFieldKey::AddFriendField]->clear();
+        return;
+    }
+
+    // Traitement du bouton retour
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+}
+void SFMLGame::friendRequestListMenu() {
+    // Fond
+    displayBackground(textures->chat);
+
+    // Barre latérale "Liste d'amis"
+    Rectangle sidebar(sf::Vector2f(0, 0), sf::Vector2f(200, WINDOW_HEIGHT), sf::Color(30, 30, 50), sf::Color(80, 80, 100));
+    sidebar.draw(*window);
+
+    // Titre
+    Text header("Liste d'amis", font, 24, sf::Color::White, sf::Vector2f(20, 10));
+    header.draw(*window);
+
+    // Requête au serveur pour les amis si data reçu
+    /*if (!client.getServerData().empty() && client.getServerData().contains("amis")) {
+        amis = client.getServerData()["amis"];
+        client.clearServerData();
+    }*/
+    amis= { "Alice", "Bob", "Charlie", "Diana" }; // Exemple de données des demandes d'amis
+    // Affichage des amis
+    static std::vector<sf::Texture> avatarTextures(20);
+    const float contactHeight = 50.0f;
+
+    for (size_t i = 0; i < std::min(amis.size(), avatarTextures.size()); ++i) {
+        float y = 100 + i * contactHeight;
+
+        if (!friendButtons.count(amis[i])) {
+            friendButtons[amis[i]] = std::make_unique<Button>(
+                amis[i], font, 20, sf::Color::White, sf::Color::Transparent,
+                sf::Vector2f(0, y), sf::Vector2f(200, contactHeight), sf::Color::Transparent);
+        }
+
+        if (avatarTextures[i].loadFromFile("../../res/avatar/avatar" + std::to_string(i + 1) + ".png")) {
+            Circle(sf::Vector2f(7, y + 8), 30.0f, sf::Color::White, sf::Color::Transparent)
+                .drawPhoto(avatarTextures[i], *window);
+        }
+
+        friendButtons[amis[i]]->draw(*window);
+    }
+
+    // Clic sur un ami
+    for (const auto& [nom, bouton] : friendButtons) {
+        if (bouton->isClicked(*window)) {
+            selectedFriend = nom;
+            break;
+        }
+    }
+
+    // Si un ami est sélectionné
+    if (!selectedFriend.empty()) {
+        Rectangle(sf::Vector2f(220, 200), sf::Vector2f(300, 150), sf::Color(60, 60, 90), sf::Color::White);
+        Text("Voulez-vous accepter l’ami :", font, 20, sf::Color::White, sf::Vector2f(230, 210)).draw(*window);
+        Text(selectedFriend, font, 24, sf::Color::Cyan, sf::Vector2f(230, 240)).draw(*window);
+
+        // Boutons accepter / refuser
+        if (!buttons.count(ButtonKey::AcceptFriendRequest)) {
+            buttons[ButtonKey::AcceptFriendRequest] = std::make_unique<Button>(
+                "Accepter", font, 18, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(230, 280), sf::Vector2f(100, 40));
+        }
+        if (!buttons.count(ButtonKey::RefuseFriendRequest)) {
+            buttons[ButtonKey::RefuseFriendRequest] = std::make_unique<Button>(
+                "Refuser", font, 18, sf::Color::White, sf::Color(200, 70, 70),
+                sf::Vector2f(350, 280), sf::Vector2f(100, 40));
+        }
+
+        buttons[ButtonKey::AcceptFriendRequest]->draw(*window);
+        buttons[ButtonKey::RefuseFriendRequest]->draw(*window);
+
+        // Action sur clic
+        if (buttons[ButtonKey::AcceptFriendRequest]->isClicked(*window)) {
+            json j = {{jsonKeys::ACTION, jsonKeys::ACCEPT_FRIEND_REQUEST}, {"friend", selectedFriend}};
+            network->sendData(j.dump() + "\n", client.getClientSocket());
+            selectedFriend.clear();
+        }
+        if (buttons[ButtonKey::RefuseFriendRequest]->isClicked(*window)) {
+            json j = {{jsonKeys::ACTION, jsonKeys::REJECT_FRIEND_REQUEST}, {"friend", selectedFriend}};
+            network->sendData(j.dump() + "\n", client.getClientSocket());
+            selectedFriend.clear();
+        }
+    }
+
+    // Bouton retour
+    if (!buttons.count(ButtonKey::Retour)) {
+        buttons[ButtonKey::Retour] = std::make_unique<Button>(
+            textures->logoMain, sf::Vector2f(7, 50), sf::Vector2f(25, 35));
+    }
+    buttons[ButtonKey::Retour]->draw(*window);
+
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j["action"] = "main";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        selectedFriend.clear();
+        return;
+    }
+}
+
+
+
+void SFMLGame::friendsMenu() {
+    // Affichage de l'arrière-plan
+    //std::cout << "Affichage du menu des amis" << std::endl;
+    displayBackground(textures->chat);
+    
+
+    // Titre du menu
+    Text header("Gestion des amis", font, 30, sf::Color::White, sf::Vector2f(250, 20));
+    header.draw(*window);
+
+    if (buttons.empty()) {
+        // Bouton "Ajouter un ami"
+        Button addFriendButton("Ajouter un ami", font, 20, sf::Color::White, sf::Color(100, 200, 250),
+                               sf::Vector2f(250, 100), sf::Vector2f(200, 50));
+        
+        // Bouton "Liste des amis"
+        Button listFriendsButton("Liste des amis", font, 20, sf::Color::White, sf::Color(70, 180, 100),
+                                 sf::Vector2f(250, 170), sf::Vector2f(200, 50));
+        
+        // Bouton "Demandes d'amis"
+        Button requestsButton("Demandes d'amis", font, 20, sf::Color::White, sf::Color(200, 180, 70),
+                              sf::Vector2f(250, 240), sf::Vector2f(200, 50));
+
+        // Bouton retour
+        Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                          sf::Vector2f(250, 310), sf::Vector2f(200, 50));
+
+        buttons[ButtonKey::AddFriend] = std::make_unique<Button>(addFriendButton);
+        buttons[ButtonKey::FriendList] = std::make_unique<Button>(listFriendsButton);
+        buttons[ButtonKey::FriendRequestList] = std::make_unique<Button>(requestsButton);
+        buttons[ButtonKey::Retour] = std::make_unique<Button>(backButton);
+    }
+
+    drawButtons();
+
+    // Actions associées aux boutons
+    if (buttons[ButtonKey::AddFriend]->isClicked(*window)) {
+        // Tu pourrais ici créer un champ pour taper le pseudo d’un ami
+        // Ou envoyer directement une requête réseau
+        std::cout << "Bouton Ajouter un ami cliqué !" << std::endl;
+        // Ex: afficher un champ ou envoyer une commande réseau
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND_MENU;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+    if (buttons[ButtonKey::FriendList]->isClicked(*window)) {
+        // Afficher la liste des amis
+        std::cout << "Affichage de la liste des amis..." << std::endl;
+        // Redirection ou changement d’état
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::FRIEND_LIST;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+    if (buttons[ButtonKey::FriendRequestList]->isClicked(*window)) {
+        std::cout << "Affichage des demandes d’amis..." << std::endl;
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::FRIEND_REQUEST_LIST;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+}
 
 void SFMLGame::refreshMenu() {
     auto newState = client.getCurrentMenuState();
@@ -243,11 +475,14 @@ void SFMLGame::refreshMenu() {
         case MenuState::Friends:
             friendsMenu();
             break;
+        case MenuState::FriendList:
+            friendListMenu();
+            break;
         case MenuState::AddFriend:
-            //addFriendMenu();
+            addFriendMenu();
             break;
         case MenuState::FriendRequestList:
-            //friendRequestListMenu();
+            friendRequestListMenu();
             break;
         case MenuState::chat:
             chatMenu();
@@ -285,6 +520,99 @@ void SFMLGame::refreshMenu() {
             break;
     }
     window->display();
+}
+void SFMLGame::friendListMenu() {
+    // Fond
+    displayBackground(textures->chat);
+
+    // Barre latérale "Amis"
+    Rectangle sidebar(sf::Vector2f(0, 0), sf::Vector2f(200, WINDOW_HEIGHT), sf::Color(30, 30, 50), sf::Color(80, 80, 100));
+    sidebar.draw(*window);
+
+    // Titre
+    Text header("Mes amis", font, 24, sf::Color::White, sf::Vector2f(20, 10));
+    header.draw(*window);
+
+    // Chargement de la liste des amis (à remplacer par les données serveur si besoin)
+    amis = { "Alice", "Bob", "Charlie", "Diana" };
+    static std::vector<sf::Texture> avatarTextures(20);
+    const float contactHeight = 50.0f;
+
+    for (size_t i = 0; i < std::min(amis.size(), avatarTextures.size()); ++i) {
+        float y = 100 + i * contactHeight;
+
+        if (!friendButtons.count(amis[i])) {
+            friendButtons[amis[i]] = std::make_unique<Button>(
+                amis[i], font, 20, sf::Color::White, sf::Color::Transparent,
+                sf::Vector2f(0, y), sf::Vector2f(200, contactHeight), sf::Color::Transparent);
+        }
+
+        if (avatarTextures[i].loadFromFile("../../res/avatar/avatar" + std::to_string(i + 1) + ".png")) {
+            Circle(sf::Vector2f(7, y + 8), 30.0f, sf::Color::White, sf::Color::Transparent)
+                .drawPhoto(avatarTextures[i], *window);
+        }
+
+        friendButtons[amis[i]]->draw(*window);
+    }
+
+    // Clic sur un ami
+    for (const auto& [nom, bouton] : friendButtons) {
+        if (bouton->isClicked(*window)) {
+            selectedFriend = nom;
+            break;
+        }
+    }
+
+    // Si un ami est sélectionné
+    if (!selectedFriend.empty()) {
+        Rectangle(sf::Vector2f(220, 200), sf::Vector2f(300, 150), sf::Color(60, 60, 90), sf::Color::White);
+        Text("Voulez-vous supprimer :", font, 20, sf::Color::White, sf::Vector2f(230, 210)).draw(*window);
+        Text(selectedFriend, font, 24, sf::Color::Cyan, sf::Vector2f(230, 240)).draw(*window);
+
+        // Boutons supprimer / annuler
+        if (!buttons.count(ButtonKey::RemoveFriend)) {
+            buttons[ButtonKey::RemoveFriend] = std::make_unique<Button>(
+                "Supprimer", font, 18, sf::Color::White, sf::Color(200, 70, 70),
+                sf::Vector2f(230, 280), sf::Vector2f(100, 40));
+        }
+        if (!buttons.count(ButtonKey::Cancel)) {
+            buttons[ButtonKey::Cancel] = std::make_unique<Button>(
+                "Annuler", font, 18, sf::Color::White, sf::Color(100, 100, 100),
+                sf::Vector2f(350, 280), sf::Vector2f(100, 40));
+        }
+
+        buttons[ButtonKey::RemoveFriend]->draw(*window);
+        buttons[ButtonKey::Cancel]->draw(*window);
+
+        // Action sur clic
+        if (buttons[ButtonKey::RemoveFriend]->isClicked(*window)) {
+            json j = {
+                {jsonKeys::ACTION, jsonKeys::REMOVE_FRIEND},
+                {"friend", selectedFriend}
+            };
+            network->sendData(j.dump() + "\n", client.getClientSocket());
+            selectedFriend.clear();
+        }
+
+        if (buttons[ButtonKey::CancelRemoveFriend]->isClicked(*window)) {
+            selectedFriend.clear();
+        }
+    }
+
+    // Bouton retour
+    if (!buttons.count(ButtonKey::Retour)) {
+        buttons[ButtonKey::Retour] = std::make_unique<Button>(
+            textures->logoMain, sf::Vector2f(7, 50), sf::Vector2f(25, 35));
+    }
+    buttons[ButtonKey::Retour]->draw(*window);
+
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j["action"] = "main";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        selectedFriend.clear();
+        return;
+    }
 }
 
 
@@ -539,6 +867,8 @@ void SFMLGame::mainMenu() {
         return;
     } else if (buttons.count(ButtonKey::Friends) && buttons[ButtonKey::Friends]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
+        std::cout << "Friends button clicked" << std::endl;
+        std::cout << j.dump() << std::endl;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } 
@@ -560,10 +890,6 @@ void SFMLGame::mainMenu() {
         return;
     }
 }
-
-/*
-Ranking Menu
-*/
 void SFMLGame::rankingMenu(){
     //afficher la background
     displayBackground(textures->ranking);
@@ -659,38 +985,81 @@ void SFMLGame::friendsMenu() {
 }**/
 
 void SFMLGame::friendsMenu() {
-    // Display the friends background
-    Rectangle background(sf::Vector2f(0, 0), sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT), sf::Color(70, 130, 180), sf::Color::Transparent); // Bleu acier
-    background.draw(*window);
+    // Affichage de l'arrière-plan
+    //std::cout << "Affichage du menu des amis" << std::endl;
+    displayBackground(textures->chat);
+    
 
-    // tres blanc verticale dans x = 200
-    Rectangle verticalLine(sf::Vector2f(200, 0), sf::Vector2f(2, WINDOW_HEIGHT), sf::Color::Black, sf::Color::Transparent);   
-    verticalLine.draw(*window);
-
-    // Header for friends list
-    Text header("Friends", font, 24, sf::Color::White, sf::Vector2f(60, 20));
+    // Titre du menu
+    Text header("Gestion des amis", font, 30, sf::Color::White, sf::Vector2f(250, 20));
     header.draw(*window);
 
-    if(buttons.empty()){
-        buttons[ButtonKey::Retour]= std::make_unique<Button>(textures->logoMain, sf::Vector2f(10, 20), sf::Vector2f(35, 35));
-        buttons[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings,sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
-        buttons[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
-        buttons[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
-                                                               sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
-        buttons[ButtonKey::FriendList] = std::make_unique<Button>("Friend List", font, 24, sf::Color::White, sf::Color::Transparent,
-                                                                  sf::Vector2f(0, 80), sf::Vector2f(200, 40));
-        buttons[ButtonKey::FriendRequests] = std::make_unique<Button>("friend requests", font, 24, sf::Color::White, sf::Color::Transparent,
-                                                                        sf::Vector2f(0, 122), sf::Vector2f(200, 40));
-        buttons[ButtonKey::AddFriend] = std::make_unique<Button>("Add Friend", font, 24, sf::Color::White, sf::Color::Transparent,
-                                                                  sf::Vector2f(0, 164), sf::Vector2f(200, 40));
-    }
-    if(texts.empty()){
-        texts[TextFieldKey::SearchField] = std::make_unique<TextField>(font, 20, sf::Color::Black, sf::Color::White,
-                                        sf::Vector2f(230, 20), sf::Vector2f(350, 32), "Search");
+    if (buttons.empty()) {
+        // Bouton "Ajouter un ami"
+        Button addFriendButton("Ajouter un ami", font, 20, sf::Color::White, sf::Color(100, 200, 250),
+                               sf::Vector2f(250, 100), sf::Vector2f(200, 50));
+        
+        // Bouton "Liste des amis"
+        Button listFriendsButton("Liste des amis", font, 20, sf::Color::White, sf::Color(70, 180, 100),
+                                 sf::Vector2f(250, 170), sf::Vector2f(200, 50));
+        
+        // Bouton "Demandes d'amis"
+        Button requestsButton("Demandes d'amis", font, 20, sf::Color::White, sf::Color(200, 180, 70),
+                              sf::Vector2f(250, 240), sf::Vector2f(200, 50));
+
+        // Bouton retour
+        Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                          sf::Vector2f(250, 310), sf::Vector2f(200, 50));
+
+        buttons[ButtonKey::AddFriend] = std::make_unique<Button>(addFriendButton);
+        buttons[ButtonKey::FriendList] = std::make_unique<Button>(listFriendsButton);
+        buttons[ButtonKey::FriendRequestList] = std::make_unique<Button>(requestsButton);
+        buttons[ButtonKey::Retour] = std::make_unique<Button>(backButton);
     }
 
+    drawButtons();
 
-    // Affichage de la liste d'amis
+    // Actions associées aux boutons
+    if (buttons[ButtonKey::AddFriend]->isClicked(*window)) {
+        // Tu pourrais ici créer un champ pour taper le pseudo d’un ami
+        // Ou envoyer directement une requête réseau
+        std::cout << "Bouton Ajouter un ami cliqué !" << std::endl;
+        // Ex: afficher un champ ou envoyer une commande réseau
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND_MENU;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+    if (buttons[ButtonKey::FriendList]->isClicked(*window)) {
+        // Afficher la liste des amis
+        std::cout << "Affichage de la liste des amis..." << std::endl;
+        // Redirection ou changement d’état
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::FRIEND_LIST;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+    if (buttons[ButtonKey::FriendRequestList]->isClicked(*window)) {
+        std::cout << "Affichage des demandes d’amis..." << std::endl;
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::FRIEND_REQUEST_LIST;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+}    // Affichage de la liste d'amis
     //float startY = 80;
     //float spacing = 70;
     //friends = client.getServerData()["data"]; // Récupérer la liste d'amis
@@ -714,7 +1083,7 @@ void SFMLGame::friendsMenu() {
         name.setFillColor(sf::Color::Black);
         name.setPosition(100, startY + i * spacing + 15);
         window->draw(name);
-    }*/
+    }
 
     drawButtons();
     drawTextFields();
@@ -733,7 +1102,7 @@ void SFMLGame::friendsMenu() {
         // Action pour le bouton "Profile"
     }
 }
-
+*/
 
 /*
 Chat Menus

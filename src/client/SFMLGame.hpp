@@ -100,6 +100,9 @@ class SFMLGame {
         sf::Clock erreurClock;
         bool afficherErreurActive = false;
         std::string erreurMessageActuel;
+        std::unordered_map<std::string, std::unique_ptr<Button>> friendButtons;
+        std::vector<std::string> amis;
+        std::string selectedFriend;
         
         
 
@@ -111,6 +114,7 @@ class SFMLGame {
         void drawTextFields();
         void drawFriends();
         void displayErrorMessage(const std::string& message) ;
+        void friendListMenu() ;
 
         //handle events
         void handleTextFieldEvents(sf::Event& event);

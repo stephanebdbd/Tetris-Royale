@@ -23,7 +23,8 @@ enum class ButtonKey {
     Royale,         // Bouton pour le mode royale
     Rejouer,        // Bouton pour rejouer
     Retour,
-
+    AcceptFriendRequest,
+    RefuseFriendRequest,
     FriendRequests,
     ChatFriend,
     CreateRoom,
@@ -40,6 +41,7 @@ enum class ButtonKey {
     JoinGame,
     GameOver,
     GameVictory,
+
     Valider,
     ValiderNb,
     ValiderEnergie,
@@ -55,7 +57,11 @@ enum class ButtonKey {
     Suppression,
     EcranNoir,
     Ralentir,
-    MiniBlocs
+    MiniBlocs,
+    RemoveFriend,
+
+    CancelRemoveFriend,
+    Cancel
 
 
 
@@ -73,5 +79,6 @@ enum class TextFieldKey {
     Energie,
     NomJoueur,
     Victime,
-    Room
+    Room,
+    AddFriendField
 };
