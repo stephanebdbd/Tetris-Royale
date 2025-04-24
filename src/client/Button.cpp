@@ -91,6 +91,8 @@ Button::Button(const std::string& text, const sf::Font& font, unsigned int chara
     this->text.setFont(font);
     this->text.setString(text);
     this->text.setCharacterSize(characterSize);
+    baseCharSize = characterSize; // stocke la taille originale ici
+
     this->text.setFillColor(textColor);
 
     // Centrer le texte
@@ -186,21 +188,26 @@ std::string Button::getText() const {
 }
 void Button::resize(float scaleX, float scaleY) {
     // Redimensionner la forme du bouton
-    sf::Vector2f newSize = shape.getSize();
-    newSize.x *= scaleX;
-    newSize.y *= scaleY;
-    shape.setSize(newSize);
+    sf::Vector2f oldSize = shape.getSize();
+    sf::Vector2f oldPosition = shape.getPosition();
 
-    // Repositionner le bouton
-    sf::Vector2f newPosition = shape.getPosition();
-    newPosition.x *= scaleX;
-    newPosition.y *= scaleY;
+    sf::Vector2f newSize = { oldSize.x * scaleX, oldSize.y * scaleY };
+    sf::Vector2f newPosition = { oldPosition.x * scaleX, oldPosition.y * scaleY };
+
+    shape.setSize(newSize);
     shape.setPosition(newPosition);
 
-    // Repositionner le texte
-    sf::FloatRect textBounds = text.getLocalBounds();
-    text.setPosition(
-        shape.getPosition().x + (shape.getSize().x - textBounds.width) / 2 - textBounds.left,
-        shape.getPosition().y + (shape.getSize().y - textBounds.height) / 2 - textBounds.top
+    // Redimensionner la taille de la police
+    unsigned int newCharSize = std::clamp(
+        static_cast<unsigned int>(baseCharSize * std::min(scaleX, scaleY)),
+        10u, 60u // min 10, max 60 (modifiable selon ton design)
     );
+    text.setCharacterSize(newCharSize);
+
+    // Centrer à nouveau le texte
+    sf::FloatRect textRect = text.getLocalBounds();
+    text.setOrigin(textRect.left + textRect.width / 2.0f, 
+                   textRect.top + textRect.height / 2.0f);
+    text.setPosition(newPosition.x + newSize.x / 2.0f,
+                     newPosition.y + newSize.y / 2.0f);
 }

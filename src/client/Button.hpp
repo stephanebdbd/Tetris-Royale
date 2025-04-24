@@ -60,4 +60,5 @@ class Button {
         bool wasPressed = false ; // Nouvel état pour suivre l'état précédent
         sf::Clock clickTimer; // Pour gérer les délais entre les clics
         std::shared_ptr<sf::Texture> buttonTexture; // Texture pour le bouton (optionnel)
+        unsigned int baseCharSize;
 };

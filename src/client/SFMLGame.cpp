@@ -1391,29 +1391,42 @@ void SFMLGame::drawEndGame() {
 
 }
 void SFMLGame::handleResize(unsigned int newWidth, unsigned int newHeight) {
-    // Ajuster la vue pour correspondre à la nouvelle taille de la fenêtre
-    sf::View view = window->getView();
-    view.setSize(newWidth, newHeight);
-    view.setCenter(newWidth / 2.0f, newHeight / 2.0f);
+    // Calculer le ratio d’aspect original et celui de la nouvelle taille
+    float windowRatio = static_cast<float>(WINDOW_WIDTH) / WINDOW_HEIGHT;
+    float newRatio = static_cast<float>(newWidth) / newHeight;
+
+    // Créer une nouvelle vue basée sur la taille logique du jeu
+    sf::View view(sf::FloatRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
+
+    if (newRatio > windowRatio) {
+        // La fenêtre est trop large → bandes sur les côtés (letterbox horizontal)
+        float width = WINDOW_HEIGHT * newRatio;
+        float offsetX = (width - WINDOW_WIDTH) / 2.f;
+        view.setViewport(sf::FloatRect(-offsetX / width, 0, WINDOW_WIDTH / width, 1));
+    } else {
+        // La fenêtre est trop haute → bandes en haut/bas (letterbox vertical)
+        float height = WINDOW_WIDTH / newRatio;
+        float offsetY = (height - WINDOW_HEIGHT) / 2.f;
+        view.setViewport(sf::FloatRect(0, -offsetY / height, 1, WINDOW_HEIGHT / height));
+    }
+
     window->setView(view);
 
-    // Recalculer les positions et tailles des éléments
+    // Mettre à jour l’échelle pour redimensionner les éléments
     float scaleX = static_cast<float>(newWidth) / WINDOW_WIDTH;
     float scaleY = static_cast<float>(newHeight) / WINDOW_HEIGHT;
 
-    // Redimensionner les boutons
     for (auto& [_, button] : buttons) {
         button->resize(scaleX, scaleY);
     }
 
-    // Redimensionner les champs de texte
     for (auto& [_, text] : texts) {
         text->resize(scaleX, scaleY);
     }
 
-    // Redimensionner les autres éléments si nécessaire
-    // Exemple : ajuster la taille des messages ou des grilles
+    // Redimensionner d'autres éléments si besoin
 }
+
 sf::Color SFMLGame::fromShapeSymbolSFML(const std::string& symbol) {
     if (symbol == "I") return sf::Color::Cyan;
     if (symbol == "O") return sf::Color::Yellow;
