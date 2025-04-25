@@ -7,19 +7,29 @@ CREATE TABLE IF NOT EXISTS Users (
     CHECK(username <> '')
 );
 
+CREATE TABLE IF NOT EXISTS Games(
+    id_game INTEGER,
+    id_sender INTEGER, 
+    id_player INTEGER,
+    invitation_type TEXT NOT NULL CHECK (invitation_type IN ('player', 'observer')),
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted')),
+    PRIMARY KEY (id_game, id_player),
+    FOREIGN KEY (id_sender) REFERENCES Users(id_user),
+    FOREIGN KEY (id_player) REFERENCES Users(id_user)
+);
+
 CREATE TABLE IF NOT EXISTS ChatRooms (
     id_room INTEGER PRIMARY KEY AUTOINCREMENT,
     room_name TEXT UNIQUE NOT NULL,
-    room_properietor INTEGER NOT NULL,
-    FOREIGN KEY (room_properietor) REFERENCES Users(id_user)
+    room_proprietor INTEGER NOT NULL,
+    FOREIGN KEY (room_proprietor) REFERENCES Users(id_user)
         ON DELETE CASCADE 
         ON UPDATE NO ACTION,
-    CHECK(room_name <> ''),
-    CHECK(room_properietor <> '')
+    CHECK(room_name <> '')
 );
 
--- 'invitation' when an admin send an invitation to client
--- 'pending' when an client send a request to join a room
+-- 'invitation' when an admin sends an invitation to client
+-- 'pending' when a client sends a request to join a room
 CREATE TABLE IF NOT EXISTS ChatRoomMembers (
     id_room INTEGER NOT NULL,
     id_user INTEGER NOT NULL,
@@ -32,33 +42,34 @@ CREATE TABLE IF NOT EXISTS ChatRoomMembers (
 CREATE TABLE IF NOT EXISTS ChatMessages (
     id_message INTEGER PRIMARY KEY AUTOINCREMENT,
     id_room INTEGER NOT NULL,
-    sender TEXT NOT NULL,
+    sender INTEGER NOT NULL,
     message TEXT NOT NULL,
     msg_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_room) REFERENCES ChatRooms(id_room) ON DELETE CASCADE
+    FOREIGN KEY (id_room) REFERENCES ChatRooms(id_room) ON DELETE CASCADE,
+    FOREIGN KEY (sender) REFERENCES Users(id_user)
 );
 
 CREATE TABLE IF NOT EXISTS Messages (
     id_msg INTEGER PRIMARY KEY AUTOINCREMENT,
-    sender TEXT NOT NULL,
-    receiver TEXT NOT NULL,
+    sender INTEGER NOT NULL,
+    receiver INTEGER NOT NULL,
     msg TEXT NOT NULL,
     msg_date_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sender) REFERENCES Users(username)
+    FOREIGN KEY (sender) REFERENCES Users(id_user)
         ON DELETE CASCADE 
         ON UPDATE NO ACTION,
-    FOREIGN KEY (receiver) REFERENCES Users(username)
-        ON DELETE CASCADE 
+    FOREIGN KEY (receiver) REFERENCES Users(id_user)
+        ON DELETE CASCADE
         ON UPDATE NO ACTION,
-    CHECK (sender <> receiver), -- Un utilisateur ne peut pas envoyer de message à lui-même
-    CHECK(msg <> '') -- Vérifier que le message n'est pas vide
+    CHECK (sender <> receiver), -- A user cannot send a message to themselves
+    CHECK(msg <> '') -- Check that the message is not empty
 );
 
 CREATE TABLE IF NOT EXISTS Friendships (
-    id_friendship INTEGER PRIMARY KEY,
+    id_friendship INTEGER PRIMARY KEY AUTOINCREMENT,
     id_sender INTEGER NOT NULL,
     id_receiver INTEGER NOT NULL,
-    status TEXT NOT NULL CHECK (status IN ('pending', 'accepted')),
+    status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', "bestFriend", 'banned')),
     UNIQUE (id_sender, id_receiver),
     FOREIGN KEY (id_sender) REFERENCES Users(id_user)
         ON DELETE CASCADE 

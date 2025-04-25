@@ -41,7 +41,7 @@ def display_database_contents(db_path):
             conn.close()
 
 # Chemin vers la base de données
-db_path = "../server/data/database.db"
+db_path = "../src/server/data/database.db"
 display_database_contents(db_path)
 
 #command for test

@@ -68,9 +68,6 @@ bool DataManager::registerUser(const std::string &username, const std::string &p
 
 
 bool DataManager::sendFriendRequest(const std::string& sender, const std::string& receiver) {
-    // Empêcher l'envoi de demande à soi-même
-    if (sender == receiver) return false;
-
     // Récupération des IDs
     QueryResult senderIdResult = getUserId(sender);
     QueryResult receiverIdResult = getUserId(receiver);
@@ -120,7 +117,6 @@ bool DataManager::acceptFriendRequest(const std::string& receiver, const std::st
     // Vérifie l'existence d'une demande d'ami en attente
     std::string condition = 
         "(id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "' AND status = 'pending')";
-    std::cout << condition << std::endl;
     QueryResult checkRequest = db->selectFromTable("Friendships", "status", condition);
     if (checkRequest.data.empty()) {
         return false;
@@ -135,14 +131,11 @@ bool DataManager::rejectFriendRequest(const std::string& receiver, const std::st
     // Récupérer les IDs des utilisateurs
     QueryResult senderIdResult = getUserId(sender);
     QueryResult receiverIdResult = getUserId(receiver);
-
     if (senderIdResult.data.empty() || receiverIdResult.data.empty()) {
         return false;
     }
-
     std::string senderId = senderIdResult.getFirst();
     std::string receiverId = receiverIdResult.getFirst();
-
     // Vérifie l'existence de la demande
     std::string condition = 
         "id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "' AND status = 'pending'";
@@ -151,12 +144,9 @@ bool DataManager::rejectFriendRequest(const std::string& receiver, const std::st
     if (checkRequest.data.empty()) {
         return false;
     }
-
     // Supprime la demande
     return db->deleteEntry("Friendships", condition).isOk();
 }
-
-
 
 bool DataManager::areFriends(const std::string& user1, const std::string& user2) {
     // Récupération des IDs des utilisateurs
@@ -199,57 +189,8 @@ bool DataManager::userNotExists(const std::string& username) const {
     return !userExists(username);  // Inverse de userExists
 }
 
-/*
-bool DataManager::hasSentRequest(const std::string& sender, const std::string& receiver) const {
-    // Récupérer les IDs des utilisateurs
-    QueryResult senderIdResult = getUserId(sender);
-    QueryResult receiverIdResult = getUserId(receiver);
 
-    if (senderIdResult.data.empty() || receiverIdResult.data.empty()) {
-        return false;  // L'un des utilisateurs (ou les deux) n'existe pas
-    }
 
-    std::string senderId = senderIdResult.getFirst();
-    std::string receiverId = receiverIdResult.getFirst();
-
-    // Condition pour vérifier si une demande a été envoyée
-    std::string condition =
-        "id_sender = '" + senderId + "' AND id_receiver = '" + receiverId + "' AND status = 'pending'";
-
-    // Vérification dans la base de données
-    QueryResult checkRequest = db->selectFromTable("Friendships", "COUNT(*)", condition);
-
-    // Vérifier si le résultat contient un nombre supérieur à 0
-    return (!checkRequest.data.empty() && checkRequest.getFirst() != "0");
-}*/
-
-std::vector<std::string> DataManager::getList(const std::string& user, const std::string& status, bool doubleSens) {
-    std::vector<std::string> list;
-
-    QueryResult userIdResult = getUserId(user);
-    if (userIdResult.data.empty()) return list;
-
-    std::string userId = userIdResult.getFirst();
-    std::string condition = "((u.id_user = f.id_sender AND f.id_receiver = '" + userId + "')";
-    if(doubleSens) condition += "OR (u.id_user = f.id_receiver AND f.id_sender = '" + userId + "')";
-    condition += ")";
-    
-
-    std::string sql =
-        "SELECT u.username "
-        "FROM Friendships f "
-        "JOIN Users u ON ("
-            + condition +
-        ") "
-        "WHERE f.status = '" + status + "';";
-
-    QueryResult result = db->executeQuery(sql);
-
-    for (const auto& row : result.getData()) {
-        if (!row.empty()) list.push_back(row[0]);  // username
-    }
-    return list;
-}
 bool DataManager::deleteFriend(const std::string& user1, const std::string& user2) {
     // Récupération des IDs des utilisateurs
     QueryResult user1Result = getUserId(user1);
@@ -274,19 +215,76 @@ bool DataManager::deleteFriend(const std::string& user1, const std::string& user
     return result.isOk();
 }
 
+QueryResult DataManager::getDataFromTable(
+    const std::string& table,
+    const std::string& columns,
+    const std::string& joinTables,
+    const std::string& joinConditions,
+    const std::string& whereConditions)
+{
+    std::string sql = "SELECT " + columns + " FROM " + table;
+    
+    if (!joinTables.empty()) {
+        sql += " JOIN " + joinTables;
+        if (!joinConditions.empty()) {
+            sql += " ON " + joinConditions;
+        }
+    }
+    
+    if (!whereConditions.empty()) {
+        sql += " WHERE " + whereConditions;
+    }
+    
+    sql += ";";
+    
+    return db->executeQuery(sql);
+}
 
+std::vector<std::string> DataManager::getUserListByStatus(const std::string& user, const std::string& status) {
+    std::vector<std::string> list;
+    
+    // Obtenir l'ID de l'utilisateur
+    QueryResult userIdResult = getUserId(user);
+    if (userIdResult.data.empty()) {
+        return list;
+    }
+    
+    std::string userId = userIdResult.getFirst();
+    
+    // Construire la condition de jointure
+    std::string joinCondition = "((u.id_user = f.id_sender AND f.id_receiver = '" + userId + "')";
+    if (status == "accepted") {
+        joinCondition += "OR (u.id_user = f.id_receiver AND f.id_sender = '" + userId + "')";
+    }
+    joinCondition += ")";
+    // Exécuter la requête
+    QueryResult result = getDataFromTable(
+        "Friendships f",     // table
+        "DISTINCT u.username", // columns (DISTINCT pour éviter les doublons)
+        "Users u",           // joinTables
+        joinCondition,       // joinConditions
+        "f.status = '" + status + "'" // whereConditions
+    );
+    
+    // Remplir la liste des résultats
+    for (const auto& row : result.getData()) {
+        if (!row.empty()) {
+            list.push_back(row[0]); // username
+        }
+    }
+    
+    return list;
+}
 
 // Obtenir la liste des amis confirmés
 std::vector<std::string> DataManager::getFriendList(const std::string& user) {
-    return getList(user, "accepted");
+    return getUserListByStatus(user, "accepted");
 }
 
 // Obtenir la liste des demandes d'amis en attente
 std::vector<std::string> DataManager::getRequestList(const std::string& user) {
-    return getList(user, "pending", false);
+    return getUserListByStatus(user, "pending");
 }
-
-
 
 QueryResult DataManager::updateUserName(const std::string &id_user, const std::string &pwd, const std::string &new_username){
     QueryResult result;
@@ -315,10 +313,57 @@ QueryResult DataManager::updatePwd(const std::string &id_user, const std::string
     return result;
 }
 
+bool DataManager::sendInvitationToFriend(const int& gameRoom, const std::string& sender, const std::string& player, const std::string& invitation_type){
+    QueryResult senderIdResult = getUserId(sender);
+    QueryResult playerIdResult = getUserId(player);
+    if(!playerIdResult.isOk()) return false;
+    std::string senderId = senderIdResult.getFirst();
+    std::string playerId = playerIdResult.getFirst();
+    //verfier si une invitation a été déja envoyer a ce joueur
+    std::string condition = "(id_game = '" + std::to_string(gameRoom) + "' AND id_player = '"+ playerId + "' And invitation_type = '" + invitation_type + "')";
+    QueryResult existing = db->selectFromTable("Games", "status", condition);
+    if(!existing.data.empty()) return false;
+    // Envoi de l'invitaion au joueur
+    std::string columns = "id_game, id_sender, id_player, invitation_type, status";
+    std::string values = "'" + std::to_string(gameRoom) + "', '" + senderId + "', '" + playerId + "', '" + invitation_type + "', 'pending'";
+    QueryResult insertResult = db->insertEntry("Games", columns, values);
+    std::cout << "game inviation sent to " << player << std::endl;
+    return insertResult.isOk();
+}
+
+bool DataManager::acceptGameInvitation(const int& gameRoom, const std::string& player){
+    QueryResult playerIdResult = getUserId(player);
+    if (playerIdResult.data.empty()) return false;
+
+    std::string playerId = playerIdResult.getFirst();
+    std::string set_clause = "status = 'accepted'";
+    std::string condition = "id_game = '" + std::to_string(gameRoom) + "' AND id_player = '" + playerId + "' AND status = 'pending'";
+    QueryResult result = db->updateEntry("Games", set_clause, condition);
+    return result.isOk();
+}
+
+std::vector<std::vector<std::string>> DataManager::getListGameRequest(const std::string& user){
+    std::vector<std::vector<std::string>> gamesInviation;
+    QueryResult userIdResult = getUserId(user);
+    if (userIdResult.data.empty()) return gamesInviation;
+    std::string userId = userIdResult.getFirst();
+    QueryResult result = getDataFromTable(
+        "Games g",
+        "u.username, g.invitation_type, g.id_game",
+        "Users u",
+        "u.id_user = g.id_player",
+        "g.status = 'pending'"
+    );
+    for (const auto& row : result.getData()) {
+        if (!row.empty()) gamesInviation.push_back(row);  // username
+    }
+    return gamesInviation;
+}
+
 
 QueryResult DataManager::updateHighScore(const std::string& username, const int& bestScore){
     QueryResult result;
-    // Update the username for the specified user
+    // Update the bestScore
     std::string set_clause = "best_score = '" + std::to_string(bestScore) + "'";
     std::string condition = "username = '" + username + "'";
     result = db->updateEntry("Users", set_clause, condition);
@@ -326,52 +371,13 @@ QueryResult DataManager::updateHighScore(const std::string& username, const int&
 }
 
 
-QueryResult DataManager::deleteAccount(const std::string &id_user, const std::string &pwd) {
-    QueryResult result;
-    // Check if the provided password is correct
-    if (checkPwd(id_user, pwd)) {
-        // Delete the user's account
-        std::string condition = "id_user = '" + id_user + "'";
-        result = db->deleteEntry("Users", condition);
+std::vector<std::pair<std::string, int>> DataManager::getRanking() const {
+    std::vector<std::pair<std::string, int>> ranking;
+    QueryResult result = db->executeQuery("SELECT username, best_score FROM Users ORDER BY best_score;");
+    std::cout << "hallllo" << std::endl;
+    for (const auto& row : result.getData()) {
+        std::cout << row[0] << " : " << row[1] << std::endl;
+        if (!row.empty()) ranking.push_back(std::make_pair(row[0], std::stoi(row[1])));  // username and best_score
     }
-    return result;
-}
-
-
-QueryResult DataManager::getUserFriends(const std::string &id_user){
-    std::string condition = "id_user_r = '" + id_user + "'";
-    QueryResult result = db->selectFromTable("Relations", "id_friend", condition);
-    return result;
-}
-
-
-bool DataManager::addGameState(const std::string &id_player1, const std::string &id_player2,const std::string &id_session, const std::string &game_state){
-    std::string time = db->getTime();
-    std::string columns = "id_player1, id_player2, id_session, game_state, state_date_time";
-    std::string values = "'" + id_player1 + "', '" + id_player2 + "', '" + id_session + "', '" + game_state + "', '" + time + "'";
-    QueryResult result = db->insertEntry("GameStates", columns, values);
-    if(result.isOk()){return true;}else{std::cout << result.getError() << std::endl;}
-    return false;
-}
-
-QueryResult DataManager::getGameStates(const std::string &id_session){
-    std::string columns = "game_state";
-    std::string condition = "(id_session = '" + id_session + "')";
-    std::string order_by = " ORDER BY state_date_time";
-    QueryResult result = db->selectFromTable("GameStates", columns, condition + order_by);
-    return result;
-}
-
-QueryResult DataManager::getSessionId(const std::string &id_player){
-    std::string columns = "DISTINCT id_session, id_player1, id_player2";
-    std::string condition = "(id_player1 = '" + id_player + "' OR id_player2 = '" + id_player + "')";    
-    std::string order_by = " ORDER BY state_date_time";
-    QueryResult result = db->selectFromTable("GameStates", columns, condition + order_by);
-    return result;
-}
-
-QueryResult DataManager::deleteGameStates(const std::string &id_session){
-    std::string condition = "id_session = '" + id_session + "'";
-    QueryResult result = db->deleteEntry("GameStates", condition);
-    return result;
+    return ranking;
 }

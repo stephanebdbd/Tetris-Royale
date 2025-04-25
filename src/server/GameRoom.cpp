@@ -286,7 +286,6 @@ void GameRoom::keyInputGame(int playerId, const std::string& unicodeAction) {
 }
 
 void GameRoom::input(int playerServerId, const std::string& unicodeAction) {
-    std::cout << "GameRoom #" << roomId << " received input from player #" << playerServerId << ": " << unicodeAction << std::endl;
     if (!getSettingsDone())
         inputLobby(playerServerId, unicodeAction);
     int playerId = getPlayerId(playerServerId);

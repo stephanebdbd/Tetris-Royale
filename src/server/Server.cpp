@@ -75,8 +75,8 @@ void Server::acceptClients() {
 
 void Server::handleClient(int clientSocket, int clientId) {
     char buffer[1024];
-    constexpr int TARGET_FPS = 12;
-    constexpr std::chrono::milliseconds FRAME_TIME(1000 / TARGET_FPS); // ~83ms
+    constexpr int TARGET_FPS = 7;
+    constexpr std::chrono::milliseconds FRAME_TIME(1000 / TARGET_FPS);
     
     auto lastRefreshTime = std::chrono::steady_clock::now();
     auto nextRefreshTime = lastRefreshTime + FRAME_TIME;
@@ -203,8 +203,8 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             else keyInputMainMenu(clientSocket, clientId, action);
             break;
         case MenuState::classement:
-            //if (refreshMenu) sendMenuToClient(clientSocket, menu.getRankingMenu(dataManager.getRanking()));
-            //else keyInputRankingMenu(clientSocket, clientId, action);
+            if (refreshMenu) sendMenuToClient(clientSocket, menu.getRankingMenu(userManager.getRanking()));
+            else keyInputRankingMenu(clientSocket, clientId, action);
             break;
         case MenuState::Team:
             if(refreshMenu) sendMenuToClient(clientSocket, menu.getTeamsMenu());
@@ -280,8 +280,9 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             break;
         case MenuState::JoinGame:
             if(refreshMenu){
-                ///////std::vector<std::vector<std::string>> invitations = userManager.getListGameRequest(currentUser);
-            ////////sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
+                std::cout << "" << std::endl;
+                std::vector<std::vector<std::string>> invitations = userManager.getListGameRequest(currentClient);
+                sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
             }
             keyInputChoiceGameRoom(clientSocket, clientId, action);
             break;
@@ -340,7 +341,6 @@ void Server::keyInputChooseGameModeMenu(int clientSocket, int clientId, const st
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
     }
 }
-
 
 
 void Server::keyInputManageFriendRequests(int clientSocket, int clientId, const std::string& action) {
@@ -1127,24 +1127,22 @@ To do
 void Server::keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status) {
     //### GÉRER L'INVITATION D'UN VIEWER
     std::cout << "Sending game request to: " << receiver << " with status: " << status << std::endl;
-
-    std::string game_request = receiver;
     std::string currentUser = clientPseudo[clientId];
 
-    if(game_request == currentUser){
+    if(receiver == currentUser){
         sendMenuToClient(clientSocket, menu.displayMessage("Erreur : Vous ne pouvez pas vous envoyer une invitation de jeu."));
-        sleep(3);
+        sleep(2);
         return;
     }
-    if(!userManager.areFriends(currentUser,game_request)){
-        sendMenuToClient(clientSocket, menu.displayMessage("Erreur : Vous n'êtes pas ami avec "+game_request+"."));
-        sleep(3);
+    if(!userManager.areFriends(currentUser,receiver)){
+        sendMenuToClient(clientSocket, menu.displayMessage("Erreur : Vous n'êtes pas ami avec "+receiver+"."));
+        sleep(2);
         return;
     }
-    ////int gameRoomId = clientGameRoomId[clientId];
-    ////userManager.sendInvitationToFriend(currentUser, game_request,status, gameRoomId);
-    ////sendMenuToClient(clientSocket, menu.displayMessage("Request Sent To "+game_request+"."));
-    /////sleep(3);
+    int gameRoomId = clientGameRoomId[clientId];
+    userManager.sendInvitationToFriend(gameRoomId, currentUser, receiver,status);
+    sendMenuToClient(clientSocket, menu.displayMessage("Request Sent To "+receiver+"."));
+    sleep(2);
 
 }
 
@@ -1164,8 +1162,6 @@ void Server::keyInputHelpMenu(int clientSocket, int clientId, const std::string&
 }
 
 void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action) {
-
-    std::cout << "Received action: " << action << " from client #" << clientId << std::endl;
     std::string status, receiver;
     // Vérifier si l'action commence par \invite
     if (action.find("/invite") == 0) {
@@ -1243,6 +1239,7 @@ void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::s
         std::size_t pos = action.find(".");
         std::string number = action.substr(pos+1, action.size());
         int roomNumber = std::stoi(number);
+        userManager.acceptGameInvitation(roomNumber, clientPseudo[clientId]);
         clientGameRoomId[clientId] = roomNumber;
         auto gameRoom = gameRooms[roomNumber];
         gameRoom->addPlayer(clientId);
