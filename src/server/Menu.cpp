@@ -252,7 +252,7 @@ json Menu::getAddAdmin() const{
 }
 
 json Menu::getListeRequests(const std::vector<std::string>& data) const {
-    return getListe(data, "Liste des demandes d'ajout", "Tapez 'accept.pseudo' ou 'reject.pseudo'  pour accepter ou refuser une demande d'amitie ou 'quit' pour quitter :    ");
+    return getListe(data, "Liste des demandes d'ajout", "Tapez 'accept'/'reject'.pseudo et '/back' pour quitter : ");
 }
 
 
@@ -425,14 +425,17 @@ json Menu::getLobbyMenu(int maxPlayers, const std::string& mode, int amountOfPla
 json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& pendingRequests) const {
     json menu = {
         {jsonKeys::TITLE, "Liste des demandes du rejoindre un jeu: "},
-        {jsonKeys::OPTIONS, json::array()},
+        {jsonKeys::OPTIONS, json::object()},
         {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande ou '/back' pour faire un retour:    "}
     };
 
     int index = 1;
     for (const auto& invitation : pendingRequests) {
-        menu[jsonKeys::OPTIONS].push_back(std::to_string(index) + ". " + "Vous êtes invités par '"+invitation[0]+
-        "' en tant que '"+invitation[1]+"' dans la GameRoom '"+invitation[2]+"'");  
+        std::string key = std::to_string(index) + ". ";
+        std::string value = "Vous êtes invités par '" + invitation[0] +
+                            "' en tant que '" + invitation[1] +
+                            "' dans la GameRoom '" + invitation[2] + "'";
+        menu[jsonKeys::OPTIONS][key] = value;
         index++;
     }
 

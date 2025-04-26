@@ -376,10 +376,6 @@ void Server::keyInputManageFriendRequests(int clientSocket, int clientId, const 
 
     if (isAccept || isReject) {
         std::string friend_request = action.substr(isAccept ? prefix_accept.size() : prefix_reject.size());
-        //if (!userManager.isPendingRequest(friend_request, currentUser)) {
-        //    returnToMenu(clientSocket, clientId, MenuState::Friends, "Erreur : Aucune demande d'ami en attente de '" + friend_request + "'.");
-        //    return;
-        //}
 
         isAccept ? userManager.acceptFriendRequest(currentUser, friend_request)
                  : userManager.rejectFriendRequest(currentUser, friend_request);
@@ -485,7 +481,7 @@ void Server::keyInputAddFriendMenu(int clientSocket, int clientId, const std::st
     // Envoyer la demande d'ami
     if(!userManager.sendFriendRequest(currentUser, friend_request))
          returnToMenu(clientSocket, clientId, MenuState::Friends, "Demande d'ami déja existe!");
-    else returnToMenu(clientSocket, clientId, MenuState::Friends, "Demande d'ami'Demande d'ami envoyée à " + friend_request + ". Veuiller consulter la listes des amis pour voir si la demande a été acceptée.");
+    else returnToMenu(clientSocket, clientId, MenuState::Friends, "Demande d'ami'Demande d'ami envoyée à " + friend_request);
     
 }
 
