@@ -10,8 +10,8 @@
 #include <memory>
 
 
-const unsigned int WINDOW_WIDTH = 1500;
-const unsigned int WINDOW_HEIGHT = 750;
+const unsigned int WINDOW_WIDTH = 800;
+const unsigned int WINDOW_HEIGHT = 650;
 const std::string WINDOW_TITLE = "Tetris Royal";
 
 SFMLGame::SFMLGame(Client& client) : 
@@ -120,13 +120,8 @@ void SFMLGame::handleButtonEvents() {
 
 void SFMLGame::cleanup() {
     buttons.clear();
-    if(buttons.empty()){
-        std::cout << "Buttons cleared" << std::endl;
-    }
     texts.clear();
-    if(texts.empty()){
-        std::cout << "Texts cleared" << std::endl;
-    }
+    chatContacts.clear(); // Clear chatContacts explicitly if needed
 }
 
 void SFMLGame::handleEvents() {
@@ -442,10 +437,8 @@ void SFMLGame::refreshMenu() {
         std::cout << "State changed to: " << static_cast<int>(currentState) << std::endl;
         this->cleanup();
     }
-    
 
     window->clear();
-    
     switch (currentState) {
         case MenuState::Welcome:
             welcomeMenu();
@@ -498,7 +491,6 @@ void SFMLGame::refreshMenu() {
             break;
         case MenuState::Pause:
             //gamePauseMenu();
-            
             break;
         case MenuState::CreateGame:
             ChoiceGameMode();
@@ -516,6 +508,7 @@ void SFMLGame::refreshMenu() {
             //std::cerr << "Unhandled MenuState: " << static_cast<int>(currentState) << std::endl;
             break;
     }
+    client.clearServerData();
     window->display();
 }
 void SFMLGame::friendListMenu() {
@@ -630,6 +623,7 @@ void SFMLGame::run() {
         handleEvents();
         refreshMenu();
     }
+    messages.clear();
 }
 
 
@@ -936,9 +930,7 @@ void SFMLGame::rankingMenu(){
     } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
         // Action pour le bouton "Profile"
     }
-
 }
-
 
 
 void SFMLGame::chatMenu() {
@@ -968,7 +960,7 @@ void SFMLGame::chatMenu() {
 
     if (buttons.empty()) {
         // Bouton pour revenir au menu principal
-        Button backButton(textures->logoMain,sf::Vector2f(7, 50), sf::Vector2f(25, 35));        // Bouton pour envoyer le message
+        Button backButton(textures->logoMain,sf::Vector2f(7, 50), sf::Vector2f(25, 35));       // Bouton pour envoyer le message
         Button sendButton(">", font, 20, sf::Color::White, sf::Color(70, 200, 70),
                           sf::Vector2f(WINDOW_WIDTH - 40, WINDOW_HEIGHT - 40), sf::Vector2f(35, 35));
         // Ajout des boutons au vecteur
@@ -979,7 +971,6 @@ void SFMLGame::chatMenu() {
     // Dessiner les champs de texte et les boutons
     drawTextFields();
     drawButtons();
-    
 
     if (!client.getServerData().empty() && client.getServerData().contains("data")) {
         contacts = client.getServerData()["data"];
@@ -995,26 +986,30 @@ void SFMLGame::chatMenu() {
         json j;
         j[jsonKeys::ACTION] = "main";
         network->sendData(j.dump() + "\n", client.getClientSocket());
+        clickedContact.clear();
         return; // Sortir immédiatement après avoir traité le clic
     }
 
     // Ensuite vérifier le sendButton
-    if (buttons[ButtonKey::Send]->isClicked(*window) && !texts[TextFieldKey::MessageField]->getText().empty()) {
+    if (!clickedContact.empty() && buttons[ButtonKey::Send]->isClicked(*window) && !texts[TextFieldKey::MessageField]->getText().empty()) {
         json j = {
             {"message", texts[TextFieldKey::MessageField]->getText()},
+            {"receiver", clickedContact},
+            {"sender", "You"}
         };
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        messages.push_back({"You", texts[TextFieldKey::MessageField]->getText()});
+        messages.emplace_back(std::move(j));
         texts[TextFieldKey::MessageField]->clear(); // Effacer le champ de texte après l'envoi
         return;
     }
-    // Gérer les messages du serveur
+    // recevoir les messages du serveur et les stocker
     getMessagesFromServer();
     // Afficher les messages
     drawMessages();
 }
 
 void SFMLGame::handleContacts() {
+    if (contacts.empty()) return;
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
 
@@ -1054,12 +1049,17 @@ void SFMLGame::handleContacts() {
 }
 
 void SFMLGame::getMessagesFromServer() {
-    // Récupérer les messages du serveur
-    auto message = client.getServerData();
-    if (message.contains("sender") && message["sender"] == clickedContact) {
-        messages.push_back({message["sender"], message["message"]});
+    try {
+        auto message = client.getServerData();
+        if (message.contains("sender")) {
+            messages.emplace_back(std::move(message));
+            if (messages.size() > 100) {
+                messages.erase(messages.begin());
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error processing message: " << e.what() << std::endl;
     }
-    client.clearServerData();
 }
 
 void SFMLGame::drawContacts() {
@@ -1071,9 +1071,10 @@ void SFMLGame::drawContacts() {
 
 
 void SFMLGame::drawMessages() {
-    for (auto& [sender, message] : messages) {
-        if(sender == clickedContact || sender == "You") {
-            displayMessage(sender, message);
+    for (auto& msg : messages) {
+        auto sender = msg["sender"]; auto receiver = msg["receiver"];
+        if((sender == clickedContact) || (sender == "You" && receiver == clickedContact)) {
+            displayMessage(sender, msg["message"]);
         MessagesY += 40; // Adjust the Y position for each message
         }
     }

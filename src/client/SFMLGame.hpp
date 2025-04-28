@@ -83,7 +83,7 @@ class SFMLGame {
         std::map<ButtonKey, std::unique_ptr<Button>> buttons;
         std::map<TextFieldKey, std::unique_ptr<TextField>> texts;
         std::map<std::string, std::unique_ptr<Button>> chatContacts;
-        std::vector<std::pair<std::string, std::string>> messages;
+        std::vector<json> messages;
         std::vector<std::string> contacts;
         std::vector<std::string> friends;
         std::vector<std::pair<std::string, int>> ranking;

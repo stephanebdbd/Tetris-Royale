@@ -36,12 +36,11 @@ void ServerChat::processClientChat(int receiverSock, const std::string& sender, 
 void ServerChat::sendMessage(int clientSocket, std::string sender, std::string receiver, const std::string& message, bool isOnline) {
     json msg;
     msg["sender"] = sender;
+    msg["receiver"] = receiver;
     msg["message"] = message;
     std::string msgStr = msg.dump() + "\n";
     if(isOnline) {
         send(clientSocket, msgStr.c_str(), msgStr.size(), 0);
-    }else{
-        receiver = receiver;
     }
 }
 
