@@ -103,6 +103,7 @@ class SFMLGame {
         std::unordered_map<std::string, std::unique_ptr<Button>> friendButtons;
         std::vector<std::string> amis;
         std::string selectedFriend;
+        //std::map<std::string, int> userAvatars; // Associe chaque username à son index d'avatar
         
         
 
@@ -137,6 +138,9 @@ class SFMLGame {
             {890.f, 0.f}, {890.f, 320.f}, {1060.f, 0.f}, {1060.f, 320.f},
 
         };
+        int selectedAvatar = 0; // 0 par défaut ou -1 si non sélectionné
+        std::vector<std::string> avatarPaths; // Chemins des avatars disponibles
+        sf::Texture avatarduClient; // Texture pour l'avatar du client
 
     public:
         SFMLGame(Client& client);
@@ -208,7 +212,10 @@ class SFMLGame {
 
         void drawMiniGrid(const json& miniGrid, sf::Vector2f pos);
         void drawMiniTetra(const json& miniTetra, sf::Vector2f pos);
+        
+        
 
 };
 
 #endif // 
+
