@@ -1,8 +1,7 @@
 CREATE TABLE IF NOT EXISTS Users (
     id_user INTEGER PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
-    hash_pwd TEXT NOT NULL,
-    salt TEXT NOT NULL,
+    passwrd TEXT NOT NULL,
     best_score INTEGER DEFAULT 0,
     CHECK(username <> '')
 );

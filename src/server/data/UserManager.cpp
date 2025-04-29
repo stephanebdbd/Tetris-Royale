@@ -1,6 +1,5 @@
 #include "UserManager.hpp"
 #include "Database.hpp"
-#include "security.hpp"
 #include <iostream>
 
 QueryResult DataManager::getUsername(const std::string &id_user) {
@@ -34,7 +33,7 @@ QueryResult DataManager::getUserId(const std::string &username) {
 }
 
 bool DataManager::checkPwd(const std::string &id_user, const std::string &pwd) {
-    std::string columns = "hash_pwd, salt";
+    std::string columns = "passwrd";
     std::string condition = "id_user = '" + id_user + "'";
     QueryResult result = db->selectFromTable("Users", columns, condition);
 
@@ -42,11 +41,8 @@ bool DataManager::checkPwd(const std::string &id_user, const std::string &pwd) {
         return false; // L'ID utilisateur n'existe pas
     }
 
-    std::string hash_pwd = result.data[0][0];
-    std::string salt = result.data[0][1];
-    std::string salt_pwd = pwd + salt;
-
-    return Security::verifyPwd(hash_pwd, salt_pwd); // Vérification du mot de passe
+    std::string password = result.data[0][0];
+    return password == pwd;
 }
 
 bool DataManager::loginUser(const std::string &username, const std::string &pwd) {
@@ -58,10 +54,9 @@ bool DataManager::loginUser(const std::string &username, const std::string &pwd)
 }
 
 bool DataManager::registerUser(const std::string &username, const std::string &pwd) {
-    std::string salt = Security::genSalt();
-    std::string hashpwd = Security::hashPwd(pwd + salt);
-    std::string columns = "username, hash_pwd, salt";
-    std::string values = "'" + username + "', '" + hashpwd + "', '" + salt + "'";
+  
+    std::string columns = "username, passwrd";
+    std::string values = "'" + username + "', '" + pwd + "'";
     QueryResult result = db->insertEntry("Users", columns, values);
     return result.isOk();
 }
@@ -304,9 +299,8 @@ QueryResult DataManager::updatePwd(const std::string &id_user, const std::string
     // Check if the password is correct
     if (checkPwd(id_user, pwd)) {
         // Update the password for the given user
-        std::string salt = Security::genSalt();
-        std::string nhpwd = Security::hashPwd(new_pwd+salt);
-        std::string set_clause = "hash_pwd = '" + nhpwd + "', salt = '" + salt + "'";
+
+        std::string set_clause = "passwrd = '" + new_pwd + "'";
         std::string condition = "id_user = '" + id_user + "'";
         result = db->updateEntry("Users", set_clause, condition);
     }
