@@ -350,7 +350,7 @@ std::vector<std::vector<std::string>> DataManager::getListGameRequest(const std:
         "Games g",
         "u.username, g.invitation_type, g.id_game",
         "Users u",
-        "u.id_user = g.id_player",
+        "u.id_user = g.id_sender",
         "g.status = 'pending'"
     );
     for (const auto& row : result.getData()) {
