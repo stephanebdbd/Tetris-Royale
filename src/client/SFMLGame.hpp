@@ -36,6 +36,15 @@ const std::string LogoExit = "../../res/logo/exit.png";
 const std::string LogoFriend = "../../res/logo/friend.png";
 const std::string LogoAddFriend = "../../res/logo/addFriend.png";
 const std::string LogoFrindsRequest = "../../res/logo/friendRequest.png";
+const std::string backgroundMode = "../../res/background/mode.png";
+const std::string LogoRemote = "../../res/logo/remote.png";
+const std::string LogoViewer = "../../res/logo/viewer.png";
+const std::string LogoPLus = "../../res/logo/plus.png";
+const std::string LogoEsc = "../../res/logo/esc.png";
+const std::string LogoP_O = "../../res/logo/inviteP_O.png";
+const std::string LogoThreePoint = "../../res/logo/dots.png";
+const std::string LogoAccept = "../../res/logo/accept.png";
+const std::string backgroundRejoindre = "../../res/background/rejoindre.png";
 
 
 struct Textures{
@@ -43,7 +52,8 @@ struct Textures{
                 chat, ranking, logoConnexion,logoNotification,
                 logoSettings, logoTeams, logoRanking,
                 logoChat,logoMain,logoExit,logoAddFriend,
-                logoFrindsRequest;
+                logoFrindsRequest, mode, player, viewer, 
+                plus, esc, P_O, playerClicked, accept, rejoindre;
 
     Textures() = default;
     ~Textures() = default;
@@ -69,6 +79,15 @@ struct Textures{
         loadTexture(logoExit, LogoExit);
         loadTexture(logoAddFriend, LogoAddFriend);
         loadTexture(logoFrindsRequest, LogoFrindsRequest);
+        loadTexture(mode, backgroundMode);
+        loadTexture(player, LogoRemote);
+        loadTexture(viewer, LogoViewer);
+        loadTexture(plus, LogoPLus);
+        loadTexture(esc, LogoEsc);
+        loadTexture(P_O, LogoP_O);
+        loadTexture(playerClicked, LogoThreePoint);
+        loadTexture(accept, LogoAccept);
+        loadTexture(rejoindre, backgroundRejoindre);
     }
 };
 
@@ -138,6 +157,22 @@ class SFMLGame {
             {890.f, 0.f}, {890.f, 320.f}, {1060.f, 0.f}, {1060.f, 320.f},
 
         };
+        std::map<std::string, std::vector<std::unique_ptr<Button>>> inviteFriends;
+        std::map<std::string, std::vector<std::unique_ptr<Button>>> acceptInvite;
+        std::unique_ptr<Button> quitter = std::make_unique<Button>("Quitter", font, 24, sf::Color::White, sf::Color::Red, sf::Vector2f(200, 500), sf::Vector2f(150, 50));
+        //std::map<std::string, std::unique_ptr<Button>> inviteFriends;
+        bool invite = false;
+        bool cl = false;
+        //std::vector<std::string> pseudos;
+        std::vector<std::vector<bool>> isInvite;
+        // Variables globales ou membres de la classe
+        sf::View inviteView; // Vue pour le rectangle défilable
+        float inviteScrollOffset = 0.0f; // Décalage vertical pour le défilement
+        const float inviteScrollSpeed = 30.0f; // Vitesse de défilement
+        float inviteMaxScroll = 500.0f; // Hauteur maximale du contenu défilable
+        std::vector<std::string> amistest = {"Friend1", "Friend2", "Friend3", "Friend4", "Friend5", "Friend6", "Friend7", "Friend8", "Friend9", "Friend10", 
+            "Friend11", "Friend12", "Friend13", "Friend14", "Friend15", "Friend16", "Friend17", "Friend18", "Friend19", "Friend20"};
+            
         int selectedAvatar = 0; // 0 par défaut ou -1 si non sélectionné
         std::vector<std::string> avatarPaths; // Chemins des avatars disponibles
         sf::Texture avatarduClient; // Texture pour l'avatar du client
