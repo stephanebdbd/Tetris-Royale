@@ -164,12 +164,29 @@ void Client::receiveDisplay() {
                             chat.receiveChatMessages(data);
                         serverData = data;
                     }
-                    // Sinon, c'est un menu
                     else {
                         chatMode = false;
                         isPlaying = false;
                         // changer le menuState dans le cas de GUI
                         if(data.contains("state")) {
+                            if(data.contains("message")){
+                                std::string message = data["message"];
+                                std::cout << "Message reçu : " << message << std::endl;
+                                if(message == "avatar"){
+                                    int avatarIndex = std::stoi(data["data"][0].get<std::string>());
+                                    setAvatarIndex(avatarIndex);
+                                }
+                                if (data.contains("dataPair") && message == "contacts") {
+                                    contacts = data["dataPair"].get<std::vector<std::pair<std::string, int>>>();
+                                    std::cout << "Contacts: " << std::endl;
+                                    for (const auto& contact : contacts) {
+                                        std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
+                                    }
+                                }
+                                
+                            }
+                                
+                                
                             std::cout << "MenuState: " << data["state"] << std::endl;
                             currentMenuState = menuStateManager.deserialize(data["state"]);
                             serverData = data;

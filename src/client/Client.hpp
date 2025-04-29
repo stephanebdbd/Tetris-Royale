@@ -45,6 +45,8 @@ private:
     std::mutex receiveMutex;
     std::string temporaryMessage;
     std::mutex messageMutex;
+    int avatarIndex = -1; // Index de l'avatar du joueur actuel (-1 par défaut si non défini)
+    std::vector<std::pair<std::string, int>> contacts;
 
 
 
@@ -75,7 +77,16 @@ public:
         void setGameStateIsEnd(bool isEnd);
        
         void clearServerData() { serverData.clear(); }
+        void setAvatarIndex(int index) {
+            avatarIndex = index;
+        }
 
+        int getAvatarIndex() const {
+            return avatarIndex;
+        }
+        const std::vector<std::pair<std::string, int>>& getContacts() const {
+            return contacts;
+        }
 };
 
 #endif

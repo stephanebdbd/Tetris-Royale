@@ -164,6 +164,18 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                     clientPseudo[clientId] = action[jsonKeys::USERNAME];
                     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
                     sockToPseudo[clientSocket] = clientPseudo[clientId];
+                    std::cout <<"hahahahhahahahahahahahhahahahahahhahahahaikram" << std::endl;
+                    int avatarIndex = userManager->getUserAvatar(action[jsonKeys::USERNAME]);
+                    std::cout << "Avatar du joueur connecté : " << avatarIndex << std::endl;
+                    menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "avatar", {std::to_string(avatarIndex)});
+                    /*json response = {
+                        {"action", "login_success"},
+                        {"username", action[jsonKeys::USERNAME]},
+                        {"avatar", avatarIndex}
+                    };
+                    std::cout << "JSON envoyé au client : " << response.dump() << std::endl;
+                    send(clientSocket, response.dump().c_str(), response.dump().size(), 0);*/
+                    
                     std::cout << "Client #" << clientId << " connecté avec succès." << std::endl;
                 }else{
                     std::cout << "Le mot de passe est incorrect." << std::endl;
@@ -179,7 +191,9 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::cout << "Client #" << clientId << " a demandé de s'enregistrer." << std::endl;
             if(userManager->userNotExists(action[jsonKeys::USERNAME])){
                 std::cout << "Le pseudo n'existe pas." << std::endl;
-                userManager->registerUser(action[jsonKeys::USERNAME], action[jsonKeys::PASSWORD]);
+                int avatarIndex = action.contains("avatar") ? static_cast<int>(action["avatar"]) : -1;
+                userManager->registerUser(action[jsonKeys::USERNAME], action[jsonKeys::PASSWORD], avatarIndex);
+                //userManager->setUserAvatar(action[jsonKeys::USERNAME], avatarIndex); // Associer l'avatar à l'utilisateur
                 clientStates[clientId] = MenuState::Main;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo n'existe pas.");
                 clientPseudo[clientId] = action[jsonKeys::USERNAME];
@@ -242,7 +256,16 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat." << std::endl;
             clientStates[clientId] = MenuState::chat;
             auto friends = friendList->getFriendList(clientPseudo[clientId]);
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le chat.", friends);
+            std::vector<std::pair<std::string,int>> contactStrings;
+            for (const auto& friendName : friends) {
+                int avatarIndex = userManager->getUserAvatar(friendName);
+                std::cout << "Avatar de l'ami " << friendName << ": " << avatarIndex << std::endl;
+                auto contact = std::make_pair(friendName, avatarIndex); 
+                contactStrings.push_back(contact);
+            }
+            std::cout<<"qqqqqqqq"<<std::endl;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts",{},contactStrings);
+            std::cout<<"listaaaa"<<std::endl;
             return;
         }
         else if(actionType == jsonKeys::FRIENDS) {
@@ -412,12 +435,11 @@ void Server::keyInputAddFriendMenuGUI(int clientSocket,int clientId,const std::s
         std::lock_guard<std::mutex> lock(clientPseudoMutex);
         currentUser = clientPseudo[clientId];
     }
-    std::string friend_request = trim(action);
+    std::string friend_request = action;
     //std::cout << "Demande d'ami pour l'utilisateur : " << friend_request << std::endl;
     // Vérifier si l'utilisateur existe
-    if (!friendList->userExists(friend_request)) {
-        menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Erreur : L'utilisateur " + friend_request + " n'existe pas.");
-        menuStateManager->sendTemporaryDisplay(clientSocket, "Erreur : L'utilisateur " + friend_request + " n'existe pas.");
+    if (userManager->userNotExists(friend_request)) {
+        returnToMenu(clientSocket, clientId, MenuState::AddFriend, "Erreur : L'utilisateur " + friend_request + " n'existe pas.");
         return;
     }
     // Vérifier si l'utilisateur essaie de s'ajouter lui-même
@@ -757,10 +779,10 @@ void Server::keyInputAddFriendMenu(int clientSocket, int clientId, const std::st
         std::lock_guard<std::mutex> lock(clientPseudoMutex);
         currentUser = clientPseudo[clientId];
     }
-    std::string friend_request = trim(action);
+    std::string friend_request = action;
 
     // Vérifier si l'utilisateur existe
-    if (!friendList->userExists(friend_request)) {
+    if (userManager->userNotExists(friend_request)) {
         returnToMenu(clientSocket, clientId, MenuState::AddFriend, "Erreur : L'utilisateur " + friend_request + " n'existe pas.");
         return;
     }
@@ -988,7 +1010,8 @@ void Server::keyInputRegisterPseudoMenu(int clientSocket, int clientId, const st
 
 void Server::keyInputRegisterPasswordMenu(int clientSocket, int clientId, const std::string& action) {
     friendList->registerUser(clientPseudo[clientId]);
-    userManager->registerUser(clientPseudo[clientId], action);
+    int avatarIndex = -1;
+    userManager->registerUser(clientPseudo[clientId], action, avatarIndex);
     chat->initMessageMemory("Clients/" + clientPseudo[clientId] + ".json");
     sockToPseudo[clientSocket] = clientPseudo[clientId];
     pseudoTosocket[clientPseudo[clientId]] = clientSocket;

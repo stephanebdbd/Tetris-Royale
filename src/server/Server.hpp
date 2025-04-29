@@ -34,7 +34,7 @@ class Server {
     std::shared_ptr<ServerChat> chat;
     std::shared_ptr<FriendList> friendList;
     std::shared_ptr<MenuStateManager> menuStateManager;
-    
+    std::unordered_map<int, int> clientAvatar; // Associe un clientId à un avatarIndex
     
     
     //chaque client aura sa game

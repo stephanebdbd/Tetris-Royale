@@ -8,6 +8,7 @@
 struct UserData {
     std::string password;
     int highscore;
+    int avatarIndex;
 };
 
 class UserManager {
@@ -20,11 +21,23 @@ class UserManager {
 public:
     UserManager(const std::string& filename);
     bool userNotExists(const std::string& username) const;
-    bool registerUser(const std::string& username, const std::string& password);
+    bool registerUser(const std::string& username, const std::string& password, int avatarIndex);
     bool authenticateUser(const std::string& username, const std::string& password);
     int getHighscore(const std::string& username);
     void updateHighscore(const std::string& username, int score);
     std::vector<std::pair<std::string, int>> getRanking() const;
+    int getUserAvatar(const std::string& username) const {
+        if (users.find(username) != users.end()) {
+            return users.at(username).avatarIndex;
+        }
+        return -1; // Retourne -1 si aucun avatar n'est défini
+    }
+    void setUserAvatar(const std::string& username, int avatarIndex) {
+        if (users.find(username) != users.end()) {
+            users[username].avatarIndex = avatarIndex;
+            saveUsers();
+        }
+    }
 };
 
 #endif

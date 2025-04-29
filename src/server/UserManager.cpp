@@ -15,11 +15,11 @@ bool UserManager::userNotExists(const std::string& username) const {
 }
 
 // Enregistre un nouvel utilisateur si le pseudo n'existe pas encore
-bool UserManager::registerUser(const std::string& username, const std::string& password) {
+bool UserManager::registerUser(const std::string& username, const std::string& password, int avatarIndex) {
     if (users.find(username) != users.end()) {
         return false; // L'utilisateur existe déjà
     }
-    users[username] = {password, 0}; // Nouveau joueur avec un highscore de 0
+    users[username] = {password, 0, avatarIndex}; // Nouveau joueur avec un highscore de 0
     saveUsers();
     return true;
 }
@@ -46,11 +46,11 @@ void UserManager::updateHighscore(const std::string& username, int score) {
 }
 
 // Charge les utilisateurs depuis le fichier texte
-void UserManager::loadUsers() {
+/*void UserManager::loadUsers() {
     std::ifstream infile(file);
     if (!infile) return;
     std::string line, username, password;
-    int highscore;
+    int highscore, avatarIndex;
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         if (std::getline(iss, username, ':') && std::getline(iss, password, ':') && iss >> highscore) {
@@ -59,13 +59,34 @@ void UserManager::loadUsers() {
     }
     //fermer le fichier
     infile.close();
+}*/
+void UserManager::loadUsers() {
+    std::ifstream infile(file);
+    if (!infile) return;
+    
+    std::string line;
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        std::string username, password, highscoreStr, avatarIndexStr;
+        if (std::getline(iss, username, ':') &&
+            std::getline(iss, password, ':') &&
+            std::getline(iss, highscoreStr, ':') &&
+            std::getline(iss, avatarIndexStr)) {
+
+            int highscore = std::stoi(highscoreStr);
+            int avatarIndex = std::stoi(avatarIndexStr);
+
+            users[username] = {password, highscore, avatarIndex};
+        }
+    }
 }
+
 
 // Sauvegarde la liste des utilisateurs dans le fichier texte
 void UserManager::saveUsers() {
     std::ofstream outfile(file);
     for (const auto& [username, data] : users) {
-        outfile << username << ":" << data.password << ":" << data.highscore << "\n";
+        outfile << username << ":" << data.password << ":" << data.highscore << ":" << data.avatarIndex << "\n";
     }
 }
 
