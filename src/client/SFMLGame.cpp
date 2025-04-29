@@ -1440,7 +1440,7 @@ void SFMLGame::drawMiniGrid(const json& miniGrid, sf::Vector2f pos) {
                 sf::Color color = fromSFML(colorValue);
                 cell.setFillColor(color);
             }else{
-                cell.setFillColor(sf::Color(50, 50, 50));
+                cell.setFillColor(sf::Color(200, 200, 200));
             }
 
             window->draw(cell);  
@@ -1493,7 +1493,7 @@ void SFMLGame::drawGrid(const json& grid) {
                 sf::Color color = fromSFML(colorValue);
                 cell.setFillColor(color);
             }else{
-                cell.setFillColor(sf::Color(50, 50, 50));
+                cell.setFillColor(sf::Color(200, 200, 200));
             }
  
             window->draw(cell);  
@@ -1642,7 +1642,7 @@ sf::Color SFMLGame::fromShapeSymbolSFML(const std::string& symbol) {
     if (symbol == "Z") return sf::Color::Red;
     if (symbol == "J") return sf::Color::Blue;
     if (symbol == "L") return sf::Color(255, 165, 0); // Orange
-    return sf::Color::White; // Default
+    return sf::Color(100,100,100); // Default
 }
 
 sf::Color SFMLGame::fromSFML(int value) {
@@ -1653,7 +1653,7 @@ sf::Color SFMLGame::fromSFML(int value) {
     if (value == 1) return sf::Color::Red;
     if (value == 5) return sf::Color::Blue;
     if (value == 7) return sf::Color(255, 165, 0); // Orange
-    return sf::Color::White; // Default
+    return sf::Color(100,100,100); // Default
 }
 
 
@@ -1714,7 +1714,13 @@ void SFMLGame::displayWaitingRoom() {
     Rectangle frameCommand(sf::Vector2f(20, 120), sf::Vector2f(500, 450), sf::Color::Transparent, sf::Color(135, 206, 250));
     frameCommand.draw(*window);
 
+
+    
+
     if (client.isGameStateUpdated()) {
+        GameState gameData = client.getGameState();
+        json lines = gameData.menu[jsonKeys::OPTIONS];
+
         Rectangle framestate(sf::Vector2f(550, 120), sf::Vector2f(470, 450), sf::Color::Transparent, sf::Color(135, 206, 250));
         framestate.draw(*window);
 
@@ -1725,8 +1731,20 @@ void SFMLGame::displayWaitingRoom() {
 
         float startY = 130; // Position de départ pour les amis
         float spacing = 30; // Espacement entre les amis
+
+        if(!gameData.pseudos.empty()){
+            pseudos = gameData.pseudos;
+        }
+    
+        if(!gameData.friendsLobby.empty()){
+            friendsLobby = gameData.friendsLobby;
+            /*std::cout << "Friends: " << friendsLobby.size() << std::endl;
+            for (const auto& friendName : friendsLobby) {
+                std::cout << "Friend: " << friendName << std::endl;
+            }*/
+        }
         
-        std::map<std::string,  std::vector<std::string>> pseudos = client.getServerData()["secondData"];
+        
         /*if(!(std::find(pseudos.begin(), pseudos.end(), pseudo) != pseudos.end())){
             pseudos.push_back(pseudo);
             
@@ -1735,22 +1753,24 @@ void SFMLGame::displayWaitingRoom() {
         player.draw(*window);
         Text observer("Observers: " , font, 20, sf::Color::White, sf::Vector2f(1280, startY));
         observer.draw(*window);
-        for(size_t i = 0; i < pseudos["player"].size(); ++i){
+        if(!pseudos.empty()){
+            for(size_t i = 0; i < pseudos["player"].size(); ++i){
             
-            Text pseudoText(pseudos["player"][i], font, 20, sf::Color::White, sf::Vector2f(1070, spacing + startY + i * spacing));
-            pseudoText.draw(*window);
-            
-        }
-        for(size_t i = 0; i < pseudos["observer"].size(); ++i){
-            
-            Text pseudoText(pseudos["observer"][i], font, 20, sf::Color::White, sf::Vector2f(1290, spacing + startY + i * spacing));
-            pseudoText.draw(*window);
-            
+                Text pseudoText(pseudos["player"][i], font, 20, sf::Color::White, sf::Vector2f(1070, spacing + startY + i * spacing));
+                pseudoText.draw(*window);
+                
+            }
+            for(size_t i = 0; i < pseudos["observer"].size(); ++i){
+                
+                Text pseudoText(pseudos["observer"][i], font, 20, sf::Color::White, sf::Vector2f(1290, spacing + startY + i * spacing));
+                pseudoText.draw(*window);
+                
+            }
         }
         
         
-        GameState gameData = client.getGameState();
-        json lines = gameData.menu[jsonKeys::OPTIONS];
+        
+        
 
         
 
@@ -1803,28 +1823,29 @@ void SFMLGame::displayWaitingRoom() {
         window->setView(inviteView);
 
         
-
-        auto friends = client.getServerData()["data"];
+        
+        
+        
         // Dessiner la liste des amis
         float startY = 130; // Position de départ pour les amis
         float spacing = 50; // Espacement entre les amis
-        float totalHeight = friends.size() * spacing; // Hauteur totale du contenu
+        float totalHeight = friendsLobby.size() * spacing; // Hauteur totale du contenu
         inviteMaxScroll = std::max(0.0f, totalHeight - 450); // Ajuster la hauteur maximale de défilement
 
-        for (size_t i = 0; i < friends.size(); ++i) {
-            Text friendName(friends[i], font, 20, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 200, startY + i * spacing));
+        for (size_t i = 0; i < friendsLobby.size(); ++i) {
+            Text friendName(friendsLobby[i], font, 20, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 200, startY + i * spacing));
 
 
-            if (!inviteFriends.count(friends[i])){
-                inviteFriends[friends[i]].push_back(std::make_unique<Button>(textures->player, sf::Vector2f(800, startY + i * spacing - 5), sf::Vector2f(50, 50)));
-                inviteFriends[friends[i]].push_back(std::make_unique<Button>(textures->viewer, sf::Vector2f(870, startY + i * spacing - 5), sf::Vector2f(50, 50)));
+            if (!inviteFriends.count(friendsLobby[i])){
+                inviteFriends[friendsLobby[i]].push_back(std::make_unique<Button>(textures->player, sf::Vector2f(800, startY + i * spacing - 5), sf::Vector2f(50, 50)));
+                inviteFriends[friendsLobby[i]].push_back(std::make_unique<Button>(textures->viewer, sf::Vector2f(870, startY + i * spacing - 5), sf::Vector2f(50, 50)));
                 isInvite.push_back({false, false});
             }
 
 
             friendName.draw(*window);
-            inviteFriends[friends[i]][0]->draw(*window);
-            inviteFriends[friends[i]][1]->draw(*window);
+            inviteFriends[friendsLobby[i]][0]->draw(*window);
+            inviteFriends[friendsLobby[i]][1]->draw(*window);
 
             
         }

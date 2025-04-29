@@ -464,15 +464,15 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 std::string pseudo = clientPseudo[observer];
                 active["observer"].push_back(pseudo);
             }
-            std::cout<<"size active: "<<active["observer"].size()<<std::endl;
+            //std::cout<<"size active: "<<active["observer"].size()<<std::endl;
             
             for (int player : players){
                 auto friends = friendList->getFriendList(clientPseudo[player]);
-                menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "rejoindre gameRoonm", friends, {}, active);
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "rejoindre gameRoonm as player", friends, {}, active);
             }
             for (int observer : observers){
                 //auto friends = friendList->getFriendList(clientPseudo[player]);
-                menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "rejoindre gameRoonm", {}, {}, active);
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "rejoindre gameRoonm as observer", {}, {}, active);
             }
             return;
         }
@@ -969,7 +969,7 @@ void Server::loopGame(int ownerId) {
                         gameRoom->updatePlayerGame(player);
                         if (gameRoom->getNeedToSendGame(player)) {
                             sendGameToPlayer(player, clientIdToSocket[player], gameRoom);
-                            if (elapsedTime >= 200){
+                            if (elapsedTime >= 100){
                                 sendMiniGameToPlayer(player, clientIdToSocket[player], gameRoom);
                                 lastMiniGameUpdateTime = currentTime;
                             }

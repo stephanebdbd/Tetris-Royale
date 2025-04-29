@@ -17,6 +17,9 @@ struct GameState {
     json miniGrid;
     bool miniUpdate = false;
 
+    std::vector<std::string> friendsLobby;
+    std::map<std::string, std::vector<std::string>> pseudos;
+
     
 };
 

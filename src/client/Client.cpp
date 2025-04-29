@@ -171,6 +171,7 @@ void Client::receiveDisplay() {
                         isPlaying = false;
                         // changer le menuState dans le cas de GUI
                         if(data.contains("state")) {
+                            setGameStateFromServer(data);
                             if(data.contains("message")){
                                 std::string message = data["message"];
                                 std::cout << "Message reçu : " << message << std::endl;
@@ -248,10 +249,16 @@ void Client::setGameStateFromServer(const json& data) {
         gameState.miniGrid = data["otherPlayersGrids"];
         gameState.miniUpdate = true;
     }
+
+    else if(data.contains("data") || data.contains("secondData")){
+        gameState.friendsLobby = data["data"];
+        gameState.pseudos = data["secondData"];
+    }
     else{
         gameState.isGame = false;
         gameState.isEnd = true;
         gameState.menu = data;
+        
         
     }
     gameState.updated = true;
