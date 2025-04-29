@@ -180,7 +180,7 @@ void GameRoom::keyInputchooseVictim(int playerId, int victim) {
 
 void GameRoom::setAmountOfPlayers(int amount) {
     amountOfPlayers = amount;
-    if ((amountOfPlayers ==  1) || (getGameModeName() == GameModeName::Endless))
+    if (amountOfPlayers <=  1)
         endGame();
 }
 

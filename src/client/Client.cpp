@@ -141,8 +141,10 @@ void Client::receiveDisplay() {
                     if (data.contains(jsonKeys::GRID)|| data.contains("otherPlayersGrids")) {
                         isPlaying = true;
                         chatMode = false;
-                        //display.displayGame(data);
-                        setGameStateFromServer(data);
+                        if(isTerminal && !data.contains("otherPlayersGrids"))
+                            display.displayGame(data);
+                        else
+                            setGameStateFromServer(data);
                     }
                     // Si c'est un message de chat
                     else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
@@ -192,8 +194,10 @@ void Client::receiveDisplay() {
                             serverData = data;
                             
                         } else {
-                            display.displayMenu(data, inputBuffer);
-                            setGameStateFromServer(data);
+                            if(isTerminal)
+                                display.displayMenu(data, inputBuffer);
+                            else
+                                setGameStateFromServer(data);
 
 
                         }
@@ -281,4 +285,3 @@ void Client::sendInputFromSFML(const std::string& input) {
         controller.sendInput(input, clientSocket);
     }
 }
-

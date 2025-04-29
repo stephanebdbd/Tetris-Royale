@@ -14,6 +14,10 @@ void Text::draw(sf::RenderWindow& window) const {
     window.draw(text);
 }
 
+sf::FloatRect Text::getLocalBounds() const {
+    return text.getLocalBounds();
+}
+
 
 TextField::TextField(const sf::Font& font, unsigned int characterSize, 
     const sf::Color& textColor, const sf::Color& backgroundColor, 

@@ -52,6 +52,7 @@ class Menu {
         json displayMessage(const std::string& message) const;
         
         json getQuitGameMenu() const;
+        json getGameOverMenu() const;
 
 };
 

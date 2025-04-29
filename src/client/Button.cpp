@@ -109,6 +109,13 @@ Button::Button(const sf::Texture& texture, const sf::Vector2f& position, const s
     shape.setFillColor(sf::Color::White); // ou transparent selon ton style
     buttonTexture = std::make_shared<sf::Texture>(texture);
 }
+
+void Button::setTexture(const sf::Texture& texture) {
+    buttonTexture = std::make_shared<sf::Texture>(texture);
+    //shape.setSize(sf::Vector2f(texture.getSize()));
+    //shape.setFillColor(sf::Color::White); // ou transparent selon ton style
+}
+
 // Fonction pour dessiner le bouton
 void Button::draw(sf::RenderWindow& window) const {
     if(buttonTexture) {

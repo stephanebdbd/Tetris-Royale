@@ -434,7 +434,7 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
 
     int index = 1;
     for (const auto& invitation : pendingRequests) {
-        menu[jsonKeys::OPTIONS].push_back(std::to_string(index) + ". " + "Vous êtes invités par '"+invitation[0]+
+        menu[jsonKeys::OPTIONS].push_back(std::to_string(index) + ". " + "Vous etes invites par '"+invitation[0]+
         "' en tant que '"+invitation[1]+"' dans la GameRoom '"+invitation[2]+"'");  
         index++;
     }
@@ -442,17 +442,7 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
     return menu.dump() + "\n";
 }
 
-json Menu::getWinGameMenu() const {
-    json menu = {
-        {jsonKeys::TITLE, "YOU WIN!!"},
-        {jsonKeys::OPTIONS, {
-            {"1. ", "Rejouer"},
-            {"2. ", "Retour au menu principal"}
-        }},
-        {jsonKeys::INPUT, "Votre choix: "}
-    };
-    return menu.dump() + "\n";  // Convertir en chaîne JSON
-}
+
 
 json Menu::getHelpMenu(bool isRC, bool canEditMaxPlayer) const {    
     json menu = {
@@ -497,3 +487,26 @@ json Menu::getQuitGameMenu() const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
+json Menu::getWinGameMenu() const {
+    json menu = {
+        {jsonKeys::TITLE, "YOU WIN!!"},
+        {jsonKeys::OPTIONS, {
+            {"1. ", "Rejouer"},
+            {"2. ", "Retour au menu principal"}
+        }},
+        {jsonKeys::INPUT, "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}
+
+json Menu::getGameOverMenu() const {
+    json menu = {
+        {jsonKeys::TITLE, "GAME OVER"},
+        {jsonKeys::OPTIONS, {
+            {"1. ", "Rejouer"},
+            {"2. ", "Retour au menu principal"}
+        }},
+        {jsonKeys::INPUT, "Votre choix: "}
+    };
+    return menu.dump() + "\n";  // Convertir en chaîne JSON
+}

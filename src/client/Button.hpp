@@ -47,6 +47,7 @@ class Button {
         bool operator==(const Button& other) const {
             return text.getString() == other.text.getString();
         }
+        void setTexture(const sf::Texture& texture);
         
     private:
         sf::RectangleShape shape;

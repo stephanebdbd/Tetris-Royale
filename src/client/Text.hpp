@@ -6,6 +6,7 @@ class Text{
              const sf::Color& textColor, const sf::Vector2f& position, sf::Uint32 style = sf::Text::Bold);
     
         void draw(sf::RenderWindow& window) const;
+        sf::FloatRect getLocalBounds() const;
     
     private:
         sf::Text text;

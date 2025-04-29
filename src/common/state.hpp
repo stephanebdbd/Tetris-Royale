@@ -61,7 +61,10 @@ enum class ButtonKey {
     RemoveFriend,
 
     CancelRemoveFriend,
-    Cancel
+    Cancel,
+    esc,
+    InviteP_O,
+    retour
 
 
 

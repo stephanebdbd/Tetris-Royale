@@ -378,7 +378,22 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             clientStates[clientId] = MenuState::Settings;
             this->keyInputCreateGameRoom(clientId, GameModeName::Duel);
             
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Mode Duel activé");
+            auto friends = friendList->getFriendList(clientPseudo[clientId]);
+
+            std::map<std::string,  std::vector<std::string>> active;
+            std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
+            std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
+            std::cout<<"size players: "<<players.size()<<std::endl;
+            for (int player : players){
+                std::string pseudo = clientPseudo[player];
+                active["player"].push_back(pseudo);
+            }
+
+            for (int observer : observers){
+                std::string pseudo = clientPseudo[observer];
+                active["observer"].push_back(pseudo);
+            }
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "mode duel", friends, {}, active);
             return;
             
         }
@@ -386,18 +401,46 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         else if(actionType == "ClassicMode") {
             clientStates[clientId] = MenuState::Settings;
             this->keyInputCreateGameRoom(clientId, GameModeName::Classic);
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Mode Classique activé");
+            auto friends = friendList->getFriendList(clientPseudo[clientId]);
+            std::map<std::string,  std::vector<std::string>> active;
+            std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
+            std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
+            std::cout<<"size players: "<<players.size()<<std::endl;
+            for (int player : players){
+                std::string pseudo = clientPseudo[player];
+                active["player"].push_back(pseudo);
+            }
+
+            for (int observer : observers){
+                std::string pseudo = clientPseudo[observer];
+                active["observer"].push_back(pseudo);
+            }
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "mode classic", friends, {}, active);
         }
         else if(actionType == "RoyaleMode") {
             clientStates[clientId] = MenuState::Settings;
             this->keyInputCreateGameRoom(clientId, GameModeName::Royal_Competition);
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Mode Royale activé");
+            auto friends = friendList->getFriendList(clientPseudo[clientId]);
+            std::map<std::string,  std::vector<std::string>> active;
+            std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
+            std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
+            std::cout<<"size players: "<<players.size()<<std::endl;
+            for (int player : players){
+                std::string pseudo = clientPseudo[player];
+                active["player"].push_back(pseudo);
+            }
+
+            for (int observer : observers){
+                std::string pseudo = clientPseudo[observer];
+                active["observer"].push_back(pseudo);
+            }
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "mode royale", friends, {}, active);
         }
         else if(actionType == "Rejoindre"){
             std::cout << "Client #" << clientId << " a demandé de choisir le mode de jeu ." << std::endl;
             clientStates[clientId] = MenuState::JoinGame;
-            std::string currentUser = clientPseudo[clientId];
-            std::vector<std::vector<std::string>> invitations = friendList->getListGameRequest(currentUser);
+            //std::string currentUser = clientPseudo[clientId];
+            //std::vector<std::vector<std::string>> invitations = friendList->getListGameRequest(currentUser);
             //sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu choisir GameRoom ."/*,invitations*/);
             return;
@@ -407,7 +450,30 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::cout << "Client #" << clientId << " accepte a rejoindre une Gameroom ." << std::endl;
             //clientStates[clientId] = MenuState::Settings;
             
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu modeJeu ."/*,invitations*/);
+            std::map<std::string,  std::vector<std::string>> active;
+            std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
+            std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
+            std::cout<<"size players: "<<players.size()<<std::endl;
+            std::cout<<"size observers: "<<observers.size()<<std::endl;
+            for (int player : players){
+                std::string pseudo = clientPseudo[player];
+                active["player"].push_back(pseudo);
+            }
+
+            for (int observer : observers){
+                std::string pseudo = clientPseudo[observer];
+                active["observer"].push_back(pseudo);
+            }
+            std::cout<<"size active: "<<active["observer"].size()<<std::endl;
+            
+            for (int player : players){
+                auto friends = friendList->getFriendList(clientPseudo[player]);
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "rejoindre gameRoonm", friends, {}, active);
+            }
+            for (int observer : observers){
+                //auto friends = friendList->getFriendList(clientPseudo[player]);
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "rejoindre gameRoonm", {}, {}, active);
+            }
             return;
         }
 
@@ -555,37 +621,43 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             else keyInputManageFriendRequests(clientSocket, clientId, action);
             break;
         case MenuState::JoinOrCreateGame:
-            if (refresh) sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
-            else keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
+            /*if (refresh) sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
+            else keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);*/
+            keyInputJoinOrCreateGameMenu(clientSocket, clientId, action);
             break;
         case MenuState::JoinGame:
-            if (refresh) {
+            /*if (refresh) {
                 std::string currentUser = clientPseudo[clientId];
                 std::vector<std::vector<std::string>> invitations = friendList->getListGameRequest(currentUser);
                 sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
-            } else keyInputChoiceGameRoom(clientSocket, clientId, action);
+            } else keyInputChoiceGameRoom(clientSocket, clientId, action);*/
+            keyInputChoiceGameRoom(clientSocket, clientId, action);
             break;
         case MenuState::CreateGame:
-            if (refresh) sendMenuToClient(clientSocket, menu.getGameModeMenu());
-            else keyInputChooseGameModeMenu(clientSocket, clientId, action);
+            /*if (refresh) sendMenuToClient(clientSocket, menu.getGameModeMenu());
+            else keyInputChooseGameModeMenu(clientSocket, clientId, action);*/
+            keyInputChooseGameModeMenu(clientSocket, clientId, action);
             break;
         case MenuState::GameOver:
-            if (refresh) sendMenuToClient(clientSocket, menu.getEndGameMenu("GAME OVER"));
-            else keyInputGameOverMenu(clientSocket, clientId, action);
+            //if (refresh) sendMenuToClient(clientSocket, menu.getEndGameMenu("GAME OVER"));
+            //else keyInputGameOverMenu(clientSocket, clientId, action);
+            keyInputGameOverMenu(clientSocket, clientId, action);
             break;
         case MenuState::Settings:
-            if (refresh) {
+            /*if (refresh) {
                 auto gameRoom = gameRooms[clientGameRoomId[clientId]];
                 sendMenuToClient(clientSocket, menu.getLobbyMenu(getMaxPlayers(clientId), getMode(clientId), getAmountOfPlayers(clientId), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
-            } else keyInputLobbySettingsMenu(clientSocket, clientId, action);
+            } else keyInputLobbySettingsMenu(clientSocket, clientId, action);*/
+            keyInputLobbySettingsMenu(clientSocket, clientId, action);
             break;
         case MenuState::Help:
-            if (refresh) {
+            /*if (refresh) {
                 auto gameRoom = gameRooms[clientGameRoomId[clientId]];
                 bool isRC = gameRoom->getGameModeName() == GameModeName::Royal_Competition;
                 bool canEditMaxPlayer = gameRoom->getGameModeName() == GameModeName::Classic || isRC;
                 sendMenuToClient(clientSocket, menu.getHelpMenu(isRC, canEditMaxPlayer));
-            } else keyInputHelpMenu(clientSocket, clientId, action);
+            } else keyInputHelpMenu(clientSocket, clientId, action);*/
+            keyInputHelpMenu(clientSocket, clientId, action);
             break;
         case MenuState::Play:
             sendInputToGameRoom(clientId, action);
@@ -878,8 +950,12 @@ void Server::loopGame(int ownerId) {
         letPlayersPlay(players);
         letObserversObserve(observers);
         gameRoom->startGame();
+
+        auto lastMiniGameUpdateTime = std::chrono::steady_clock::now();
         
         while (gameRoom->getInProgress()) {
+            auto currentTime = std::chrono::steady_clock::now();
+            auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastMiniGameUpdateTime).count();
             if(gameRoom->getViewers().size() > observers.size()) {
                 observers = gameRoom->getViewers();
             }
@@ -893,7 +969,10 @@ void Server::loopGame(int ownerId) {
                         gameRoom->updatePlayerGame(player);
                         if (gameRoom->getNeedToSendGame(player)) {
                             sendGameToPlayer(player, clientIdToSocket[player], gameRoom);
-                            sendMiniGameToPlayer(player, clientIdToSocket[player], gameRoom);
+                            if (elapsedTime >= 200){
+                                sendMiniGameToPlayer(player, clientIdToSocket[player], gameRoom);
+                                lastMiniGameUpdateTime = currentTime;
+                            }
                             for(auto observer : observers) {
                                 int idOclient = gameRoom->getclientobserverId(observer);
                                 if (idOclient == player) {
@@ -927,16 +1006,17 @@ void Server::loopGame(int ownerId) {
                 else
                     userManager->updateHighscore(clientPseudo[player], gameRoom->getScoreValue());
                 sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu(message));
-                for(auto observer : observers) {
-                    clientStates[observer] = MenuState::GameOver;
-                    sendMenuToClient(clientIdToSocket[observer], menu.getEndGameMenu("END GAME"));
-                    menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "Game End");
-                }
+                
             } catch (const std::exception& e) {
             players.erase(std::remove(players.begin(), players.end(), player), players.end());
             disconnectPlayer(player);
             std::cerr << "Erreur lors de l'envoi du message de fin de jeu au joueur #" << player << ": " << e.what() << std::endl;
             }
+        }
+        for(auto observer : observers) {
+            clientStates[observer] = MenuState::GameOver;
+            sendMenuToClient(clientIdToSocket[observer], menu.getEndGameMenu("END GAME"));
+            menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "Game End");
         }
     
     }
@@ -961,10 +1041,12 @@ bool Server::gamePreparation(int ownerId, std::shared_ptr<GameRoom> gameRoom){
                 if (player != ownerId){
                     clientStates[player] = MenuState::GameOver;
                     sendMenuToClient(clientIdToSocket[player], menu.getEndGameMenu("GAME END"));
+                    menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "owner est quitte");
                 }
                 else {
                     clientStates[player] = MenuState::JoinOrCreateGame;
                     sendMenuToClient(clientIdToSocket[player], menu.getJoinOrCreateGame());
+                    menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "Bienvenue dans menu creer ou rejoindre .");
                 }
             }
             return false;
@@ -1446,7 +1528,7 @@ void Server::sendMiniGameToPlayer(int clientId, int clientSocket, std::shared_pt
             std::shared_ptr<Game> otherGame = gameRoom->getGame(otherPlayerId);
 
             json otherPlayerData;
-            otherPlayerData["playerId"] = otherPlayerId;
+            //otherPlayerData["playerId"] = otherPlayerId;
             otherPlayerData["grid"] = otherGame->gridToJson();
             otherPlayerData["tetra"] = otherGame->tetraminoToJson()[jsonKeys::TETRA_PIECE];
             otherPlayersGrids.push_back(otherPlayerData);
@@ -1559,6 +1641,8 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
             gameRoom->removePlayer(clientId);
         clientStates[clientId] = MenuState::JoinOrCreateGame;
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
+        menuStateManager->sendMenuStateToClient(clientIdToSocket[clientId], clientStates[clientId], "Bienvenue dans menu rejoindre et creer .");
+
         return;
     }
     

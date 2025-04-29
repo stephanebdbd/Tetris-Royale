@@ -28,8 +28,11 @@ void TetraminoDisplacement::keyInputGameMenu(const std::string& action) {
             inverseCommand = false;
         }
         else{
-            applyMalus1();
-            newAction = ch;
+            if(newAction != "///"){
+                applyMalus1();
+                newAction = ch;
+            }
+            
         }
     }
 

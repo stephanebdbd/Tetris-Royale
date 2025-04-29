@@ -36,9 +36,13 @@ int main() {
         std::cout.rdbuf(serverLog.rdbuf());
         std::cerr.rdbuf(serverLog.rdbuf());
         
+        client.setIsTerminal(true);
         lancerModeTerminal(client);
+        
+
 
     } else if (choix == 2) {
+        client.setIsTerminal(false);
 
         lancerModeGraphique(client);
         

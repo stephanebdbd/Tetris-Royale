@@ -47,6 +47,7 @@ private:
     std::mutex messageMutex;
     int avatarIndex = -1; // Index de l'avatar du joueur actuel (-1 par défaut si non défini)
     std::vector<std::pair<std::string, int>> contacts;
+    bool isTerminal;
 
 
 
@@ -87,6 +88,7 @@ public:
         const std::vector<std::pair<std::string, int>>& getContacts() const {
             return contacts;
         }
+        void setIsTerminal(bool isTerminal) { this->isTerminal = isTerminal; }
 };
 
 #endif
