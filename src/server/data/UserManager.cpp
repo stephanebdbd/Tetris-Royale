@@ -336,9 +336,8 @@ bool DataManager::acceptGameInvitation(const int& gameRoom, const std::string& p
     if (playerIdResult.data.empty()) return false;
 
     std::string playerId = playerIdResult.getFirst();
-    std::string set_clause = "status = 'accepted'";
     std::string condition = "id_game = '" + std::to_string(gameRoom) + "' AND id_player = '" + playerId + "' AND status = 'pending'";
-    QueryResult result = db->updateEntry("Games", set_clause, condition);
+    QueryResult result = db->deleteEntry("Games", condition);
     return result.isOk();
 }
 
