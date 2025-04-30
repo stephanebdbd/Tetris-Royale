@@ -1,6 +1,5 @@
 #include "UserManager.hpp"
 #include "Database.hpp"
-#include "security.hpp"
 #include <iostream>
 
 QueryResult DataManager::getUsername(const std::string &id_user) {
@@ -33,8 +32,16 @@ QueryResult DataManager::getUserId(const std::string &username) {
     return result; // Retourne l'objet result avec les données si l'utilisateur existe
 }
 
+int DataManager::getUserAvatarId(const std::string &username){
+    std::string condition = "username = '" + username + "'";
+    QueryResult result = db->selectFromTable("Users", "id_avatar", condition);
+    if(!result.getData().empty())
+        return std::stoi(result.getFirst());
+    return -1;
+}
+
 bool DataManager::checkPwd(const std::string &id_user, const std::string &pwd) {
-    std::string columns = "hash_pwd, salt";
+    std::string columns = "passwrd";
     std::string condition = "id_user = '" + id_user + "'";
     QueryResult result = db->selectFromTable("Users", columns, condition);
 
@@ -42,11 +49,8 @@ bool DataManager::checkPwd(const std::string &id_user, const std::string &pwd) {
         return false; // L'ID utilisateur n'existe pas
     }
 
-    std::string hash_pwd = result.data[0][0];
-    std::string salt = result.data[0][1];
-    std::string salt_pwd = pwd + salt;
-
-    return Security::verifyPwd(hash_pwd, salt_pwd); // Vérification du mot de passe
+    std::string password = result.data[0][0];
+    return password == pwd;
 }
 
 bool DataManager::loginUser(const std::string &username, const std::string &pwd) {
@@ -57,11 +61,10 @@ bool DataManager::loginUser(const std::string &username, const std::string &pwd)
     return false;
 }
 
-bool DataManager::registerUser(const std::string &username, const std::string &pwd) {
-    std::string salt = Security::genSalt();
-    std::string hashpwd = Security::hashPwd(pwd + salt);
-    std::string columns = "username, hash_pwd, salt";
-    std::string values = "'" + username + "', '" + hashpwd + "', '" + salt + "'";
+bool DataManager::registerUser(const std::string &username, const std::string &pwd, const int& avatrId) {
+  
+    std::string columns = "username, passwrd, id_avatar";
+    std::string values = "'" + username + "', '" + pwd + "', '" + std::to_string(avatrId) + "'";
     QueryResult result = db->insertEntry("Users", columns, values);
     return result.isOk();
 }
@@ -304,9 +307,8 @@ QueryResult DataManager::updatePwd(const std::string &id_user, const std::string
     // Check if the password is correct
     if (checkPwd(id_user, pwd)) {
         // Update the password for the given user
-        std::string salt = Security::genSalt();
-        std::string nhpwd = Security::hashPwd(new_pwd+salt);
-        std::string set_clause = "hash_pwd = '" + nhpwd + "', salt = '" + salt + "'";
+
+        std::string set_clause = "passwrd = '" + new_pwd + "'";
         std::string condition = "id_user = '" + id_user + "'";
         result = db->updateEntry("Users", set_clause, condition);
     }
@@ -351,7 +353,7 @@ std::vector<std::vector<std::string>> DataManager::getListGameRequest(const std:
         "u.username, g.invitation_type, g.id_game",
         "Users u",
         "u.id_user = g.id_sender",
-        "g.status = 'pending'"
+        "g.id_player = " + userId + " AND g.status = 'pending'" // AND g.id_player = " + user
     );
     for (const auto& row : result.getData()) {
         if (!row.empty()) gamesInviation.push_back(row);  // username
@@ -372,8 +374,7 @@ QueryResult DataManager::updateHighScore(const std::string& username, const int&
 
 std::vector<std::pair<std::string, int>> DataManager::getRanking() const {
     std::vector<std::pair<std::string, int>> ranking;
-    QueryResult result = db->executeQuery("SELECT username, best_score FROM Users ORDER BY best_score;");
-    std::cout << "hallllo" << std::endl;
+    QueryResult result = db->executeQuery("SELECT username, best_score FROM Users ORDER BY best_score DESC;");
     for (const auto& row : result.getData()) {
         std::cout << row[0] << " : " << row[1] << std::endl;
         if (!row.empty()) ranking.push_back(std::make_pair(row[0], std::stoi(row[1])));  // username and best_score

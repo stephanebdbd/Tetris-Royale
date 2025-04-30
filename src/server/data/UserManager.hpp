@@ -32,9 +32,10 @@ public:
     bool userNotExists(const std::string& username) const;
     bool checkPwd(const std::string &id_user, const std::string &pwd);
     bool loginUser(const std::string &username, const std::string &pwd);
-    bool registerUser(const std::string &username, const std::string &pwd);
+    bool registerUser(const std::string &username, const std::string &pwd, const int& avatrId = -1);
     QueryResult getUsername(const std::string &id_user);
     QueryResult getUserId(const std::string& username);
+    int getUserAvatarId(const std::string& username);
     QueryResult updateUserName(const std::string &username, const std::string &pwd, const std::string &new_username);
     QueryResult updatePwd(const std::string &username, const std::string &pwd, const std::string &new_pwd);
     bool authenticateUser(const std::string& username, const std::string& password) ;

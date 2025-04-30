@@ -39,10 +39,8 @@ void SFMLGame::update() {
     // Autres mises à jour de logique du jeu...
     
     std::string tempMessage = client.getTemporaryMessage();
-    //std::cout << "----->Message temporaire: " << tempMessage << std::endl;
     if (!tempMessage.empty()) {
         afficherErreur(tempMessage);  // Appelle ta méthode d'affichage
-        std::cout << "----->Message temporaire: " << tempMessage << std::endl;
         client.setTemporaryMessage("");  // Efface le message temporaire après l'avoir affiché
     }
 
@@ -88,7 +86,7 @@ void SFMLGame::drawErreurMessage() {
 
 
 void SFMLGame::drawButtons() {
-    drawErreurMessage(); // 👈 affiche le panneau si actif
+    drawErreurMessage();
 
     for (const auto& [_, button] : buttons) {
         button->draw(*window);
@@ -273,8 +271,6 @@ void SFMLGame::addFriendMenu() {
         j["friend"] = friendName;
         network->sendData(j.dump() + "\n", client.getClientSocket());
 
-        std::cout << "Requête envoyée pour ajouter l'ami : " << friendName << std::endl;
-
         texts[TextFieldKey::AddFriendField]->clear();
         return;
     }
@@ -284,7 +280,6 @@ void SFMLGame::addFriendMenu() {
         json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
         return;
     }
 }
@@ -300,12 +295,11 @@ void SFMLGame::friendRequestListMenu() {
     Text header("Liste d'amis", font, 24, sf::Color::White, sf::Vector2f(20, 10));
     header.draw(*window);
 
+    auto serverData = client.getServerData();
     // Requête au serveur pour les amis si data reçu
-    /*if (!client.getServerData().empty() && client.getServerData().contains("amis")) {
-        amis = client.getServerData()["amis"];
-        client.clearServerData();
-    }*/
-    amis= { "Alice", "Bob", "Charlie", "Diana" }; // Exemple de données des demandes d'amis
+    if (!serverData.empty() && serverData.contains("data") && serverData["message"] == jsonKeys::FRIEND_REQUEST_LIST) {
+        amis = client.getServerData()["data"];
+    }
     // Affichage des amis
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
@@ -510,10 +504,10 @@ void SFMLGame::refreshMenu() {
         case MenuState::chat:
             chatMenu();
             break;
-        case MenuState::ManageRoom:
+        case MenuState::ManageTeam:
             //teamsMenu();
             break;
-        case MenuState::CreateRoom:
+        case MenuState::CreateTeam:
             //createRoomMenu();
             break;
         case MenuState::JoinOrCreateGame:
@@ -1051,7 +1045,9 @@ void SFMLGame::rankingMenu(){
     // Affichage de la liste d'amis (exemple visuel)
     float startY = 80;
     float spacing = 70;
-    ranking = client.getServerData()["dataPair"]; // Récupérer la liste d'amis
+    auto serverData = client.getServerData();
+    if(serverData.contains("dataPair"))
+        ranking = client.getServerData()["dataPair"]; // Récupérer la liste d'amis
     for (size_t i = 0; i < ranking.size() && i < 10; ++i) {
         // Rectangle fictif pour la carte du joueur
         Rectangle friendCard(sf::Vector2f(90, startY + i * spacing), sf::Vector2f(600, 60), sf::Color::Transparent, sf::Color(200, 200, 200));
@@ -1122,11 +1118,9 @@ void SFMLGame::chatMenu() {
 
     // Dessiner les champs de texte et les boutons
     drawTextFields();
-
     drawButtons();
     
     // Gérer les clics sur les contacts
-    std::cout<<"salam ismail"<<std::endl;
     handleContacts();
     //dessiner les contacts
     drawContacts();
@@ -1780,7 +1774,7 @@ void SFMLGame::displayWaitingRoom() {
         int i = 0;
         for (auto& [key, value] : lines.items()) {
             line =  value.get<std::string>();
-            if (line.rfind("/help", 0) == 0 || line.rfind("/quit", 0) == 0) {
+            if (line.rfind("/help", 0) == 0 || line.rfind("/back", 0) == 0) {
                 continue; // Ignore cet élément
             }
 
@@ -1974,8 +1968,8 @@ void SFMLGame::displayWaitingRoom() {
    
     if (!invite && quitter->isClicked(*window)) {
             
-        std::cout << "quitter: " << "/quit"<< std::endl;
-        client.sendInputFromSFML("/quit");
+        std::cout << "quitter: " << "/back"<< std::endl;
+        client.sendInputFromSFML("/back");
         return;
         
     }

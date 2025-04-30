@@ -36,7 +36,7 @@ void Chat::sendMessage(json& msg, const std::map<std::string, int>& receiver) {
         auto receiverOfMessage = receiver.begin()->first;
         // Enregistrement du message dans la base de données
         if (!saveMessage(msg["sender"], receiverOfMessage, msg["message"]))
-            std::cerr << "Failed to save message: " << msg["message"] << std::endl;
+            std::cerr << "Failed to save message: " << msg["sender"] << "  : " << msg["message"] << std::endl;
     }
 
     for (const auto& [receiverName, receiverSocket] : receiver) {

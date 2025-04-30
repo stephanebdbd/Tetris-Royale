@@ -11,7 +11,7 @@ bool ChatRoom::createTeam(const std::string &room_name, const std::string &admin
     }
 
     // Créer la salle dans la table ChatRooms avec le propriétaire
-    std::string columns = "room_name, room_properietor";
+    std::string columns = "room_name, room_proprietor";
     std::string values = "'" + room_name + "', '" + idAdmin.getFirst() + "'";
     QueryResult result = db->insertEntry("ChatRooms", columns, values);
     if (!result.isOk()) {
@@ -23,6 +23,7 @@ bool ChatRoom::createTeam(const std::string &room_name, const std::string &admin
     // Ajouter l'admin dans la table ChatRoomMembers
     columns = "id_room, id_user, status";
     values = roomId + ", '" + idAdmin.getFirst() + "', 'admin'";
+    std::cout << "room created" << std::endl;
     return db->insertEntry("ChatRoomMembers", columns, values).isOk();
 }
 
@@ -673,3 +674,4 @@ void ChatRoom::sendOldMessages(int socket, const std::string& roomName) {
         std::cout << "Aucun historique à envoyer pour la room " << roomName << std::endl;
     }
 }
+

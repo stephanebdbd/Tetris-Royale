@@ -1,15 +1,15 @@
 CREATE TABLE IF NOT EXISTS Users (
     id_user INTEGER PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
-    hash_pwd TEXT NOT NULL,
-    salt TEXT NOT NULL,
+    passwrd TEXT NOT NULL,
     best_score INTEGER DEFAULT 0,
+    id_avatar TEXT NOT NULL DEFAULT -1,
     CHECK(username <> '')
 );
 
 CREATE TABLE IF NOT EXISTS Games(
     id_game INTEGER,
-    id_sender INTEGER, 
+    id_sender INTEGER,
     id_player INTEGER,
     invitation_type TEXT NOT NULL CHECK (invitation_type IN ('player', 'observer')),
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted')),
