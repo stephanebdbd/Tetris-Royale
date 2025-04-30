@@ -1,5 +1,0 @@
-zz:zz:0
-all:all:1000
-alo:alo:0
-ola:ola:0
-moha:moha:0

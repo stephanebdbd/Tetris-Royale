@@ -147,13 +147,14 @@ void Client::receiveDisplay() {
                             setGameStateFromServer(data);
                     }
                     // Si c'est un message de chat
+                    // Si c'est un message de chat
                     else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
-                        chatMode = true;
-                        isPlaying = false;
-                        // Lancer le chat dans un thread
+                        std::cout << "data mode : " << data << std::endl;
+                        chatMode = true; // Passer en mode chat
+                        chat.setMyPseudo(data["pseudo"]); // Mettre à jour le pseudo du client
+                        //lancer thread pour gerer les fenetre de chat et l envoi de message
                         std::thread chatThread(&ClientChat::run, &chat);
-                        chatThread.detach();
-        
+                        chatThread.detach(); // Lancer le thread de chat
                     }
                     else if (data.contains(jsonKeys::TEMPORARY_DISPLAY)) {
                         std::string message = data[jsonKeys::TEMPORARY_DISPLAY];
@@ -166,6 +167,17 @@ void Client::receiveDisplay() {
                             chat.receiveChatMessages(data);
                         serverData = data;
                     }
+
+                    // Si "data" est un tableau et que l'élément 0 contient "msg" (pour les anciens messages)
+                    else if (data.is_array()) {
+                        if(data.empty()) continue;
+                        for (const auto& msg : data) {
+                            if (msg.is_object() && msg.contains("message")) { // Ensure msg is an object
+                                chat.addChatMessage(msg);
+                            }
+                        }
+                        chat.displayChatMessages(); // Afficher les messages de chat
+                    }
                     else {
                         chatMode = false;
                         isPlaying = false;
@@ -174,7 +186,6 @@ void Client::receiveDisplay() {
                             setGameStateFromServer(data);
                             if(data.contains("message")){
                                 std::string message = data["message"];
-                                std::cout << "Message reçu : " << message << std::endl;
                                 if(message == "avatar"){
                                     int avatarIndex = std::stoi(data["data"][0].get<std::string>());
                                     setAvatarIndex(avatarIndex);

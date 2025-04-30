@@ -47,7 +47,7 @@ namespace jsonKeys {
     constexpr char NEXT_PIECE[] = "nextPiece";
     constexpr char SHAPE[] = "shape";
     constexpr char SHAPE_SYMBOL[] = "shapeSymbol";
-    
+    constexpr char MESSAGE[] = "message";
     constexpr char MESSAGE_CIBLE[] = "messageCible";
     constexpr char REMOVE_FRIEND[] = "removeFriend";
     constexpr char PROPOSITION_CIBLE[] = "propositionCible";
