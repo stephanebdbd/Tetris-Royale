@@ -246,6 +246,7 @@ class SFMLGame {
         void displayWaitingRoom();
         void displayJoinGame();
         void drawMessageMalusBonus(const json& msg);
+        void drawAvatar(int avatarIndex, float posX, float posY, float size);
 
         void drawMiniGrid(const json& miniGrid, sf::Vector2f pos);
         void drawMiniTetra(const json& miniTetra, sf::Vector2f pos);

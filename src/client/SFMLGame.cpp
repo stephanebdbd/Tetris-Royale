@@ -729,11 +729,11 @@ void SFMLGame::registerMenu() {
     displayBackground(textures->connexion);
 
     // Titre principal
-    Text title("Création de compte", font, 30, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 150, 30));
+    Text title("Creation de compte", font, 30, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 150, 30));
     title.draw(*window);
 
     // Slogan ou aide
-    Text subtitle("Rejoignez la communauté Tetris Royal", font, 18, sf::Color(200, 200, 220), sf::Vector2f(WINDOW_WIDTH / 2 - 180, 80));
+    Text subtitle("Rejoignez la communaute Tetris Royal", font, 18, sf::Color(200, 200, 220), sf::Vector2f(WINDOW_WIDTH / 2 - 180, 80));
     subtitle.draw(*window);
 
     // Centrage des champs
@@ -918,7 +918,28 @@ void SFMLGame::connexionMenu() {
     }
 }
 
+void SFMLGame::drawAvatar(int avatarIndex, float posX, float posY, float size) {
+    if (avatarIndex >= 0 && avatarIndex < static_cast<int>(avatarPaths.size())) {
+        sf::Texture avatarTexture;
+        if (avatarTexture.loadFromFile(avatarPaths[avatarIndex])) {
+            sf::Sprite avatarSprite;
+            avatarSprite.setTexture(avatarTexture);
 
+            // Redimensionner l'avatar pour qu'il rentre bien dans le bouton
+            avatarSprite.setScale(
+                size / avatarTexture.getSize().x,
+                size / avatarTexture.getSize().y
+            );
+
+            // Positionner l'avatar
+            avatarSprite.setPosition(posX, posY);
+
+            window->draw(avatarSprite);
+        } else {
+            std::cout << "Erreur de chargement de l'avatar !" << std::endl;
+        }
+    }
+}
 
 void SFMLGame::mainMenu() {
     // Afficher l'arrière-plan du menu principal
@@ -974,26 +995,7 @@ void SFMLGame::mainMenu() {
     // Dessiner les boutons
     drawButtons();
     int avatarIndex = client.getAvatarIndex();
-    if (avatarIndex >= 0 && avatarIndex < static_cast<int>(avatarPaths.size())) {
-        sf::Texture avatarTexture;
-        if (avatarTexture.loadFromFile(avatarPaths[avatarIndex])) {
-            sf::Sprite avatarSprite;
-            avatarSprite.setTexture(avatarTexture);
-            
-            // Redimensionner l'avatar pour qu'il rentre bien dans le bouton
-            avatarSprite.setScale(
-                45.0f / avatarTexture.getSize().x,
-                45.0f / avatarTexture.getSize().y
-            );
-            
-            // Positionner l'avatar à la position du bouton Profile
-            avatarSprite.setPosition(WINDOW_WIDTH - 70, 20);
-            
-            window->draw(avatarSprite);
-        } else {
-            std::cout << "Erreur de chargement de l'avatar !" << std::endl;
-        }
-    }
+    drawAvatar(avatarIndex, WINDOW_WIDTH - 70, 20, 45.0f);
     
 
     // Gérer les clics sur les boutons
@@ -1090,6 +1092,8 @@ void SFMLGame::rankingMenu(){
     } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
         // Action pour le bouton "Profile"
     }
+    int avatarIndex = client.getAvatarIndex();
+    drawAvatar(avatarIndex, WINDOW_WIDTH - 70, 20, 45.0f);
 
 }
 
@@ -1349,6 +1353,8 @@ void SFMLGame::CreateOrJoinGame() {
     } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
         // Action pour le bouton "Profile"
     }
+    int avatarIndex = client.getAvatarIndex();
+    drawAvatar(avatarIndex, WINDOW_WIDTH - 70, 20, 45.0f);
 }
 
 void SFMLGame::ChoiceGameMode(){
@@ -1403,6 +1409,8 @@ void SFMLGame::ChoiceGameMode(){
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
+    int avatarIndex = client.getAvatarIndex();
+    drawAvatar(avatarIndex, WINDOW_WIDTH - 70, 20, 45.0f);
 
 }
 void SFMLGame::displayGame(){
@@ -2030,11 +2038,15 @@ void SFMLGame::displayWaitingRoom() {
         return;
         
     }
+    int avatarIndex = client.getAvatarIndex();
+    drawAvatar(avatarIndex, WINDOW_WIDTH - 70, 20, 45.0f);
     
 }
 
 void SFMLGame::displayJoinGame() {
     window->clear(sf::Color(30, 30, 60)); // Fond bleu nuit
+    int avatarIndex = client.getAvatarIndex();
+    drawAvatar(avatarIndex, WINDOW_WIDTH - 70, 20, 45.0f);
 
     if (buttons.empty()) {
         buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
