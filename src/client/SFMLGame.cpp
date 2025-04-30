@@ -729,51 +729,58 @@ void SFMLGame::registerMenu() {
     displayBackground(textures->connexion);
 
     // Titre principal
-    Text title("Création de compte", font, 30, sf::Color::White, sf::Vector2f(250, 30));
+    Text title("Création de compte", font, 30, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 150, 30));
     title.draw(*window);
 
     // Slogan ou aide
-    Text subtitle("Rejoignez la communauté Tetris Royal", font, 18, sf::Color(200, 200, 220), sf::Vector2f(250, 80));
+    Text subtitle("Rejoignez la communauté Tetris Royal", font, 18, sf::Color(200, 200, 220), sf::Vector2f(WINDOW_WIDTH / 2 - 180, 80));
     subtitle.draw(*window);
+
+    // Centrage des champs
+    float fieldWidth = 250;
+    float fieldHeight = 35;
+    float centerX = WINDOW_WIDTH / 2 - fieldWidth / 2;
+    float startY = 180;
+    float fieldSpacing = 50;
 
     // Ajouter les champs de texte s'ils n'existent pas
     if (texts.empty()) {
         texts[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                     sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 350), sf::Vector2f(200, 35), "Username.");
+                                                                     sf::Vector2f(centerX, startY), sf::Vector2f(fieldWidth, fieldHeight), "Username");
         texts[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                     sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 400), sf::Vector2f(200, 35), "Password", true);
+                                                                     sf::Vector2f(centerX, startY + fieldSpacing), sf::Vector2f(fieldWidth, fieldHeight), "Password", true);
         texts[TextFieldKey::ConfirmPassword] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                            sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 450), sf::Vector2f(200, 35), "Confirm Password", true);
+                                                                            sf::Vector2f(centerX, startY + 2 * fieldSpacing), sf::Vector2f(fieldWidth, fieldHeight), "Confirm Password", true);
     }
 
     // Section Sélection d'avatar
-    Text avatarTitle("Choisissez votre avatar:", font, 20, sf::Color::White, sf::Vector2f(250, 310));
+    float avatarTitleY = startY + 3 * fieldSpacing + 20;
+    Text avatarTitle("Choisissez votre avatar:", font, 20, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 130, avatarTitleY));
     avatarTitle.draw(*window);
 
-    // Afficher la galerie d'avatars
-    float avatarStartX = 250;
-    float avatarY = 350;
+    // afficher la galerie d'avatar
     float avatarSize = 50;
     float avatarSpacing = 15;
     int avatarsPerRow = 5;
+    float avatarRowWidth = avatarsPerRow * avatarSize + (avatarsPerRow - 1) * avatarSpacing;
+    float avatarStartX = WINDOW_WIDTH / 2 - avatarRowWidth / 2;
+    float avatarY = avatarTitleY + 40;
 
     for (size_t i = 0; i < avatarPaths.size(); ++i) {
         float avatarX = avatarStartX + (i % avatarsPerRow) * (avatarSize + avatarSpacing);
         float currentY = avatarY + (i / avatarsPerRow) * (avatarSize + avatarSpacing);
-    
+
         sf::Texture avatarTex;
         if (avatarTex.loadFromFile(avatarPaths[i])) {
-            // Dessiner l'avatar avec un contour si sélectionné
-            sf::CircleShape avatarCircle(avatarSize / 2); // Crée un cercle avec un rayon
+            sf::CircleShape avatarCircle(avatarSize / 2);
             avatarCircle.setPosition(avatarX, currentY);
             avatarCircle.setOutlineThickness(2);
             avatarCircle.setOutlineColor((selectedAvatar == static_cast<int>(i)) ? sf::Color::Yellow : sf::Color::Transparent);
             avatarCircle.setFillColor(sf::Color(100, 100, 100));
             avatarCircle.setTexture(&avatarTex);
-    
+
             window->draw(avatarCircle);
-    
-            // Gérer le clic sur l'avatar
+
             sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left) &&
                 std::sqrt(std::pow(mousePos.x - (avatarX + avatarSize / 2), 2) +
@@ -785,11 +792,17 @@ void SFMLGame::registerMenu() {
     }
 
     // Ajouter les boutons s'ils n'existent pas
+    float buttonWidth = 200;
+    float buttonHeight = 35;
+    float buttonX = WINDOW_WIDTH / 2 - buttonWidth / 2;
+    float avatarRows = (avatarPaths.size() + avatarsPerRow - 1) / avatarsPerRow;
+    float buttonY = avatarY + avatarRows * (avatarSize + avatarSpacing) + 30;
+
     if (buttons.empty()) {
         buttons[ButtonKey::Registre] = std::make_unique<Button>("S'inscrire", font, 24, sf::Color::White, sf::Color(100, 149, 237),
-                                                                 sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 500), sf::Vector2f(200, 35));
+                                                                 sf::Vector2f(buttonX, buttonY), sf::Vector2f(buttonWidth, buttonHeight));
         buttons[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 24, sf::Color::White, sf::Color(255, 99, 71),
-                                                               sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 560), sf::Vector2f(200, 35));
+                                                               sf::Vector2f(buttonX, buttonY + 60), sf::Vector2f(buttonWidth, buttonHeight));
     }
 
     // Dessiner les champs de texte et les boutons
@@ -819,7 +832,7 @@ void SFMLGame::registerMenu() {
             afficherErreur("Tous les champs doivent être remplis.");
             return;
         }
-        
+
         if (password != confirmPassword) {
             afficherErreur("Les mots de passe ne correspondent pas.");
             return;
@@ -836,7 +849,7 @@ void SFMLGame::registerMenu() {
             {jsonKeys::ACTION, "register"},
             {jsonKeys::USERNAME, username},
             {jsonKeys::PASSWORD, password},
-            {"avatar", selectedAvatar} // Envoi de l'index de l'avatar sélectionné
+            {"avatar", selectedAvatar}
         };
 
         network->sendData(j.dump() + "\n", client.getClientSocket());
@@ -848,6 +861,7 @@ void SFMLGame::registerMenu() {
         selectedAvatar = -1;
     }
 }
+
 
 void SFMLGame::connexionMenu() {
     // Afficher l'arrière-plan du menu de connexion
