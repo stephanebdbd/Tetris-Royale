@@ -11,7 +11,6 @@ struct GameState {
     bool updated = false;  // drapeau pour indiquer que de nouvelles données sont arrivées
 
     json menu;
-    bool isEnd = false;
     bool isGame = false;
     json message;
     json miniGrid;

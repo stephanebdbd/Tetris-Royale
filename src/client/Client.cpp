@@ -267,7 +267,6 @@ void Client::setGameStateFromServer(const json& data) {
     }
     else{
         gameState.isGame = false;
-        gameState.isEnd = true;
         gameState.menu = data;
         
         
@@ -293,10 +292,22 @@ void Client::setGameStateUpdated(bool updated) {
     gameState.updated = updated;
 }
 
-void Client::setGameStateIsEnd(bool isEnd) {
+void Client::reintiliseData(){
     std::lock_guard<std::mutex> lock(gameStateMutex);
-    gameState.isEnd = isEnd;
+    gameState.gridData.clear();
+    gameState.currentPieceData.clear();
+    gameState.nextPieceData.clear();
+    gameState.scoreData.clear();
+    gameState.message.clear();
+    gameState.miniGrid.clear();
+    gameState.miniUpdate = false;
+    gameState.isGame = false;
+    gameState.friendsLobby.clear();
+    gameState.pseudos.clear();
+
 }
+
+
 
 void Client::sendInputFromSFML(const std::string& input) {
     if (!input.empty()) {

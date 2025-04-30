@@ -89,6 +89,7 @@ public:
             return contacts;
         }
         void setIsTerminal(bool isTerminal) { this->isTerminal = isTerminal; }
+        void reintiliseData();
 };
 
 #endif

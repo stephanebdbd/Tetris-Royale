@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <set>
 
 
 const unsigned int WINDOW_WIDTH = 1500;
@@ -1550,6 +1551,7 @@ void SFMLGame::drawTetramino(const json& tetraPiece) {
 
 void SFMLGame::drawEndGame() {
     GameState gameData = client.getGameState();
+    client.reintiliseData();
     json endGameData = gameData.menu;
     std::string message = endGameData[jsonKeys::TITLE];
     sf::Color color;
@@ -1580,13 +1582,11 @@ void SFMLGame::drawEndGame() {
         j[jsonKeys::ACTION] = "createjoin";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
-        client.setGameStateIsEnd(false);
         return;
     } else if (buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::MAIN;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
-        client.setGameStateIsEnd(false);
         return;
     }
 
@@ -2020,21 +2020,15 @@ void SFMLGame::displayWaitingRoom() {
 }
 
 void SFMLGame::displayJoinGame() {
-    
-
-    
-    
     window->clear(sf::Color(30, 30, 60)); // Fond bleu nuit
 
-
     if (buttons.empty()) {
-        
         buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
     }
     drawButtons();
 
     json j;
-    
+
     if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
         j[jsonKeys::ACTION] = "createjoin";
         network->sendData(j.dump() + "\n", client.getClientSocket());
@@ -2042,54 +2036,69 @@ void SFMLGame::displayJoinGame() {
     }
 
     // Créer et configurer le texte du titre
-
-    Text title("DEMANDES DE JEU", font, 40, sf::Color::White, sf::Vector2f(WINDOW_WIDTH/2 - 250, 30)); 
+    Text title("DEMANDES DE JEU", font, 40, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 250, 30));
     title.draw(*window);
-    
 
     if (client.isGameStateUpdated()) {
-        
         GameState gameData = client.getGameState();
         json requests = gameData.menu[jsonKeys::OPTIONS];
         std::string titre = gameData.menu[jsonKeys::TITLE];
+        //std::cout << "requests: " << requests.size() << std::endl;
 
         Text t(titre, font, 40, sf::Color::White, sf::Vector2f(20, 100));
         t.draw(*window);
 
-
         std::string line;
-        if(requests.empty()) {
+        if (requests.empty()) {
             line = "Aucune demande de jeu";
             Text requ(line, font, 40, sf::Color::Red, sf::Vector2f(20, 170));
             requ.draw(*window);
-        }
-        
-
-        else{
+        } else {
+            // Synchroniser acceptInvite avec requests
+            std::set<std::string> currentInvitations;
             int i = 0;
+
             for (auto& [key, value] : requests.items()) {
                 line = key + value.get<std::string>();
                 std::string message = line;
-                
+                //std::cout << "Message: " << message << std::endl;
 
+                // Extraire les informations de l'invitation
                 size_t startPos = message.find("GameRoom '");
-                std::string gameRoomNumber;
+                std::string gameRoomNumber, inviter, status;
                 if (startPos != std::string::npos) {
-                    // Avancer après "GameRoom '"
                     startPos += std::string("GameRoom '").length();
-
-                    // Trouver la position de l'apostrophe fermante
                     size_t endPos = message.find("'", startPos);
                     if (endPos != std::string::npos) {
-                        // Extraire le numéro de la GameRoom
                         gameRoomNumber = message.substr(startPos, endPos - startPos);
-                        //std::cout << "GameRoom Number: " << gameRoomNumber << std::endl;
-                    } else {
-                        std::cerr << "Erreur : Apostrophe fermante non trouvée." << std::endl;
                     }
-                } else {
-                    std::cerr << "Erreur : 'GameRoom' non trouvé dans le message." << std::endl;
+
+                    // Extraire le nom de l'invitant
+                    size_t inviterStart = message.find("par '");
+                    if (inviterStart != std::string::npos) {
+                        inviterStart += std::string("par '").length();
+                        size_t inviterEnd = message.find("'", inviterStart);
+                        if (inviterEnd != std::string::npos) {
+                            inviter = message.substr(inviterStart, inviterEnd - inviterStart);
+                        }
+                    }
+
+                    // Extraire le statut (joueur/observateur)
+                    size_t statusStart = message.find("en tant que '");
+                    if (statusStart != std::string::npos) {
+                        statusStart += std::string("en tant que '").length();
+                        size_t statusEnd = message.find("'", statusStart);
+                        if (statusEnd != std::string::npos) {
+                            status = message.substr(statusStart, statusEnd - statusStart);
+                        }
+                    }
                 }
+
+                // Générer une clé unique pour cette invitation
+                std::string invitationKey = gameRoomNumber + "|" + inviter + "|" + status;
+                currentInvitations.insert(invitationKey);
+
+                // Afficher le message
                 float messageX = 20; // Position horizontale du message
                 float messageY = 150 + i * 50;
 
@@ -2097,58 +2106,54 @@ void SFMLGame::displayJoinGame() {
                 requ.draw(*window);
 
                 float buttonX = messageX + 800; // Décalage horizontal pour placer le bouton à droite du message
-                float buttonY = messageY; 
+                float buttonY = messageY;
 
-                if(acceptInvite.size() < requests.size()){
-                    if(!acceptInvite.count(gameRoomNumber)){
-                        acceptInvite[gameRoomNumber].push_back(std::make_unique<Button>(textures->accept, sf::Vector2f(buttonX, buttonY), sf::Vector2f(25, 25)));
-                    }
-                    else if(acceptInvite[gameRoomNumber].size() < requests.size()){
-                        acceptInvite[gameRoomNumber].push_back(std::make_unique<Button>(textures->accept, sf::Vector2f(buttonX, buttonY), sf::Vector2f(25, 25)));
-                    }
+                // Ajouter un bouton pour cette invitation si elle n'existe pas déjà
+                if (!acceptInvite.count(invitationKey)) {
+                    acceptInvite[invitationKey].push_back(std::make_unique<Button>(textures->accept, sf::Vector2f(buttonX, buttonY), sf::Vector2f(25, 25)));
                 }
-                
-                
 
-                
                 i++;
             }
 
-            
+            // Supprimer les invitations obsolètes
+            for (auto it = acceptInvite.begin(); it != acceptInvite.end();) {
+                if (currentInvitations.find(it->first) == currentInvitations.end()) {
+                    it = acceptInvite.erase(it);
+                } else {
+                    ++it;
+                }
+            }
 
-            for(const auto& [_, buttonsA] : acceptInvite) {
-                for(const auto& buttonA : buttonsA) {
+            // Dessiner les boutons
+            for (const auto& [invitationKey, buttonsA] : acceptInvite) {
+                for (const auto& buttonA : buttonsA) {
                     buttonA->draw(*window);
                 }
-                
             }
 
-            json j;
-            for (const auto& [nbre, buttonsA] : acceptInvite) {
-                for(const auto& buttonA : buttonsA) {
+            // Gérer les clics sur les boutons
+            for (const auto& [invitationKey, buttonsA] : acceptInvite) {
+                for (const auto& buttonA : buttonsA) {
                     if (buttonA->isClicked(*window)) {
-                        std::cout << "Room choisi: " << nbre << std::endl;
-                        std::cout<<"accept." << nbre << std::endl;
-                        if(!nbre.empty()){
-                            client.sendInputFromSFML("accept." + nbre);
-                            j[jsonKeys::ACTION] = "AcceptRejoindre";
-                            network->sendData(j.dump() + "\n", client.getClientSocket());  
-                            acceptInvite.clear();
-                            break;
-                        }                    
                         
+
+                        // Extraire les informations de la clé
+                        size_t firstDelim = invitationKey.find("|");
+                        std::string gameRoomNumber = invitationKey.substr(0, firstDelim);
+                        std::cout << "accept." << gameRoomNumber << std::endl;
+
+                        // Envoyer la réponse au serveur
+                        client.sendInputFromSFML("accept." + gameRoomNumber);
+                        j[jsonKeys::ACTION] = "AcceptRejoindre";
+                        network->sendData(j.dump() + "\n", client.getClientSocket());
+                        acceptInvite.clear();
+                        break;
                     }
                 }
-                
             }
-
-            
-
-
-            
         }
-    }        
-
+    }
 }
 
 void SFMLGame::drawMessageMalusBonus(const json& msg){
