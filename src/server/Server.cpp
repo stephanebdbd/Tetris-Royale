@@ -969,7 +969,7 @@ void Server::loopGame(int ownerId) {
                         gameRoom->updatePlayerGame(player);
                         if (gameRoom->getNeedToSendGame(player)) {
                             sendGameToPlayer(player, clientIdToSocket[player], gameRoom);
-                            if (elapsedTime >= 100){
+                            if (elapsedTime >= 500){
                                 sendMiniGameToPlayer(player, clientIdToSocket[player], gameRoom);
                                 lastMiniGameUpdateTime = currentTime;
                             }
