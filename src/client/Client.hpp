@@ -85,9 +85,8 @@ public:
         int getAvatarIndex() const {
             return avatarIndex;
         }
-        const std::vector<std::pair<std::string, int>>& getContacts() const {
-            return contacts;
-        }
+        const std::vector<std::pair<std::string, int>>& getContacts() const ;
+        void setContacts(const std::vector<std::pair<std::string, int>>& newContacts);
         void setIsTerminal(bool isTerminal) { this->isTerminal = isTerminal; }
         void reintiliseData();
 };

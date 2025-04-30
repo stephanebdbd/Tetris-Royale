@@ -1174,13 +1174,17 @@ void SFMLGame::chatMenu() {
 }
 
 void SFMLGame::handleContacts() {
+    const auto& contacts = client.getContacts(); 
     if (contacts.empty()) return;
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
-    auto serveurD = client.getServerData();
+    
+    std::cout << "Contacts: " << std::endl;
+    for (const auto& contact : contacts) {
+        std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
+        }
     
     // Gestion des contacts
-    const auto& contacts = client.getContacts();
     for (size_t i = 0; i < std::min(contacts.size(), avatarTextures.size()); ++i) {
         const auto& [contactName, avatarIndex] = contacts[i];
         float contactY = 100 + i * contactHeight;

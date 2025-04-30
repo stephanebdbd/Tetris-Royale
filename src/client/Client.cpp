@@ -191,7 +191,7 @@ void Client::receiveDisplay() {
                                     setAvatarIndex(avatarIndex);
                                 }
                                 if (data.contains("dataPair") && message == "contacts") {
-                                    contacts = data["dataPair"].get<std::vector<std::pair<std::string, int>>>();
+                                    setContacts(data["dataPair"].get<std::vector<std::pair<std::string, int>>>());
                                     std::cout << "Contacts: " << std::endl;
                                     for (const auto& contact : contacts) {
                                         std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
@@ -313,4 +313,10 @@ void Client::sendInputFromSFML(const std::string& input) {
     if (!input.empty()) {
         controller.sendInput(input, clientSocket);
     }
+}
+const std::vector<std::pair<std::string, int>>&  Client:: getContacts() const {
+    return contacts;
+}
+void Client::setContacts(const std::vector<std::pair<std::string, int>>& newContacts) {
+    contacts = newContacts;
 }
