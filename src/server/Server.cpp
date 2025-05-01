@@ -1708,11 +1708,17 @@ void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::s
             
             auto currentClient = clientPseudo[clientId];
             std::vector<std::vector<std::string>> invitations = userManager.getListGameRequest(currentClient);
+            bool invitationFound = false;
+
             for (const auto& invi : invitations){
-                if(invi[1]!=status || invi[2]!=nbreRoom){
-                    returnToMenu(clientSocket, clientId, MenuState::JoinGame, "Erreur : La salle demandée n'existe pas ou le status n'est pas correct.");
-                    return;
+                if(invi[1]==status && invi[2]==nbreRoom){
+                    invitationFound = true;
+                    break;
                 }
+            }
+            if (!invitationFound) {
+                returnToMenu(clientSocket, clientId, MenuState::JoinGame, "Erreur : Vous n'avez pas d'invitation pour cette salle.");
+                return;
             }
             int roomNumber = std::stoi(nbreRoom);
             

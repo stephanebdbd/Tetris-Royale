@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS Games(
     id_player INTEGER,
     invitation_type TEXT NOT NULL CHECK (invitation_type IN ('player', 'observer')),
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted')),
-    PRIMARY KEY (id_game, id_player),
+    PRIMARY KEY (id_game, id_player, invitation_type),
     FOREIGN KEY (id_sender) REFERENCES Users(id_user),
     FOREIGN KEY (id_player) REFERENCES Users(id_user)
 );
