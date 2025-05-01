@@ -539,6 +539,7 @@ void SFMLGame::refreshMenu() {
     }
     client.clearServerData();
     window->display();
+    sleep(0.1);
 }
 void SFMLGame::friendListMenu() {
     // Fond
@@ -1179,11 +1180,6 @@ void SFMLGame::handleContacts() {
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
     
-    std::cout << "Contacts: " << std::endl;
-    for (const auto& contact : contacts) {
-        std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
-        }
-    
     // Gestion des contacts
     for (size_t i = 0; i < std::min(contacts.size(), avatarTextures.size()); ++i) {
         const auto& [contactName, avatarIndex] = contacts[i];
@@ -1219,20 +1215,19 @@ void SFMLGame::handleContacts() {
             initial.setPosition(
                 circle.getPosition().x + circle.getRadius() - textBounds.width / 2 - textBounds.left,
                 circle.getPosition().y + circle.getRadius() - textBounds.height / 2 - textBounds.top
-    );
+            );
 
-    window->draw(initial);
+            window->draw(initial);
         }
-    }
-
-    // Gestion des clics
-    for (const auto& [contact, button] : chatContacts) {
-        if (button->isClicked(*window)) {
-            clickedContact = contact;
-            network->sendData(json{{"action", "openChat"}, {"contact", contact}}.dump() + "\n", 
-                            client.getClientSocket());
-            break;
+        //gestion des clicks
+        const auto& Button = chatContacts[contactName];
+        if(Button->isClicked(*window)){
+            clickedContact = contactName;
+            avatarClickedContact = avatarIndex;
+            network->sendData(json{{"action", "openChat"}, {"contact", contactName}}.dump() + "\n", 
+                        client.getClientSocket());
         }
+        
     }
 
     // Affichage du chat sélectionné
@@ -1241,7 +1236,7 @@ void SFMLGame::handleContacts() {
                  sf::Color(50, 50, 70), sf::Color(100, 100, 120)).draw(*window);
         Text(clickedContact, font, 24, sf::Color::White, sf::Vector2f(250, 10)).draw(*window);
         Circle(sf::Vector2f(215, 10), 30.0f, sf::Color::White, sf::Color::Transparent)
-            .drawPhoto(avatarTextures[0], *window);
+            .drawPhoto(avatarTextures[avatarClickedContact], *window);
     }
 }
 

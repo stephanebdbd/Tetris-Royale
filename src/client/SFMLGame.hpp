@@ -122,8 +122,6 @@ class SFMLGame {
         std::unordered_map<std::string, std::unique_ptr<Button>> friendButtons;
         std::vector<std::string> amis;
         std::string selectedFriend;
-        //std::map<std::string, int> userAvatars; // Associe chaque username à son index d'avatar
-        
         
 
         void afficherErreur(const std::string& message) ;
@@ -140,7 +138,6 @@ class SFMLGame {
         void handleTextFieldEvents(sf::Event& event);
         void handleButtonEvents();
         void handleEvents();
-        void LoadResources();
         void cleanup();
 
         //send json to server
@@ -172,10 +169,8 @@ class SFMLGame {
         float inviteScrollOffset = 0.0f; // Décalage vertical pour le défilement
         const float inviteScrollSpeed = 30.0f; // Vitesse de défilement
         float inviteMaxScroll = 500.0f; // Hauteur maximale du contenu défilable
-        std::vector<std::string> amistest = {"Friend1", "Friend2", "Friend3", "Friend4", "Friend5", "Friend6", "Friend7", "Friend8", "Friend9", "Friend10", 
-            "Friend11", "Friend12", "Friend13", "Friend14", "Friend15", "Friend16", "Friend17", "Friend18", "Friend19", "Friend20"};
-            
         int selectedAvatar = 0; // 0 par défaut ou -1 si non sélectionné
+        int avatarClickedContact; // avatar du client selection pour chatter
         std::vector<std::string> avatarPaths; // Chemins des avatars disponibles
         sf::Texture avatarduClient; // Texture pour l'avatar du client
 
