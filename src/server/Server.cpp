@@ -302,13 +302,18 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         }
         else if(actionType == jsonKeys::FRIEND_LIST) {
             //la liste des amis
+            std::cout<<".................... en fait je suis dans HANDLEGUIActions " << clientPseudo[clientId]<<std::endl;
             auto friends = userManager.getFriendList(clientPseudo[clientId]);
+            for (const auto& friendName : friends) {
+                std::cout << "Ami: " << friendName << std::endl;
+            }
             if(friends.empty()){
+                std::cout <<"je suis tous vide en fait n = j'ai pas des amis pour l'insttant "<< std::endl;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], jsonKeys::FRIEND_LIST);
                 return;
             }
             clientStates[clientId] = MenuState::FriendList;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Liste d'amis", friends);
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], jsonKeys::FRIEND_LIST, friends);
             std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
             return;
         }
@@ -326,23 +331,34 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::cout << "Client #" << clientId << " a demandé d'ajouter un ami." << std::endl;
             clientStates[clientId] = MenuState::AddFriend;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Ami ajouté.");
+
             return;
         }
         else if(actionType == jsonKeys::ADD_FRIEND) {
-            //gerer l'ajout d'amis
-            keyInputAddFriendMenu(clientSocket, clientId, action["friend"]);
-            std::cout << "Client #" << clientId << " a demandé d'ajouter un ami." << std::endl;
-            //userManager.acceptFriendRequest(clientPseudo[clientId], action["friend"]);
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Ami ajouté.");
-            menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami envoyée à " + action["friend"].get<std::string>() + ". Veuillez consulter la liste des amis pour voir si la demande a été acceptée.");
+            //std::cout << "Client #" << clientId << " a demandé d'ajouter un ami." << std::endl;
+            if (userManager.userNotExists(action["friend"])) {
+                std::cout << "Demande d'ami échouée. L'utilisateur n'existe pas." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. L'utilisateur n'existe pas.");
+            } else if (userManager.sendFriendRequest(clientPseudo[clientId], action["friend"])) {
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami envoyée à " + action["friend"].get<std::string>() + "");
+            } else {
+                std::cout << "Demande d'ami échouée. L'utilisateur a déjà été ajouté." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. L'utilisateur a déjà été ajouté.");
+            }
             return;
         }
         else if (actionType == jsonKeys::ACCEPT_FRIEND_REQUEST) {
             //gerer l'acceptation d'amis
             std::cout << "Client #" << clientId << " a demandé d'accepter un ami." << std::endl;
-            userManager.acceptFriendRequest(clientPseudo[clientId], action["friend"]);
+            if (userManager.acceptFriendRequest(clientPseudo[clientId], action["friend"])){
+                std::cout << "Ami accepté." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Ami accepté.");
+            } else {
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Ami déjà accepté ou demande d'ami non trouvée.");
+
+                std::cout << "Ami déjà accepté ou demande d'ami non trouvée." << std::endl;
+            }
             
-            menuStateManager->sendTemporaryDisplay(clientSocket, "Ami accepté.");
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Ami accepté.");
 
             return;
@@ -350,15 +366,35 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         else if(actionType == jsonKeys::REJECT_FRIEND_REQUEST) {
             //gerer le refus d'amis
             std::cout << "Client #" << clientId << " a demandé de refuser un ami." << std::endl;
-            userManager.rejectFriendRequest(clientPseudo[clientId], action["friend"]);
-            menuStateManager->sendTemporaryDisplay(clientSocket, "Ami refusé.");
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Ami refusé.");
+            if (!action.contains("friend") || !action["friend"].is_string()) {
+                std::cout << "Demande d'ami échouée. Données invalides." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. Données invalides.");
+            } else if (userManager.userNotExists(action["friend"])) {
+                std::cout << "Demande d'ami échouée. L'utilisateur n'existe pas." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. L'utilisateur n'existe pas.");
+            } else if (userManager.rejectFriendRequest(clientPseudo[clientId], action["friend"])) {
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Ami refusé.");
+            } else {
+                std::cout << "Demande d'ami échouée. L'utilisateur a déjà été refusé." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. L'utilisateur a déjà été refusé.");
+            }
             return;
         }
         else if(actionType == jsonKeys::REMOVE_FRIEND) {
             //gerer la suppression d'amis
             std::cout << "Client #" << clientId << " a demandé de supprimer un ami." << std::endl;
-            userManager.deleteFriend(clientPseudo[clientId], action["friend"]);
+            if (!action.contains("friend") || !action["friend"].is_string()) {
+                std::cout << "Suppression d'ami échouée. Données invalides." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Suppression d'ami échouée. Données invalides.");
+            } else if (userManager.userNotExists(action["friend"])) {
+                std::cout << "Suppression d'ami échouée. L'utilisateur n'existe pas." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Suppression d'ami échouée. L'utilisateur n'existe pas.");
+            } else if (userManager.deleteFriend(clientPseudo[clientId], action["friend"])) {
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Ami supprimé.");
+            } else {
+                std::cout << "Suppression d'ami échouée. L'utilisateur a déjà été supprimé." << std::endl;
+                menuStateManager->sendTemporaryDisplay(clientSocket, "Suppression d'ami échouée. L'utilisateur a déjà été supprimé.");
+            }
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Ami supprimé.");
             return;
         }
@@ -597,6 +633,12 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             else keyInputAddFriendMenu(clientSocket, clientId, action);
             break;
         case MenuState::FriendList:
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
+            std::cout << "------------------------------------------------------------------"<<std::endl;
+            for (auto name : userManager.getFriendList(currentClient)) {
+                std::cout << "---hello Friend: " << name << std::endl;
+            }
+            std::cout << "----------------------------------------------------------------"<<std::endl;
             if(refreshMenu) sendMenuToClient(clientSocket, menu.getFriendListMenu(userManager.getFriendList(currentClient)));
             else keyInputManageFriendlist(clientSocket, clientId, action);
             break;
@@ -741,6 +783,10 @@ void Server::keyInputManageFriendlist(int clientSocket, int clientId, const std:
     }
 
     std::vector<std::string> friends = userManager.getFriendList(currentUser);
+    std::cout << "------------------------ alo alo : " << std::endl;
+    for (const std::string& friend_name : friends) {
+        std::cout << "------------------------ Ami: " << friend_name << std::endl;
+    }
     if (friends.empty()) {
         returnToMenu(clientSocket, clientId, MenuState::Main, "Vous n'avez aucun ami dans votre liste.");
         return;

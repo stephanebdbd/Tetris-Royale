@@ -271,12 +271,12 @@ void SFMLGame::addFriendMenu() {
         j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND;
         j["friend"] = friendName;
         network->sendData(j.dump() + "\n", client.getClientSocket());
-
+        //afficherErreur("Demande d'ami envoyée à " + friendName + ". .");
         texts[TextFieldKey::AddFriendField]->clear();
         return;
     }
 
-    // Traitement du bouton retour
+    // Traitement du bouton retour  
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
@@ -391,6 +391,7 @@ void SFMLGame::friendsMenu() {
     // Titre du menu
     Text header("Gestion des amis", font, 30, sf::Color::White, sf::Vector2f(250, 20));
     header.draw(*window);
+        // Requête au serveur pour les amis si data reçu
 
     if (buttons.empty()) {
         // Bouton "Ajouter un ami"
@@ -543,6 +544,7 @@ void SFMLGame::refreshMenu() {
 }
 void SFMLGame::friendListMenu() {
     // Fond
+    //std::cout << "Affichage de la liste d'amis" << std::endl;
     displayBackground(textures->chat);
 
     // Barre latérale "Amis"
@@ -552,9 +554,20 @@ void SFMLGame::friendListMenu() {
     // Titre
     Text header("Mes amis", font, 24, sf::Color::White, sf::Vector2f(20, 10));
     header.draw(*window);
-
-    // Chargement de la liste des amis (à remplacer par les données serveur si besoin)
-    amis = { "Alice", "Bob", "Charlie", "Diana" };
+    auto serverData = client.getServerData();
+    // Requête au serveur pour les amis si data reçu
+    if (!serverData.empty() && serverData.contains("data") && serverData["message"] == jsonKeys::FRIEND_LIST) {
+        amis = serverData["data"];
+        if (amis.empty()) {
+            std::cout << "Aucun ami trouvé." << std::endl;
+        } else {
+            std::cout << "Liste d'amis reçue avec succès." << std::endl;
+        }
+        for (const auto& friendName : amis) {
+            std::cout << "------->   Ami: " << friendName << std::endl;
+        }
+    }
+    // Affichage des amis
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
 
@@ -614,7 +627,7 @@ void SFMLGame::friendListMenu() {
             selectedFriend.clear();
         }
 
-        if (buttons[ButtonKey::CancelRemoveFriend]->isClicked(*window)) {
+        if (buttons[ButtonKey::Cancel]->isClicked(*window)) {
             selectedFriend.clear();
         }
     }
