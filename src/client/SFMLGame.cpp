@@ -2178,11 +2178,15 @@ void SFMLGame::displayJoinGame() {
 
                         // Extraire les informations de la clé
                         size_t firstDelim = invitationKey.find("|");
+                        size_t secondDelim = invitationKey.find("|", firstDelim + 1);
                         std::string gameRoomNumber = invitationKey.substr(0, firstDelim);
-                        std::cout << "accept." << gameRoomNumber << std::endl;
+                        //std::string inviter = invitationKey.substr(firstDelim + 1, secondDelim - firstDelim - 1);
+                        std::string status = invitationKey.substr(secondDelim + 1);
+
+                        std::cout << "accept." <<status+"."<<gameRoomNumber << std::endl;
 
                         // Envoyer la réponse au serveur
-                        client.sendInputFromSFML("accept." + gameRoomNumber);
+                        client.sendInputFromSFML("accept."+status+"." + gameRoomNumber);
                         j[jsonKeys::ACTION] = "AcceptRejoindre";
                         network->sendData(j.dump() + "\n", client.getClientSocket());
                         acceptInvite.clear();

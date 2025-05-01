@@ -678,6 +678,10 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::Play:
             sendInputToGameRoom(clientId, action);
             break;
+        case MenuState::Observer:
+            sendInputToGameRoom2(clientId, action);
+            break;
+
         default:
             break;
     }
@@ -1658,6 +1662,7 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
             gameRoom->removePlayer(clientId);
         clientStates[clientId] = MenuState::JoinOrCreateGame;
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
+        menuStateManager->sendMenuStateToClient(clientIdToSocket[clientId], clientStates[clientId], "Bienvenue dans menu rejoindre et creer .");
         return;
     }
     
@@ -1691,28 +1696,74 @@ void Server::extractDataBetweenSlashes(const std::string& toFind, const std::str
 
 void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action){
     if (action.find("accept.") == 0){
-        std::size_t pos = action.find(".");
-        std::string number = action.substr(pos+1, action.size());
-        int roomNumber = std::stoi(number);
-        userManager.acceptGameInvitation(roomNumber, clientPseudo[clientId]);
-        clientGameRoomId[clientId] = roomNumber;
-        if (gameRooms.find(roomNumber) == gameRooms.end()) {
-            returnToMenu(clientSocket, clientId, MenuState::JoinGame, "Erreur : La salle demandée n'existe pas.");
-            return;
-        }
-        auto gameRoom = gameRooms[roomNumber];
-        gameRoom->addPlayer(clientId);
-        clientStates[clientId] = MenuState::Settings;
-        
-        for (const auto& cId : gameRooms[roomNumber]->getPlayers())
-            sendMenuToClient(pseudoTosocket[clientPseudo[cId]], menu.getLobbyMenu(getMaxPlayers(cId), getMode(cId), getAmountOfPlayers(cId), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+        std::size_t firstDot = action.find(".");
+        std::size_t secondDot = action.find(".", firstDot + 1);
 
+        if (firstDot != std::string::npos && secondDot != std::string::npos) {
+            // Extraire le status(player/observer)
+            std::string status = action.substr(firstDot + 1, secondDot - firstDot - 1);
+        
+            // Extraire le numéro de la gameRoom
+            std::string nbreRoom = action.substr(secondDot + 1);
+            
+            auto currentClient = clientPseudo[clientId];
+            std::vector<std::vector<std::string>> invitations = userManager.getListGameRequest(currentClient);
+            for (const auto& invi : invitations){
+                if(invi[1]!=status || invi[2]!=nbreRoom){
+                    returnToMenu(clientSocket, clientId, MenuState::JoinGame, "Erreur : La salle demandée n'existe pas ou le status n'est pas correct.");
+                    return;
+                }
+            }
+            int roomNumber = std::stoi(nbreRoom);
+            
+
+            if (gameRooms.find(roomNumber) == gameRooms.end()) {
+                returnToMenu(clientSocket, clientId, MenuState::JoinGame, "Erreur : La salle demandée n'existe pas.");
+                return;
+            }
+
+            userManager.acceptGameInvitation(roomNumber, clientPseudo[clientId]);
+            clientGameRoomId[clientId] = roomNumber;
+            auto gameRoom = gameRooms[roomNumber];
+
+            if (status == "player") {
+                gameRoom->addPlayer(clientId);
+                clientStates[clientId] = MenuState::Settings;
+                sendMenuToClient(clientSocket, menu.displayMessage("Vous avez rejoint la partie en tant que joueur."));
+            } else if (status == "observer") {
+                gameRoom->addViewer(clientId); // Ajouter en tant qu'observateur
+                if (gameRoom->getInProgress()){                    
+                    clientStates[clientId] = MenuState::Observer;
+                    
+                }
+                else {
+                    clientStates[clientId] = MenuState::Settings;
+                    sendMenuToClient(clientSocket, menu.displayMessage("Vous observez la partie. Utilisez 'left' et 'right' pour changer de joueur."));
+                }
+            }
+
+           
+            if(!gameRoom->getInProgress()){
+                for (const auto& cId : gameRoom->getPlayers()){
+                    sendMenuToClient(pseudoTosocket[clientPseudo[cId]], menu.getLobbyMenu(getMaxPlayers(cId), getMode(cId), getAmountOfPlayers(cId), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+                
+                }
+
+                for (const auto& observerId : gameRoom->getViewers()) {
+                    sendMenuToClient(pseudoTosocket[clientPseudo[observerId]], menu.getLobbyMenu(getMaxPlayers(observerId ), getMode(observerId ), getAmountOfPlayers(observerId ), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+            }
+            }
+        
+            
+        } else {
+            std::cerr << "Format invalide pour l'action : " << action << std::endl;
+        }
     }
+
     else if(action.find("/back") == 0){
         clientStates[clientId] = MenuState::JoinOrCreateGame;
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
     }
-
 }
 
 std::string Server::getMode(int clientId){

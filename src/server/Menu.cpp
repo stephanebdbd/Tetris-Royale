@@ -426,7 +426,7 @@ json Menu::getGameRequestsListMenu(const std::vector<std::vector<std::string>>& 
     json menu = {
         {jsonKeys::TITLE, "Liste des demandes du rejoindre un jeu: "},
         {jsonKeys::OPTIONS, json::object()},
-        {jsonKeys::INPUT, "Tapez 'accept.<Number Room>' pour accepter une demande ou '/back' pour faire un retour:    "}
+        {jsonKeys::INPUT, "Tapez 'accept.<state>.<Number Room>' pour accepter une demande ou '/back' pour faire un retour:    "}
     };
 
     int index = 1;
