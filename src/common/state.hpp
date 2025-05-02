@@ -64,6 +64,7 @@ enum class ButtonKey {
     Cancel,
     esc,
     InviteP_O,
+    Close,
     retour
 
 

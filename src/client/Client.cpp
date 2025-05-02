@@ -198,6 +198,13 @@ void Client::receiveDisplay() {
                                         std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
                                     }
                                 }
+                                if(data.contains("data") && message == jsonKeys::FRIEND_LIST){
+                                    setAmis(data["data"].get<std::vector<std::string>>());
+                                    std::cout << "Amis: " << std::endl;
+                                    for (const auto& friendName : amis) {
+                                        std::cout << "Nom: " << friendName << std::endl;
+                                    }
+                                }
                             /*if (data["message"] == "ranking") {
                                     serverData = data;
                                     std::cout << "Classement: " << std::endl;
@@ -212,6 +219,14 @@ void Client::receiveDisplay() {
                                     std::cout << "Contacts: " << std::endl;
                                     for (const auto& contact : contacts) {
                                         std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
+                                    }
+                                }
+                                if(data.contains("data") && message == "player_info"){
+                                    setShow(true);
+                                    setPlayerInfo(data["data"].get<std::vector<std::string>>());
+                                    std::cout << "player_info: " << std::endl;
+                                    for (const auto& player : PlayerInfo) {
+                                        std::cout << "Nom: " << player << std::endl;
                                     }
                                 }
                             }

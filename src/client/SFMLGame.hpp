@@ -174,6 +174,7 @@ class SFMLGame {
         int avatarClickedContact; // avatar du client selection pour chatter
         std::vector<std::string> avatarPaths; // Chemins des avatars disponibles
         sf::Texture avatarduClient; // Texture pour l'avatar du client
+        //bool show = false;
 
     public:
         SFMLGame(Client& client);
@@ -247,6 +248,7 @@ class SFMLGame {
 
         void drawMiniGrid(const json& miniGrid, sf::Vector2f pos);
         void drawMiniTetra(const json& miniTetra, sf::Vector2f pos);
+        void displayCurrentPlayerInfo();
         
         
 

@@ -540,12 +540,8 @@ void SFMLGame::friendListMenu() {
     // Titre
     Text header("Mes amis", font, 24, sf::Color::White, sf::Vector2f(20, 10));
     header.draw(*window);
-    auto serverData = client.getServerData();
-    // Requête au serveur pour les amis si data reçu
-    if (!serverData.empty() && serverData.contains("data") && serverData["message"] == jsonKeys::FRIEND_LIST) {
-        amis = serverData["data"];
-    }
     // Affichage des amis
+    auto amis = client.getAmis();
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
 
@@ -919,7 +915,56 @@ void SFMLGame::drawAvatar(int avatarIndex, float posX, float posY, float size) {
         }
     }
 }
+void SFMLGame::displayCurrentPlayerInfo() {
+    // Récupérer les informations du joueur actuel
+    auto username = client.getPlayerInfo()[0];
+    auto score = client.getPlayerInfo()[1];
+    auto level = stoi(score) % 1000;
 
+    float infoBoxWidth = 300;
+    float infoBoxHeight = 100;
+    float infoBoxX = WINDOW_WIDTH - infoBoxWidth - 20; // Position à droite avec une marge de 20px
+    float infoBoxY = 80; 
+
+    // Fond du rectangle
+    sf::RectangleShape infoBox(sf::Vector2f(infoBoxWidth, infoBoxHeight));
+    infoBox.setFillColor(sf::Color(50, 50, 70, 200));   
+    infoBox.setOutlineColor(sf::Color::White);          // Bordure blanche
+    infoBox.setOutlineThickness(2);
+    infoBox.setPosition(infoBoxX, infoBoxY);
+
+    // Texte pour le nom du joueur
+    Text playerName("Nom: " + username, font, 20, sf::Color::White, sf::Vector2f(infoBoxX + 10, infoBoxY + 10));
+    playerName.draw(*window);
+
+    // Texte pour le score du joueur
+    Text playerScore("Score: " + score, font, 20, sf::Color::White, sf::Vector2f(infoBoxX + 10, infoBoxY + 40));
+    playerScore.draw(*window);
+    // Texte pour le niveau du joueur
+    Text playerLevel("Niveau: " + std::to_string(level), font, 20, sf::Color::White, sf::Vector2f(infoBoxX + 10, infoBoxY + 70));
+    playerLevel.draw(*window);
+
+    //  pour fermer la fenêtre
+    if (!buttons.count(ButtonKey::Close)) {
+        buttons[ButtonKey::Close] = std::make_unique<Button>("X", font, 20, sf::Color::White, sf::Color::Red,
+                                                             sf::Vector2f(infoBoxX + infoBoxWidth - 20, infoBoxY - 3),
+                                                             sf::Vector2f(20, 20)); // Position en haut à droite de la fenêtre
+    }
+
+    if (buttons[ButtonKey::Close]->isClicked(*window)) {
+        // pour fermer la boîte d'informations
+        client.setShow(false);
+        buttons.erase(ButtonKey::Close);
+        return;
+    }
+
+    
+    window->draw(infoBox);
+    playerName.draw(*window);
+    playerScore.draw(*window);
+    playerLevel.draw(*window);
+    buttons[ButtonKey::Close]->draw(*window);
+}
 void SFMLGame::mainMenu() {
     // Afficher l'arrière-plan du menu principal
     displayBackground(textures->logoConnexion);
@@ -1005,11 +1050,22 @@ void SFMLGame::mainMenu() {
 
     } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
         // Action pour le bouton "Profile"
+        j[jsonKeys::ACTION] = "player_info";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
 
     } else if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
         client.setCurrentMenuState(MenuState::Welcome);
         return;
     }
+    auto data  = client.getServerData();
+    if (data["message"] == "player_info") {
+        client.setShow(true); // Active l'affichage des informations
+    }
+    
+    if (client.getShow()) {
+        displayCurrentPlayerInfo();
+    }
+    
 }
 
 
@@ -1035,19 +1091,19 @@ void SFMLGame::rankingMenu(){
     // Affichage de la liste d'amis (exemple visuel)
     float startY = 80;
     float spacing = 70;
-    const auto ranking1 = client.getRanking();
+    auto ranking1 = client.getRanking();
         //currentState = MenuState::classement;
         if(ranking1.empty() ) {
             std::cout << "Aucun classement trouvé." << std::endl;
             return;
         }
         int i = 0;
-        std::cout << "Liste des joueurs reçue avec succès." << std::endl;
+        //std::cout << "Liste des joueurs reçue avec succès." << std::endl;
         for (const auto& [username, details] : ranking1) {
             std::string bestScore = details[0];      // Score
             std::string avatarNumber = details[1];   // ID d'avatar
         
-            std::cout << "------->   Joueur: " << username << " avatar " << avatarNumber << std::endl;
+            //std::cout << "------->   Joueur: " << username << " avatar " << avatarNumber << std::endl;
         
             // Position de base pour cette ligne
             float yOffset = startY + i * spacing;
@@ -1088,8 +1144,6 @@ void SFMLGame::rankingMenu(){
     } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
         // Action pour le bouton "Profile"
     }
-    int avatarIndex = client.getAvatarIndex();
-    drawAvatar(avatarIndex, WINDOW_WIDTH - 70, 20, 45.0f);
 
 }
 

@@ -291,6 +291,16 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts",{},contactStrings);
             return;
         }
+        
+        else if(actionType == "player_info"){
+            //clientStates[clientId] = MenuState::PlayerInfo;
+            std::string username = clientPseudo[clientId];
+            auto [playerName, bestScore] = userManager.getCurrentPlayerInfo(username);
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir les informations du joueur." << std::endl;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "player_info", {playerName,bestScore});
+            return;
+        }
+        
         else if(actionType == jsonKeys::FRIEND_LIST) {
             //la liste des amis
             std::cout<<".................... en fait je suis dans HANDLEGUIActions " << clientPseudo[clientId]<<std::endl;

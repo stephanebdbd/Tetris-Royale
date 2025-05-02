@@ -60,6 +60,21 @@ public:
     //gerer le score du user
     QueryResult updateHighScore(const std::string& username, const int& bestScore);
     std::map<std::string, std::vector<std::string>> getRanking() const;
+    std::pair<std::string, std::string> getCurrentPlayerInfo(const std::string& username) const {
+        // Construire la condition pour récupérer les informations du joueur
+        std::string condition = "username = '" + username + "'";
+        QueryResult result = db->selectFromTable("Users", "username, best_score", condition);
     
+        if (!result.isOk() || result.data.empty()) {
+            std::cerr << "Erreur : Impossible de récupérer les informations pour l'utilisateur " << username << ".\n";
+            return {"", ""}; // Retourne des valeurs par défaut en cas d'erreur
+        }
+    
+        // Récupérer le nom et le score
+        std::string playerName = result.data[0][0]; // Nom d'utilisateur
+        std::string bestScore = result.data[0][1]; // Meilleur score
+    
+        return {playerName, bestScore};
+    }
 
 };

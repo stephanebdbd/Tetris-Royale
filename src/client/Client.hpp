@@ -49,6 +49,9 @@ private:
     std::vector<std::pair<std::string, int>> contacts;
     bool isTerminal;
     std::map<std::string, std::vector<std::string>> ranking;
+    std::vector<std::string> amis;
+    std::vector<std::string> PlayerInfo;
+    bool show = false;
 
 
 
@@ -96,6 +99,24 @@ public:
         }
         std::map<std::string, std::vector<std::string>> getRanking() const {
             return ranking;
+        }
+        void setAmis(const std::vector<std::string>& friends) {
+            amis = friends;
+        }
+        std::vector<std::string> getAmis() const {
+            return amis;
+        }
+        void setPlayerInfo(const std::vector<std::string>& playerInfo) {
+            PlayerInfo = playerInfo;
+        }
+        std::vector<std::string> getPlayerInfo() const {
+            return PlayerInfo;
+        }
+        void setShow(bool showfenetre) {
+            show = showfenetre;
+        }
+        bool getShow() const {
+            return show;
         }
 };
 
