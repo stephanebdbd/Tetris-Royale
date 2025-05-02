@@ -105,35 +105,48 @@ void Server::acceptClients() {
 
 void Server::handleClient(int clientSocket, int clientId) {
     char buffer[1024];
+    std::string partialMessage; // Stocker les messages partiels
     constexpr int TARGET_FPS = 7;
     constexpr std::chrono::milliseconds FRAME_TIME(1000 / TARGET_FPS);
-    
+
     auto lastRefreshTime = std::chrono::steady_clock::now();
     auto nextRefreshTime = lastRefreshTime + FRAME_TIME;
 
     try {
-
         while (true) {
             memset(buffer, 0, sizeof(buffer));
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
 
             if (bytesReceived > 0) {
+                partialMessage += std::string(buffer, bytesReceived); // Ajouter les données reçues
 
-                json receivedData = json::parse(buffer);
-                if (receivedData.contains(jsonKeys::MESSAGE)) {
-                    handleChat(clientSocket, clientId, receivedData);
-                    continue;
-                }
-                if (!receivedData.contains(jsonKeys::ACTION) || !receivedData[jsonKeys::ACTION].is_string()) {
-                    std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
-                    continue;
-                }
+                // Traiter les messages complets (séparés par '\n')
+                size_t pos;
+                while ((pos = partialMessage.find('\n')) != std::string::npos) {
+                    std::string message = partialMessage.substr(0, pos); // Extraire un message complet
+                    partialMessage.erase(0, pos + 1); // Supprimer le message traité
 
-                std::string action = receivedData[jsonKeys::ACTION];
-                handleGUIActions(clientSocket, clientId, receivedData);
-                handleMenu(clientSocket, clientId, action);
-            }
-            else if (bytesReceived == 0) {
+                    try {
+                        json receivedData = json::parse(message);
+                        std::cout << "Contenu de receivedData : " << receivedData.dump(4) << std::endl;
+
+                        if (receivedData.contains(jsonKeys::MESSAGE)) {
+                            handleChat(clientSocket, clientId, receivedData);
+                            continue;
+                        }
+                        if (!receivedData.contains(jsonKeys::ACTION) || !receivedData[jsonKeys::ACTION].is_string()) {
+                            std::cerr << "Erreur: 'action' manquant ou invalide dans le JSON reçu." << std::endl;
+                            continue;
+                        }
+
+                        std::string action = receivedData[jsonKeys::ACTION];
+                        handleGUIActions(clientSocket, clientId, receivedData);
+                        handleMenu(clientSocket, clientId, action);
+                    } catch (const json::parse_error& e) {
+                        std::cerr << "Erreur de parsing JSON : " << e.what() << std::endl;
+                    }
+                }
+            } else if (bytesReceived == 0) {
                 // Client disconnected
                 disconnectPlayer(clientId);
                 return;
@@ -142,14 +155,14 @@ void Server::handleClient(int clientSocket, int clientId) {
                 std::cerr << "Receive error: " << strerror(errno) << std::endl;
                 break;
             }
-    
+
             // Gestion du rafraîchissement à 12 FPS
             auto currentTime = std::chrono::steady_clock::now();
             if (currentTime >= nextRefreshTime) {
                 handleMenu(clientSocket, clientId, "", true); // Refresh only
                 lastRefreshTime = currentTime;
                 nextRefreshTime = lastRefreshTime + FRAME_TIME;
-                
+
                 // Ajustement dynamique si on prend du retard
                 if (currentTime > nextRefreshTime) {
                     nextRefreshTime = currentTime + FRAME_TIME;
@@ -159,7 +172,6 @@ void Server::handleClient(int clientSocket, int clientId) {
     } catch (const std::exception& e) {
         std::cerr << "Exception dans handleClient pour le client #" << clientId << ": " << e.what() << std::endl;
     }
-
 }
 
 
@@ -630,19 +642,25 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             else keyInputChooseGameModeMenu(clientSocket, clientId, action);
             break;
         case MenuState::GameOver:
-            keyInputGameOverMenu(clientSocket, clientId, action);
+            if(refreshMenu){}
+            else keyInputGameOverMenu(clientSocket, clientId, action);
             break;
         case MenuState::Settings:
-            keyInputLobbySettingsMenu(clientSocket, clientId, action);
+            if(refreshMenu) {}
+            else keyInputLobbySettingsMenu(clientSocket, clientId, action);
+            //keyInputLobbySettingsMenu(clientSocket, clientId, action);
             break;
         case MenuState::Help:
-            keyInputHelpMenu(clientSocket, clientId, action);
+            if(refreshMenu){}
+            else keyInputHelpMenu(clientSocket, clientId, action);
             break;
         case MenuState::Play:
-            sendInputToGameRoom(clientId, action);
+            if(refreshMenu){}
+            else sendInputToGameRoom(clientId, action);
             break;
         case MenuState::Observer:
-            sendInputToGameRoom2(clientId, action);
+            if(refreshMenu){}
+            else sendInputToGameRoom2(clientId, action);
             break;
 
         default:
@@ -1593,6 +1611,7 @@ void Server::keyInputHelpMenu(int clientSocket, int clientId, const std::string&
 void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action) {
     std::string status, receiver;
     // Vérifier si l'action commence par \invite
+    std::cout << "action : " << action << std::endl;
     if (action.find("/invite") == 0) {
         // Extraire le statut et le receiver de l'action
         extractDataBetweenSlashes("/invite", action, status, receiver);
@@ -1666,6 +1685,7 @@ void Server::extractDataBetweenSlashes(const std::string& toFind, const std::str
 }
 
 void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action){
+    std::cout << "action : " << action << std::endl;
     if (action.find("accept.") == 0){
         std::size_t firstDot = action.find(".");
         std::size_t secondDot = action.find(".", firstDot + 1);

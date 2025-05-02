@@ -88,6 +88,7 @@ void Client::handleUserInput() {
                     inputBuffer.clear();
                 }
                 // Envoie immédiat des touches pour jouer
+                std::cout<<"ana dima hadr"<< std::endl;
                 std::string specialAction(1, static_cast<char>(ch));
                 controller.sendInput(specialAction, clientSocket);
             } 
@@ -326,6 +327,7 @@ void Client::reintiliseData(){
 
 
 void Client::sendInputFromSFML(const std::string& input) {
+    std::cout<<"ana from client: "<< input << std::endl;
     if (!input.empty()) {
         controller.sendInput(input, clientSocket);
     }

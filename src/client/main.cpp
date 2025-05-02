@@ -42,6 +42,10 @@ int main() {
 
 
     } else if (choix == 2) {
+        std::ofstream serverLog("client.log");
+        std::cout.rdbuf(serverLog.rdbuf());
+        std::cerr.rdbuf(serverLog.rdbuf());
+        
         client.setIsTerminal(false);
 
         lancerModeGraphique(client);

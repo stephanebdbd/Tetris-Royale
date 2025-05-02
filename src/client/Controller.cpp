@@ -9,9 +9,10 @@ void Controller::sendInput(const std::string& action, int clientSocket) {
     if (clientSocket == -1) return;
 
     json message;
+    std::cout<<"ana from controller: "<< action << std::endl;
     message[jsonKeys::ACTION] = action;
-    std::string msg = message.dump();
-
+    std::string msg = message.dump()+"\n";
+    std::cout << "Message envoyé au serveur: " << msg << std::endl;
     if (send(clientSocket, msg.c_str(), msg.size(), 0) == -1) {
         std::cerr << "Erreur: Impossible d'envoyer le message." << std::endl;
     }
