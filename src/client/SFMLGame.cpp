@@ -129,10 +129,11 @@ void SFMLGame::handleButtonEvents() {
     }
 
     for (const auto& [_, buttonsA] : acceptInvite) {
-        for(const auto& buttonA : buttonsA) {
-            buttonA->update();
-            buttonA->setBackgroundColor(*window);
-        }
+        buttonsA->update();
+        buttonsA->setBackgroundColor(*window);
+        /*for(const auto& buttonA : buttonsA) {
+            
+        }*/
         
     }
 
@@ -2148,7 +2149,8 @@ void SFMLGame::displayJoinGame() {
 
                 // Ajouter un bouton pour cette invitation si elle n'existe pas déjà
                 if (!acceptInvite.count(invitationKey)) {
-                    acceptInvite[invitationKey].push_back(std::make_unique<Button>(textures->accept, sf::Vector2f(buttonX, buttonY), sf::Vector2f(25, 25)));
+                    //acceptInvite[invitationKey].push_back(std::make_unique<Button>(textures->accept, sf::Vector2f(buttonX, buttonY), sf::Vector2f(25, 25)));
+                    acceptInvite[invitationKey] = std::make_unique<Button>(textures->accept, sf::Vector2f(buttonX, buttonY), sf::Vector2f(25, 25));
                 }
 
                 i++;
@@ -2165,38 +2167,142 @@ void SFMLGame::displayJoinGame() {
 
             // Dessiner les boutons
             for (const auto& [invitationKey, buttonsA] : acceptInvite) {
-                for (const auto& buttonA : buttonsA) {
+                buttonsA->draw(*window);
+                /*for (const auto& buttonA : buttonsA) {
                     buttonA->draw(*window);
-                }
+                }*/
             }
 
             // Gérer les clics sur les boutons
             for (const auto& [invitationKey, buttonsA] : acceptInvite) {
-                for (const auto& buttonA : buttonsA) {
-                    if (buttonA->isClicked(*window)) {
+                if (buttonsA->isClicked(*window)) {
                         
 
-                        // Extraire les informations de la clé
-                        size_t firstDelim = invitationKey.find("|");
-                        size_t secondDelim = invitationKey.find("|", firstDelim + 1);
-                        std::string gameRoomNumber = invitationKey.substr(0, firstDelim);
-                        //std::string inviter = invitationKey.substr(firstDelim + 1, secondDelim - firstDelim - 1);
-                        std::string status = invitationKey.substr(secondDelim + 1);
+                    // Extraire les informations de la clé
+                    size_t firstDelim = invitationKey.find("|");
+                    size_t secondDelim = invitationKey.find("|", firstDelim + 1);
+                    std::string gameRoomNumber = invitationKey.substr(0, firstDelim);
+                    std::string inviter = invitationKey.substr(firstDelim + 1, secondDelim - firstDelim - 1);
+                    std::string status = invitationKey.substr(secondDelim + 1);
 
-                        std::cout << "accept." <<status+"."<<gameRoomNumber << std::endl;
+                    std::cout << "GameRoom Number: " << gameRoomNumber << std::endl;
+                    std::cout << "Inviter: " << inviter << std::endl;
+                    std::cout << "Status: " << status << std::endl;
 
-                        // Envoyer la réponse au serveur
-                        client.sendInputFromSFML("accept."+status+"." + gameRoomNumber);
-                        j[jsonKeys::ACTION] = "AcceptRejoindre";
-                        network->sendData(j.dump() + "\n", client.getClientSocket());
-                        acceptInvite.clear();
-                        break;
-                    }
+                    std::cout << "accept." <<status+"."<<gameRoomNumber << std::endl;
+
+                    // Envoyer la réponse au serveur
+                    client.sendInputFromSFML("accept."+status+"." + gameRoomNumber);
+                    j[jsonKeys::ACTION] = "AcceptRejoindre";
+                    network->sendData(j.dump() + "\n", client.getClientSocket());
+                    acceptInvite.clear();
+                    break;
                 }
+                /*for (const auto& buttonA : buttonsA) {
+                    
+                }*/
             }
         }
     }
 }
+
+
+/*void SFMLGame::displayJoinGame() {
+    // Effacer la fenêtre avec un fond uni
+    window->clear(sf::Color(30, 30, 60)); // Fond bleu nuit
+
+    // Créer et configurer le texte du titre
+    sf::Text title("DEMANDES DE JEU", font, 40); // Taille réduite à 40
+    title.setFillColor(sf::Color::White); // Couleur blanche simple
+    title.setStyle(sf::Text::Bold); // Gras seulement
+
+    // Centrer horizontalement en haut de l'écran
+    sf::FloatRect titleRect = title.getLocalBounds();
+    title.setOrigin(titleRect.left + titleRect.width/2.0f, 0);
+    title.setPosition(WINDOW_WIDTH/2.0f, 30); // 30px depuis le haut
+
+    if (client.isGameStateUpdated()) {
+        
+        GameState gameData = client.getGameState();
+        json requests = gameData.menu[jsonKeys::OPTIONS];
+        std::string titre = gameData.menu[jsonKeys::TITLE];
+
+        sf::Text t(titre, font, 40);
+        t.setFillColor(sf::Color::White);
+        t.setPosition(20, 100); // Positionner le texte à 100 pixels du haut
+        window->draw(t);
+
+
+        std::string line;
+        if(requests.empty()) {
+            line = "Aucune demande de jeu";
+            sf::Text requ(line, font, 40);
+            requ.setFillColor(sf::Color::White);
+            requ.setPosition(20, 150); // Positionner le texte à 100 pixels du haut
+            window->draw(requ);
+        }
+
+        int i = 0;
+        for (auto& [key, value] : requests.items()) {
+            line = key + value.get<std::string>();
+            std::string message = line;
+            sf::Text requ(message, font, 20);
+            requ.setFillColor(sf::Color::White);
+            requ.setPosition(20, 150 + i); // Positionner le texte à 100 pixels du haut
+            window->draw(requ);
+            i+=50;
+        }
+
+
+        if (buttons.empty() && texts.empty()) {
+            texts[TextFieldKey::Room] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
+                sf::Vector2f(50, 150 + i), sf::Vector2f(200, 50), "room");
+
+            buttons[ButtonKey::Valider] = std::make_unique<Button>("Valider", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(270, 150 + i), sf::Vector2f(100, 50));
+            
+        }
+    
+        drawTextFields();
+        drawButtons();
+        json j;
+
+        if (buttons.count(ButtonKey::Valider) && buttons[ButtonKey::Valider]->isClicked(*window)) {
+            std::string room = texts[TextFieldKey::Room]->getText();
+            if(room.empty()) {
+                std::cerr << "Rempliez le champs de Room " << std::endl;
+                return;
+            }
+
+            size_t dotPosition = room.find('.'); // Trouver la position du point
+
+            if (dotPosition != std::string::npos) {
+                std::string status = room.substr(0, dotPosition); // Extraire la partie avant le point
+                std::string nbre = room.substr(dotPosition + 1);  // Extraire la partie après le point
+
+                std::cout << "Status: " << status << std::endl;
+                std::cout << "Nbre: " << nbre << std::endl;
+
+                std::cout << "accept."+status+"."+nbre<< std::endl;
+                client.sendInputFromSFML("accept." + status+"."+nbre);
+                texts[TextFieldKey::Room]->setText("");
+                j[jsonKeys::ACTION] = "AcceptRejoindre";
+                network->sendData(j.dump() + "\n", client.getClientSocket());
+                return;
+
+            } else {
+                std::cerr << "Format invalide, le point est manquant." << std::endl;
+            }
+            
+            
+        }
+    }
+
+
+    // Dessiner le titre
+    window->draw(title);
+}*/
+
 
 void SFMLGame::drawMessageMalusBonus(const json& msg){
 

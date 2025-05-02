@@ -155,7 +155,8 @@ class SFMLGame {
 
         };
         std::map<std::string, std::vector<std::unique_ptr<Button>>> inviteFriends;
-        std::map<std::string, std::vector<std::unique_ptr<Button>>> acceptInvite;
+        //std::map<std::string, std::vector<std::unique_ptr<Button>>> acceptInvite;
+        std::map<std::string, std::unique_ptr<Button>> acceptInvite;
         std::map<std::string,  std::vector<std::string>> pseudos = {};
         std::vector<std::string> friendsLobby = {};
         std::unique_ptr<Button> quitter = std::make_unique<Button>("Quitter", font, 24, sf::Color::White, sf::Color::Red, sf::Vector2f(200, 500), sf::Vector2f(150, 50));

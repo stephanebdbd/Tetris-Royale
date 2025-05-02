@@ -1140,6 +1140,12 @@ bool Server::gamePreparation(int ownerId, std::shared_ptr<GameRoom> gameRoom){
                     menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "Bienvenue dans menu creer ou rejoindre .");
                 }
             }
+
+            for (auto observer : gameRoom->getViewers()) {
+                clientStates[observer] = MenuState::GameOver;
+                sendMenuToClient(clientIdToSocket[observer], menu.getEndGameMenu("GAME END"));
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "owner est quitte");
+            }
             return false;
         }
     }
@@ -1658,8 +1664,10 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
     if (action.find("/back") == 0){
         if (gameRoom->getOwnerId() == clientId)
             gameRoom->setOwnerQuit();
-        else
+        else{
             gameRoom->removePlayer(clientId);
+        }
+            
         clientStates[clientId] = MenuState::JoinOrCreateGame;
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
         menuStateManager->sendMenuStateToClient(clientIdToSocket[clientId], clientStates[clientId], "Bienvenue dans menu rejoindre et creer .");
