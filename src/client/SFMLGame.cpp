@@ -279,9 +279,7 @@ void SFMLGame::addFriendMenu() {
 
     // Traitement du bouton retour  
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        json j;
-        j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::Friends);
         return;
     }
 }
@@ -373,10 +371,7 @@ void SFMLGame::friendRequestListMenu() {
     buttons[ButtonKey::Retour]->draw(*window);
 
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        json j;
-        j["action"] = "main";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        selectedFriend.clear();
+        client.setCurrentMenuState(MenuState::Friends);
         return;
     }
 }
@@ -421,12 +416,7 @@ void SFMLGame::friendsMenu() {
 
     // Actions associées aux boutons
     if (buttons[ButtonKey::AddFriend]->isClicked(*window)) {
-
-        std::cout << "Bouton Ajouter un ami cliqué !" << std::endl;
-        json j;
-        j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND_MENU;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
+        client.setCurrentMenuState(MenuState::AddFriend);
         return;
     }
 
@@ -441,7 +431,6 @@ void SFMLGame::friendsMenu() {
     }
 
     if (buttons[ButtonKey::FriendRequestList]->isClicked(*window)) {
-        std::cout << "Affichage des demandes d’amis..." << std::endl;
         json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIEND_REQUEST_LIST;
         network->sendData(j.dump() + "\n", client.getClientSocket());
@@ -450,10 +439,7 @@ void SFMLGame::friendsMenu() {
     }
 
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        json j;
-        j[jsonKeys::ACTION] = jsonKeys::MAIN;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
+        client.setCurrentMenuState(MenuState::Main);
         return;
     }
 }
@@ -559,14 +545,6 @@ void SFMLGame::friendListMenu() {
     // Requête au serveur pour les amis si data reçu
     if (!serverData.empty() && serverData.contains("data") && serverData["message"] == jsonKeys::FRIEND_LIST) {
         amis = serverData["data"];
-        if (amis.empty()) {
-            std::cout << "Aucun ami trouvé." << std::endl;
-        } else {
-            std::cout << "Liste d'amis reçue avec succès." << std::endl;
-        }
-        for (const auto& friendName : amis) {
-            std::cout << "------->   Ami: " << friendName << std::endl;
-        }
     }
     // Affichage des amis
     static std::vector<sf::Texture> avatarTextures(20);
@@ -641,10 +619,7 @@ void SFMLGame::friendListMenu() {
     buttons[ButtonKey::Retour]->draw(*window);
 
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        json j;
-        j["action"] = "main";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        selectedFriend.clear();
+        client.setCurrentMenuState(MenuState::Main);
         return;
     }
 }
@@ -718,22 +693,13 @@ void SFMLGame::welcomeMenu() {
     }
 
     if (buttons.count(ButtonKey::Registre) && buttons[ButtonKey::Registre]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::REGISTER_MENU;
-        //currentState = MenuState::Register; // Passer à l'état d'inscription
-        //std::cout << "Register button clicked" << std::endl;
-        //std::cout << "currentState: " << static_cast<int>(currentState) << std::endl;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-
-        cleanup();
+        client.setCurrentMenuState(MenuState::Register);
         return;
     }
 
     if (buttons.count(ButtonKey::Login) && buttons[ButtonKey::Login]->isClicked(*window)) {
         //currentState = MenuState::Login; // Passer à l'état de connexion
-        j[jsonKeys::ACTION] = jsonKeys::LOGIN_MENU;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-
-        cleanup();
+        client.setCurrentMenuState(MenuState::Login);
         return;
     }
 }
@@ -1015,12 +981,8 @@ void SFMLGame::mainMenu() {
 
     // Gérer les clics sur les boutons
     json j;
-    if (buttons.count(ButtonKey::Teams) && buttons[ButtonKey::Teams]->isClicked(*window)) {
-        // Action pour le bouton "Teams"
-
-    } else if (buttons.count(ButtonKey::Play) && buttons[ButtonKey::Play]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "createjoin";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
+    if (buttons.count(ButtonKey::Play) && buttons[ButtonKey::Play]->isClicked(*window)) {
+        client.setCurrentMenuState(MenuState::JoinOrCreateGame);
         return;
 
     } else if (buttons.count(ButtonKey::Chat) && buttons[ButtonKey::Chat]->isClicked(*window)) {
@@ -1029,8 +991,7 @@ void SFMLGame::mainMenu() {
         return;
 
     } else if (buttons.count(ButtonKey::Friends) && buttons[ButtonKey::Friends]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::Friends);
         return;
 
     } else if (buttons.count(ButtonKey::Ranking) && buttons[ButtonKey::Ranking]->isClicked(*window)) {
@@ -1048,8 +1009,7 @@ void SFMLGame::mainMenu() {
         // Action pour le bouton "Profile"
 
     } else if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::WELCOME;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::Welcome);
         return;
     }
 }
@@ -1120,9 +1080,7 @@ void SFMLGame::rankingMenu(){
         }
         
     if(buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
-        json j;
-        j[jsonKeys::ACTION] = jsonKeys::MAIN;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::Main);
         return;
     }
     else if (buttons.count(ButtonKey::Settings) && buttons[ButtonKey::Settings]->isClicked(*window)) {
@@ -1186,10 +1144,7 @@ void SFMLGame::chatMenu() {
 
     // Vérifier d'abord le backButton
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        json j;
-        j[jsonKeys::ACTION] = "main";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        clickedContact.clear();
+        client.setCurrentMenuState(MenuState::Main);
         return; // Sortir immédiatement après avoir traité le clic
     }
 
@@ -1368,8 +1323,7 @@ void SFMLGame::CreateOrJoinGame() {
     // Gérer les clics sur les boutons
     json j;
     if (buttons.count(ButtonKey::Create) && buttons[ButtonKey::Create]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "choiceMode";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::CreateGame);
         return;
     } 
     
@@ -1380,8 +1334,7 @@ void SFMLGame::CreateOrJoinGame() {
         return;
     }
     else if(buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)){
-        j[jsonKeys::ACTION] = "main";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::Main);
         return;
     }
     else if (buttons.count(ButtonKey::Settings) && buttons[ButtonKey::Settings]->isClicked(*window)) {
@@ -1639,13 +1592,10 @@ void SFMLGame::drawEndGame() {
     json j;
     
     if (buttons.count(ButtonKey::Rejouer) && buttons[ButtonKey::Rejouer]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "createjoin";
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        client.setGameStateUpdated(false);
+        client.setCurrentMenuState(MenuState::JoinOrCreateGame);
         return;
     } else if (buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::MAIN;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::Main);
         client.setGameStateUpdated(false);
         return;
     }

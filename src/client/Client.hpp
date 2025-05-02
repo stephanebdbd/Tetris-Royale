@@ -65,6 +65,7 @@ public:
         int getClientSocket() const { return clientSocket; }
         void stopThreads() { stop_threads = true; }
         MenuState getCurrentMenuState();
+        void setCurrentMenuState(MenuState menuState){ currentMenuState = menuState; }
         json getServerData() const { return serverData; }
         void setTemporaryMessage(const std::string& msg);
         std::string getTemporaryMessage();

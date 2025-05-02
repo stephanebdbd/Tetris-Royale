@@ -165,23 +165,9 @@ void Server::handleClient(int clientSocket, int clientId) {
 
 void Server::handleGUIActions(int clientSocket, int clientId, const json& action) {
     if(action.contains(jsonKeys::ACTION) && action[jsonKeys::ACTION].is_string()) {
-        
         std::string actionType = action[jsonKeys::ACTION];
-        std::cout << "Client #" << clientId << " a demandé l'action: " << actionType << std::endl;
-        if (actionType == jsonKeys::REGISTER_MENU) {
-            clientStates[clientId] = MenuState::Register;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu d'inscription.");
-            return;
-        }
-        else if(actionType == jsonKeys::LOGIN_MENU) {
-            
-
-            std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu de connexion." << std::endl;
-            clientStates[clientId] = MenuState::Login;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu de connexion.");
-            return;
-        }  
-        else if(actionType == jsonKeys::LOGIN) {
+        
+        if(actionType == jsonKeys::LOGIN) {
             //gerer le login
             if(userManager.userNotExists(action[jsonKeys::USERNAME])){
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Le pseudo n'existe pas.");
@@ -291,15 +277,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 contactStrings.push_back(contact);
             }
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts",{},contactStrings);
-            return;
-        }
-        else if(actionType == jsonKeys::FRIENDS) {
-            //gerer les amis
-            std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
-            clientStates[clientId] = MenuState::Friends;
-            //auto friends = userManager.getFriendList(clientPseudo[clientId]);
-
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans la liste d'amis.");
             return;
         }
         else if(actionType == jsonKeys::FRIEND_LIST) {
@@ -526,22 +503,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 //auto friends = userManager.getFriendList(clientPseudo[player]);
                 menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "rejoindre gameRoonm as observer", {}, {}, active);
             }
-            return;
-        }
-
-        else if(actionType == "rejouer"){
-            std::cout << "Client #" << clientId << " choisi rejouer" << std::endl;
-            clientStates[clientId] = MenuState::JoinOrCreateGame;
-            
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu join or create.");
-            return;
-        }
-
-        else if(actionType == "retour au menu"){
-            std::cout << "Client #" << clientId << " choisi retour au menu" << std::endl;
-            clientStates[clientId] = MenuState::Main;
-            
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu main .");
             return;
         }
     }
