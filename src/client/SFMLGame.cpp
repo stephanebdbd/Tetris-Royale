@@ -491,8 +491,8 @@ void SFMLGame::refreshMenu() {
         case MenuState::chat:
             chatMenu();
             break;
-        case MenuState::ManageTeam:
-            //teamsMenu();
+        case MenuState::Team:
+            teamsMenu();
             break;
         case MenuState::CreateTeam:
             //createRoomMenu();
@@ -969,11 +969,12 @@ void SFMLGame::mainMenu() {
     // Afficher l'arrière-plan du menu principal
     displayBackground(textures->logoConnexion);
 
+    float centerX = WINDOW_WIDTH / 2.0f;
+    float y = 660;
+    float spacing = 25;
     float buttonWidth = 120;
     float buttonHeight = 50;
-    float spacing = 40;
-    float startX = 450;
-    float y = 660;
+    float decallage = 20;
 
     // Couleurs harmonisées
     sf::Color background = sf::Color(30, 30, 30, 180); // noir semi-transparent
@@ -983,21 +984,25 @@ void SFMLGame::mainMenu() {
     // Ajouter les boutons s'ils n'existent pas
     if (buttons.empty()) {
         // Boutons principaux
-        buttons[ButtonKey::Ranking] = std::make_unique<Button>("Ranking", font, 26, text, background,
-                                                                sf::Vector2f(startX, y),
-                                                                sf::Vector2f(buttonWidth, buttonHeight), outline);
-
         buttons[ButtonKey::Play] = std::make_unique<Button>("Play", font, 26, text, background,
-                                                            sf::Vector2f(startX + (buttonWidth + spacing), y + 30),
-                                                            sf::Vector2f(buttonWidth, buttonHeight), outline);
-
+            sf::Vector2f(centerX - buttonWidth / 2.0f, y),  // un peu plus bas pour variation
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
         buttons[ButtonKey::Chat] = std::make_unique<Button>("Chat", font, 26, text, background,
-                                                            sf::Vector2f(startX + 2 * (buttonWidth + spacing), y + 30),
-                                                            sf::Vector2f(buttonWidth, buttonHeight), outline);
+            sf::Vector2f(centerX + (buttonWidth/2.0f + spacing) , y-decallage),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
 
+        buttons[ButtonKey::Ranking] = std::make_unique<Button>("Ranking", font, 26, text, background,
+            sf::Vector2f(centerX + 2 * spacing + 1.5f*buttonWidth , y- 2.0f *decallage),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+        
+        buttons[ButtonKey::Teams] = std::make_unique<Button>("Teams", font, 26, text, background,
+            sf::Vector2f(centerX - (buttonWidth * 1.5f + spacing ), y - decallage),  // symétrique à Chat
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+        
         buttons[ButtonKey::Friends] = std::make_unique<Button>("Friends", font, 26, text, background,
-                                                               sf::Vector2f(startX + 3 * (buttonWidth + spacing), y),
-                                                               sf::Vector2f(buttonWidth, buttonHeight), outline);
+            sf::Vector2f(centerX - (2.5f * buttonWidth + 2 * spacing), y - 2.0f * decallage),  // symétrique à Ranking
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+            
 
         buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit,
                                                             sf::Vector2f(10, 20),
@@ -1035,6 +1040,10 @@ void SFMLGame::mainMenu() {
 
     } else if (buttons.count(ButtonKey::Friends) && buttons[ButtonKey::Friends]->isClicked(*window)) {
         client.setCurrentMenuState(MenuState::Friends);
+        return;
+    } else if (buttons.count(ButtonKey::Teams) && buttons[ButtonKey::Teams]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
 
     } else if (buttons.count(ButtonKey::Ranking) && buttons[ButtonKey::Ranking]->isClicked(*window)) {
@@ -1145,6 +1154,58 @@ void SFMLGame::rankingMenu(){
         // Action pour le bouton "Profile"
     }
 
+}
+void SFMLGame::teamsMenu() {
+    displayBackground(textures->logoConnexion); 
+
+    float buttonWidth = 300;
+    float buttonHeight = 60;
+    float spacing = 30;
+    float centerX = WINDOW_WIDTH / 2.0f - buttonWidth / 2.0f;
+    float startY = 250;
+
+    sf::Color background = sf::Color(40, 40, 40, 200);
+    sf::Color outline = sf::Color(135, 206, 250);
+    sf::Color text = sf::Color::White;
+
+    // Ajouter les boutons s'ils n'existent pas
+    if (buttons.empty()) {
+        buttons[ButtonKey::CreateTeam] = std::make_unique<Button>("Créer une équipe", font, 28, text, background,
+            sf::Vector2f(centerX, startY),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+
+        buttons[ButtonKey::JoinTeam] = std::make_unique<Button>("Rejoindre une équipe", font, 28, text, background,
+            sf::Vector2f(centerX, startY + buttonHeight + spacing),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+
+        buttons[ButtonKey::TeamInvites] = std::make_unique<Button>("Invitations reçues", font, 28, text, background,
+            sf::Vector2f(centerX, startY + 2 * (buttonHeight + spacing)),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+
+        buttons[ButtonKey::ManageTeams] = std::make_unique<Button>("Gérer mes équipes", font, 28, text, background,
+            sf::Vector2f(centerX, startY + 3 * (buttonHeight + spacing)),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+    }
+
+    drawButtons();
+
+    json j;
+    if (buttons[ButtonKey::CreateTeam]->isClicked(*window)) {
+        client.setCurrentMenuState(MenuState::CreateTeam);
+        return;
+
+    } else if (buttons[ButtonKey::JoinTeam]->isClicked(*window)) {
+        client.setCurrentMenuState(MenuState::JoinTeam);
+        return;
+
+    } else if (buttons[ButtonKey::TeamInvites]->isClicked(*window)) {
+        client.setCurrentMenuState(MenuState::TeamsInvitation);
+        return;
+
+    } else if (buttons[ButtonKey::ManageTeams]->isClicked(*window)) {
+        client.setCurrentMenuState(MenuState::ManageTeams);
+        return;
+    }
 }
 
 

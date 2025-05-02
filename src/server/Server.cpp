@@ -291,7 +291,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts",{},contactStrings);
             return;
         }
-        
+
         else if(actionType == "player_info"){
             //clientStates[clientId] = MenuState::PlayerInfo;
             std::string username = clientPseudo[clientId];
@@ -301,6 +301,13 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             return;
         }
         
+        else if (actionType == jsonKeys::TEAMS) {
+            //gerer les amis
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu des équipes." << std::endl;
+            clientStates[clientId] = MenuState::Team;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu des amis.");
+            return;
+        }
         else if(actionType == jsonKeys::FRIEND_LIST) {
             //la liste des amis
             std::cout<<".................... en fait je suis dans HANDLEGUIActions " << clientPseudo[clientId]<<std::endl;

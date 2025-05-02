@@ -193,6 +193,7 @@ class SFMLGame {
 
         // Main Menu
         void mainMenu();
+        void teamsMenu();
 
         //classement
         void rankingMenu();

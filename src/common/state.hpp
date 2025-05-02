@@ -64,8 +64,12 @@ enum class ButtonKey {
     Cancel,
     esc,
     InviteP_O,
+    upstream,
     Close,
-    retour
+    retour,     CreateTeam,
+    JoinTeam,
+    TeamInvites,
+    ManageTeams, 
 
 
 

@@ -56,9 +56,7 @@ enum class MenuState {
             AddFriend,
             FriendList,
             FriendRequestList,
-            PrivateChat,
-        
-
+            PrivateChat
 };
 
 class MenuStateManager {

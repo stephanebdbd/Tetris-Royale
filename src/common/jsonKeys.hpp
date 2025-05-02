@@ -61,6 +61,7 @@ namespace jsonKeys {
     constexpr char LIGHT_GRID[] = "lightGrid";
 
     constexpr char GAME_OVER[] = "gameOver";
+    constexpr char TEAMS[] = "teams";
 
     
 }
