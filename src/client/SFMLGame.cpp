@@ -377,7 +377,6 @@ void SFMLGame::friendRequestListMenu() {
 }
 
 
-
 void SFMLGame::friendsMenu() {
     // Affichage de l'arrière-plan
     //std::cout << "Affichage du menu des amis" << std::endl;
@@ -422,7 +421,6 @@ void SFMLGame::friendsMenu() {
 
     if (buttons[ButtonKey::FriendList]->isClicked(*window)) {
         // Afficher la liste des amis
-        std::cout << "Affichage de la liste des amis..." << std::endl;
         json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIEND_LIST;
         network->sendData(j.dump() + "\n", client.getClientSocket());
@@ -529,6 +527,7 @@ void SFMLGame::refreshMenu() {
     window->display();
     sleep(0.1);
 }
+
 void SFMLGame::friendListMenu() {
     // Fond
     //std::cout << "Affichage de la liste d'amis" << std::endl;
@@ -619,7 +618,7 @@ void SFMLGame::friendListMenu() {
     buttons[ButtonKey::Retour]->draw(*window);
 
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Main);
+        client.setCurrentMenuState(MenuState::Friends);
         return;
     }
 }
@@ -643,7 +642,6 @@ void SFMLGame::run() {
         refreshMenu();
     }
     messages.clear();
-
 }
 
 
@@ -1264,7 +1262,6 @@ void SFMLGame::drawMessages() {
         auto sender = msg["sender"]; auto receiver = msg["receiver"];
         if((sender == clickedContact) || (sender == "You" && receiver == clickedContact)) {
             displayMessage(sender, msg["message"]);
-        MessagesY += 40; // Adjust the Y position for each message
         }
     }
     MessagesY = 60; // Reset Y position after all messages are drawn
@@ -1273,21 +1270,77 @@ void SFMLGame::drawMessages() {
 
 void SFMLGame::displayMessage(const std::string& sender, const std::string& message) {
     const bool isYou = sender == "You";
-    const float bubbleHeight = 30.f;
-    const float bubbleWidth = std::min(300.f, message.length() * 13.f);
-    const float cornerRadius = 10.f;
-    const float bubbleX = isYou ? WINDOW_WIDTH - 5 - bubbleWidth : 210;
-    const sf::Color bubbleColor = isYou ? sf::Color(70, 130, 180) : sf::Color(90, 90, 110);
 
+    // Définir les paramètres de style
+    const unsigned int fontSize = 16;
+    const float padding = 10.f;
+    const float maxWidth = 500.f;
+    const float margin = 5.f;
+    const float leftStartX = 210.f;
+
+    // Créer l'objet texte temporaire pour mesurer
+    sf::Text tempText(message, font, fontSize);
+    tempText.setFillColor(sf::Color::White);
+    tempText.setPosition(0, 0); // temporaire
+
+    // Ajuster le texte à une largeur maximale
+    std::string wrappedText = wrapText(message, font, fontSize, maxWidth - 2 * padding);
+    sf::Text messageText(wrappedText, font, fontSize);
+    sf::FloatRect bounds = messageText.getLocalBounds();
+
+    // Taille finale de la bulle
+    float bubbleWidth = std::min(maxWidth, bounds.width + 2 * padding);
+    float bubbleHeight = bounds.height + 2 * padding;
+
+    // Position de la bulle
+    float bubbleX = isYou ? WINDOW_WIDTH - margin - bubbleWidth : leftStartX;
+    sf::Color bubbleColor = isYou ? sf::Color(70, 130, 180) : sf::Color(90, 90, 110);
+
+    // Créer et dessiner la bulle
     Rectangle bubble(sf::Vector2f(bubbleX, MessagesY), sf::Vector2f(bubbleWidth, bubbleHeight), bubbleColor, sf::Color(100, 100, 120));
-    bubble.draw(*window);buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit,
-        sf::Vector2f(10, 20),
-        sf::Vector2f(40, 40));
+    bubble.draw(*window);
 
-    // Draw message text
-    Text messageText(message, font, 16, sf::Color::White, sf::Vector2f(bubbleX + cornerRadius + 5.f, MessagesY));
-    messageText.draw(*window);
+    // Positionner et dessiner le texte
+    messageText.setPosition(bubbleX + padding, MessagesY + padding / 2);
+    window->draw(messageText);
+
+    // Avancer la position Y pour le prochain message
+    MessagesY += bubbleHeight + 10.f;
 }
+
+std::string SFMLGame::wrapText(const std::string& text, const sf::Font& font, unsigned int characterSize, float maxWidth) {
+    std::string result;
+    std::string word;
+    sf::Text temp("", font, characterSize);
+
+    for (char c : text) {
+        if (c == ' ' || c == '\n') {
+            temp.setString(result + word);
+            if (temp.getLocalBounds().width > maxWidth) {
+                result += '\n' + word;
+            } else {
+                result += word;
+            }
+            result += c;
+            word.clear();
+        } else {
+            word += c;
+        }
+    }
+
+    // Dernier mot
+    if (!word.empty()) {
+        temp.setString(result + word);
+        if (temp.getLocalBounds().width > maxWidth) {
+            result += '\n' + word;
+        } else {
+            result += word;
+        }
+    }
+
+    return result;
+}
+
 
 
 /*
@@ -1928,17 +1981,6 @@ void SFMLGame::displayWaitingRoom() {
         buttons[ButtonKey::InviteP_O] = std::make_unique<Button>(textures->P_O, sf::Vector2f(200, yPos), sf::Vector2f(120, 120));
 
         yPos += 120;
-
-
-        /*buttons[ButtonKey::retour] = std::make_unique<Button>("Quitter", font, 24, sf::Color::White, sf::Color::Red,
-                sf::Vector2f(200, yPos), sf::Vector2f(150, 50));*/
-
-        
-
-        
-        
-
-        
     }
 
     drawTextFields();
@@ -1947,7 +1989,6 @@ void SFMLGame::displayWaitingRoom() {
 
 
     if (buttons.count(ButtonKey::esc) && invite) {
-    //std::cout << "Button esc exists" << std::endl;
         if (buttons[ButtonKey::esc]->isClicked(*window)) {
             std::cout << "Esc button clicked" << std::endl;
             invite = false;
@@ -1977,8 +2018,6 @@ void SFMLGame::displayWaitingRoom() {
 
    
     if (!invite && quitter->isClicked(*window)) {
-            
-        std::cout << "quitter: " << "/back"<< std::endl;
         client.sendInputFromSFML("/back");
         return;
         
@@ -2180,103 +2219,6 @@ void SFMLGame::displayJoinGame() {
         }
     }
 }
-
-
-/*void SFMLGame::displayJoinGame() {
-    // Effacer la fenêtre avec un fond uni
-    window->clear(sf::Color(30, 30, 60)); // Fond bleu nuit
-
-    // Créer et configurer le texte du titre
-    sf::Text title("DEMANDES DE JEU", font, 40); // Taille réduite à 40
-    title.setFillColor(sf::Color::White); // Couleur blanche simple
-    title.setStyle(sf::Text::Bold); // Gras seulement
-
-    // Centrer horizontalement en haut de l'écran
-    sf::FloatRect titleRect = title.getLocalBounds();
-    title.setOrigin(titleRect.left + titleRect.width/2.0f, 0);
-    title.setPosition(WINDOW_WIDTH/2.0f, 30); // 30px depuis le haut
-
-    if (client.isGameStateUpdated()) {
-        
-        GameState gameData = client.getGameState();
-        json requests = gameData.menu[jsonKeys::OPTIONS];
-        std::string titre = gameData.menu[jsonKeys::TITLE];
-
-        sf::Text t(titre, font, 40);
-        t.setFillColor(sf::Color::White);
-        t.setPosition(20, 100); // Positionner le texte à 100 pixels du haut
-        window->draw(t);
-
-
-        std::string line;
-        if(requests.empty()) {
-            line = "Aucune demande de jeu";
-            sf::Text requ(line, font, 40);
-            requ.setFillColor(sf::Color::White);
-            requ.setPosition(20, 150); // Positionner le texte à 100 pixels du haut
-            window->draw(requ);
-        }
-
-        int i = 0;
-        for (auto& [key, value] : requests.items()) {
-            line = key + value.get<std::string>();
-            std::string message = line;
-            sf::Text requ(message, font, 20);
-            requ.setFillColor(sf::Color::White);
-            requ.setPosition(20, 150 + i); // Positionner le texte à 100 pixels du haut
-            window->draw(requ);
-            i+=50;
-        }
-
-
-        if (buttons.empty() && texts.empty()) {
-            texts[TextFieldKey::Room] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
-                sf::Vector2f(50, 150 + i), sf::Vector2f(200, 50), "room");
-
-            buttons[ButtonKey::Valider] = std::make_unique<Button>("Valider", font, 24, sf::Color::White, sf::Color(70, 200, 70),
-                sf::Vector2f(270, 150 + i), sf::Vector2f(100, 50));
-            
-        }
-    
-        drawTextFields();
-        drawButtons();
-        json j;
-
-        if (buttons.count(ButtonKey::Valider) && buttons[ButtonKey::Valider]->isClicked(*window)) {
-            std::string room = texts[TextFieldKey::Room]->getText();
-            if(room.empty()) {
-                std::cerr << "Rempliez le champs de Room " << std::endl;
-                return;
-            }
-
-            size_t dotPosition = room.find('.'); // Trouver la position du point
-
-            if (dotPosition != std::string::npos) {
-                std::string status = room.substr(0, dotPosition); // Extraire la partie avant le point
-                std::string nbre = room.substr(dotPosition + 1);  // Extraire la partie après le point
-
-                std::cout << "Status: " << status << std::endl;
-                std::cout << "Nbre: " << nbre << std::endl;
-
-                std::cout << "accept."+status+"."+nbre<< std::endl;
-                client.sendInputFromSFML("accept." + status+"."+nbre);
-                texts[TextFieldKey::Room]->setText("");
-                j[jsonKeys::ACTION] = "AcceptRejoindre";
-                network->sendData(j.dump() + "\n", client.getClientSocket());
-                return;
-
-            } else {
-                std::cerr << "Format invalide, le point est manquant." << std::endl;
-            }
-            
-            
-        }
-    }
-
-
-    // Dessiner le titre
-    window->draw(title);
-}*/
 
 
 void SFMLGame::drawMessageMalusBonus(const json& msg){

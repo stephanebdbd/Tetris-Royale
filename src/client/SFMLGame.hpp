@@ -219,6 +219,7 @@ class SFMLGame {
         void drawMessages();
         void drawContacts();
         void displayMessage(const std::string&sender, const std::string& message);
+        std::string wrapText(const std::string& text, const sf::Font& font, unsigned int characterSize, float maxWidth);
 
         //friends
         void friendsMenu();
