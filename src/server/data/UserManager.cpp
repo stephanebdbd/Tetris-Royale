@@ -372,12 +372,21 @@ QueryResult DataManager::updateHighScore(const std::string& username, const int&
 }
 
 
-std::vector<std::pair<std::string, int>> DataManager::getRanking() const {
-    std::vector<std::pair<std::string, int>> ranking;
-    QueryResult result = db->executeQuery("SELECT username, best_score FROM Users ORDER BY best_score DESC;");
+std::map<std::string, std::vector<std::string>> DataManager::getRanking() const {
+    std::map<std::string, std::vector<std::string>> ranking; // username -> [score, avatarName]
+    QueryResult result = db->executeQuery(
+        "SELECT username, best_score, id_avatar FROM Users ORDER BY best_score DESC;"
+    );
+
     for (const auto& row : result.getData()) {
-        std::cout << row[0] << " : " << row[1] << std::endl;
-        if (!row.empty()) ranking.push_back(std::make_pair(row[0], std::stoi(row[1])));  // username and best_score
+        if (!row.empty()) {
+            std::string username = row[0];
+            std::string bestScore = row[1]; 
+            std::string avatarId = row[2]; 
+
+            // Ajouter les données dans la map
+            ranking[username] = {bestScore, avatarId};
+        }
     }
     return ranking;
 }

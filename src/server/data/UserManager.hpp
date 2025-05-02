@@ -59,6 +59,7 @@ public:
 
     //gerer le score du user
     QueryResult updateHighScore(const std::string& username, const int& bestScore);
-    std::vector<std::pair<std::string, int>> getRanking() const;  // Récupérer le classement des utilisateurs
+    std::map<std::string, std::vector<std::string>> getRanking() const;
+    
 
 };

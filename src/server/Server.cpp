@@ -258,9 +258,11 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         else if(actionType == jsonKeys::RANKING) {
             //gerer le classement
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le classement." << std::endl;
-            auto ranking = userManager.getRanking();
             clientStates[clientId] = MenuState::classement;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le classement.", {}, ranking);
+            auto ranking = userManager.getRanking();
+
+            //clientStates[clientId] = MenuState::classement;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "ranking", {},{},ranking);
             return;
         }
         else if(actionType == "settings") {

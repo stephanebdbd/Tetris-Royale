@@ -105,7 +105,7 @@ class SFMLGame {
         std::vector<json> messages;
         std::vector<std::string> contacts;
         std::vector<std::string> friends;
-        std::vector<std::pair<std::string, int>> ranking;
+        std::map<std::string, std::vector<std::string>> ranking;
         sf::Font font;
         MenuState currentState;
         std::string clickedContact;

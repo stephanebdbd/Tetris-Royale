@@ -197,8 +197,24 @@ void Client::receiveDisplay() {
                                         std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
                                     }
                                 }
-                                
+                            /*if (data["message"] == "ranking") {
+                                    serverData = data;
+                                    std::cout << "Classement: " << std::endl;
+                                    for (const auto& player : ranking) {
+                                        std::cout << "Nom: " << player.first << ", Avatar: " << player.second[1] << std::endl;
+                                    }
+                            }*/
+
+                                if(data.contains("secondData") && message == "ranking") {
+                                    setRanking(data["secondData"].get<std::map<std::string, std::vector<std::string>>>());
+
+                                    std::cout << "Contacts: " << std::endl;
+                                    for (const auto& contact : contacts) {
+                                        std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
+                                    }
+                                }
                             }
+                                
                                 
                                 
                             std::cout << "MenuState: " << data["state"] << std::endl;

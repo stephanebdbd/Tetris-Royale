@@ -1077,23 +1077,48 @@ void SFMLGame::rankingMenu(){
     // Affichage de la liste d'amis (exemple visuel)
     float startY = 80;
     float spacing = 70;
-    auto serverData = client.getServerData();
-    if(serverData.contains("dataPair"))
-        ranking = client.getServerData()["dataPair"]; // Récupérer la liste d'amis
-    for (size_t i = 0; i < ranking.size() && i < 10; ++i) {
-        // Rectangle fictif pour la carte du joueur
-        Rectangle friendCard(sf::Vector2f(90, startY + i * spacing), sf::Vector2f(600, 60), sf::Color::Transparent, sf::Color(200, 200, 200));
-        friendCard.draw(*window);
-        //Nom du joueur
-        Text name(ranking[i].first, font, 20, sf::Color::Black, sf::Vector2f(150, startY + i * spacing + 15));
-        name.draw(*window);
-        //Score du joueur
-        Text score(std::to_string(ranking[i].second), font, 20, sf::Color::Black, sf::Vector2f(570, startY + i * spacing + 15));
-        score.draw(*window);
-        // Avatar fictif
-        //Circle avatar();
-        //avatar.draw(*window);
-    }
+    const auto ranking1 = client.getRanking();
+        //currentState = MenuState::classement;
+        if(ranking1.empty() ) {
+            std::cout << "Aucun classement trouvé." << std::endl;
+            return;
+        }
+        int i = 0;
+        std::cout << "Liste des joueurs reçue avec succès." << std::endl;
+        for (const auto& [username, details] : ranking1) {
+            std::string bestScore = details[0];      // Score
+            std::string avatarNumber = details[1];   // ID d'avatar
+        
+            std::cout << "------->   Joueur: " << username << " avatar " << avatarNumber << std::endl;
+        
+            // Position de base pour cette ligne
+            float yOffset = startY + i * spacing;
+        
+            // Avatar
+            int avatarId = std::stoi(avatarNumber);
+            if (avatarId >= 0 && avatarId < static_cast<int>(avatarPaths.size())) {
+                sf::Texture avatarTexture;
+                if (avatarTexture.loadFromFile(avatarPaths[avatarId])) {
+                    sf::CircleShape avatarCircle(30);
+                    avatarCircle.setPosition(100, yOffset);  // Centré à gauche
+                    avatarCircle.setTexture(&avatarTexture);
+                    avatarCircle.setOutlineThickness(2);
+                    avatarCircle.setOutlineColor(sf::Color::White);
+                    window->draw(avatarCircle);
+                }
+            }
+        
+            // Nom du joueur (à droite de l’avatar)
+            Text name(username, font, 22, sf::Color::White, sf::Vector2f(190, yOffset + 10));
+            name.draw(*window);
+        
+            // Score du joueur (à droite complètement)
+            Text score(bestScore, font, 20, sf::Color::Black, sf::Vector2f(300, yOffset + 10));
+            score.draw(*window);
+        
+            i++;
+        }
+        
     if(buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         j[jsonKeys::ACTION] = jsonKeys::MAIN;

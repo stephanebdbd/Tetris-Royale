@@ -48,6 +48,7 @@ private:
     int avatarIndex = -1; // Index de l'avatar du joueur actuel (-1 par défaut si non défini)
     std::vector<std::pair<std::string, int>> contacts;
     bool isTerminal;
+    std::map<std::string, std::vector<std::string>> ranking;
 
 
 
@@ -89,6 +90,12 @@ public:
         void setContacts(const std::vector<std::pair<std::string, int>>& newContacts);
         void setIsTerminal(bool isTerminal) { this->isTerminal = isTerminal; }
         void reintiliseData();
+        void setRanking(std::map<std::string, std::vector<std::string>> ranking1) {
+            ranking = ranking1;
+        }
+        std::map<std::string, std::vector<std::string>> getRanking() const {
+            return ranking;
+        }
 };
 
 #endif

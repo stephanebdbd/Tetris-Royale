@@ -346,21 +346,29 @@ json Menu::displayMessage(const std::string& message) const {
     return menu.dump() + "\n";  // Convertir en chaîne JSON
 }
 
-json Menu::getRankingMenu(const std::vector<std::pair<std::string, int>>& ranking) const {
+json Menu::getRankingMenu(const std::map<std::string, std::vector<std::string>>& ranking) const {
     json menu = {
         {jsonKeys::TITLE, "Classement des meilleurs joueurs"},
-        {jsonKeys::OPTIONS, json::object()},  // car avec array la key commence a 0
+        {jsonKeys::OPTIONS, json::object()},  // car avec array la key commence à 0
         {jsonKeys::INPUT, "Appuyez sur la touche \"1\" pour revenir au menu principal : "}
     };
 
     // Ajoute les 10 meilleurs joueurs
-    int limit = std::min(10, static_cast<int>(ranking.size()));
-    for (int i = 0; i < limit; ++i) {
+    int i = 0;
+    for (const auto& [username, details] : ranking) {
+        if (i >= 10) break; // Limiter à 10 joueurs
+
+        // Construire la clé et la valeur
         std::string key = "    " + std::to_string(i + 1) + ". ";
-        std::string value = ranking[i].first + " - " + std::to_string(ranking[i].second);
+        std::string value = username + " - Score: " + details[0]; // details[0] contient le score
+
+        // Ajouter au JSON
         menu[jsonKeys::OPTIONS][key] = value;
+
+        i++;
     }
-    return menu.dump() + "\n";  // Convertir en chaîne JSON
+
+    return menu; // Retourner l'objet JSON
 }
 
 json Menu::getEndGameMenu(const std::string& message) const {
