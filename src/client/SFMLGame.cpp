@@ -12,7 +12,7 @@
 
 
 const unsigned int WINDOW_WIDTH = 1500;
-const unsigned int WINDOW_HEIGHT = 750;
+const unsigned int WINDOW_HEIGHT = 850;
 const std::string WINDOW_TITLE = "Tetris Royal";
 
 SFMLGame::SFMLGame(Client& client) : 
@@ -669,11 +669,11 @@ void SFMLGame::welcomeMenu() {
     // Ajouter les boutons s'ils n'existent pas
     if (buttons.empty()) {
         buttons[ButtonKey::Login] = std::make_unique<Button>("Login", font, 24, sf::Color::White, sf::Color(100, 149, 237),
-                                                             sf::Vector2f(WINDOW_WIDTH/2 - 220, 500), sf::Vector2f(200, 35));
+                                                             sf::Vector2f(WINDOW_WIDTH/2 - 220, 600), sf::Vector2f(200, 35));
         buttons[ButtonKey::Registre] = std::make_unique<Button>("Registre", font, 24, sf::Color::White, sf::Color(255, 165, 0),
-                                                                sf::Vector2f(WINDOW_WIDTH/2 + 20, 500), sf::Vector2f(200, 35));
+                                                                sf::Vector2f(WINDOW_WIDTH/2 + 20, 600), sf::Vector2f(200, 35));
         buttons[ButtonKey::Quit] = std::make_unique<Button>("Exit", font, 24, sf::Color::White, sf::Color(255, 99, 71),
-                                                            sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 560), sf::Vector2f(200, 35));
+                                                            sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 660), sf::Vector2f(200, 35));
     }
 
     // Dessiner les boutons
@@ -704,32 +704,29 @@ void SFMLGame::registerMenu() {
     displayBackground(textures->connexion);
 
     // Titre principal
-    Text title("Creation de compte", font, 30, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 150, 30));
+    Text title("Rejoignez la communaute", font, 30, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 150, 20));
     title.draw(*window);
 
-    // Slogan ou aide
-    Text subtitle("Rejoignez la communaute Tetris Royal", font, 18, sf::Color(200, 200, 220), sf::Vector2f(WINDOW_WIDTH / 2 - 180, 80));
-    subtitle.draw(*window);
 
     // Centrage des champs
     float fieldWidth = 250;
     float fieldHeight = 35;
     float centerX = WINDOW_WIDTH / 2 - fieldWidth / 2;
-    float startY = 180;
-    float fieldSpacing = 50;
+    float startY = 500;
+    float fieldSpacing = 60;
 
     // Ajouter les champs de texte s'ils n'existent pas
     if (texts.empty()) {
         texts[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                     sf::Vector2f(centerX, startY), sf::Vector2f(fieldWidth, fieldHeight), "Username");
+                                                                     sf::Vector2f(centerX - 300, startY), sf::Vector2f(fieldWidth, fieldHeight), "Username");
         texts[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                     sf::Vector2f(centerX, startY + fieldSpacing), sf::Vector2f(fieldWidth, fieldHeight), "Password", true);
+                                                                     sf::Vector2f(centerX + 270, startY), sf::Vector2f(fieldWidth, fieldHeight), "Password", true);
         texts[TextFieldKey::ConfirmPassword] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                            sf::Vector2f(centerX, startY + 2 * fieldSpacing), sf::Vector2f(fieldWidth, fieldHeight), "Confirm Password", true);
+                                                                            sf::Vector2f(centerX - 20, startY + fieldSpacing), sf::Vector2f(fieldWidth, fieldHeight), "Confirm Password", true);
     }
 
     // Section Sélection d'avatar
-    float avatarTitleY = startY + 3 * fieldSpacing + 20;
+    float avatarTitleY = startY + 2 * fieldSpacing + 10;
     Text avatarTitle("Choisissez votre avatar:", font, 20, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 130, avatarTitleY));
     avatarTitle.draw(*window);
 
@@ -771,13 +768,13 @@ void SFMLGame::registerMenu() {
     float buttonHeight = 35;
     float buttonX = WINDOW_WIDTH / 2 - buttonWidth / 2;
     float avatarRows = (avatarPaths.size() + avatarsPerRow - 1) / avatarsPerRow;
-    float buttonY = avatarY + avatarRows * (avatarSize + avatarSpacing) + 30;
+    float buttonY = avatarY + avatarRows * (avatarSize + avatarSpacing);
 
     if (buttons.empty()) {
         buttons[ButtonKey::Registre] = std::make_unique<Button>("S'inscrire", font, 24, sf::Color::White, sf::Color(100, 149, 237),
-                                                                 sf::Vector2f(buttonX, buttonY), sf::Vector2f(buttonWidth, buttonHeight));
+                                                                 sf::Vector2f(buttonX - 150, buttonY), sf::Vector2f(buttonWidth, buttonHeight));
         buttons[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 24, sf::Color::White, sf::Color(255, 99, 71),
-                                                               sf::Vector2f(buttonX, buttonY + 60), sf::Vector2f(buttonWidth, buttonHeight));
+                                                               sf::Vector2f(buttonX + 150, buttonY), sf::Vector2f(buttonWidth, buttonHeight));
     }
 
     // Dessiner les champs de texte et les boutons
@@ -845,16 +842,16 @@ void SFMLGame::connexionMenu() {
     // Ajouter les champs de texte et les boutons s'ils n'existent pas
     if (texts.empty()) {
         texts[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                    sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 400), sf::Vector2f(200, 35), "Username.");
+                                                                    sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 560), sf::Vector2f(200, 35), "Username.");
         texts[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                    sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 450), sf::Vector2f(200, 35), "Password", true);
+                                                                    sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 610), sf::Vector2f(200, 35), "Password", true);
     }
 
     if (buttons.empty()) {
         buttons[ButtonKey::Login] = std::make_unique<Button>("Se connecter", font, 24, sf::Color::White, sf::Color(100, 149, 237),
-                                                             sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 500), sf::Vector2f(200, 35));
+                                                             sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 660), sf::Vector2f(200, 35));
         buttons[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 24, sf::Color::White, sf::Color(255, 99, 71),
-                                                              sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 560), sf::Vector2f(200, 35));
+                                                              sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 710), sf::Vector2f(200, 35));
     }
 
     // Dessiner les champs de texte et les boutons
@@ -970,7 +967,7 @@ void SFMLGame::mainMenu() {
     displayBackground(textures->logoConnexion);
 
     float centerX = WINDOW_WIDTH / 2.0f;
-    float y = 660;
+    float y = 780;
     float spacing = 25;
     float buttonWidth = 120;
     float buttonHeight = 50;
@@ -1523,16 +1520,16 @@ void SFMLGame::ChoiceGameMode(){
 
         // Création des boutons
         buttons[ButtonKey::Endless] = std::make_unique<Button>("ENDLESS", font, 30, sf::Color::White, sf::Color(255, 255, 255, 0),
-                                                               sf::Vector2f(335, 425), sf::Vector2f(160, 45), sf::Color(255, 255, 255, 0));
+                                                               sf::Vector2f(340, 490), sf::Vector2f(160, 45), sf::Color(255, 255, 255, 0));
 
         buttons[ButtonKey::Duel] = std::make_unique<Button>("DUEL", font, 30, sf::Color::White, sf::Color(255, 255, 255, 0),
-                                                            sf::Vector2f(375, 560), sf::Vector2f(100, 45), sf::Color(255, 255, 255, 0));
+                                                            sf::Vector2f(375, 640), sf::Vector2f(100, 45), sf::Color(255, 255, 255, 0));
 
         buttons[ButtonKey::Classic] = std::make_unique<Button>("CLASSIC", font, 30, sf::Color::White, sf::Color(255, 255, 255, 0),
-                                                               sf::Vector2f(980, 425), sf::Vector2f(150, 45), sf::Color(255, 255, 255, 0));
+                                                               sf::Vector2f(980, 490), sf::Vector2f(150, 45), sf::Color(255, 255, 255, 0));
 
         buttons[ButtonKey::Royale] = std::make_unique<Button>("ROYALE", font, 30, sf::Color::White, sf::Color(255, 255, 255, 0),
-                                                              sf::Vector2f(980, 560), sf::Vector2f(150, 45), sf::Color(255, 255, 255, 0));
+                                                              sf::Vector2f(980, 640), sf::Vector2f(150, 45), sf::Color(255, 255, 255, 0));
 
         buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
         //buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit,sf::Vector2f(10, 20),sf::Vector2f(40, 40));
