@@ -18,7 +18,7 @@ Server::Server(int port)
     database(std::make_shared<DataBase>()), 
     userManager(database),
     chatRoomsManage(database), // Initialize chatRoom with the database instance
-    chat(database) // Passez la base de données à ServerChat
+    chat(database) // Passez la base de données à Chat
     {}
 
 
@@ -128,9 +128,9 @@ void Server::handleClient(int clientSocket, int clientId) {
 
                     try {
                         json receivedData = json::parse(message);
-                        std::cout << "Contenu de receivedData : " << receivedData.dump(4) << std::endl;
 
                         if (receivedData.contains(jsonKeys::MESSAGE)) {
+                            std::cout << "hello" << std::endl;
                             handleChat(clientSocket, clientId, receivedData);
                             continue;
                         }
@@ -915,6 +915,7 @@ void Server::keyInputPrivateChat(int clientSocket, int clientId, const std::stri
     }else if( !userManager.areFriends(sockToPseudo[clientSocket], action)){
         returnToMenu(clientSocket, clientId, MenuState::PrivateChat, "You are not friends with this user.");
     }else{
+        std::cout << action << std::endl;
         receiverOfMessages[clientId] = action;                                  //stocker le pseudo du destinataire
         clientStates[clientId] = MenuState::chat;
         sendChatModeToClient(clientSocket);                                     //envoyer le mode de chat au client
@@ -934,7 +935,7 @@ void Server::keyInputChatTeam(int clientSocket, int clientId, const std::string&
             clientStates[clientId] = MenuState::chat;
             sendChatModeToClient(clientSocket);
             sleep(0.1); // Attendre un peu pour s'assurer que le client a reçu le mode de chat
-            //chatRoomsManage.sendOldMessages(clientSocket, action); //envoyer les anciens messages
+            chatRoomsManage.sendOldMessages(clientSocket, action); //envoyer les anciens messages
         } else {
             returnToMenu(clientSocket, clientId, MenuState::Team, "Vous n'êtes pas membre de cette room.");
         }

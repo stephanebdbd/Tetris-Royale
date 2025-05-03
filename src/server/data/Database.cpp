@@ -87,16 +87,22 @@ QueryResult DataBase::executeQuery(const std::string& sql_query) {
 
 
 
-QueryResult DataBase::insertEntry(const std::string &table_name, const std::string& columns, const std::string& values){
+QueryResult DataBase::insertEntry(const std::string &table_name, const std::string& columns, const std::string& values) {
     std::string sql = "INSERT INTO " + table_name + " (" + columns + ") VALUES (" + values + ");";
-    return executeQuery(sql);
+    QueryResult result = executeQuery(sql);
+    
+    if (!result.isOk()) {
+        std::cerr << "Failed to insert into " << table_name 
+                  << " with values: " << values 
+                  << "\nError: " << result.getError() << std::endl;
+    }
+    return result;
 }
 
 
 QueryResult DataBase::deleteEntry(const std::string &table_name, const std::string& condition) {
     std::string sql = "DELETE FROM " + table_name + " WHERE " + condition + ";";
     QueryResult result = executeQuery(sql);
-    //int num_del_rows = sqlite3_changes(db);
     return result;
 }
 

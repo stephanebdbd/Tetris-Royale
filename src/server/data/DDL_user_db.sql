@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS ChatRoomMembers (
     FOREIGN KEY (id_user) REFERENCES Users(id_user) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS ChatMessages (
+CREATE TABLE IF NOT EXISTS ChatRoomMessages (
     id_message INTEGER PRIMARY KEY AUTOINCREMENT,
     id_room INTEGER NOT NULL,
     sender INTEGER NOT NULL,
@@ -49,19 +49,19 @@ CREATE TABLE IF NOT EXISTS ChatMessages (
     FOREIGN KEY (sender) REFERENCES Users(id_user)
 );
 
-CREATE TABLE IF NOT EXISTS Messages (
+CREATE TABLE IF NOT EXISTS PrivateMessages (
     id_msg INTEGER PRIMARY KEY AUTOINCREMENT,
-    sender INTEGER NOT NULL,
-    receiver INTEGER NOT NULL,
+    id_sender INTEGER NOT NULL,
+    id_receiver INTEGER NOT NULL,
     msg TEXT NOT NULL,
     msg_date_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sender) REFERENCES Users(id_user)
+    FOREIGN KEY (id_sender) REFERENCES Users(id_user)
         ON DELETE CASCADE 
         ON UPDATE NO ACTION,
-    FOREIGN KEY (receiver) REFERENCES Users(id_user)
+    FOREIGN KEY (id_receiver) REFERENCES Users(id_user)
         ON DELETE CASCADE
         ON UPDATE NO ACTION,
-    CHECK (sender <> receiver), -- A user cannot send a message to themselves
+    CHECK (id_sender <> id_receiver), -- A user cannot send a message to themselves
     CHECK(msg <> '') -- Check that the message is not empty
 );
 

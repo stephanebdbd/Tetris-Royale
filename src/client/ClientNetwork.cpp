@@ -41,12 +41,14 @@ void ClientNetwork::disconnect(int& clientSocket) {
 }
 
 bool ClientNetwork::sendData(const std::string& data, int clientSocket) {
-    if (send(clientSocket, data.c_str(), data.size(), 0) == -1) {
+    std::string dataWithNewline = data + "\n"; // Ajoute un séparateur
+    if (send(clientSocket, dataWithNewline.c_str(), dataWithNewline.size(), 0) == -1) {
         std::cerr << "Erreur: Impossible d'envoyer les données." << std::endl;
         return false;
     }
     return true;
 }
+
 int ClientNetwork::receivedData(int clientSocket, char *buffer) {
     memset(buffer, 0, 1024); // 1024 is the actual size of the buffer
     int bytesReceived = recv(clientSocket, buffer, 1023, 0); // Adjust the size to 1023 to leave space for null terminator

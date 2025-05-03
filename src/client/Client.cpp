@@ -15,12 +15,6 @@ Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port
 
 Client::~Client() {
     stopThreads();
-    if (inputThread.joinable()) {
-        inputThread.join();
-    }
-    if (receiveThread.joinable()) {
-        receiveThread.join();
-    }
 }
 
 void Client::run() {
@@ -132,7 +126,6 @@ void Client::receiveDisplay() {
             size_t pos = receivedData.find("\n");
             while (pos != std::string::npos) {
                 try {
-                    
 
                     std::string jsonStr = receivedData.substr(0, pos);
                     receivedData.erase(0, pos + 1);
@@ -171,7 +164,10 @@ void Client::receiveDisplay() {
 
                     // Si "data" est un tableau et que l'élément 0 contient "msg" (pour les anciens messages)
                     else if (data.is_array()) {
-                        if(data.empty()) continue;
+                        if(data.empty()){
+                            std::cout << "hello empty" << data << std::endl;
+                            continue;
+                        }
                         for (const auto& msg : data) {
                             if (msg.is_object() && msg.contains("message")) { // Ensure msg is an object
                                 chat.addChatMessage(msg);
@@ -205,13 +201,6 @@ void Client::receiveDisplay() {
                                         std::cout << "Nom: " << friendName << std::endl;
                                     }
                                 }
-                            /*if (data["message"] == "ranking") {
-                                    serverData = data;
-                                    std::cout << "Classement: " << std::endl;
-                                    for (const auto& player : ranking) {
-                                        std::cout << "Nom: " << player.first << ", Avatar: " << player.second[1] << std::endl;
-                                    }
-                            }*/
 
                                 if(data.contains("secondData") && message == "ranking") {
                                     setRanking(data["secondData"].get<std::map<std::string, std::vector<std::string>>>());

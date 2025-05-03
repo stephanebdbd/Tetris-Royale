@@ -627,7 +627,7 @@ bool ChatRoom::saveMessageToRoom(const std::string& sender, const std::string& r
     std::string columns = "id_room, sender, message, msg_date_time";
     std::string values = id_room + ", '" + sender + "', '" + message + "', '" + timestamp + "'";
 
-    QueryResult insertResult = db->insertEntry("ChatMessages", columns, values);
+    QueryResult insertResult = db->insertEntry("ChatRoomMessages", columns, values);
     if (!insertResult.isOk()) {
         std::cout << "Erreur lors de l'insertion du message : " << insertResult.getError() << std::endl;
         return false;
@@ -647,7 +647,7 @@ std::string ChatRoom::getMessagesFromRoom(const std::string& room_name) {
     std::string id_room = roomResult.getFirst();
     condition = "id_room = " + id_room;
     std::string order = " ORDER BY msg_date_time ";
-    QueryResult result = db->selectFromTable("ChatMessages", "sender, message, msg_date_time", condition + order);
+    QueryResult result = db->selectFromTable("ChatRoomMessages", "sender, message, msg_date_time", condition + order);
 
     json messagesJson = json::array();
     for (const auto& row : result.getData()) {

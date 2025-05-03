@@ -67,6 +67,7 @@ void ClientChat::sendChatMessages() {
                 {"message", inputStr},
             };
             
+            std::cout << "Envoi du message: " << msg_json.dump() << "avec socket : " << clientSocket << std::endl;
             if (!network.sendData(msg_json.dump(), clientSocket)) {
                 std::cerr << "Erreur d'envoi du message !\n";
             }
@@ -95,50 +96,6 @@ void ClientChat::receiveChatMessages(const json& msg) {
     displayChatMessages();
 }
 
-
-void ClientChat::displayMessage(const std::string& sender, const std::string& message) {
-    mtx.lock();
-    int max_y, max_x;
-    getmaxyx(displayWin, max_y, max_x);
-    int current_y = getcury(displayWin);
-
-    // Si on est en bas de la fenêtre, faire défiler
-    if (current_y >= max_y - 2) {
-        scroll(displayWin);
-        current_y = max_y - 2;
-    }
-
-    bool isMyMessage = (sender == MyPseudo);
-    std::string formatted_msg = "[" + sender + "]: " + message;
-
-    // Calculer la position x
-    int x_pos = isMyMessage ? (max_x - formatted_msg.length() - 3) : 2;
-
-    // Si le message est trop long, le diviser en plusieurs lignes
-    size_t start = 0;
-    while (start < formatted_msg.length()) {
-        int available_width = isMyMessage ? (max_x - x_pos - 2) : (max_x - 4);
-        std::string line = formatted_msg.substr(start, available_width);
-        
-        if (isMyMessage) {
-            // Recalculer la position pour chaque ligne (au cas où)
-            x_pos = max_x - line.length() - 3;
-            if (x_pos < 2) x_pos = 2; // Ne pas dépasser à gauche
-        }
-        
-        mvwprintw(displayWin, current_y++, x_pos, "%s", line.c_str());
-        start += available_width;
-
-        // Si on atteint le bas après avoir ajouté une ligne, faire défiler
-        if (current_y >= max_y - 2) {
-            scroll(displayWin);
-            current_y = max_y - 2;
-        }
-    }
-
-    wrefresh(displayWin);
-    mtx.unlock();
-}
 
 void ClientChat::displayChatMessages() {
     mtx.lock();

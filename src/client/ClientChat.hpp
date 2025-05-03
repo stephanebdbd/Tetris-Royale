@@ -24,7 +24,6 @@ class ClientChat{
         void run();
         void sendChatMessages();
         void receiveChatMessages(const json& msg);
-        void displayMessage(const std::string& sender, const std::string& message);
         void displayChatMessages();
         void addChatMessage(const json& msg);
         void setClientSocket(int clientSocket);
