@@ -162,7 +162,7 @@ void Server::handleClient(int clientSocket, int clientId) {
             }
 
             // Gestion du rafraîchissement à 12 FPS
-            if(!clientMode[clientId]){
+            if(!clientMode[clientId] || clientStates[clientId] == MenuState::JoinGame){
                 auto currentTime = std::chrono::steady_clock::now();
                 if (currentTime >= nextRefreshTime) {
                     handleMenu(clientSocket, clientId, "", true); // Refresh only
