@@ -62,6 +62,26 @@ namespace jsonKeys {
 
     constexpr char GAME_OVER[] = "gameOver";
     constexpr char TEAMS[] = "teams";
+    constexpr char CREATE_TEAM[] = "createTeam";
+    constexpr char JOIN_TEAM[] = "joinTeam";
+    constexpr char TEAM_INVITES[] = "teamInvites";
+    constexpr char TEAM_INVITE[] = "teamInvite";
+    constexpr char MANAGE_TEAMS[] = "manageTeams";
+    constexpr char CREATE_TEAM_MENU[] = "createTeamMenu";
+    constexpr char TEAM_NAME[] = "teamName";
+    constexpr char TEAM_MEMBER[] = "teamMember";
+    constexpr char TEAM_MEMBER_LIST[] = "teamMemberList";
+    constexpr char TEAM_MEMBER_LIST_MENU[] = "teamMemberListMenu";
+    constexpr char TEAM_MEMBER_LIST_MENU2[] = "teamMemberListMenu2";
+    constexpr char JOIN_TEAM_MENU[] = "joinTeamMenu";
+    constexpr char MANAGE_TEAM[] = "manageTeam";
+    constexpr char MANAGE_TEAMS_MENU[] = "manageTeamMenu";
+    constexpr char MANAGE_TEAM_MENU[] = "manageTeamMenu";
+    constexpr char MANAGE_TEAM_MEMBER[] = "manageTeamMember";
+    constexpr char MANAGE_TEAM_MEMBER_LIST[] = "manageTeamMemberList";
+    constexpr char MANAGE_TEAM_MEMBER_LIST_MENU[] = "manageTeamMemberListMenu";
+    constexpr char DELETE_TEAM[] = "deleteTeam";
+
 
     
 }

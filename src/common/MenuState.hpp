@@ -38,6 +38,7 @@ enum class MenuState {
                 Pause,
         classement,
         Team,
+            CreatTeamMenu,
             CreateTeam,
             JoinTeam,
             TeamsInvitation,
