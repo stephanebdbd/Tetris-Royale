@@ -35,7 +35,7 @@ class Server {
     std::shared_ptr<MenuStateManager> menuStateManager;
     std::unordered_map<int, int> clientAvatar; // Associe un clientId à un avatarIndex
     
-    
+
     //chaque client aura sa game
     std::unordered_map<int, std::string> clientPseudo;    // id -> pseudo
     std::unordered_map<int, MenuState> clientStates;      // id -> menu
@@ -43,6 +43,7 @@ class Server {
     std::unordered_map<int, std::string> sockToPseudo;    // socket -> pseudo
     std::unordered_map<int, std::string> roomToManage;    // id -> room
     std::unordered_map<int, std::string> receiverOfMessages;    // id -> receiver
+    std::unordered_map<int, bool> clientMode; //id -> Mode(terminale (false), Gui(true))
     std::mutex clientPseudoMutex;        // socket -> bool(chat en cours)
     std::mutex gameRoomsMutex;          // mutex pour la gestion des rooms de jeu
    

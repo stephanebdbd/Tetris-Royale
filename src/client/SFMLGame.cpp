@@ -265,10 +265,10 @@ void SFMLGame::addFriendMenu() {
     drawTextFields();
     drawButtons();
 
+    json j;
     // Traitement du bouton envoyer
     if (buttons[ButtonKey::Send]->isClicked(*window) && !texts[TextFieldKey::AddFriendField]->getText().empty()) {
         std::string friendName = texts[TextFieldKey::AddFriendField]->getText();
-        json j;
         j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND;
         j["friend"] = friendName;
         network->sendData(j.dump() + "\n", client.getClientSocket());
@@ -279,7 +279,8 @@ void SFMLGame::addFriendMenu() {
 
     // Traitement du bouton retour  
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Friends);
+        j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
 }
@@ -371,7 +372,9 @@ void SFMLGame::friendRequestListMenu() {
     buttons[ButtonKey::Retour]->draw(*window);
 
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Friends);
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
 }
@@ -413,15 +416,16 @@ void SFMLGame::friendsMenu() {
 
     drawButtons();
 
+    json j;
     // Actions associées aux boutons
     if (buttons[ButtonKey::AddFriend]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::AddFriend);
+        j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND_MENU;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
 
     if (buttons[ButtonKey::FriendList]->isClicked(*window)) {
         // Afficher la liste des amis
-        json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIEND_LIST;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         cleanup();
@@ -429,7 +433,6 @@ void SFMLGame::friendsMenu() {
     }
 
     if (buttons[ButtonKey::FriendRequestList]->isClicked(*window)) {
-        json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIEND_REQUEST_LIST;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         cleanup();
@@ -437,7 +440,8 @@ void SFMLGame::friendsMenu() {
     }
 
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Main);
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
 }
@@ -505,7 +509,6 @@ void SFMLGame::refreshMenu() {
             break;
         case MenuState::Pause:
             //gamePauseMenu();
-            
             break;
         case MenuState::CreateGame:
             ChoiceGameMode();
@@ -614,7 +617,9 @@ void SFMLGame::friendListMenu() {
     buttons[ButtonKey::Retour]->draw(*window);
 
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Friends);
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
 }
@@ -623,7 +628,7 @@ void SFMLGame::friendListMenu() {
 // Compléter le switch dans run()
 void SFMLGame::run() {
     // Start client threads (they're now managed by the Client class)
-    std::thread clientThread([this]() { client.run(); });
+    std::thread clientThread([this]() { client.run("gui"); });
     clientThread.detach();
 
     window->create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE);
@@ -962,6 +967,8 @@ void SFMLGame::displayCurrentPlayerInfo() {
     playerLevel.draw(*window);
     buttons[ButtonKey::Close]->draw(*window);
 }
+
+
 void SFMLGame::mainMenu() {
     // Afficher l'arrière-plan du menu principal
     displayBackground(textures->logoConnexion);
@@ -1027,7 +1034,8 @@ void SFMLGame::mainMenu() {
     // Gérer les clics sur les boutons
     json j;
     if (buttons.count(ButtonKey::Play) && buttons[ButtonKey::Play]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::JoinOrCreateGame);
+        j[jsonKeys::ACTION] = "createjoin";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
 
     } else if (buttons.count(ButtonKey::Chat) && buttons[ButtonKey::Chat]->isClicked(*window)) {
@@ -1036,7 +1044,8 @@ void SFMLGame::mainMenu() {
         return;
 
     } else if (buttons.count(ButtonKey::Friends) && buttons[ButtonKey::Friends]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Friends);
+        j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Teams) && buttons[ButtonKey::Teams]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::TEAMS;
@@ -1060,7 +1069,8 @@ void SFMLGame::mainMenu() {
         network->sendData(j.dump() + "\n", client.getClientSocket());
 
     } else if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Welcome);
+        j[jsonKeys::ACTION] = jsonKeys::WELCOME;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
     auto data  = client.getServerData();
@@ -1080,20 +1090,20 @@ void SFMLGame::rankingMenu(){
     //afficher la background
     displayBackground(textures->ranking);
     // Header for ranking list
-    Text header("LeaderBoard", font, 24, sf::Color::White, sf::Vector2f(60, 20));
+    Text header("LeaderBoard", font, 24, sf::Color::White, sf::Vector2f(400, 20));
     header.draw(*window);
+
+
     if(buttons.empty()){
-        buttons[ButtonKey::Retour]= std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
+        buttons[ButtonKey::Retour] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
         buttons[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings,sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
         buttons[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
         buttons[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
                                     sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
     }
-    if (texts.empty()) {
-        texts[TextFieldKey::SearchField] = std::make_unique<TextField>(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
-                                        sf::Vector2f(50, 20), sf::Vector2f(300, 35), "Search");
-    }
+
     drawButtons();
+
     // Affichage de la liste d'amis (exemple visuel)
     float startY = 80;
     float spacing = 70;
@@ -1140,18 +1150,14 @@ void SFMLGame::rankingMenu(){
         }
         
     if(buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Main);
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
-    else if (buttons.count(ButtonKey::Settings) && buttons[ButtonKey::Settings]->isClicked(*window)) {
-        // Action pour le bouton "Settings"
-    } else if (buttons.count(ButtonKey::Notification) && buttons[ButtonKey::Notification]->isClicked(*window)) {
-        // Action pour le bouton "Notification"
-    } else if (buttons.count(ButtonKey::Profile) && buttons[ButtonKey::Profile]->isClicked(*window)) {
-        // Action pour le bouton "Profile"
-    }
-
 }
+
+
 void SFMLGame::teamsMenu() {
     displayBackground(textures->logoConnexion); 
 
@@ -1188,19 +1194,20 @@ void SFMLGame::teamsMenu() {
 
     json j;
     if (buttons[ButtonKey::CreateTeam]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::CreateTeam);
+        //client.setCurrentMenuState(MenuState::CreateTeam);
         return;
 
     } else if (buttons[ButtonKey::JoinTeam]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::JoinTeam);
+        //client.setCurrentMenuState(MenuState::JoinTeam);
         return;
 
     } else if (buttons[ButtonKey::TeamInvites]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::TeamsInvitation);
+        //j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
 
     } else if (buttons[ButtonKey::ManageTeams]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::ManageTeams);
+        //client.setCurrentMenuState(MenuState::ManageTeams);
         return;
     }
 }
@@ -1254,7 +1261,9 @@ void SFMLGame::chatMenu() {
 
     // Vérifier d'abord le backButton
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Main);
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return; // Sortir immédiatement après avoir traité le clic
     }
 
@@ -1488,10 +1497,10 @@ void SFMLGame::CreateOrJoinGame() {
     // Gérer les clics sur les boutons
     json j;
     if (buttons.count(ButtonKey::Create) && buttons[ButtonKey::Create]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::CreateGame);
+        j[jsonKeys::ACTION] = "choiceMode";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
-    } 
-    
+    }
     else if (buttons.count(ButtonKey::Join) && buttons[ButtonKey::Join]->isClicked(*window)){
         j[jsonKeys::ACTION] = "Rejoindre";
         client.sendInputFromSFML("2");
@@ -1499,7 +1508,8 @@ void SFMLGame::CreateOrJoinGame() {
         return;
     }
     else if(buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)){
-        client.setCurrentMenuState(MenuState::Main);
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
     else if (buttons.count(ButtonKey::Settings) && buttons[ButtonKey::Settings]->isClicked(*window)) {
@@ -1757,10 +1767,12 @@ void SFMLGame::drawEndGame() {
     json j;
     
     if (buttons.count(ButtonKey::Rejouer) && buttons[ButtonKey::Rejouer]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::JoinOrCreateGame);
+        j[jsonKeys::ACTION] = "createjoin";
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
-        client.setCurrentMenuState(MenuState::Main);
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
         client.setGameStateUpdated(false);
         return;
     }

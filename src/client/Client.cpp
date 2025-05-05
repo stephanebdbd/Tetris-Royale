@@ -17,11 +17,15 @@ Client::~Client() {
     stopThreads();
 }
 
-void Client::run() {
+void Client::run(const std::string& mode) {
     if (!connect()) {
         std::cerr << "Error: Could not connect to server." << std::endl;
         return;
     }
+
+    json j;
+    j["mode"] = mode;
+    network.sendData(j.dump() + "\n", clientSocket);
 
     // Start threads (no longer detached)
     inputThread = std::thread(&Client::handleUserInput, this);
@@ -141,7 +145,6 @@ void Client::receiveDisplay() {
                             setGameStateFromServer(data);
                     }
                     // Si c'est un message de chat
-                    // Si c'est un message de chat
                     else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
                         std::cout << "data mode : " << data << std::endl;
                         chatMode = true; // Passer en mode chat
@@ -165,7 +168,6 @@ void Client::receiveDisplay() {
                     // Si "data" est un tableau et que l'élément 0 contient "msg" (pour les anciens messages)
                     else if (data.is_array()) {
                         if(data.empty()){
-                            std::cout << "hello empty" << data << std::endl;
                             continue;
                         }
                         for (const auto& msg : data) {

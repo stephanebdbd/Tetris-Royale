@@ -60,7 +60,7 @@ private:
 public:
         Client(const std::string& serverIP, int port);
         ~Client();
-        void run();
+        void run(const std::string& mode);
         bool connect();
         void receiveDisplay();
         void handleUserInput();

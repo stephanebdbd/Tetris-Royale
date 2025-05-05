@@ -368,7 +368,7 @@ json Menu::getRankingMenu(const std::map<std::string, std::vector<std::string>>&
         i++;
     }
 
-    return menu; // Retourner l'objet JSON
+    return menu.dump() + "\n"; // Retourner l'objet JSON
 }
 
 json Menu::getEndGameMenu(const std::string& message) const {

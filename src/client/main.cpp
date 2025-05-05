@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include "SFMLGame.hpp"
+#include "ClientNetwork.hpp"
 #include <ncurses.h>
 #include <iostream>
 #include <fstream>
@@ -10,7 +11,7 @@ void lancerModeTerminal(Client& client) {
     keypad(stdscr, TRUE);
     nodelay(stdscr, TRUE);
 
-    client.run();
+    client.run("terminale");
 
     endwin();
 }
@@ -38,8 +39,6 @@ int main() {
         
         client.setIsTerminal(true);
         lancerModeTerminal(client);
-        
-
 
     } else if (choix == 2) {
         std::ofstream serverLog("client.log");
@@ -47,9 +46,8 @@ int main() {
         std::cerr.rdbuf(serverLog.rdbuf());
         
         client.setIsTerminal(false);
-
         lancerModeGraphique(client);
-        
+    
     } else {
         std::cout << "Choix invalide.\n";
     }

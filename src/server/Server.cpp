@@ -127,10 +127,15 @@ void Server::handleClient(int clientSocket, int clientId) {
                     partialMessage.erase(0, pos + 1); // Supprimer le message traité
 
                     try {
+                        if(message.empty()) continue;
                         json receivedData = json::parse(message);
+                        
+                        if(receivedData.contains("mode")){
+                            clientMode[clientId] = receivedData["mode"] == "gui" ? true  : false;
+                            std::cout << receivedData["mode"] << std::endl;
+                        }
 
                         if (receivedData.contains(jsonKeys::MESSAGE)) {
-                            std::cout << "hello" << std::endl;
                             handleChat(clientSocket, clientId, receivedData);
                             continue;
                         }
@@ -157,20 +162,23 @@ void Server::handleClient(int clientSocket, int clientId) {
             }
 
             // Gestion du rafraîchissement à 12 FPS
-            auto currentTime = std::chrono::steady_clock::now();
-            if (currentTime >= nextRefreshTime) {
-                handleMenu(clientSocket, clientId, "", true); // Refresh only
-                lastRefreshTime = currentTime;
-                nextRefreshTime = lastRefreshTime + FRAME_TIME;
+            if(!clientMode[clientId]){
+                auto currentTime = std::chrono::steady_clock::now();
+                if (currentTime >= nextRefreshTime) {
+                    handleMenu(clientSocket, clientId, "", true); // Refresh only
+                    lastRefreshTime = currentTime;
+                    nextRefreshTime = lastRefreshTime + FRAME_TIME;
 
-                // Ajustement dynamique si on prend du retard
-                if (currentTime > nextRefreshTime) {
-                    nextRefreshTime = currentTime + FRAME_TIME;
+                    // Ajustement dynamique si on prend du retard
+                    if (currentTime > nextRefreshTime) {
+                        nextRefreshTime = currentTime + FRAME_TIME;
+                    }
                 }
             }
         }
     } catch (const std::exception& e) {
         std::cerr << "Exception dans handleClient pour le client #" << clientId << ": " << e.what() << std::endl;
+        disconnectPlayer(clientId);
     }
 }
 
@@ -243,7 +251,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             //gerer le menu principal
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu principal." << std::endl;
             clientStates[clientId] = MenuState::Main;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu principal.");
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId]);
             return;
         }
         else if(actionType == "game") {
@@ -308,9 +316,14 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans le menu des amis.");
             return;
         }
+        else if(actionType == jsonKeys::FRIENDS){
+            clientStates[clientId] = MenuState::Friends;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId]);
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir le gestionnaire des amis" << std::endl;
+            return;
+        }
         else if(actionType == jsonKeys::FRIEND_LIST) {
             //la liste des amis
-            std::cout<<".................... en fait je suis dans HANDLEGUIActions " << clientPseudo[clientId]<<std::endl;
             auto friends = userManager.getFriendList(clientPseudo[clientId]);
             for (const auto& friendName : friends) {
                 std::cout << "Ami: " << friendName << std::endl;
@@ -428,9 +441,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             this->keyInputCreateGameRoom(clientId, GameModeName::Endless);
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu modeJeu Endless.");
             return;
-         
-            
-            
         }
         else if(actionType == "DuelMode") {
             clientStates[clientId] = MenuState::Settings;
@@ -497,9 +507,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         else if(actionType == "Rejoindre"){
             std::cout << "Client #" << clientId << " a demandé de choisir le mode de jeu ." << std::endl;
             clientStates[clientId] = MenuState::JoinGame;
-            //std::string currentUser = clientPseudo[clientId];
-            //std::vector<std::vector<std::string>> invitations = userManager.getListGameRequest(currentUser);
-            //sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
+            handleMenu(clientSocket, clientId, "", true);
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu choisir GameRoom .");
             return;
         }
@@ -626,11 +634,6 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             break;
         case MenuState::FriendList:
             std::cout << "Client #" << clientId << " a demandé d'ouvrir la liste d'amis." << std::endl;
-            std::cout << "------------------------------------------------------------------"<<std::endl;
-            for (auto name : userManager.getFriendList(currentClient)) {
-                std::cout << "---hello Friend: " << name << std::endl;
-            }
-            std::cout << "----------------------------------------------------------------"<<std::endl;
             if(refreshMenu) sendMenuToClient(clientSocket, menu.getFriendListMenu(userManager.getFriendList(currentClient)));
             else keyInputManageFriendlist(clientSocket, clientId, action);
             break;
@@ -1629,7 +1632,7 @@ void Server::keyInputHelpMenu(int clientSocket, int clientId, const std::string&
 void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action) {
     std::string status, receiver;
     // Vérifier si l'action commence par \invite
-    std::cout << "action : " << action << std::endl;
+    std::cout << "action Lobby: " << action << std::endl;
     if (action.find("/invite") == 0) {
         // Extraire le statut et le receiver de l'action
         extractDataBetweenSlashes("/invite", action, status, receiver);
@@ -1703,7 +1706,7 @@ void Server::extractDataBetweenSlashes(const std::string& toFind, const std::str
 }
 
 void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action){
-    std::cout << "action : " << action << std::endl;
+    std::cout << "action Room: " << action << std::endl;
     if (action.find("accept.") == 0){
         std::size_t firstDot = action.find(".");
         std::size_t secondDot = action.find(".", firstDot + 1);
