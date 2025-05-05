@@ -191,6 +191,7 @@ class SFMLGame {
         // Main Menu
         void mainMenu();
         void teamsMenu();
+        void createRoomMenu();
 
         //classement
         void rankingMenu();
@@ -219,6 +220,7 @@ class SFMLGame {
         void drawContacts();
         void displayMessage(const std::string&sender, const std::string& message);
         std::string wrapText(const std::string& text, const sf::Font& font, unsigned int characterSize, float maxWidth);
+        void joinTeamMenu();
 
         //friends
         void friendsMenu();

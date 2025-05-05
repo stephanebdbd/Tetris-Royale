@@ -88,5 +88,6 @@ enum class TextFieldKey {
     NomJoueur,
     Victime,
     Room,
-    AddFriendField
+    AddFriendField,
+    TeamNameField
 };

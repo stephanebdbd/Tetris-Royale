@@ -254,6 +254,87 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId]);
             return;
         }
+        else if(actionType == jsonKeys::CREATE_TEAM_MENU) {
+            //gerer la creation d'equipe
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir le menu de création d'équipe." << std::endl;
+            clientStates[clientId] = MenuState::CreatTeamMenu;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "createTeam");
+            
+            return;
+        }
+        else if(actionType == jsonKeys::CREATE_TEAM) {
+            std::string teamName = action[jsonKeys::TEAM_NAME];
+            std::cout << "Client #" << clientId << " a demandé de créer une équipe avec le nom: " << teamName << std::endl;
+            if(chatRoomsManage.checkroomExist(teamName)){
+                menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "la room  existe déjà.");
+                menuStateManager->sendTemporaryDisplay(clientSocket, "La room existe déjà.");
+                return;
+
+            }
+            else {
+                chatRoomsManage.createTeam(teamName, sockToPseudo[clientSocket]);
+                menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "la room a été créée avec succès.");
+                menuStateManager->sendTemporaryDisplay(clientSocket, "La room a été créée avec succès.");
+                return;
+            }
+            
+        }
+        else if(actionType == jsonKeys::JOIN_TEAM_MENU) {
+            //gerer la creation d'equipe
+            std::cout << "Client #" << clientId << " a demandé de rejoindre une équipe." << std::endl;
+            clientStates[clientId] = MenuState::JoinTeam;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "joinTeam");
+            return;
+        }
+        else if(actionType == jsonKeys::JOIN_TEAM) {
+            std::string teamName = action[jsonKeys::TEAM_NAME];
+            std::cout << "Client #" << clientId << " a demandé de rejoindre l'équipe: " << teamName << std::endl;
+            if(!chatRoomsManage.checkroomExist(teamName)){
+                menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "la room n existe pas.");
+                menuStateManager->sendTemporaryDisplay(clientSocket, "La room n'existe pas.");
+                return;
+            }
+            else {
+                chatRoomsManage.joinTeam(sockToPseudo[clientSocket], teamName);
+                menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "la room a été rejointe avec succès.");
+                menuStateManager->sendTemporaryDisplay(clientSocket, "La room a été rejointe avec succès.");
+                return;
+            }
+        }
+        else if(actionType == jsonKeys::MANAGE_TEAMS_MENU) {
+            //gerer la gestion d'equipe
+            std::cout << "Client #" << clientId << " a demandé de gérer une équipe." << std::endl;
+            clientStates[clientId] = MenuState::ManageTeam;
+            auto teams = chatRoomsManage.getChatRoomsForUser(clientPseudo[clientId]);
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "manageTeam",teams);
+            return;
+        }
+        else if(actionType == jsonKeys::MANAGE_TEAM) {
+            //gerer les membres d'equipe
+            std::string teamName = action[jsonKeys::TEAM_NAME];
+            std::cout << "Client #" << clientId << " a demandé de gérer les membres de l'équipe: " << teamName << std::endl;
+            auto members = chatRoomsManage.getMembers(teamName);
+            auto admins = chatRoomsManage.getAdmins(teamName);
+            auto pendingRequests = chatRoomsManage.getClientPending(teamName);
+            return;
+        }
+        else if(actionType == jsonKeys::DELETE_TEAM) {
+            //gerer la suppression d'equipe
+            std::string teamName = action[jsonKeys::TEAM_NAME];
+            std::cout << "Client #" << clientId << " a demandé de supprimer l'équipe: " << teamName <<
+            std::endl;
+            if(!chatRoomsManage.checkroomExist(teamName)){
+                menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "la room n existe pas.");
+                menuStateManager->sendTemporaryDisplay(clientSocket, "La room n'existe pas.");
+                return;
+            }
+            else {
+                chatRoomsManage.deleteChatRoom(teamName);
+                menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "la room a été supprimée avec succès.");
+                menuStateManager->sendTemporaryDisplay(clientSocket, "La room a été supprimée avec succès.");
+                return;
+            }
+        }
         else if(actionType == "game") {
             //gerer le jeu
             std::cout << "Client #" << clientId << " a demandé d'ouvrir le jeu." << std::endl;
@@ -276,13 +357,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::cout << "Client #" << clientId << " a demandé d'ouvrir les paramètres." << std::endl;
             clientStates[clientId] = MenuState::Settings;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans les paramètres.");
-            return;
-        }
-        else if(actionType == "teams") {
-            //gerer les equipes
-            std::cout << "Client #" << clientId << " a demandé d'ouvrir les équipes." << std::endl;
-            clientStates[clientId] = MenuState::ManageTeams;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans les équipes.");
             return;
         }
         else if(actionType == "chat") {
