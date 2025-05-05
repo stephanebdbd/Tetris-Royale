@@ -315,8 +315,9 @@ void SFMLGame::friendRequestListMenu() {
         }
 
         if (avatarTextures[i].loadFromFile("../../res/avatar/avatar" + std::to_string(i + 1) + ".png")) {
-            Circle(sf::Vector2f(7, y + 8), 30.0f, sf::Color::White, sf::Color::Transparent)
-                .drawPhoto(avatarTextures[i], *window);
+            Circle circle(sf::Vector2f(7, y + 8), 30.0f, sf::Color::White, sf::Color::Transparent);
+            circle.setTexture(avatarTextures[i]);
+            circle.draw(*window);
         }
 
         friendButtons[amis[i]]->draw(*window);
@@ -558,9 +559,11 @@ void SFMLGame::friendListMenu() {
         }
 
         if (avatarTextures[i].loadFromFile("../../res/avatar/avatar" + std::to_string(i + 1) + ".png")) {
-            Circle(sf::Vector2f(7, y + 8), 30.0f, sf::Color::White, sf::Color::Transparent)
-                .drawPhoto(avatarTextures[i], *window);
+            Circle circle(sf::Vector2f(7, y + 8), 30.0f, sf::Color::White, sf::Color::Transparent);
+            circle.setTexture(avatarTextures[i]);
+            circle.draw(*window);
         }
+
 
         friendButtons[amis[i]]->draw(*window);
     }
@@ -1081,7 +1084,6 @@ void SFMLGame::mainMenu() {
     if (client.getShow()) {
         displayCurrentPlayerInfo();
     }
-    
 }
 
 
@@ -1306,10 +1308,12 @@ void SFMLGame::handleContacts() {
 
         if (avatarIndex >= 0 && avatarIndex < static_cast<int>(avatarPaths.size())) {
             if (avatarTextures[avatarIndex].loadFromFile(avatarPaths[avatarIndex])) {
-                Circle(sf::Vector2f(7, contactY + 8), 30.0f, sf::Color::White, sf::Color::Transparent)
-                    .drawPhoto(avatarTextures[avatarIndex], *window);
+                Circle circle(sf::Vector2f(7, contactY + 8), 30.0f, sf::Color::White, sf::Color::Transparent);
+                circle.setTexture(avatarTextures[avatarIndex]);
+                circle.draw(*window);
             }
         }
+
         else{
             sf::CircleShape circle(20.0f); // Rayon du cercle
             circle.setFillColor(sf::Color(100, 100, 200)); // Couleur de fond
@@ -1346,11 +1350,15 @@ void SFMLGame::handleContacts() {
     // Affichage du chat sélectionné
     if (!clickedContact.empty()) {
         Rectangle(sf::Vector2f(202, 0), sf::Vector2f(WINDOW_WIDTH - 200, 50),
-                 sf::Color(50, 50, 70), sf::Color(100, 100, 120)).draw(*window);
+        sf::Color(50, 50, 70), sf::Color(100, 100, 120)).draw(*window);
+
         Text(clickedContact, font, 24, sf::Color::White, sf::Vector2f(250, 10)).draw(*window);
-        Circle(sf::Vector2f(215, 10), 30.0f, sf::Color::White, sf::Color::Transparent)
-            .drawPhoto(avatarTextures[avatarClickedContact], *window);
+
+        Circle circle(sf::Vector2f(215, 10), 30.0f, sf::Color::White, sf::Color::Transparent);
+        circle.setTexture(avatarTextures[avatarClickedContact]);
+        circle.draw(*window);
     }
+
 }
 
 

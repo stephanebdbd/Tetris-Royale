@@ -9,7 +9,7 @@
 #include <ncurses.h>
 #include <thread>
 #include <fstream>
-
+#include <cerrno>
 
 Client::Client(const std::string& serverIP, int port) : serverIP(serverIP), port(port), clientSocket(-1) {}
 
@@ -34,11 +34,11 @@ void Client::run(const std::string& mode) {
     // Wait for threads to finish (they won't unless stop_threads is set)
     inputThread.join();
     receiveThread.join();
-
     network.disconnect(clientSocket);
     delwin(stdscr);
     endwin();
 }
+
 void Client::setTemporaryMessage(const std::string& msg) {
     std::lock_guard<std::mutex> lock(messageMutex);
     temporaryMessage = msg;
@@ -56,7 +56,6 @@ bool Client::connect() {
         std::cerr << "Erreur: Impossible de se connecter au serveur." << std::endl;
         return false;
     }
-
     chat.setClientSocket(clientSocket);
     return true;
 }
@@ -86,7 +85,6 @@ void Client::handleUserInput() {
                     inputBuffer.clear();
                 }
                 // Envoie immédiat des touches pour jouer
-                std::cout<<"ana dima hadr"<< std::endl;
                 std::string specialAction(1, static_cast<char>(ch));
                 controller.sendInput(specialAction, clientSocket);
             } 
@@ -115,154 +113,153 @@ void Client::handleUserInput() {
     }
 }
 
-
 void Client::receiveDisplay() {
-    // Make received a member variable instead of local
     while (!stop_threads) {
-        char buffer[12000];
-        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-
-        if (bytesReceived > 0) {
-            std::lock_guard<std::mutex> lock(receiveMutex); // Add mutex for thread safety
-            receivedData += std::string(buffer, bytesReceived); // Use member variable
-
-            // Process complete JSON messages
-            size_t pos = receivedData.find("\n");
-            while (pos != std::string::npos) {
-                try {
-
-                    std::string jsonStr = receivedData.substr(0, pos);
-                    receivedData.erase(0, pos + 1);
-                    json data = json::parse(jsonStr);
-                    
-                    // Si c'est une grille de jeu
-                    if (data.contains(jsonKeys::GRID)|| data.contains("otherPlayersGrids")) {
-                        isPlaying = true;
-                        chatMode = false;
-                        if(isTerminal && !data.contains("otherPlayersGrids"))
-                            display.displayGame(data);
-                        else
-                            setGameStateFromServer(data);
-                    }
-                    // Si c'est un message de chat
-                    else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
-                        std::cout << "data mode : " << data << std::endl;
-                        chatMode = true; // Passer en mode chat
-                        chat.setMyPseudo(data["pseudo"]); // Mettre à jour le pseudo du client
-                        //lancer thread pour gerer les fenetre de chat et l envoi de message
-                        std::thread chatThread(&ClientChat::run, &chat);
-                        chatThread.detach(); // Lancer le thread de chat
-                    }
-                    else if (data.contains(jsonKeys::TEMPORARY_DISPLAY)) {
-                        std::string message = data[jsonKeys::TEMPORARY_DISPLAY];
-                        setTemporaryMessage(message);  // Stocke le message pour l'affichage temporaire
-                    }
-                    
-                    // Si c'est un message de chat
-                    else if (data.contains("sender")) {
-                        if(chatMode)
-                            chat.receiveChatMessages(data);
-                        serverData = data;
-                    }
-
-                    // Si "data" est un tableau et que l'élément 0 contient "msg" (pour les anciens messages)
-                    else if (data.is_array()) {
-                        if(data.empty()){
-                            continue;
-                        }
-                        for (const auto& msg : data) {
-                            if (msg.is_object() && msg.contains("message")) { // Ensure msg is an object
-                                chat.addChatMessage(msg);
-                            }
-                        }
-                        chat.displayChatMessages(); // Afficher les messages de chat
-                    }
-                    else {
-                        chatMode = false;
-                        isPlaying = false;
-                        // changer le menuState dans le cas de GUI
-                        if(data.contains("state")) {
-                            setGameStateFromServer(data);
-                            if(data.contains("message")){
-                                std::string message = data["message"];
-                                if(message == "avatar"){
-                                    int avatarIndex = std::stoi(data["data"][0].get<std::string>());
-                                    setAvatarIndex(avatarIndex);
-                                }
-                                if (data.contains("dataPair") && message == "contacts") {
-                                    setContacts(data["dataPair"].get<std::vector<std::pair<std::string, int>>>());
-                                    std::cout << "Contacts: " << std::endl;
-                                    for (const auto& contact : contacts) {
-                                        std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
-                                    }
-                                }
-                                if(data.contains("data") && message == jsonKeys::FRIEND_LIST){
-                                    setAmis(data["data"].get<std::vector<std::string>>());
-                                    std::cout << "Amis: " << std::endl;
-                                    for (const auto& friendName : amis) {
-                                        std::cout << "Nom: " << friendName << std::endl;
-                                    }
-                                }
-
-                                if(data.contains("secondData") && message == "ranking") {
-                                    setRanking(data["secondData"].get<std::map<std::string, std::vector<std::string>>>());
-
-                                    std::cout << "Contacts: " << std::endl;
-                                    for (const auto& contact : contacts) {
-                                        std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << std::endl;
-                                    }
-                                }
-                                if(data.contains("data") && message == "player_info"){
-                                    setShow(true);
-                                    setPlayerInfo(data["data"].get<std::vector<std::string>>());
-                                    std::cout << "player_info: " << std::endl;
-                                    for (const auto& player : PlayerInfo) {
-                                        std::cout << "Nom: " << player << std::endl;
-                                    }
-                                }
-                            }
-                                
-                                
-                                
-                            std::cout << "MenuState: " << data["state"] << std::endl;
-                            currentMenuState = menuStateManager.deserialize(data["state"]);
-                            serverData = data;
-                            
-                        } else {
-                            if(isTerminal)
-                                display.displayMenu(data, inputBuffer);
-                            else
-                                setGameStateFromServer(data);
-
-
-                        }
-                        
-                    }
-
-                    refresh();  // Rafraîchir l'affichage après mise à jour du jeu ou menu
-                } catch (json::parse_error& e) {
-                    std::cerr << "JSON parse error: " << e.what() << std::endl;
-                }
-
-                pos = receivedData.find("\n");
-            }
-        }
-        else if (bytesReceived == 0) {
-            // Connection closed
-            stopThreads();
-            break;
-        } else {
-            if (stop_threads) {
-                break;  // Exit if stop_threads is set
-            }
-            // Error
-            if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                stopThreads();
-            }
-        }
+        std::string dataChunk = receiveData();
+        if (dataChunk.empty()) continue;
+        appendToBuffer(dataChunk);
+        processBufferedMessages();
     }
 }
 
+std::string Client::receiveData() {
+    char buffer[12000];
+    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+
+    if (bytesReceived > 0) {
+        return std::string(buffer, bytesReceived);
+    } else if (bytesReceived == 0 || (errno != EAGAIN && errno != EWOULDBLOCK)) {
+        stopThreads();
+    }
+    return "";
+}
+
+void Client::appendToBuffer(const std::string& chunk) {
+    std::lock_guard<std::mutex> lock(receiveMutex);
+    receivedData += chunk;
+}
+
+void Client::processBufferedMessages() {
+    std::lock_guard<std::mutex> lock(receiveMutex);
+    std::size_t pos;
+    while ((pos = receivedData.find('\n')) != std::string::npos) {
+        std::string jsonStr = receivedData.substr(0, pos);
+        receivedData.erase(0, pos + 1);
+        handleJsonMessage(jsonStr);
+    }
+}
+
+void Client::handleJsonMessage(const std::string& jsonStr) {
+    try {
+        json data = json::parse(jsonStr);
+
+        if (data.contains(jsonKeys::GRID) || data.contains("otherPlayersGrids")) {
+            handleGameGrid(data);
+        } else if (data.contains(jsonKeys::MODE) && data[jsonKeys::MODE] == "chat") {
+            startChatMode(data);
+        } else if (data.contains(jsonKeys::TEMPORARY_DISPLAY)) {
+            setTemporaryMessage(data[jsonKeys::TEMPORARY_DISPLAY]);
+        } else if (data.contains("sender")) {
+            handleChatMessage(data);
+        } else if (data.is_array()) {
+            handleChatHistory(data);
+        } else {
+            handleOtherMessages(data);
+        }
+        refresh();
+    } catch (json::parse_error& e) {
+        std::cerr << "JSON parse error: " << e.what() << std::endl;
+    }
+}
+
+void Client::handleGameGrid(const json& data) {
+    isPlaying = true;
+    chatMode = false;
+    if (isTerminal && !data.contains("otherPlayersGrids"))
+        display.displayGame(data);
+    else
+        setGameStateFromServer(data);
+}
+
+void Client::startChatMode(const json& data) {
+    chatMode = true;
+    chat.setMyPseudo(data["pseudo"]);
+    std::thread chatThread(&ClientChat::run, &chat);
+    chatThread.detach();
+}
+
+void Client::handleChatMessage(const json& data) {
+    if (chatMode)
+        chat.receiveChatMessages(data);
+    serverData = data;
+}
+
+void Client::handleChatHistory(const json& data) {
+    for (const auto& msg : data) {
+        if (msg.is_object() && msg.contains("message")) {
+            chat.addChatMessage(msg);
+        }
+    }
+    chat.displayChatMessages();
+}
+
+void Client::handleStatefulData(const json& data) {
+    if (data.contains("message")) {
+        std::string message = data["message"];
+
+        if (message == "avatar" && data.contains("data")) {
+            int avatarIndex = std::stoi(data["data"][0].get<std::string>());
+            setAvatarIndex(avatarIndex);
+        }
+
+        if (message == "contacts" && data.contains("dataPair")) {
+            setContacts(data["dataPair"].get<std::vector<std::pair<std::string, int>>>());
+            std::cout << "Contacts:\n";
+            for (const auto& contact : contacts) {
+                std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << '\n';
+            }
+        }
+
+        if (message == jsonKeys::FRIEND_LIST && data.contains("data")) {
+            setAmis(data["data"].get<std::vector<std::string>>());
+            std::cout << "Amis:\n";
+            for (const auto& ami : amis) {
+                std::cout << "Nom: " << ami << '\n';
+            }
+        }
+
+        if (message == "ranking" && data.contains("secondData")) {
+            setRanking(data["secondData"].get<std::map<std::string, std::vector<std::string>>>());
+            std::cout << "Classement mis à jour.\n";
+        }
+
+        if (message == "player_info" && data.contains("data")) {
+            setShow(true);
+            setPlayerInfo(data["data"].get<std::vector<std::string>>());
+            std::cout << "Infos joueur :\n";
+            for (const auto& p : PlayerInfo) {
+                std::cout << "Nom: " << p << '\n';
+            }
+        }
+    }
+
+    std::cout << "MenuState: " << data["state"] << '\n';
+    currentMenuState = menuStateManager.deserialize(data["state"]);
+    serverData = data;
+}
+
+void Client::handleOtherMessages(const json& data) {
+    chatMode = false;
+    isPlaying = false;
+    if (data.contains("state")) {
+        handleStatefulData(data);
+    } else {
+        if (isTerminal)
+            display.displayMenu(data, inputBuffer);
+        else
+            setGameStateFromServer(data);
+    }
+}
 
 MenuState Client::getCurrentMenuState() {
     return currentMenuState; 
@@ -292,13 +289,8 @@ void Client::setGameStateFromServer(const json& data) {
     else{
         gameState.isGame = false;
         gameState.menu = data;
-        
-        
     }
     gameState.updated = true;
-    
-
-    
 }
 
 const GameState Client::getGameState() {
@@ -332,17 +324,54 @@ void Client::reintiliseData(){
 
 }
 
-
-
 void Client::sendInputFromSFML(const std::string& input) {
     std::cout<<"ana from client: "<< input << std::endl;
     if (!input.empty()) {
         controller.sendInput(input, clientSocket);
     }
 }
+
 const std::vector<std::pair<std::string, int>>&  Client:: getContacts() const {
     return contacts;
 }
+
 void Client::setContacts(const std::vector<std::pair<std::string, int>>& newContacts) {
     contacts = newContacts;
+}
+
+void Client::setRanking(std::map<std::string, std::vector<std::string>> ranking1) {
+    ranking = ranking1;
+}
+std::map<std::string, std::vector<std::string>> Client::getRanking() const {
+    return ranking;
+}
+void Client::setAmis(const std::vector<std::string>& friends) {
+    amis = friends;
+}
+std::vector<std::string> Client::getAmis() const {
+    return amis;
+}
+void Client::setPlayerInfo(const std::vector<std::string>& playerInfo) {
+    PlayerInfo = playerInfo;
+}
+std::vector<std::string> Client::getPlayerInfo() const {
+    return PlayerInfo;
+}
+void Client::setShow(bool showfenetre) {
+    show = showfenetre;
+}
+bool Client::getShow() const {
+    return show;
+}
+
+void Client::clearServerData() {
+    serverData.clear();
+}
+
+void Client::setAvatarIndex(int index) {
+    avatarIndex = index;
+}
+
+int Client::getAvatarIndex() const {
+    return avatarIndex;
 }

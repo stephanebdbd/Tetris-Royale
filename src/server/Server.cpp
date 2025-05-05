@@ -121,7 +121,7 @@ void Server::handleClient(int clientSocket, int clientId) {
                 partialMessage += std::string(buffer, bytesReceived); // Ajouter les données reçues
 
                 // Traiter les messages complets (séparés par '\n')
-                size_t pos;
+                std::size_t pos;
                 while ((pos = partialMessage.find('\n')) != std::string::npos) {
                     std::string message = partialMessage.substr(0, pos); // Extraire un message complet
                     partialMessage.erase(0, pos + 1); // Supprimer le message traité

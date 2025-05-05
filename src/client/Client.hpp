@@ -62,7 +62,23 @@ public:
         ~Client();
         void run(const std::string& mode);
         bool connect();
+
+
         void receiveDisplay();
+        std::string receiveData();
+        void appendToBuffer(const std::string& chunk);
+        void processBufferedMessages();
+
+        void handleJsonMessage(const std::string& jsonStr);
+
+        void handleGameGrid(const json& data);
+        void startChatMode(const json& data);
+        void handleChatMessage(const json& data);
+        void handleChatHistory(const json& data);
+        void handleOtherMessages(const json& data);
+        void handleStatefulData(const json& data);
+
+        
         void handleUserInput();
         void displayMenu(const json& data);
         int getClientSocket() const { return clientSocket; }
@@ -82,42 +98,22 @@ public:
         void sendInputFromSFML(const std::string& input);
         void setGameStateIsEnd(bool isEnd);
        
-        void clearServerData() { serverData.clear(); }
-        void setAvatarIndex(int index) {
-            avatarIndex = index;
-        }
+        void clearServerData();
+        void setAvatarIndex(int index);
 
-        int getAvatarIndex() const {
-            return avatarIndex;
-        }
+        int getAvatarIndex() const;
         const std::vector<std::pair<std::string, int>>& getContacts() const ;
         void setContacts(const std::vector<std::pair<std::string, int>>& newContacts);
         void setIsTerminal(bool isTerminal) { this->isTerminal = isTerminal; }
         void reintiliseData();
-        void setRanking(std::map<std::string, std::vector<std::string>> ranking1) {
-            ranking = ranking1;
-        }
-        std::map<std::string, std::vector<std::string>> getRanking() const {
-            return ranking;
-        }
-        void setAmis(const std::vector<std::string>& friends) {
-            amis = friends;
-        }
-        std::vector<std::string> getAmis() const {
-            return amis;
-        }
-        void setPlayerInfo(const std::vector<std::string>& playerInfo) {
-            PlayerInfo = playerInfo;
-        }
-        std::vector<std::string> getPlayerInfo() const {
-            return PlayerInfo;
-        }
-        void setShow(bool showfenetre) {
-            show = showfenetre;
-        }
-        bool getShow() const {
-            return show;
-        }
+        void setRanking(std::map<std::string, std::vector<std::string>> ranking1);
+        std::map<std::string, std::vector<std::string>> getRanking() const;
+        void setAmis(const std::vector<std::string>& friends);
+        std::vector<std::string> getAmis() const;
+        void setPlayerInfo(const std::vector<std::string>& playerInfo);
+        std::vector<std::string> getPlayerInfo() const;
+        void setShow(bool showfenetre);
+        bool getShow() const;
 };
 
 #endif

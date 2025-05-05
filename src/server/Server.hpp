@@ -11,9 +11,9 @@
 #include "data/chat.hpp"
 #include "data/UserManager.hpp"
 #include "data/chatRoom.hpp"
+#include "../common/MenuState.hpp"
 #include <atomic>
 #include <unordered_map>
-#include "../common/MenuState.hpp"
 #include <mutex>
 
 

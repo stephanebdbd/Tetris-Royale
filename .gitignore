@@ -1,6 +1,5 @@
 src/server/*.db
 src/*/*.o
-<<<<<<< HEAD
 src/*/*.log
 src/server/ChatRooms/*
 src/server/Clients/*
@@ -11,8 +10,5 @@ src/client/client
 src/server/users.txt
 src/server/gameInvitations.txt
 *.txt
-=======
 src/*/*/*.o
-src/*/*.log
 *.json
->>>>>>> ismail_and_mohamed
