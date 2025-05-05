@@ -204,6 +204,7 @@ void Client::handleChatHistory(const json& data) {
 }
 
 void Client::handleStatefulData(const json& data) {
+    setGameStateFromServer(data);
     if (data.contains("message")) {
         std::string message = data["message"];
 
