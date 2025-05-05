@@ -180,3 +180,7 @@ void Button::resize(float scaleX, float scaleY) {
     text.setPosition(newPosition.x + newSize.x / 2.0f,
                      newPosition.y + newSize.y / 2.0f);
 }
+
+bool Button::operator==(const Button& other) const {
+    return text.getString() == other.text.getString();
+}

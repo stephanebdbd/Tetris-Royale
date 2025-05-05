@@ -50,10 +50,7 @@ public:
     std::string getText() const;
     void resize(float scaleX, float scaleY);
     void setTexture(const sf::Texture& texture);
-
-    bool operator==(const Button& other) const {
-        return text.getString() == other.text.getString();
-    }
+    bool operator==(const Button& other) const;
 
 private:
     sf::RectangleShape shape;
