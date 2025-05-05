@@ -534,11 +534,15 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             
             for (int player : players){
                 auto friends = userManager.getFriendList(clientPseudo[player]);
-                menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "rejoindre gameRoonm as player", friends, {}, active);
+                if (gameRooms[clientGameRoomId[clientId]]->getOwnerId() == clientId){
+                    menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "owner", friends, {}, active);
+                }else{
+                    menuStateManager->sendMenuStateToClient(clientIdToSocket[player], clientStates[player], "player", friends, {}, active);
+                }
             }
             for (int observer : observers){
                 //auto friends = userManager.getFriendList(clientPseudo[player]);
-                menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "rejoindre gameRoonm as observer", {}, {}, active);
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "observer", {}, {}, active);
             }
             return;
         }
@@ -1668,7 +1672,11 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
         if (gameRoom->getOwnerId() == clientId)
             gameRoom->setOwnerQuit();
         else{
-            gameRoom->removePlayer(clientId);
+            std::vector<int> players = gameRoom->getPlayers();
+            if(std::find(players.begin(), players.end(), clientId) != players.end())
+                gameRoom->removePlayer(clientId);
+            else
+                gameRoom->removeViewer(clientId);
         }
             
         clientStates[clientId] = MenuState::JoinOrCreateGame;

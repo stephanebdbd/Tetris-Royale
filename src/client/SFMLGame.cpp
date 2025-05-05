@@ -1924,6 +1924,17 @@ void SFMLGame::displayWaitingRoom() {
                 std::cout << "Friend: " << friendName << std::endl;
             }*/
         }
+
+        if(!gameData.showCommand.empty()){
+            if(gameData.showCommand == "player")
+                showCommand = false;
+            else if(gameData.showCommand == "observer"){
+                showCommand = false;
+                showInviteCommand = false;
+            }
+                
+            
+        }
         
         
         /*if(!(std::find(pseudos.begin(), pseudos.end(), pseudo) != pseudos.end())){
@@ -2070,13 +2081,16 @@ void SFMLGame::displayWaitingRoom() {
 
     if (buttons.empty() && texts.empty()) {
 
-        if(invite){
+        if(invite && showInviteCommand){
             buttons[ButtonKey::esc] = std::make_unique<Button>(textures->esc, sf::Vector2f(995, 90), sf::Vector2f(30, 30));
         }
-        texts[TextFieldKey::Speed] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
-            sf::Vector2f(50, 150), sf::Vector2f(200, 50), "Speed");
-        buttons[ButtonKey::Valider] = std::make_unique<Button>("Valider", font, 24, sf::Color::White, sf::Color(70, 200, 70),
-            sf::Vector2f(270, 150), sf::Vector2f(100, 50));
+        if(showCommand){
+            texts[TextFieldKey::Speed] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
+                sf::Vector2f(50, 150), sf::Vector2f(200, 50), "Speed");
+            buttons[ButtonKey::Valider] = std::make_unique<Button>("Valider", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+                sf::Vector2f(270, 150), sf::Vector2f(100, 50));
+        }
+        
         
 
         if (classic || royale) {
@@ -2102,7 +2116,8 @@ void SFMLGame::displayWaitingRoom() {
         if (royale) yPos = 360;
         else if (classic) yPos = 290;
 
-        buttons[ButtonKey::InviteP_O] = std::make_unique<Button>(textures->P_O, sf::Vector2f(200, yPos), sf::Vector2f(120, 120));
+        if(showInviteCommand)
+            buttons[ButtonKey::InviteP_O] = std::make_unique<Button>(textures->P_O, sf::Vector2f(200, yPos), sf::Vector2f(120, 120));
 
         yPos += 120;
     }
@@ -2230,7 +2245,8 @@ void SFMLGame::displayJoinGame() {
             line = "Aucune demande de jeu";
             Text requ(line, font, 40, sf::Color::Red, sf::Vector2f(20, 170));
             requ.draw(*window);
-        } else {
+        } 
+        else{
             // Synchroniser acceptInvite avec requests
             std::set<std::string> currentInvitations;
             int i = 0;

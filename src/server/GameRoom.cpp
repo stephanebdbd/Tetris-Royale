@@ -228,6 +228,12 @@ void GameRoom::addViewer(int viewerId) {
 
 }
 
+void GameRoom::removeViewer(int viewerId) {
+    viewersId.erase(std::remove(viewersId.begin(), viewersId.end(), viewerId), viewersId.end());
+    observerCurrentPlayer.erase(viewerId);
+
+}
+
 void GameRoom::observerNextPlayer(int observerId) {
     if (observerCurrentPlayer.find(observerId) != observerCurrentPlayer.end()) {
         //observerCurrentPlayer[observerId] = (observerCurrentPlayer[observerId] + 1) % players.size();

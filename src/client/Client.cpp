@@ -284,9 +284,10 @@ void Client::setGameStateFromServer(const json& data) {
         gameState.miniUpdate = true;
     }
 
-    else if(data.contains("data") || data.contains("secondData")){
+    else if(data.contains("data") || data.contains("secondData") || data.contains("message")){
         gameState.friendsLobby = data["data"];
         gameState.pseudos = data["secondData"];
+        gameState.showCommand = data["message"];
     }
     else{
         gameState.isGame = false;
@@ -327,6 +328,7 @@ void Client::reintiliseData(){
     gameState.isGame = false;
     gameState.friendsLobby.clear();
     gameState.pseudos.clear();
+    gameState.showCommand.clear();
 
 }
 

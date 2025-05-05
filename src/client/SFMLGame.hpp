@@ -170,7 +170,8 @@ class SFMLGame {
         int avatarClickedContact; // avatar du client selection pour chatter
         std::vector<std::string> avatarPaths; // Chemins des avatars disponibles
         sf::Texture avatarduClient; // Texture pour l'avatar du client
-        //bool show = false;
+        bool showCommand = true;
+        bool showInviteCommand = true;
 
     public:
         SFMLGame(Client& client);

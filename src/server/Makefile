@@ -32,7 +32,7 @@ $(TARGET): $(SERVEUR_OBJECTS)
 clean:
 	rm -f $(TARGET) $(SERVEUR_OBJECTS) $(DATA_OBJECTS) data/*.o server.log
 	rm -f *.o
-	rm -f *.txt
+	find . -type f -name "*.txt" ! -name "help.txt" -exec rm -f {} +
 
 # Exécuter "serveur" après compilation
 run: $(TARGET)

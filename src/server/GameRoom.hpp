@@ -118,6 +118,8 @@ public:
         }
         return -1;
     }
+
+    void removeViewer(int viewerId);
 };
 
 #endif

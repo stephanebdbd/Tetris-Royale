@@ -18,6 +18,7 @@ struct GameState {
 
     std::vector<std::string> friendsLobby;
     std::map<std::string, std::vector<std::string>> pseudos;
+    std::string showCommand;
 
     
 };
