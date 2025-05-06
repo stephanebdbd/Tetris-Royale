@@ -42,9 +42,14 @@ public:
                 std::unique_ptr<Button>>& buttons, std::map<TextFieldKey, std::unique_ptr<TextField>>& texts);
 
     void welcomeMenu();
+
     void connexionMenu();
     void registerMenu();
+    
     void mainMenu();
+
+    void rankingMenu();
+    void teamsMenu();
     
     void drawButtons();
 

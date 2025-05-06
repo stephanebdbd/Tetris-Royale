@@ -363,6 +363,137 @@ void MenuManager::registerMenu() {
     }
 }
 
+void MenuManager::rankingMenu(){
+    //afficher la background
+    sfmlGame->displayBackground(textures->ranking);
+    // Header for ranking list
+    Text header("LeaderBoard", font, 24, sf::Color::White, sf::Vector2f(400, 20));
+    header.draw(*window);
+
+
+    if(buttons->empty()){
+        (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
+        (*buttons)[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings,sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
+        (*buttons)[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
+        (*buttons)[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
+                                    sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
+    }
+
+    drawButtons();
+
+    // Affichage de la liste d'amis (exemple visuel)
+    float startY = 80;
+    float spacing = 70;
+    auto ranking1 = client.getRanking();
+        //currentState = MenuState::classement;
+        if(ranking1.empty() ) {
+            std::cout << "Aucun classement trouvé." << std::endl;
+            return;
+        }
+        int i = 0;
+        for (const auto& [username, details] : ranking1) {
+            std::string bestScore = details[0];      // Score
+            std::string avatarNumber = details[1];   // ID d'avatar
+        
+            // Position de base pour cette ligne
+            float yOffset = startY + i * spacing;
+        
+            // Avatar
+            int avatarId = std::stoi(avatarNumber);
+            if (avatarId >= 0 && avatarId < static_cast<int>(avatarManager->getAvatarPath().size())) {
+                sf::Texture avatarTexture;
+                if (avatarTexture.loadFromFile(avatarManager->getAvatarPath()[avatarId])) {
+                    sf::CircleShape avatarCircle(30);
+                    avatarCircle.setPosition(100, yOffset);  // Centré à gauche
+                    avatarCircle.setTexture(&avatarTexture);
+                    avatarCircle.setOutlineThickness(2);
+                    avatarCircle.setOutlineColor(sf::Color::White);
+                    window->draw(avatarCircle);
+                }
+            }
+        
+            // Nom du joueur (à droite de l’avatar)
+            Text name(username, font, 22, sf::Color::White, sf::Vector2f(190, yOffset + 10));
+            name.draw(*window);
+        
+            // Score du joueur (à droite complètement)
+            Text score(bestScore, font, 20, sf::Color::Black, sf::Vector2f(300, yOffset + 10));
+            score.draw(*window);
+        
+            i++;
+        }
+        
+    if(buttons->count(ButtonKey::Retour) && (*buttons)[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+}
+
+void MenuManager::teamsMenu() {
+    sfmlGame->displayBackground(textures->logoConnexion); 
+
+    float buttonWidth = 300;
+    float buttonHeight = 60;
+    float spacing = 30;
+    float centerX = WINDOW_WIDTH / 2.0f - buttonWidth / 2.0f;
+    float startY = 250;
+
+    sf::Color background = sf::Color(40, 40, 40, 200);
+    sf::Color outline = sf::Color(135, 206, 250);
+    sf::Color text = sf::Color::White;
+
+    // Ajouter les boutons s'ils n'existent pas
+    if (buttons->empty()) {
+        (*buttons)[ButtonKey::CreateTeam] = std::make_unique<Button>("Créer une équipe", font, 28, text, background,
+            sf::Vector2f(centerX, startY),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+
+        (*buttons)[ButtonKey::JoinTeam] = std::make_unique<Button>("Rejoindre une équipe", font, 28, text, background,
+            sf::Vector2f(centerX, startY + buttonHeight + spacing),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+
+        (*buttons)[ButtonKey::TeamInvites] = std::make_unique<Button>("Invitations reçues", font, 28, text, background,
+            sf::Vector2f(centerX, startY + 2 * (buttonHeight + spacing)),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+
+        (*buttons)[ButtonKey::ManageTeams] = std::make_unique<Button>("Gérer mes équipes", font, 28, text, background,
+            sf::Vector2f(centerX, startY + 3 * (buttonHeight + spacing)),
+            sf::Vector2f(buttonWidth, buttonHeight), outline);
+    }
+
+    drawButtons();
+
+    json j;
+    if ((*buttons)[ButtonKey::CreateTeam]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::CREATE_TEAM_MENU;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+
+    } else if ((*buttons)[ButtonKey::JoinTeam]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::JOIN_TEAM_MENU;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        //client.setCurrentMenuState(MenuState::JoinTeam);
+        return;
+
+    } else if ((*buttons)[ButtonKey::TeamInvites]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::TEAM_INVITES;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        //j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+
+    } else if ((*buttons)[ButtonKey::ManageTeams]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAMS;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        //client.setCurrentMenuState(MenuState::ManageTeams);
+        return;
+    }
+}
+
+
+
 // Gestion des champs de texte
 void MenuManager::handleTextFieldEvents(sf::Event& event) {
     for (const auto& [_, field] : *texts) {

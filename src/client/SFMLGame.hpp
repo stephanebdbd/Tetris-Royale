@@ -113,12 +113,7 @@ class SFMLGame {
         void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
         // Main Menu
-        void mainMenu();
-        void teamsMenu();
         void createRoomMenu();
-
-        //classement
-        void rankingMenu();
 
         // Game Menu
         void gameMenu();
