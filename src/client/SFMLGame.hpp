@@ -6,6 +6,9 @@
 #include "Controller.hpp"
 #include "ClientNetwork.hpp"
 #include "ClientChat.hpp"
+#include "MenuManager.hpp"
+#include "AvatarManager.hpp"
+#include "Textures.hpp"
 #include "Button.hpp"
 #include "Text.hpp"
 #include "../common/MenuState.hpp"
@@ -16,77 +19,8 @@
 #include "../common/GameState.hpp"
 #include "../common/state.hpp"
 
-//resources path
-const std::string FONT_PATH = "../../res/fonts/Arial.ttf";
-const std::string LogoBackGround = "../../res/background/logo.png";
-const std::string ConnexionBackGround = "../../res/background/connexion.png";
-const std::string MainMenuBackGround = "../../res/background/main_menu.png";
-const std::string RankingBackGround = "../../res/background/ranking.png";
-const std::string GameMenuBackGround = "../../res/background/game_menu.png";
-const std::string GridBackGround = "../../res/background/grid.png";
-const std::string ChatBackGround = "../../res/background/chat.png";
-const std::string NotificationBackGround = "../../res/background/notification.png";
-const std::string LogoNotification = "../../res/logo/notification.png";
-const std::string LogoSettings = "../../res/logo/settings.png";
-const std::string LogoTeams = "../../res/logo/teams.png";
-const std::string LogoRanking = "../../res/logo/ranking.png";
-const std::string LogoMain = "../../res/logo/main.png";
-const std::string LogoExit = "../../res/logo/exit.png";
-const std::string LogoFriend = "../../res/logo/friend.png";
-const std::string LogoAddFriend = "../../res/logo/addFriend.png";
-const std::string backgroundMode = "../../res/background/mode.png";
-const std::string LogoRemote = "../../res/logo/remote.png";
-const std::string LogoViewer = "../../res/logo/viewer.png";
-const std::string LogoPLus = "../../res/logo/plus.png";
-const std::string LogoEsc = "../../res/logo/esc.png";
-const std::string LogoP_O = "../../res/logo/inviteP_O.png";
-const std::string LogoThreePoint = "../../res/logo/dots.png";
-const std::string LogoAccept = "../../res/logo/accept.png";
-const std::string backgroundRejoindre = "../../res/background/rejoindre.png";
 
-
-struct Textures{
-    sf::Texture connexion, grid, game, settings, 
-                chat, ranking, logoConnexion,logoNotification,
-                logoSettings, logoTeams, logoRanking,
-                logoChat,logoMain,logoExit,logoAddFriend,
-                logoFrindsRequest, mode, player, viewer, 
-                plus, esc, P_O, playerClicked, accept, rejoindre;
-
-    Textures() = default;
-    ~Textures() = default;
-
-    void loadTexture(sf::Texture& texture, const std::string& filePath) {
-        if (!texture.loadFromFile(filePath)) {
-            std::cerr << "Erreur: Impossible de charger la texture depuis " << filePath << std::endl;
-        }
-    }
-    void loadTextures() {
-        loadTexture(connexion, ConnexionBackGround);
-        //loadTexture(grid, GridBackGround);
-        //loadTexture(game, GameMenuBackGround);
-        loadTexture(chat, ChatBackGround);
-        loadTexture(ranking, RankingBackGround);
-        loadTexture(logoConnexion, LogoBackGround);
-        loadTexture(logoNotification, LogoNotification);
-        loadTexture(logoSettings, LogoSettings);
-        loadTexture(logoTeams, LogoTeams);
-        loadTexture(logoRanking, LogoRanking);
-        loadTexture(logoMain, LogoMain);
-        loadTexture(logoExit, LogoExit);
-        loadTexture(logoAddFriend, LogoAddFriend);
-        loadTexture(mode, backgroundMode);
-        loadTexture(player, LogoRemote);
-        loadTexture(viewer, LogoViewer);
-        loadTexture(plus, LogoPLus);
-        loadTexture(esc, LogoEsc);
-        loadTexture(P_O, LogoP_O);
-        loadTexture(playerClicked, LogoThreePoint);
-        loadTexture(accept, LogoAccept);
-        loadTexture(rejoindre, backgroundRejoindre);
-    }
-};
-
+class MenuManager; // TODO: supprimer ca
 
 class SFMLGame {
     private:
@@ -104,6 +38,8 @@ class SFMLGame {
         std::map<std::string, std::vector<std::string>> ranking;
         sf::Font font;
         MenuState currentState;
+        std::unique_ptr<AvatarManager> avatarManager;
+        std::unique_ptr<MenuManager> menuManager;
         std::string clickedContact;
         float scrollSpeed = 0.5f; // Vitesse de défilement
         float friendsListOffset = 0.0f; // Décalage vertical pour la liste des amis
@@ -118,23 +54,16 @@ class SFMLGame {
         std::unordered_map<std::string, std::unique_ptr<Button>> friendButtons;
         std::vector<std::string> amis;
         std::string selectedFriend;
-        
-
-        void afficherErreur(const std::string& message) ;
-        void drawErreurMessage() ;
+    
 
         //draw
-        void drawButtons();
-        void drawTextFields();
         void drawFriends();
         void displayErrorMessage(const std::string& message) ;
         void friendListMenu() ;
 
         //handle events
-        void handleTextFieldEvents(sf::Event& event);
         void handleButtonEvents();
         void handleEvents();
-        void cleanup();
 
         //send json to server
         bool sendJsonToServer(json& j, const std::string& action) {
@@ -166,10 +95,7 @@ class SFMLGame {
         float inviteScrollOffset = 0.0f; // Décalage vertical pour le défilement
         const float inviteScrollSpeed = 30.0f; // Vitesse de défilement
         float inviteMaxScroll = 500.0f; // Hauteur maximale du contenu défilable
-        int selectedAvatar = 0; // 0 par défaut ou -1 si non sélectionné
-        int avatarClickedContact; // avatar du client selection pour chatter
-        std::vector<std::string> avatarPaths; // Chemins des avatars disponibles
-        sf::Texture avatarduClient; // Texture pour l'avatar du client
+
         bool showCommand = true;
         bool showInviteCommand = true;
 
@@ -183,8 +109,6 @@ class SFMLGame {
         void displayBackground(sf::Texture& texture);
 
         // Welcome Menu
-        void welcomeMenu();
-        void connexionMenu() ;
         void registerMenu();
         void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
@@ -250,7 +174,17 @@ class SFMLGame {
         void drawMiniTetra(const json& miniTetra, sf::Vector2f pos);
         void displayCurrentPlayerInfo();
         
-        
+
+
+
+
+
+        //TODO: remettre en privé ou dans menu manager 
+        void drawButtons();
+        void cleanup();
+        void drawErreurMessage();
+        void drawTextFields();
+        void afficherErreur(const std::string& message);
 
 };
 

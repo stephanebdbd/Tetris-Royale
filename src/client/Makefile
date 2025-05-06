@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 
-OBJS = ClientChat.o Client.o ClientDisplay.o ClientNetwork.o Color.o Controller.o main.o SFMLGame.o Button.o Text.o ../common/MenuState.o
+OBJS = ClientChat.o Client.o ClientDisplay.o ClientNetwork.o Color.o Controller.o main.o SFMLGame.o MenuManager.o Button.o Text.o Textures.o ../common/MenuState.o AvatarManager.o
 
 all: client
 
