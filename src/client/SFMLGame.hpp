@@ -56,8 +56,6 @@ class SFMLGame {
         std::string erreurMessageActuel;
         std::unordered_map<std::string, std::unique_ptr<Button>> friendButtons;
         std::unordered_map<std::string, std::unique_ptr<Button>> TEAMSbuttons;
-        std::vector<std::string> amis;
-        std::string selectedFriend;
         std::string selectedTeam;
         
 
@@ -111,8 +109,7 @@ class SFMLGame {
         void refreshMenu();
         void displayBackground(sf::Texture& texture);
 
-        // Welcome Menu
-        void registerMenu();
+        
         void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
         // Teams Menu
@@ -131,11 +128,6 @@ class SFMLGame {
         void drawContacts();
         void displayMessage(const std::string&sender, const std::string& message);
         std::string wrapText(const std::string& text, const sf::Font& font, unsigned int characterSize, float maxWidth);
-
-        //friends
-        void addFriendMenu();
-        void friendRequestListMenu();
-        void friendListMenu() ;
 
 
         //Game Menu

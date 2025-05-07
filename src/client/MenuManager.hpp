@@ -34,6 +34,7 @@ class MenuManager {
     std::map<TextFieldKey, std::unique_ptr<TextField>>* texts;
     std::map<std::string, std::unique_ptr<Button>> friendButtons;
     std::string selectedFriend;
+    std::vector<std::string> amis;
 
 
 public:
@@ -49,11 +50,12 @@ public:
     void mainMenu();
 
     void friendsMenu();
+    void addFriendMenu();
+    void friendListMenu();
+    void friendRequestListMenu();
 
     void rankingMenu();
     void teamsMenu();
-    
-    void drawButtons();
 
     void handleTextFieldEvents(sf::Event& event);
 
