@@ -59,7 +59,11 @@ enum class ButtonKey {
     Ralentir,
     MiniBlocs,
     RemoveFriend,
-
+    ListMembers,
+    AddMember,
+    AddAdmin,
+    JoinRequests,
+    DeleteRoom,
     CancelRemoveFriend,
     Cancel,
     esc,

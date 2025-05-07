@@ -34,7 +34,9 @@ class SFMLGame {
         std::map<std::string, std::unique_ptr<Button>> chatContacts;
         std::vector<json> messages;
         std::vector<std::string> contacts;
+        std::vector<std::string> contactsToShow;
         std::vector<std::string> friends;
+        std::vector<std::string> friendsToShow;
         std::map<std::string, std::vector<std::string>> ranking;
         sf::Font font;
         MenuState currentState;
@@ -53,16 +55,12 @@ class SFMLGame {
         bool afficherErreurActive = false;
         std::string erreurMessageActuel;
         std::unordered_map<std::string, std::unique_ptr<Button>> friendButtons;
+        std::unordered_map<std::string, std::unique_ptr<Button>> TEAMSbuttons;
         std::vector<std::string> amis;
         std::string selectedFriend;
-    
+        std::string selectedTeam;
+        
 
-        //draw
-        void friendListMenu() ;
-
-        //handle events
-        void handleButtonEvents();
-        void handleEvents();
 
         bool duel = false;
         bool classic = false;
@@ -92,11 +90,23 @@ class SFMLGame {
         bool showCommand = true;
         bool showInviteCommand = true;
 
+        //handle events
+        void handleButtonEvents();
+        void handleEvents();
+
     public:
         SFMLGame(Client& client);
         ~SFMLGame() = default;
         void update() ;
 
+        // Draw functions
+        void drawButtons();
+        void cleanup();
+        void drawErreurMessage();
+        void drawTextFields();
+        void afficherErreur(const std::string& message);
+
+        // Main loop
         void run();
         void refreshMenu();
         void displayBackground(sf::Texture& texture);
@@ -105,15 +115,12 @@ class SFMLGame {
         void registerMenu();
         void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
-        // Main Menu
+        // Teams Menu
         void createRoomMenu();
+        void joinTeamMenu();
+        void displayRoomsMenu();
+        void manageTeamMenu();
 
-        //Grid Menu
-        void displayGrid();
-        void displayPiece();
-        void displayNextPiece();
-        void displayScoreBoard();
-        void displayPiecesFinalPosition();
 
         // Chat Menu
         void chatMenu();
@@ -124,20 +131,17 @@ class SFMLGame {
         void drawContacts();
         void displayMessage(const std::string&sender, const std::string& message);
         std::string wrapText(const std::string& text, const sf::Font& font, unsigned int characterSize, float maxWidth);
-        void joinTeamMenu();
 
         //friends
         void friendsMenu();
         void addFriendMenu();
         void friendRequestListMenu();
+        void friendListMenu() ;
 
-        //notification
-        void notificationMenu(const std::vector<std::string>& notifications);
+
+        //Game Menu
         void drawGrid(const json& grid);
-    
         void displayGame();
-
-
         void drawTetramino(const json& tetraPiece);
         sf::Color fromShapeSymbolSFML(const std::string& symbol);
         sf::Color fromSFML(int value);
@@ -149,24 +153,10 @@ class SFMLGame {
         void displayJoinGame();
         void drawMessageMalusBonus(const json& msg);
         void drawAvatar(int avatarIndex, float posX, float posY, float size);
-
         void drawMiniGrid(const json& miniGrid, sf::Vector2f pos);
         void drawMiniTetra(const json& miniTetra, sf::Vector2f pos);
         void displayCurrentPlayerInfo();
-        
-
-
-
-
-
-        //TODO: remettre en privé ou dans menu manager 
-        void drawButtons();
-        void cleanup();
-        void drawErreurMessage();
-        void drawTextFields();
-        void afficherErreur(const std::string& message);
 
 };
 
 #endif // 
-

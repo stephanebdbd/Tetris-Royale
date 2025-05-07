@@ -273,6 +273,12 @@ void SFMLGame::refreshMenu() {
         case MenuState::JoinTeam:
             joinTeamMenu();
             break;
+        case MenuState::ManageTeams:
+            displayRoomsMenu();
+            break;
+        case MenuState::ManageTeam:
+            manageTeamMenu();
+            break;
         case MenuState::JoinOrCreateGame:
             CreateOrJoinGame();
             break;
@@ -405,6 +411,7 @@ void SFMLGame::createRoomMenu() {
         return;
     }
 }
+
 void SFMLGame::joinTeamMenu() {
     // Afficher l'arrière-plan
     displayBackground(textures->chat);
@@ -455,6 +462,162 @@ void SFMLGame::joinTeamMenu() {
     // Traitement du bouton "Retour"
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+}
+
+void SFMLGame::displayRoomsMenu() {
+    // Afficher l'arrière-plan
+    displayBackground(textures->chat);
+
+    // Barre latérale "Équipes"
+    Rectangle sidebar(sf::Vector2f(0, 0), sf::Vector2f(200, WINDOW_HEIGHT), sf::Color(30, 30, 50), sf::Color(80, 80, 100));
+    sidebar.draw(*window);
+
+    // Titre
+    Text header("Mes équipes", font, 24, sf::Color::White, sf::Vector2f(20, 10));
+    header.draw(*window);
+
+    // Récupérer les équipes depuis le client
+    auto teams = client.getTeams(); // Supposons que cette méthode retourne une liste d'équipes
+    static std::vector<sf::Texture> avatarTextures(20);
+    const float teamHeight = 50.0f;
+
+    // Affichage des équipes
+    for (size_t i = 0; i < std::min(teams.size(), avatarTextures.size()); ++i) {
+        float y = 100 + i * teamHeight;
+
+        if (!TEAMSbuttons.count(teams[i])) {
+            TEAMSbuttons[teams[i]] = std::make_unique<Button>(
+                teams[i], font, 20, sf::Color::White, sf::Color::Transparent,
+                sf::Vector2f(0, y), sf::Vector2f(200, teamHeight), sf::Color::Transparent);
+        }
+
+        TEAMSbuttons[teams[i]]->draw(*window);
+    }
+
+    // Gérer les clics sur une équipe
+    for (const auto& [teamName, button] : TEAMSbuttons) {
+        if (button->isClicked(*window)) {
+            selectedTeam = teamName;
+            break;
+        }
+    }
+
+    // Si une équipe est sélectionnée
+    if (!selectedTeam.empty()) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAM;
+        j[jsonKeys::TEAM_NAME] = selectedTeam;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        //selectedTeam.clear();
+        return;
+    }
+
+    // Bouton retour
+    if (!buttons.count(ButtonKey::Retour)) {
+        buttons[ButtonKey::Retour] = std::make_unique<Button>(
+            textures->logoMain, sf::Vector2f(7, 50), sf::Vector2f(25, 35));
+    }
+    buttons[ButtonKey::Retour]->draw(*window);
+
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+}
+void SFMLGame::manageTeamMenu() {
+    // Afficher l'arrière-plan
+    displayBackground(textures->chat);
+
+    // Titre principal
+    Text title("Gérer l'équipe", font, 30, sf::Color::White, sf::Vector2f(250, 30));
+    title.draw(*window);
+
+    // Création des boutons si pas encore fait
+    if (buttons.empty()) {
+        float buttonWidth = 300;
+        float buttonHeight = 50;
+        float spacing = 20;
+        float centerX = WINDOW_WIDTH / 2.0f - buttonWidth / 2.0f;
+        float startY = 150;
+
+        // Bouton "Liste des membres"
+        buttons[ButtonKey::ListMembers] = std::make_unique<Button>("Liste des membres", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                                                                   sf::Vector2f(centerX, startY), sf::Vector2f(buttonWidth, buttonHeight));
+
+        // Bouton "Ajouter un membre"
+        buttons[ButtonKey::AddMember] = std::make_unique<Button>("Ajouter un membre", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                                                                 sf::Vector2f(centerX, startY + (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
+
+        // Bouton "Ajouter un admin"
+        buttons[ButtonKey::AddAdmin] = std::make_unique<Button>("Ajouter un admin", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                                                                sf::Vector2f(centerX, startY + 2 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
+
+        // Bouton "Les demandes de rejoindre"
+        buttons[ButtonKey::JoinRequests] = std::make_unique<Button>("Les demandes de rejoindre", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                                                                    sf::Vector2f(centerX, startY + 3 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
+
+        // Bouton "Supprimer la room"
+        buttons[ButtonKey::DeleteRoom] = std::make_unique<Button>("Supprimer la room", font, 20, sf::Color::White, sf::Color(200, 70, 70),
+                                                                  sf::Vector2f(centerX, startY + 4 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
+
+        // Bouton "Retour"
+        buttons[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                                                              sf::Vector2f(centerX, startY + 5 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
+    }
+
+    // Dessiner les boutons
+    drawButtons();
+
+    json j;
+
+    // Gérer les clics sur les boutons
+    if (buttons[ButtonKey::ListMembers]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::LIST_MEMBERS;
+        j[jsonKeys::TEAM_NAME] = selectedTeam;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+
+    if (buttons[ButtonKey::AddMember]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::ADD_MEMBER;
+        j[jsonKeys::TEAM_NAME] = selectedTeam;
+    
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+
+    if (buttons[ButtonKey::AddAdmin]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::ADD_ADMIN;
+        j[jsonKeys::TEAM_NAME] = selectedTeam;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+
+    if (buttons[ButtonKey::JoinRequests]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::JOIN_REQUESTS;
+        j[jsonKeys::TEAM_NAME] = selectedTeam;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+
+    if (buttons[ButtonKey::DeleteRoom]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::DELETE_ROOM;
+        j[jsonKeys::TEAM_NAME] = selectedTeam;
+        network->sendData(j.dump() + "\n", client.getClientSocket());
+        cleanup();
+        return;
+    }
+
+    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        selectedTeam.clear();
         network->sendData(j.dump() + "\n", client.getClientSocket());
         cleanup();
         return;

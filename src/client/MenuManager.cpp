@@ -474,20 +474,17 @@ void MenuManager::teamsMenu() {
     } else if ((*buttons)[ButtonKey::JoinTeam]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::JOIN_TEAM_MENU;
         network.sendData(j.dump() + "\n", client.getClientSocket());
-        //client.setCurrentMenuState(MenuState::JoinTeam);
         return;
 
     } else if ((*buttons)[ButtonKey::TeamInvites]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::TEAM_INVITES;
         network.sendData(j.dump() + "\n", client.getClientSocket());
-        //j[jsonKeys::ACTION] = jsonKeys::TEAMS;
         network.sendData(j.dump() + "\n", client.getClientSocket());
         return;
 
     } else if ((*buttons)[ButtonKey::ManageTeams]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAMS;
+        j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAM_MENU;
         network.sendData(j.dump() + "\n", client.getClientSocket());
-        //client.setCurrentMenuState(MenuState::ManageTeams);
         return;
     }
 }

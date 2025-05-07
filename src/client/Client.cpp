@@ -234,6 +234,14 @@ void Client::handleStatefulData(const json& data) {
             }
         }
 
+        if(data.contains("data") && message == jsonKeys::TEAMS_LIST){
+            setTeams(data["data"].get<std::vector<std::string>>());
+            std::cout << "TEAAMS: " << std::endl;
+            for (const auto& teamName : teams) {
+                std::cout << "Nom: " << teamName << std::endl;
+            }
+        }
+
         if (message == "ranking") {
             setRanking(data["secondData"].get<std::map<std::string, std::vector<std::string>>>());
             std::cout << "Classement mis à jour.\n";
@@ -367,6 +375,14 @@ void Client::setShow(bool showfenetre) {
 }
 bool Client::getShow() const {
     return show;
+}
+
+void Client::setTeams(const std::vector<std::string>& teams) {
+    this->teams = teams;
+}
+
+std::vector<std::string> Client::getTeams() const {
+    return teams;
 }
 
 void Client::clearServerData() {

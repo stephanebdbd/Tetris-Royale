@@ -46,13 +46,13 @@ private:
     std::string temporaryMessage;
     std::mutex messageMutex;
     int avatarIndex = -1; // Index de l'avatar du joueur actuel (-1 par défaut si non défini)
-    std::vector<std::pair<std::string, int>> contacts;
+    bool show = false;
     bool isTerminal;
+    std::vector<std::pair<std::string, int>> contacts;
     std::map<std::string, std::vector<std::string>> ranking;
     std::vector<std::string> amis;
     std::vector<std::string> PlayerInfo;
-    bool show = false;
-
+    std::vector<std::string> teams;
 
 
 
@@ -114,6 +114,8 @@ public:
         std::vector<std::string> getPlayerInfo() const;
         void setShow(bool showfenetre);
         bool getShow() const;
+        std::vector<std::string> getTeams() const;
+        void setTeams(const std::vector<std::string>& teams);
 };
 
 #endif

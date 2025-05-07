@@ -85,6 +85,16 @@ namespace jsonKeys {
     constexpr char MANAGE_TEAM_MEMBER_LIST[] = "manageTeamMemberList";
     constexpr char MANAGE_TEAM_MEMBER_LIST_MENU[] = "manageTeamMemberListMenu";
     constexpr char DELETE_TEAM[] = "deleteTeam";
+    constexpr char LIST_MEMBERS[] = "list_members";
+    constexpr char ADD_MEMBER[]= "add_member";
+    constexpr char ADD_ADMIN[] = "add_admin";
+    constexpr char JOIN_REQUESTS[] = "join_requests";
+    constexpr char DELETE_ROOM[] = "delete_room";
+    constexpr char TEAMS_LIST[] = "teamsList";
+    constexpr char QUIT_ROOM[] = "quitRoom";
+    constexpr char MEMBER_NAME[] = "memberName";
+    constexpr char REMOVE_MEMBER[] = "remove_member";
+    constexpr char REMOVE_ADMIN[] = "remove_admin";
 
 
     
