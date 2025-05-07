@@ -312,9 +312,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             //gerer les membres d'equipe
             std::string teamName = action[jsonKeys::TEAM_NAME];
             std::cout << "Client #" << clientId << " a demandé de gérer les membres de l'équipe: " << teamName << std::endl;
-            //auto members = chatRoomsManage.getMembers(teamName);
-            //auto admins = chatRoomsManage.getAdmins(teamName);
-            //auto pendingRequests = chatRoomsManage.getClientPending(teamName);
             clientStates[clientId] = MenuState::ManageTeam;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "manageTeam");
             menuStateManager->sendTemporaryDisplay(clientSocket, "Bienvenue dans le menu de gestion de l'équipe.");
@@ -358,8 +355,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::string teamName = action[jsonKeys::TEAM_NAME];
             std::cout << "Client #" << clientId << " a demandé de lister les membres de l'équipe: " << teamName << std::endl;
             auto members = chatRoomsManage.getMembers(teamName);
-            //auto admins = chatRoomsManage.getAdmins(teamName);
-            //auto pendingRequests = chatRoomsManage.getClientPending(teamName);
             clientStates[clientId] = MenuState::ListTeamMembres;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], jsonKeys::LIST_MEMBERS, members);
             return;
@@ -445,7 +440,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             clientStates[clientId] = MenuState::classement;
             auto ranking = userManager.getRanking();
 
-            //clientStates[clientId] = MenuState::classement;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "ranking", {},{},ranking);
             return;
         }
@@ -512,7 +506,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 std::cout << "Ami: " << friendName << std::endl;
             }
             if(friends.empty()){
-                std::cout <<"je suis tous vide en fait n = j'ai pas des amis pour l'insttant "<< std::endl;
                 menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], jsonKeys::FRIEND_LIST);
                 return;
             }
@@ -523,7 +516,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         }
         else if(actionType == jsonKeys::FRIEND_REQUEST_LIST) {
             //gerer l'ajout d'amis
-            //keyInputAddFriendMenu(clientSocket, clientId, action["friend"]);
             auto friendRequests = userManager.getRequestList(clientPseudo[clientId]);
             clientStates[clientId] = MenuState::FriendRequestList;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId],  jsonKeys::FRIEND_REQUEST_LIST, friendRequests);
@@ -531,7 +523,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         }
         else if (actionType == jsonKeys::ADD_FRIEND_MENU) {
             //gerer l'ajout d'amis
-            //keyInputAddFriendMenuGUI(clientSocket, clientId, action["friend"]);
             std::cout << "Client #" << clientId << " a demandé d'ajouter un ami." << std::endl;
             clientStates[clientId] = MenuState::AddFriend;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Ami ajouté.");

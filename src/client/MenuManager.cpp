@@ -256,7 +256,7 @@ void MenuManager::registerMenu() {
     float avatarStartX = WINDOW_WIDTH / 2 - avatarRowWidth / 2;
     float avatarY = avatarTitleY + 40;
 
-    for (size_t i = 0; i < avatarPaths.size(); ++i) {
+    for (std::size_t i = 0; i < avatarPaths.size(); ++i) {
         float avatarX = avatarStartX + (i % avatarsPerRow) * (avatarSize + avatarSpacing);
         float currentY = avatarY + (i / avatarsPerRow) * (avatarSize + avatarSpacing);
 
@@ -714,7 +714,7 @@ void MenuManager::friendRequestListMenu() {
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
 
-    for (size_t i = 0; i < std::min(amis.size(), avatarTextures.size()); ++i) {
+    for (std::size_t i = 0; i < std::min(amis.size(), avatarTextures.size()); ++i) {
         float y = 100 + i * contactHeight;
 
         if (!friendButtons.count(amis[i])) {

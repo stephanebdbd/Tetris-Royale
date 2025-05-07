@@ -120,7 +120,7 @@ void ClientChat::displayChatMessages() {
         int x_pos = isMyMessage ? (max_x - formatted_msg.length() - 3) : 2;
 
         // Gérer plusieurs lignes de messages
-        size_t start = 0;
+        std::size_t start = 0;
         while (start < formatted_msg.length()) {
             int available_width = isMyMessage ? (max_x - x_pos - 2) : (max_x - 4);
             std::string line = formatted_msg.substr(start, available_width);

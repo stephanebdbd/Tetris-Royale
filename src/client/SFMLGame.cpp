@@ -469,7 +469,7 @@ void SFMLGame::displayRoomsMenu() {
     const float teamHeight = 50.0f;
 
     // Affichage des équipes
-    for (size_t i = 0; i < std::min(teams.size(), avatarTextures.size()); ++i) {
+    for (std::size_t i = 0; i < std::min(teams.size(), avatarTextures.size()); ++i) {
         float y = 100 + i * teamHeight;
 
         if (!TEAMSbuttons.count(teams[i])) {
@@ -746,7 +746,7 @@ void SFMLGame::handleContacts() {
     const float contactHeight = 50.0f;
     
     // Gestion des contacts
-    for (size_t i = 0; i < std::min(contacts.size(), avatarTextures.size()); ++i) {
+    for (std::size_t i = 0; i < std::min(contacts.size(), avatarTextures.size()); ++i) {
         const auto& [contactName, avatarIndex] = contacts[i];
         float contactY = 100 + i * contactHeight;
 
@@ -1097,8 +1097,8 @@ void SFMLGame::drawMiniTetra(const json& miniTetra, sf::Vector2f pos) {
 
     sf::Color color = SFMLGame::fromShapeSymbolSFML(std::string(1, shapeSymbol));
 
-    for (size_t row = 0; row < shape.size(); ++row) {
-        for (size_t col = 0; col < shape[row].size(); ++col) {
+    for (std::size_t row = 0; row < shape.size(); ++row) {
+        for (std::size_t col = 0; col < shape[row].size(); ++col) {
             if (shape[row][col][0] != ' ') {
                 sf::RectangleShape block(sf::Vector2f(15-1, 15-1));
                 block.setFillColor(color);
@@ -1176,8 +1176,8 @@ void SFMLGame::drawTetramino(const json& tetraPiece) {
 
     sf::Color color = SFMLGame::fromShapeSymbolSFML(std::string(1, shapeSymbol));
 
-    for (size_t row = 0; row < shape.size(); ++row) {
-        for (size_t col = 0; col < shape[row].size(); ++col) {
+    for (std::size_t row = 0; row < shape.size(); ++row) {
+        for (std::size_t col = 0; col < shape[row].size(); ++col) {
             if (shape[row][col][0] != ' ') {
                 sf::RectangleShape block(sf::Vector2f(cellSize-1, cellSize-1));
                 block.setFillColor(color);
@@ -1374,13 +1374,13 @@ void SFMLGame::displayWaitingRoom() {
         Text observer("Observers: " , font, 20, sf::Color::White, sf::Vector2f(1280, startY));
         observer.draw(*window);
         if(!pseudos.empty()){
-            for(size_t i = 0; i < pseudos["player"].size(); ++i){
+            for(std::size_t i = 0; i < pseudos["player"].size(); ++i){
             
                 Text pseudoText(pseudos["player"][i], font, 20, sf::Color::White, sf::Vector2f(1070, spacing + startY + i * spacing));
                 pseudoText.draw(*window);
                 
             }
-            for(size_t i = 0; i < pseudos["observer"].size(); ++i){
+            for(std::size_t i = 0; i < pseudos["observer"].size(); ++i){
                 
                 Text pseudoText(pseudos["observer"][i], font, 20, sf::Color::White, sf::Vector2f(1290, spacing + startY + i * spacing));
                 pseudoText.draw(*window);
@@ -1396,7 +1396,7 @@ void SFMLGame::displayWaitingRoom() {
                 continue; // Ignore cet élément
             }
 
-            size_t colonPos = line.find(":");
+            std::size_t colonPos = line.find(":");
             std::string beforeColon = (colonPos != std::string::npos) ? line.substr(0, colonPos + 1) : line; // Inclut ":"
             std::string afterColon = (colonPos != std::string::npos) ? line.substr(colonPos + 1) : "";
         

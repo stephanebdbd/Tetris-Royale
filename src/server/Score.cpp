@@ -3,7 +3,7 @@
 
 #include <ncurses.h>
 
-Score::Score(int posX, int posY) : score(0), combo(0), x(posX), y(posY) {std::cout << "Score created" << std::endl;}
+Score::Score(int posX, int posY) : score(0), combo(0), x(posX), y(posY) {}
 
 void Score::addScore(int linesCleared) {
     int points[] = {0, 100, 300, 500, 800}; // Points attribués selon les lignes supprimées
