@@ -201,7 +201,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                     pseudoTosocket[clientPseudo[clientId]] = clientSocket;
                     sockToPseudo[clientSocket] = clientPseudo[clientId];
                     int avatarIndex = userManager.getUserAvatarId(action[jsonKeys::USERNAME]);
-                    //std::cout << "Avatar du joueur connecté : " << avatarIndex << std::endl;
                     menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "avatar", {std::to_string(avatarIndex)});
                     json response = {
                         {"action", "login_success"},
@@ -540,7 +539,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             return;
         }
         else if(actionType == jsonKeys::ADD_FRIEND) {
-            //std::cout << "Client #" << clientId << " a demandé d'ajouter un ami." << std::endl;
             if (userManager.userNotExists(action["friend"])) {
                 std::cout << "Demande d'ami échouée. L'utilisateur n'existe pas." << std::endl;
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. L'utilisateur n'existe pas.");
@@ -819,7 +817,6 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
             break;
         case MenuState::JoinGame:
             if(refreshMenu){
-                std::cout << "" << std::endl;
                 std::vector<std::vector<std::string>> invitations = userManager.getListGameRequest(currentClient);
                 sendMenuToClient(clientSocket, menu.getGameRequestsListMenu(invitations));
             }
@@ -955,10 +952,6 @@ void Server::keyInputManageFriendlist(int clientSocket, int clientId, const std:
     }
 
     std::vector<std::string> friends = userManager.getFriendList(currentUser);
-    std::cout << "------------------------ alo alo : " << std::endl;
-    for (const std::string& friend_name : friends) {
-        std::cout << "------------------------ Ami: " << friend_name << std::endl;
-    }
     if (friends.empty()) {
         returnToMenu(clientSocket, clientId, MenuState::Main, "Vous n'avez aucun ami dans votre liste.");
         return;

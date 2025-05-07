@@ -27,11 +27,10 @@ void Client::run(const std::string& mode) {
     j["mode"] = mode;
     network.sendData(j.dump() + "\n", clientSocket);
 
-    // Start threads (no longer detached)
+    // Création du thread
     inputThread = std::thread(&Client::handleUserInput, this);
     receiveThread = std::thread(&Client::receiveDisplay, this);
 
-    // Wait for threads to finish (they won't unless stop_threads is set)
     inputThread.join();
     receiveThread.join();
     network.disconnect(clientSocket);
@@ -62,7 +61,7 @@ bool Client::connect() {
 
 
 void Client::handleUserInput() {
-    halfdelay(1);  // Attend 100ms max pour stabiliser l'affichage
+    halfdelay(1);  // 100 ms d'attente
     
     while (!stop_threads) {
         
@@ -220,7 +219,7 @@ void Client::handleStatefulData(const json& data) {
                 std::vector<std::string> stringData = data["data"].get<std::vector<std::string>>();
                 std::vector<std::pair<std::string, int>> convertedData;
                 for (const auto& str : stringData) {
-                    convertedData.emplace_back(str, -1); // Default integer value set to -1 (no avatar)
+                    convertedData.emplace_back(str, -1); // Pas d'avatar
                 }
                 setContacts(convertedData);
             }
@@ -236,7 +235,7 @@ void Client::handleStatefulData(const json& data) {
 
         if(data.contains("data") && message == jsonKeys::TEAMS_LIST){
             setTeams(data["data"].get<std::vector<std::string>>());
-            std::cout << "TEAAMS: " << std::endl;
+            std::cout << "TEAMS: " << std::endl;
             for (const auto& teamName : teams) {
                 std::cout << "Nom: " << teamName << std::endl;
             }

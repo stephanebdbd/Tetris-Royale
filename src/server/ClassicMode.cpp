@@ -6,7 +6,6 @@ void ClassicMode::featureMode(std::shared_ptr<Game> game, int malusOrBonus){
 
     std::cout << "Malus or Bonus : " << malusOrBonus << std::endl;
     
-    //int linesCleared = game->getLinesCleared();
     int nbrMalus = getNbrMalus(malusOrBonus); // nombre du malus à envoyer
     std::cout << "Nbr malus : " << nbrMalus << std::endl;
 

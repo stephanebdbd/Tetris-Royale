@@ -27,7 +27,6 @@ SFMLGame::SFMLGame(Client& client) :
 {
     std::cout << "SFMLGame constructor called" << std::endl;
 
-    // Load font
     if (!font.loadFromFile(FONT_PATH)) {
         std::cerr << "Erreur: Impossible de charger la police." << std::endl;
     }
@@ -37,7 +36,6 @@ SFMLGame::SFMLGame(Client& client) :
     }
     avatarManager->loadAvatarPaths(paths);
 
-    // Load textures
     textures->loadTextures();
 }
 
@@ -246,7 +244,7 @@ void SFMLGame::refreshMenu() {
             displayWaitingRoom();  
             break;
         case MenuState::Friends:
-            friendsMenu();
+            menuManager->friendsMenu();
             break;
         case MenuState::FriendList:
             friendListMenu();
@@ -295,7 +293,7 @@ void SFMLGame::refreshMenu() {
             break;
 
         default:
-            //std::cerr << "Unhandled MenuState: " << static_cast<int>(currentState) << std::endl;
+            std::cerr << "Unhandled MenuState: " << static_cast<int>(currentState) << std::endl;
             break;
     }
     client.clearServerData();
@@ -305,7 +303,7 @@ void SFMLGame::refreshMenu() {
 
 // Compléter le switch dans run()
 void SFMLGame::run() {
-    // Start client threads (they're now managed by the Client class)
+    // Début de thread du client
     std::thread clientThread([this]() { client.run("gui"); });
     clientThread.detach();
 
@@ -341,10 +339,6 @@ void SFMLGame::displayBackground(sf::Texture& texture) {
     window->draw(sprite);
 }
 
-
-/*
-Teams Menu
-*/
 
 void SFMLGame::createRoomMenu() {
     // Afficher l'arrière-plan
@@ -410,7 +404,6 @@ void SFMLGame::joinTeamMenu() {
     Text title("Rejoindre une équipe", font, 30, sf::Color::White, sf::Vector2f(250, 30));
     title.draw(*window);
 
-    // Slogan ou aide en dessous du titre
     Text subtitle("Entrez le nom de l'équipe que vous souhaitez rejoindre", font, 18, sf::Color(200, 200, 220), sf::Vector2f(250, 80));
     subtitle.draw(*window);
 
@@ -614,13 +607,8 @@ void SFMLGame::manageTeamMenu() {
     }
 }
 
-/*
-Friends List Menu
-*/
-
 void SFMLGame::friendListMenu() {
     // Fond
-    //std::cout << "Affichage de la liste d'amis" << std::endl;
     displayBackground(textures->chat);
 
     // Barre latérale "Amis"
@@ -635,7 +623,7 @@ void SFMLGame::friendListMenu() {
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
 
-    for (size_t i = 0; i < std::min(amis.size(), avatarTextures.size()); ++i) {
+    for (std::size_t i = 0; i < std::min(amis.size(), avatarTextures.size()); ++i) {
         float y = 100 + i * contactHeight;
 
         if (!friendButtons.count(amis[i])) {
@@ -721,8 +709,7 @@ void SFMLGame::addFriendMenu() {
     Text title("Ajouter un ami", font, 30, sf::Color::White, sf::Vector2f(250, 30));
     title.draw(*window);
 
-    // Slogan ou aide en dessous du titre
-    Text subtitle("Entre le pseudo de ton futur ami 🎉", font, 18, sf::Color(200, 200, 220), sf::Vector2f(250, 80));
+    Text subtitle("Entre le pseudo de ton futur ami", font, 18, sf::Color(200, 200, 220), sf::Vector2f(250, 80));
     subtitle.draw(*window);
 
     // Création du champ de texte si pas encore fait
@@ -864,76 +851,6 @@ void SFMLGame::friendRequestListMenu() {
 }
 
 
-void SFMLGame::friendsMenu() {
-    // Affichage de l'arrière-plan
-    //std::cout << "Affichage du menu des amis" << std::endl;
-    displayBackground(textures->chat);
-    
-
-    // Titre du menu
-    Text header("Gestion des amis", font, 30, sf::Color::White, sf::Vector2f(250, 20));
-    header.draw(*window);
-        // Requête au serveur pour les amis si data reçu
-
-    if (buttons.empty()) {
-        // Bouton "Ajouter un ami"
-        Button addFriendButton("Ajouter un ami", font, 20, sf::Color::White, sf::Color(100, 200, 250),
-                               sf::Vector2f(250, 100), sf::Vector2f(200, 50));
-        
-        // Bouton "Liste des amis"
-        Button listFriendsButton("Liste des amis", font, 20, sf::Color::White, sf::Color(70, 180, 100),
-                                 sf::Vector2f(250, 170), sf::Vector2f(200, 50));
-        
-        // Bouton "Demandes d'amis"
-        Button requestsButton("Demandes d'amis", font, 20, sf::Color::White, sf::Color(200, 180, 70),
-                              sf::Vector2f(250, 240), sf::Vector2f(200, 50));
-
-        // Bouton retour
-        Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                          sf::Vector2f(250, 310), sf::Vector2f(200, 50));
-
-        buttons[ButtonKey::AddFriend] = std::make_unique<Button>(addFriendButton);
-        buttons[ButtonKey::FriendList] = std::make_unique<Button>(listFriendsButton);
-        buttons[ButtonKey::FriendRequestList] = std::make_unique<Button>(requestsButton);
-        buttons[ButtonKey::Retour] = std::make_unique<Button>(backButton);
-    }
-
-    drawButtons();
-
-    json j;
-    // Actions associées aux boutons
-    if (buttons[ButtonKey::AddFriend]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::ADD_FRIEND_MENU;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        return;
-    }
-
-    if (buttons[ButtonKey::FriendList]->isClicked(*window)) {
-        // Afficher la liste des amis
-        j[jsonKeys::ACTION] = jsonKeys::FRIEND_LIST;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
-        return;
-    }
-
-    if (buttons[ButtonKey::FriendRequestList]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::FRIEND_REQUEST_LIST;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
-        return;
-    }
-
-    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::MAIN;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        return;
-    }
-}
-
-/*
-Player Info
-*/
-
 void SFMLGame::displayCurrentPlayerInfo() {
     // Récupérer les informations du joueur actuel
     auto username = client.getPlayerInfo()[0];
@@ -985,11 +902,6 @@ void SFMLGame::displayCurrentPlayerInfo() {
     buttons[ButtonKey::Close]->draw(*window);
 }
 
-/*
-Chat Menu
-*/
-
-
 void SFMLGame::chatMenu() {
     // Display the chat background
     displayBackground(textures->chat);
@@ -1005,7 +917,7 @@ void SFMLGame::chatMenu() {
     if (texts.empty()) {
         // Création des champs de texte
         TextField searchField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
-            sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Search");
+            sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Recherche");
         // Champ de texte pour envoyer un message
         TextField messageField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
             sf::Vector2f(205, WINDOW_HEIGHT - 40), sf::Vector2f(WINDOW_WIDTH - 250, 35), "Enter un message");
@@ -1770,7 +1682,7 @@ void SFMLGame::displayWaitingRoom() {
         float totalHeight = friendsLobby.size() * spacing; // Hauteur totale du contenu
         inviteMaxScroll = std::max(0.0f, totalHeight - 450); // Ajuster la hauteur maximale de défilement
 
-        for (size_t i = 0; i < friendsLobby.size(); ++i) {
+        for (std::size_t i = 0; i < friendsLobby.size(); ++i) {
             Text friendName(friendsLobby[i], font, 20, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 200, startY + i * spacing));
 
             if (!inviteFriends.count(friendsLobby[i])){
@@ -1896,10 +1808,6 @@ void SFMLGame::displayWaitingRoom() {
 
     if(!invite && buttons.count(ButtonKey::Chat) && buttons[ButtonKey::Chat]->isClicked(*window)) {
         std::cout << "Chat button clicked" << std::endl;
-        //client.sendInputFromSFML(jsonKeys::CHAT_LOBBY);
-        /*
-        reste petit probleme a regler
-        */
         return;
     }
 
@@ -1972,8 +1880,6 @@ void SFMLGame::displayJoinGame() {
         GameState gameData = client.getGameState();
         json requests = gameData.menu[jsonKeys::OPTIONS];
         std::string titre = gameData.menu[jsonKeys::TITLE];
-        //std::cout << "requests: " << requests.size() << std::endl;
-
         Text t(titre, font, 40, sf::Color::White, sf::Vector2f(20, 100));
         t.draw(*window);
 
@@ -1991,33 +1897,32 @@ void SFMLGame::displayJoinGame() {
             for (auto& [key, value] : requests.items()) {
                 line = key + value.get<std::string>();
                 std::string message = line;
-                //std::cout << "Message: " << message << std::endl;
 
                 // Extraire les informations de l'invitation
-                size_t startPos = message.find("GameRoom '");
+                std::size_t startPos = message.find("GameRoom '");
                 std::string gameRoomNumber, inviter, status;
                 if (startPos != std::string::npos) {
                     startPos += std::string("GameRoom '").length();
-                    size_t endPos = message.find("'", startPos);
+                    std::size_t endPos = message.find("'", startPos);
                     if (endPos != std::string::npos) {
                         gameRoomNumber = message.substr(startPos, endPos - startPos);
                     }
 
                     // Extraire le nom de l'invitant
-                    size_t inviterStart = message.find("par '");
+                    std::size_t inviterStart = message.find("par '");
                     if (inviterStart != std::string::npos) {
                         inviterStart += std::string("par '").length();
-                        size_t inviterEnd = message.find("'", inviterStart);
+                        std::size_t inviterEnd = message.find("'", inviterStart);
                         if (inviterEnd != std::string::npos) {
                             inviter = message.substr(inviterStart, inviterEnd - inviterStart);
                         }
                     }
 
                     // Extraire le statut (joueur/observateur)
-                    size_t statusStart = message.find("en tant que '");
+                    std::size_t statusStart = message.find("en tant que '");
                     if (statusStart != std::string::npos) {
                         statusStart += std::string("en tant que '").length();
-                        size_t statusEnd = message.find("'", statusStart);
+                        std::size_t statusEnd = message.find("'", statusStart);
                         if (statusEnd != std::string::npos) {
                             status = message.substr(statusStart, statusEnd - statusStart);
                         }
@@ -2066,8 +1971,8 @@ void SFMLGame::displayJoinGame() {
                         
 
                     // Extraire les informations de la clé
-                    size_t firstDelim = invitationKey.find("|");
-                    size_t secondDelim = invitationKey.find("|", firstDelim + 1);
+                    std::size_t firstDelim = invitationKey.find("|");
+                    std::size_t secondDelim = invitationKey.find("|", firstDelim + 1);
                     std::string gameRoomNumber = invitationKey.substr(0, firstDelim);
                     std::string inviter = invitationKey.substr(firstDelim + 1, secondDelim - firstDelim - 1);
                     std::string status = invitationKey.substr(secondDelim + 1);
@@ -2095,12 +2000,8 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
 
     if(msg[jsonKeys::CHOICE_CIBLE]) {
         std::string message = "Joueur Cible";
-        std::cout << "Joueur Cible nkhtar ana" << std::endl;
-
         if (buttons.empty() && texts.empty()) {
-            
-            //std::cout<<"ana hna bach tkhtar" << std::endl;
-
+        
             texts[TextFieldKey::Victime] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
                 sf::Vector2f(190, 670), sf::Vector2f(90, 30), "Victime");
             buttons[ButtonKey::Valider] = std::make_unique<Button>("Valider", font, 24, sf::Color::White, sf::Color(70, 200, 70),
@@ -2116,7 +2017,6 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
                 std::cerr << "Rempliez le champs de Victime " << std::endl;
                 return;
             }
-            //std::cout << "Victime choisi: " << id << std::endl;
             client.sendInputFromSFML(id);
             texts[TextFieldKey::Victime]->setText("");
             return;
@@ -2134,7 +2034,6 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
         std::string message = std::string("Joueur Cible") + " "+  std::to_string(id);
 
         if (buttons.empty()) {
-            //std::cout<<"ana yes or no" << std::endl;
             buttons[ButtonKey::Yes] = std::make_unique<Button>("Yes", font, 24, sf::Color::White, sf::Color(70, 200, 70),
                 sf::Vector2f(290, 670), sf::Vector2f(90, 30));
 
@@ -2147,13 +2046,11 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
         drawButtons();
 
         if (buttons.count(ButtonKey::Yes) && buttons[ButtonKey::Yes]->isClicked(*window)) {
-            //std::cout << "ana Yes" << std::endl;
             client.sendInputFromSFML("y");
             return;
         }
 
         if (buttons.count(ButtonKey::No) && buttons[ButtonKey::No]->isClicked(*window)) {
-            //std::cout << "ana No" << std::endl;
             client.sendInputFromSFML("n");
             return;
         }
@@ -2178,13 +2075,11 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
         drawButtons();
 
         if (buttons.count(ButtonKey::Malus) && buttons[ButtonKey::Malus]->isClicked(*window)) {
-            //std::cout << "ana malus" << std::endl;
             client.sendInputFromSFML("1");
             return;
         }
 
         if (buttons.count(ButtonKey::Bonus) && buttons[ButtonKey::Bonus]->isClicked(*window)) {
-            //std::cout << "ana bonus" << std::endl;
             client.sendInputFromSFML("2");
             return;
         }
@@ -2213,31 +2108,26 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
         drawButtons();
 
         if (buttons.count(ButtonKey::Inversion) && buttons[ButtonKey::Inversion]->isClicked(*window)) {
-            //std::cout << "ana inversion" << std::endl;
             client.sendInputFromSFML("1");
             return;
         }
 
         if (buttons.count(ButtonKey::Blocage) && buttons[ButtonKey::Blocage]->isClicked(*window)) {
-            //std::cout << "ana blocage" << std::endl;
             client.sendInputFromSFML("2");
             return;
         }
 
         if (buttons.count(ButtonKey::ChuteRapide) && buttons[ButtonKey::ChuteRapide]->isClicked(*window)) {
-            //std::cout << "ana chute" << std::endl;
             client.sendInputFromSFML("3");
             return;
         }
 
         if (buttons.count(ButtonKey::Suppression) && buttons[ButtonKey::Suppression]->isClicked(*window)) {
-            //std::cout << "ana suppri" << std::endl;
             client.sendInputFromSFML("4");
             return;
         }
 
         if (buttons.count(ButtonKey::EcranNoir) && buttons[ButtonKey::EcranNoir]->isClicked(*window)) {
-            //std::cout << "ana noir" << std::endl;
             client.sendInputFromSFML("5");
             return;
         }
@@ -2256,7 +2146,6 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
         drawButtons();
 
         if (buttons.count(ButtonKey::Ralentir) && buttons[ButtonKey::Ralentir]->isClicked(*window)) {
-            //std::cout << "ana ralentir" << std::endl;
             client.sendInputFromSFML("1");
             return;
         }

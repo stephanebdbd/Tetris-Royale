@@ -108,7 +108,6 @@ void GameRoom::handleMalusOrBonus(int playerId) {
         }
     }
     else if ((getGameModeName() == GameModeName::Duel) || (getGameModeName() == GameModeName::Classic)) {
-        // playersMalusOrBonus[playerId] = games[playerId]->getLinesCleared();
         int linesCleared = games[playerId]->getLinesCleared();
         if (linesCleared > 1 || applyMalus[playerId]) {
             if (getGameModeName() == GameModeName::Duel){
@@ -118,14 +117,12 @@ void GameRoom::handleMalusOrBonus(int playerId) {
             }
             else if(getGameModeName() == GameModeName::Classic && showmessage[playerId]) {
                 playersMalusOrBonus[playerId] = linesCleared;
-                std::cout<<"raha true"<<std::endl;
                 messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = true;
                 choiceVictimRandomly(playerId);
                 showmessage[playerId] = false;
                 
             }
             if (playersVictim[playerId] != -1) {
-                std::cout<<"hna ghadi nsift malus"<<std::endl;
                 applyFeatureMode(playerId);
                 reinitializeMalusOrBonus(playerId);
             } 
@@ -236,7 +233,6 @@ void GameRoom::removeViewer(int viewerId) {
 
 void GameRoom::observerNextPlayer(int observerId) {
     if (observerCurrentPlayer.find(observerId) != observerCurrentPlayer.end()) {
-        //observerCurrentPlayer[observerId] = (observerCurrentPlayer[observerId] + 1) % players.size();
         int currentPlayer = observerCurrentPlayer[observerId];
         int indxPlayer = getPlayerId(currentPlayer);
         int nextPlayer = indxPlayer + 1;
@@ -351,7 +347,6 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction,std::s
             std::cout<<"unicodeAction: "<<unicodeAction<<std::endl;
 
             if(std::find(boolInputs.begin(), boolInputs.end(), unicodeAction) != boolInputs.end()){
-                std::cout<<"i am hier1"<<std::endl;
                 if (unicodeAction == "N" || unicodeAction == "n") {
                     messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = false;
                     messageList[playerId][jsonKeys::CHOICE_CIBLE] = true;
@@ -361,7 +356,6 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction,std::s
                 else if (unicodeAction == "Y" || unicodeAction == "y") {
                     messageList[playerId][jsonKeys::PROPOSITION_CIBLE] = false;
                     playersVictim[playerId] = victimRandom;
-                    std::cout<<"raha false"<<std::endl;
                     applyMalus[playerId] = true;
                     keyClear[playerId] = true;
                 }
@@ -369,14 +363,10 @@ void GameRoom::input(int playerServerId, const std::string& unicodeAction,std::s
             
 
             else{
-                std::cout<<"i am hier2"<<std::endl;
                 int action = convertStringToInt(unicodeAction);
                 if (action != -1) {
-                    std::cout<<"i am hier3"<<std::endl;
                     if ((playersMalusOrBonus[playerId] == -1) && (getGameModeName() == GameModeName::Royal_Competition) && (!applyMalus[playerId])) {
-                        std::cout<<"i am hier4"<<std::endl;
                         if((messageList[playerId][jsonKeys::CHOICE_MALUS_BONUS]) && (action == 1)){
-                            std::cout<<"i am hier5"<<std::endl;
                             messageList[playerId][jsonKeys::CHOICE_MALUS] = true;
                             messageList[playerId][jsonKeys::CHOICE_MALUS_BONUS] = false;
                             keyClear[playerId] = true;
@@ -554,7 +544,6 @@ json GameRoom::messageToJson(int playerServerId) const {
     }
     smessage[jsonKeys::CIBLE_ID] = victimRandom;
     if(keyClear[playerId]){
-        std::cout<<"i am here from server clear"<<std::endl;
         smessage[jsonKeys::CLEAR] = true;
         keyClear[playerId] = false;
     }
@@ -562,4 +551,15 @@ json GameRoom::messageToJson(int playerServerId) const {
 
     return smessage;
     
+}
+
+int GameRoom::getclientobserverId(int observerId) {
+    if (observerCurrentPlayer.find(observerId) != observerCurrentPlayer.end()) {
+        int observedPlayerIndex = observerCurrentPlayer[observerId];
+        if (observedPlayerIndex >= 0 && observedPlayerIndex < static_cast<int>(games.size())) {
+            std::cout << "Client ID: " << players[observedPlayerIndex] << std::endl;
+        }
+        return observedPlayerIndex;
+    }
+    return -1;
 }

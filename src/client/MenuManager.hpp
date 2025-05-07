@@ -27,7 +27,7 @@ class MenuManager {
     Client& client;
     ClientNetwork& network;
     Textures* textures;
-    SFMLGame* sfmlGame; // TODO: retirer ca 
+    SFMLGame* sfmlGame;
     AvatarManager* avatarManager;
 
     std::map<ButtonKey, std::unique_ptr<Button>>* buttons;
@@ -47,6 +47,8 @@ public:
     void registerMenu();
     
     void mainMenu();
+
+    void friendsMenu();
 
     void rankingMenu();
     void teamsMenu();

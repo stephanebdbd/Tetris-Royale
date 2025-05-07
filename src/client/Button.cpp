@@ -1,6 +1,6 @@
 #include "Button.hpp"
 #include <iostream>
-#include <algorithm> // pour std::max, std::min, std::clamp
+#include <algorithm>
 
 sf::Sprite createScaledSprite(const sf::Texture& texture, const sf::Vector2f& targetSize, const sf::Vector2f& position) {
     sf::Sprite sprite(texture);
@@ -92,7 +92,7 @@ Button::Button(const std::string& text, const sf::Font& font, unsigned int chara
 Button::Button(const sf::Texture& texture, const sf::Vector2f& position, const sf::Vector2f& size) {
     shape.setSize(size);
     shape.setPosition(position);
-    shape.setFillColor(sf::Color::White); // ou transparent selon le design
+    shape.setFillColor(sf::Color::White);
     buttonTexture = std::make_shared<sf::Texture>(texture);
 }
 

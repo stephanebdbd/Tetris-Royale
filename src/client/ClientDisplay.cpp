@@ -63,7 +63,7 @@ void ClientDisplay::drawGrid(const json& grid) {
 
     for(int y = 0; y < height; ++y) {
         for(int x = 0; x < width; ++x) {
-            //voir si la cellule est occupée
+            // Voir si la cellule est occupée
             bool occupied = cells[y][x][jsonKeys::OCCUPIED];
             if (occupied) {
                 int colorValue = cells[y][x][jsonKeys::COLOR];
@@ -116,7 +116,6 @@ void ClientDisplay::drawScore(const json& score) {
 void ClientDisplay::drawMessage(const json& msg){
     
     if (msg[jsonKeys::CLEAR]){
-        std::cout<<"i am here from client clear"<<std::endl;
         for(int y = 22; y < 50; y++){
             move(y,0);
             clrtoeol();
@@ -135,13 +134,11 @@ void ClientDisplay::drawMessage(const json& msg){
         mvprintw(22, 1, "Entrez l'Id du joueur choisis: ");
 
     else if(msg[jsonKeys::CHOICE_MALUS_BONUS]){
-        std::cout<<"i am here from client malus bonus"<<std::endl;
         mvprintw(22, 1, "Saisiez votre choix : \n 1. Malus  \n 2. Bonus\n Choix: ");
     }
         
 
     else if(msg[jsonKeys::CHOICE_MALUS]){
-        std::cout<<"i am here from client malus"<<std::endl;
         mvprintw(22, 1, "Saisiez le numéro de MALUS choisi : \n"
     "1. Inverser les commandes du joueur ciblé pour trois blocs.\n"
     "2. Bloquer les commandes du joueur ciblé pour un bloc.\n"

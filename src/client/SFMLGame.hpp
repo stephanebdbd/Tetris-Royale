@@ -133,7 +133,6 @@ class SFMLGame {
         std::string wrapText(const std::string& text, const sf::Font& font, unsigned int characterSize, float maxWidth);
 
         //friends
-        void friendsMenu();
         void addFriendMenu();
         void friendRequestListMenu();
         void friendListMenu() ;

@@ -7,7 +7,6 @@ Game::Game(int gridWidth, int gridHeight, int speed)
       running(true)
       {
     displacement.setSpeed(speed);
-    std::cout << "Game created at : " << this << std::endl;
 }
 
 void Game::run() {

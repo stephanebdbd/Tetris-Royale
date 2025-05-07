@@ -99,17 +99,17 @@ void ClientChat::receiveChatMessages(const json& msg) {
 
 void ClientChat::displayChatMessages() {
     mtx.lock();
-    if (!displayWin) { // Check if displayWin is valid
+    if (!displayWin) {
         std::cerr << "Error: displayWin is not initialized.\n";
         mtx.unlock();
         return;
     }
 
-    werase(displayWin); // Clear the window
+    werase(displayWin);
     
     int max_y, max_x;
     getmaxyx(displayWin, max_y, max_x);
-    int current_y = 1; // Start below the border
+    int current_y = 1; // Début en dessous de la bordure du haut
     
     for (const auto& msg : chatMessages) {
         std::string sender = msg["sender"];
@@ -119,7 +119,7 @@ void ClientChat::displayChatMessages() {
         std::string formatted_msg = "[" + sender + "]: " + message;
         int x_pos = isMyMessage ? (max_x - formatted_msg.length() - 3) : 2;
 
-        // Handle multi-line messages
+        // Gérer plusieurs lignes de messages
         size_t start = 0;
         while (start < formatted_msg.length()) {
             int available_width = isMyMessage ? (max_x - x_pos - 2) : (max_x - 4);

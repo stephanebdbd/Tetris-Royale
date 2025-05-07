@@ -108,17 +108,7 @@ public:
     void observerPrevPlayer(int observerId);
     std::vector<int> getViewers() {return viewersId;}
 
-    int getclientobserverId(int observerId) {
-        if (observerCurrentPlayer.find(observerId) != observerCurrentPlayer.end()) {
-            int observedPlayerIndex = observerCurrentPlayer[observerId];
-            if (observedPlayerIndex >= 0 && observedPlayerIndex < static_cast<int>(games.size())) {
-                std::cout << "Client ID: " << players[observedPlayerIndex] << std::endl;
-            }
-            return observedPlayerIndex;
-        }
-        return -1;
-    }
-
+    int getclientobserverId(int observerId);
     void removeViewer(int viewerId);
 };
 

@@ -32,13 +32,13 @@ private:
 
 class Button {
 public:
-    // Constructeur texte
+    // Pour le Texte
     Button(const std::string& text, const sf::Font& font, unsigned int characterSize,
            const sf::Color& textColor, const sf::Color& backgroundColor,
            const sf::Vector2f& position, const sf::Vector2f& size,
            const sf::Color& outlineColor = sf::Color::Black);
 
-    // Constructeur image
+    // Pour l'Image
     Button(const sf::Texture& texture, const sf::Vector2f& position, const sf::Vector2f& size);
 
     void draw(sf::RenderWindow& window) const;

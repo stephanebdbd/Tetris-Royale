@@ -50,8 +50,8 @@ bool ClientNetwork::sendData(const std::string& data, int clientSocket) {
 }
 
 int ClientNetwork::receivedData(int clientSocket, char *buffer) {
-    memset(buffer, 0, 1024); // 1024 is the actual size of the buffer
-    int bytesReceived = recv(clientSocket, buffer, 1023, 0); // Adjust the size to 1023 to leave space for null terminator
+    memset(buffer, 0, 1024); // 1024 = taille du buffer
+    int bytesReceived = recv(clientSocket, buffer, 1023, 0);
     if (bytesReceived <= 0) {
         return -1;
     }
