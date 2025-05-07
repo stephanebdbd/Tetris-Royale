@@ -15,6 +15,7 @@ namespace jsonKeys {
     constexpr char MAIN[] = "main";
     constexpr char SETTINGS[] = "settings";
     constexpr char NOTIFICATION[] = "notification";
+    constexpr char PLAYER_INFO[] = "player_info";
     constexpr char RANKING[] = "ranking";
     constexpr char FRIENDS[] = "friends";
     constexpr char ADD_FRIEND[] = "addFriend";
@@ -59,7 +60,10 @@ namespace jsonKeys {
     constexpr char CLEAR[] = "clear";
     constexpr char LIGHT_TETRA[] = "lightTetra";
     constexpr char LIGHT_GRID[] = "lightGrid";
-
+    constexpr char CHAT_PRIVATE[] = "chat";
+    constexpr char CHAT_LOBBY[] = "chatLobby";
+    constexpr char CHAT_TEAMS[] = "chatTeams";
+    constexpr char OPEN_CHAT[] = "openChat";
     constexpr char GAME_OVER[] = "gameOver";
     constexpr char TEAMS[] = "teams";
     constexpr char CREATE_TEAM[] = "createTeam";

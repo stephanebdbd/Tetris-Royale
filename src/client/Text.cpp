@@ -18,6 +18,9 @@ sf::FloatRect Text::getLocalBounds() const {
     return text.getLocalBounds();
 }
 
+void Text::setPosition(float x, float y) {
+    text.setPosition(x, y);
+}
 
 TextField::TextField(const sf::Font& font, unsigned int characterSize, 
     const sf::Color& textColor, const sf::Color& backgroundColor, 

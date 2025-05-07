@@ -38,6 +38,7 @@ class SFMLGame {
         std::map<std::string, std::vector<std::string>> ranking;
         sf::Font font;
         MenuState currentState;
+        MenuState previousState;
         std::unique_ptr<AvatarManager> avatarManager;
         std::unique_ptr<MenuManager> menuManager;
         std::string clickedContact;
@@ -57,20 +58,12 @@ class SFMLGame {
     
 
         //draw
-        void drawFriends();
-        void displayErrorMessage(const std::string& message) ;
         void friendListMenu() ;
 
         //handle events
         void handleButtonEvents();
         void handleEvents();
 
-        //send json to server
-        bool sendJsonToServer(json& j, const std::string& action) {
-            j["action"] = action;
-            return network->sendData(j.dump() + "\n", client.getClientSocket());
-            cleanup();
-        }
         bool duel = false;
         bool classic = false;
         bool royale = false;
@@ -84,7 +77,7 @@ class SFMLGame {
         std::map<std::string, std::unique_ptr<Button>> acceptInvite;
         std::map<std::string,  std::vector<std::string>> pseudos = {};
         std::vector<std::string> friendsLobby = {};
-        std::unique_ptr<Button> quitter = std::make_unique<Button>("Quitter", font, 24, sf::Color::White, sf::Color::Red, sf::Vector2f(200, 500), sf::Vector2f(150, 50));
+        std::unique_ptr<Button> quitter = std::make_unique<Button>("Quitter", font, 24, sf::Color::White, sf::Color::Red, sf::Vector2f(50, 500), sf::Vector2f(150, 50));
         //std::map<std::string, std::unique_ptr<Button>> inviteFriends;
         bool invite = false;
         bool cl = false;
@@ -114,14 +107,6 @@ class SFMLGame {
 
         // Main Menu
         void createRoomMenu();
-
-        // Game Menu
-        void gameMenu();
-        void gameOverMenu();
-        void gameVictoryMenu();
-        void gameLostMenu();
-        void gamePauseMenu();
-        void settingsMenu();
 
         //Grid Menu
         void displayGrid();

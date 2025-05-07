@@ -205,23 +205,28 @@ void Client::handleChatHistory(const json& data) {
 
 void Client::handleStatefulData(const json& data) {
     setGameStateFromServer(data);
+    serverData = data;
     if (data.contains("message")) {
         std::string message = data["message"];
 
-        if (message == "avatar" && data.contains("data")) {
+        if (message == "avatar") {
             int avatarIndex = std::stoi(data["data"][0].get<std::string>());
             setAvatarIndex(avatarIndex);
         }
 
-        if (message == "contacts" && data.contains("dataPair")) {
-            setContacts(data["dataPair"].get<std::vector<std::pair<std::string, int>>>());
-            std::cout << "Contacts:\n";
-            for (const auto& contact : contacts) {
-                std::cout << "Nom: " << contact.first << ", Avatar: " << contact.second << '\n';
+        if (message == "contacts") {
+            if(!data["dataPair"].empty()) setContacts(data["dataPair"].get<std::vector<std::pair<std::string, int>>>());
+            else {
+                std::vector<std::string> stringData = data["data"].get<std::vector<std::string>>();
+                std::vector<std::pair<std::string, int>> convertedData;
+                for (const auto& str : stringData) {
+                    convertedData.emplace_back(str, -1); // Default integer value set to -1 (no avatar)
+                }
+                setContacts(convertedData);
             }
         }
 
-        if (message == jsonKeys::FRIEND_LIST && data.contains("data")) {
+        if (message == jsonKeys::FRIEND_LIST) {
             setAmis(data["data"].get<std::vector<std::string>>());
             std::cout << "Amis:\n";
             for (const auto& ami : amis) {
@@ -229,12 +234,12 @@ void Client::handleStatefulData(const json& data) {
             }
         }
 
-        if (message == "ranking" && data.contains("secondData")) {
+        if (message == "ranking") {
             setRanking(data["secondData"].get<std::map<std::string, std::vector<std::string>>>());
             std::cout << "Classement mis à jour.\n";
         }
 
-        if (message == "player_info" && data.contains("data")) {
+        if (message == "player_info") {
             setShow(true);
             setPlayerInfo(data["data"].get<std::vector<std::string>>());
             std::cout << "Infos joueur :\n";
@@ -326,7 +331,6 @@ void Client::reintiliseData(){
 }
 
 void Client::sendInputFromSFML(const std::string& input) {
-    std::cout<<"ana from client: "<< input << std::endl;
     if (!input.empty()) {
         controller.sendInput(input, clientSocket);
     }

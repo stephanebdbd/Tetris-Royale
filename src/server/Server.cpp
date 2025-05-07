@@ -352,16 +352,16 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "ranking", {},{},ranking);
             return;
         }
-        else if(actionType == "settings") {
+        else if(actionType == jsonKeys::SETTINGS) {
             //gerer les parametres
             std::cout << "Client #" << clientId << " a demandé d'ouvrir les paramètres." << std::endl;
             clientStates[clientId] = MenuState::Settings;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans les paramètres.");
             return;
         }
-        else if(actionType == "chat") {
+        else if(actionType == jsonKeys::CHAT_PRIVATE) {
             //gerer le chat
-            std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat." << std::endl;
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat privée." << std::endl;
             clientStates[clientId] = MenuState::chat;
             auto friends = userManager.getFriendList(clientPseudo[clientId]);
             std::vector<std::pair<std::string,int>> contactStrings;
@@ -373,8 +373,20 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts",{},contactStrings);
             return;
         }
-
-        else if(actionType == "player_info"){
+        else if(actionType == jsonKeys::OPEN_CHAT){
+            //gerer l'ouverture du chat
+            receiverOfMessages[clientId] = action["contact"];
+            return;
+        }
+        else if(actionType == jsonKeys::CHAT_LOBBY){
+            const auto& roomName = "GameRoom" + std::to_string(clientGameRoomId[clientId]);
+            receiverOfMessages[clientId] = roomName;
+            clientStates[clientId] = MenuState::chat;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts", {roomName});
+            std::cout << "Client #" << clientId << " a demandé d'ouvrir le chat de la salle de jeu." << std::endl;
+            return;
+        }
+        else if(actionType == jsonKeys::PLAYER_INFO){
             //clientStates[clientId] = MenuState::PlayerInfo;
             std::string username = clientPseudo[clientId];
             auto [playerName, bestScore] = userManager.getCurrentPlayerInfo(username);
@@ -491,11 +503,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Suppression d'ami échouée. L'utilisateur a déjà été supprimé.");
             }
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Ami supprimé.");
-            return;
-        }
-        else if(actionType == "openChat"){
-            //gerer l'ouverture du chat
-            receiverOfMessages[clientId] = action["contact"];
             return;
         }
         else if(actionType == "createjoin"){
@@ -1034,7 +1041,12 @@ void Server::keyInputCreateGameRoom(int clientId, GameModeName gameMode) { //cr�
     int gameRoomIndex = gameRoomIdCounter.fetch_add(1);
     gameRooms[gameRoomIndex] = std::make_shared<GameRoom>(gameRoomIndex, clientId, gameMode);
     clientGameRoomId[clientId] = gameRoomIndex;
+
+    //creer le chat pour la gameRoom
+    std::string roomName = "GameRoom" + std::to_string(gameRoomIndex);
+    chatRoomsManage.createTeam(roomName, clientPseudo[clientId]);
     
+    //ajouter le client dans la gameRoom
     std::thread loopgame(&Server::loopGame, this, clientId);
     loopgame.detach();
 }
@@ -1664,12 +1676,7 @@ void Server::sendChatModeToClient(int clientSocket) {
 }
 
 
-////////////////Ce qui suit est pour les invitations de jeu/////////////////
-//************************************************************************ */
 
-/*
-To do
-*/
 void Server::keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status) {
     //### GÉRER L'INVITATION D'UN VIEWER
     std::cout << "Sending game request to: " << receiver << " with status: " << status << std::endl;
@@ -1804,27 +1811,36 @@ void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::s
             std::vector<std::vector<std::string>> invitations = userManager.getListGameRequest(currentClient);
             bool invitationFound = false;
 
+            // Vérifier si l'invitation existe
             for (const auto& invi : invitations){
                 if(invi[1]==status && invi[2]==nbreRoom){
                     invitationFound = true;
                     break;
                 }
             }
+            // Vérifier si l'invitation existe
             if (!invitationFound) {
                 returnToMenu(clientSocket, clientId, MenuState::JoinGame, "Erreur : Vous n'avez pas d'invitation pour cette salle.");
                 return;
             }
             int roomNumber = std::stoi(nbreRoom);
-            
-
+            // Vérifier si la salle existe
             if (gameRooms.find(roomNumber) == gameRooms.end()) {
                 returnToMenu(clientSocket, clientId, MenuState::JoinGame, "Erreur : La salle demandée n'existe pas.");
                 return;
             }
 
+            //accepter l'invitation
             userManager.acceptGameInvitation(roomNumber, clientPseudo[clientId]);
+            
             clientGameRoomId[clientId] = roomNumber;
             auto gameRoom = gameRooms[roomNumber];
+            
+            //ajouter le joueur à la salle de chat de la game Room
+            std::string roomName = "GameRoom" + std::to_string(roomNumber);
+            chatRoomsManage.addClient(sockToPseudo[clientSocket], roomName);
+            // Envoyer le message de bienvenue dans la salle de chat
+            //chat.processClientChat();
 
             if (status == "player") {
                 gameRoom->addPlayer(clientId);

@@ -9,6 +9,7 @@ class Text{
     
         void draw(sf::RenderWindow& window) const;
         sf::FloatRect getLocalBounds() const;
+        void setPosition(float x, float y);
     
     private:
         sf::Text text;
