@@ -243,11 +243,7 @@ void SFMLGame::refreshMenu() {
             menuManager->rankingMenu();
             break;
         case MenuState::Settings:
-            displayWaitingRoom();
-            //to do  
-            break;
-        case MenuState::Notifications:
-            //notificationsMenu();
+            displayWaitingRoom();  
             break;
         case MenuState::Friends:
             friendsMenu();
@@ -285,9 +281,6 @@ void SFMLGame::refreshMenu() {
         case MenuState::JoinGame:
             displayJoinGame();
             break;
-        case MenuState::Pause:
-            //gamePauseMenu();
-            break;
         case MenuState::CreateGame:
             ChoiceGameMode();
             break;
@@ -318,9 +311,6 @@ void SFMLGame::run() {
 
     window->create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE);
     window->setFramerateLimit(60);
-
-    //window->setVerticalSyncEnabled(true);
-    //std::cout << "Vertical sync enabled (if supported by the system)." << std::endl;
 
     while (window->isOpen()) {
         update();
@@ -1056,6 +1046,7 @@ void SFMLGame::chatMenu() {
             j[jsonKeys::ACTION] = jsonKeys::MAIN;
         }
         network->sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(previousState);
         return; // Sortir immédiatement après avoir traité le clic
     }
 
@@ -1108,20 +1099,10 @@ void SFMLGame::handleContacts() {
         }
 
         else{
-            /*sf::CircleShape circle(20.0f); // Rayon du cercle
-            circle.setFillColor(sf::Color(100, 100, 200)); // Couleur de fond
-            circle.setPosition(circleSize); // Position du cercle
-            window->draw(circle);*/
             Circle circle(circleSize, circleRadius, sf::Color(100, 100, 200), sf::Color::Transparent);
             circle.draw(*window);
 
             // Dessiner la première lettre du nom dans le cercle
-            /*
-            sf::Text initial;
-            initial.setFont(font);
-            initial.setString(contactName.substr(0, 1)); // Première lettre du nom
-            initial.setCharacterSize(20);
-            initial.setFillColor(sf::Color::White);*/
             Text initial(contactName.substr(0, 1), font, 20, sf::Color::White, circleSize);
 
             // Centrer la lettre dans le cercle
@@ -1915,7 +1896,10 @@ void SFMLGame::displayWaitingRoom() {
 
     if(!invite && buttons.count(ButtonKey::Chat) && buttons[ButtonKey::Chat]->isClicked(*window)) {
         std::cout << "Chat button clicked" << std::endl;
-        client.sendInputFromSFML(jsonKeys::CHAT_LOBBY);
+        //client.sendInputFromSFML(jsonKeys::CHAT_LOBBY);
+        /*
+        reste petit probleme a regler
+        */
         return;
     }
 
@@ -2056,7 +2040,6 @@ void SFMLGame::displayJoinGame() {
 
                 // Ajouter un bouton pour cette invitation si elle n'existe pas déjà
                 if (!acceptInvite.count(invitationKey)) {
-                    //acceptInvite[invitationKey].push_back(std::make_unique<Button>(textures->accept, sf::Vector2f(buttonX, buttonY), sf::Vector2f(25, 25)));
                     acceptInvite[invitationKey] = std::make_unique<Button>(textures->accept, sf::Vector2f(buttonX, buttonY), sf::Vector2f(25, 25));
                 }
 

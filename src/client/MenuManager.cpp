@@ -21,8 +21,7 @@ void MenuManager::drawButtons() {
 
 void MenuManager::welcomeMenu() {
     // Afficher l'arrière-plan du menu de bienvenue
-    sf::Sprite background(textures->connexion);
-    window->draw(background);
+    sfmlGame->displayBackground(textures->connexion);
 
     // Ajouter les boutons s'ils n'existent pas
     if (buttons->empty()) {

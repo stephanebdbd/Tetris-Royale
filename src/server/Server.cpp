@@ -572,15 +572,12 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             //gerer le refus d'amis
             std::cout << "Client #" << clientId << " a demandé de refuser un ami." << std::endl;
             if (!action.contains("friend") || !action["friend"].is_string()) {
-                std::cout << "Demande d'ami échouée. Données invalides." << std::endl;
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. Données invalides.");
             } else if (userManager.userNotExists(action["friend"])) {
-                std::cout << "Demande d'ami échouée. L'utilisateur n'existe pas." << std::endl;
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. L'utilisateur n'existe pas.");
             } else if (userManager.rejectFriendRequest(clientPseudo[clientId], action["friend"])) {
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Ami refusé.");
             } else {
-                std::cout << "Demande d'ami échouée. L'utilisateur a déjà été refusé." << std::endl;
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Demande d'ami échouée. L'utilisateur a déjà été refusé.");
             }
             return;
@@ -589,15 +586,12 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             //gerer la suppression d'amis
             std::cout << "Client #" << clientId << " a demandé de supprimer un ami." << std::endl;
             if (!action.contains("friend") || !action["friend"].is_string()) {
-                std::cout << "Suppression d'ami échouée. Données invalides." << std::endl;
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Suppression d'ami échouée. Données invalides.");
             } else if (userManager.userNotExists(action["friend"])) {
-                std::cout << "Suppression d'ami échouée. L'utilisateur n'existe pas." << std::endl;
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Suppression d'ami échouée. L'utilisateur n'existe pas.");
             } else if (userManager.deleteFriend(clientPseudo[clientId], action["friend"])) {
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Ami supprimé.");
             } else {
-                std::cout << "Suppression d'ami échouée. L'utilisateur a déjà été supprimé." << std::endl;
                 menuStateManager->sendTemporaryDisplay(clientSocket, "Suppression d'ami échouée. L'utilisateur a déjà été supprimé.");
             }
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Ami supprimé.");
@@ -630,7 +624,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::map<std::string,  std::vector<std::string>> active;
             std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
             std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
-            std::cout<<"size players: "<<players.size()<<std::endl;
             for (int player : players){
                 std::string pseudo = clientPseudo[player];
                 active["player"].push_back(pseudo);
@@ -652,7 +645,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::map<std::string,  std::vector<std::string>> active;
             std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
             std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
-            std::cout<<"size players: "<<players.size()<<std::endl;
             for (int player : players){
                 std::string pseudo = clientPseudo[player];
                 active["player"].push_back(pseudo);
@@ -671,7 +663,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             std::map<std::string,  std::vector<std::string>> active;
             std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
             std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
-            std::cout<<"size players: "<<players.size()<<std::endl;
             for (int player : players){
                 std::string pseudo = clientPseudo[player];
                 active["player"].push_back(pseudo);
@@ -693,13 +684,9 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
 
         else if(actionType == "AcceptRejoindre"){
             std::cout << "Client #" << clientId << " accepte a rejoindre une Gameroom ." << std::endl;
-            //clientStates[clientId] = MenuState::Settings;
-            
             std::map<std::string,  std::vector<std::string>> active;
             std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
             std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
-            std::cout<<"size players: "<<players.size()<<std::endl;
-            std::cout<<"size observers: "<<observers.size()<<std::endl;
             for (int player : players){
                 std::string pseudo = clientPseudo[player];
                 active["player"].push_back(pseudo);
@@ -709,7 +696,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 std::string pseudo = clientPseudo[observer];
                 active["observer"].push_back(pseudo);
             }
-            //std::cout<<"size active: "<<active["observer"].size()<<std::endl;
             
             for (int player : players){
                 auto friends = userManager.getFriendList(clientPseudo[player]);
@@ -720,7 +706,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 }
             }
             for (int observer : observers){
-                //auto friends = userManager.getFriendList(clientPseudo[player]);
                 menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "observer", {}, {}, active);
             }
             return;
@@ -851,7 +836,6 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::Settings:
             if(refreshMenu) {}
             else keyInputLobbySettingsMenu(clientSocket, clientId, action);
-            //keyInputLobbySettingsMenu(clientSocket, clientId, action);
             break;
         case MenuState::Help:
             if(refreshMenu){}
