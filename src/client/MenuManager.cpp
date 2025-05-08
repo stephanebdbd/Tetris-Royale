@@ -445,21 +445,26 @@ void MenuManager::teamsMenu() {
 
     // Ajouter les boutons s'ils n'existent pas
     if (buttons->empty()) {
-        (*buttons)[ButtonKey::CreateTeam] = std::make_unique<Button>("Créer une équipe", font, 28, text, background,
+        (*buttons)[ButtonKey::CreateTeam] = std::make_unique<Button>("Creer une equipe", font, 28, text, background,
             sf::Vector2f(centerX, startY),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
 
-        (*buttons)[ButtonKey::JoinTeam] = std::make_unique<Button>("Rejoindre une équipe", font, 28, text, background,
+        (*buttons)[ButtonKey::JoinTeam] = std::make_unique<Button>("Rejoindre une equipe", font, 28, text, background,
             sf::Vector2f(centerX, startY + buttonHeight + spacing),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
 
-        (*buttons)[ButtonKey::TeamInvites] = std::make_unique<Button>("Invitations reçues", font, 28, text, background,
+        (*buttons)[ButtonKey::TeamInvites] = std::make_unique<Button>("Invitations recues", font, 28, text, background,
             sf::Vector2f(centerX, startY + 2 * (buttonHeight + spacing)),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
 
-        (*buttons)[ButtonKey::ManageTeams] = std::make_unique<Button>("Gérer mes équipes", font, 28, text, background,
+        (*buttons)[ButtonKey::ManageTeams] = std::make_unique<Button>("Gerer mes equipes", font, 28, text, background,
             sf::Vector2f(centerX, startY + 3 * (buttonHeight + spacing)),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
+        
+        (*buttons)[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit,
+            sf::Vector2f(10, 20),
+            sf::Vector2f(40, 40));
+
     }
 
     drawButtons();
@@ -483,6 +488,11 @@ void MenuManager::teamsMenu() {
 
     } else if ((*buttons)[ButtonKey::ManageTeams]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAM_MENU;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    } else if ((*buttons)[ButtonKey::Quit]->isClicked(*window)) {
+        // Action pour revenir au menu principal
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
         network.sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
