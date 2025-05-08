@@ -430,7 +430,7 @@ void MenuManager::rankingMenu(){
 }
 
 void MenuManager::teamsMenu() {
-    sfmlGame->displayBackground(textures->logoConnexion); 
+    sfmlGame->displayBackground(textures->teams); 
 
     float buttonWidth = 300;
     float buttonHeight = 60;

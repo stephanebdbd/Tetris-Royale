@@ -342,30 +342,30 @@ void SFMLGame::displayBackground(sf::Texture& texture) {
 
 void SFMLGame::createRoomMenu() {
     // Afficher l'arrière-plan
-    displayBackground(textures->chat);
+    displayBackground(textures->teams);
 
     // Titre principal
-    Text title("Créer une équipe", font, 30, sf::Color::White, sf::Vector2f(250, 30));
+    Text title("Create New Team", font, 30, sf::Color::White, sf::Vector2f(600, 150));
     title.draw(*window);
 
     // Slogan ou aide en dessous du titre
-    Text subtitle("Entrez le nom de votre équipe", font, 18, sf::Color(200, 200, 220), sf::Vector2f(250, 80));
+    Text subtitle("Entre the Name of your Team", font, 18, sf::Color(200, 200, 220), sf::Vector2f(500, 200));
     subtitle.draw(*window);
 
     // Création du champ de texte si pas encore fait
     if (texts.empty()) {
         TextField teamNameField(font, 20, sf::Color::Black, sf::Color::White,
-                                sf::Vector2f(250, 130), sf::Vector2f(300, 40), "Nom de l'équipe");
+                        sf::Vector2f(550, 450), sf::Vector2f(300, 40), "Team Name");
         texts[TextFieldKey::TeamNameField] = std::make_unique<TextField>(teamNameField);
     }
 
     // Création des boutons si pas encore fait
     if (buttons.empty()) {
         Button createButton("Create", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                            sf::Vector2f(250, 190), sf::Vector2f(140, 45));
+                                            sf::Vector2f(550, 500), sf::Vector2f(140, 45));
 
         Button backButton("Back", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                          sf::Vector2f(410, 190), sf::Vector2f(140, 45));
+                                        sf::Vector2f(710, 500), sf::Vector2f(140, 45));
 
         buttons[ButtonKey::Create] = std::make_unique<Button>(createButton);
         buttons[ButtonKey::Retour] = std::make_unique<Button>(backButton);
@@ -391,36 +391,35 @@ void SFMLGame::createRoomMenu() {
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::TEAMS;
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
         return;
     }
 }
 
 void SFMLGame::joinTeamMenu() {
     // Afficher l'arrière-plan
-    displayBackground(textures->chat);
+    displayBackground(textures->teams);
 
     // Titre principal
-    Text title("Rejoindre une équipe", font, 30, sf::Color::White, sf::Vector2f(250, 30));
+    Text title("Join Team", font, 40, sf::Color::White, sf::Vector2f(600, 150));
     title.draw(*window);
 
-    Text subtitle("Entrez le nom de l'équipe que vous souhaitez rejoindre", font, 18, sf::Color(200, 200, 220), sf::Vector2f(250, 80));
+    Text subtitle("Enter the name of the team you want to join", font, 20, sf::Color(200, 200, 220), sf::Vector2f(500, 200));
     subtitle.draw(*window);
 
     // Création du champ de texte si pas encore fait
     if (texts.empty()) {
         TextField teamNameField(font, 20, sf::Color::Black, sf::Color::White,
-                                sf::Vector2f(250, 130), sf::Vector2f(300, 40), "Nom de l'équipe");
+                                sf::Vector2f(550, 450), sf::Vector2f(300, 40), "Team Name");
         texts[TextFieldKey::TeamNameField] = std::make_unique<TextField>(teamNameField);
     }
 
     // Création des boutons si pas encore fait
     if (buttons.empty()) {
-        Button joinButton("Rejoindre", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                          sf::Vector2f(250, 190), sf::Vector2f(140, 45));
+        Button joinButton("Join", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                          sf::Vector2f(550, 500), sf::Vector2f(140, 45));
 
-        Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                          sf::Vector2f(410, 190), sf::Vector2f(140, 45));
+        Button backButton("Back", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                          sf::Vector2f(710, 500), sf::Vector2f(140, 45));
 
         buttons[ButtonKey::Join] = std::make_unique<Button>(joinButton);
         buttons[ButtonKey::Retour] = std::make_unique<Button>(backButton);
@@ -446,21 +445,21 @@ void SFMLGame::joinTeamMenu() {
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::TEAMS;
         network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
+        client.setCurrentMenuState(MenuState::Team);
         return;
     }
 }
 
 void SFMLGame::displayRoomsMenu() {
     // Afficher l'arrière-plan
-    displayBackground(textures->chat);
+    displayBackground(textures->teams);
 
     // Barre latérale "Équipes"
     Rectangle sidebar(sf::Vector2f(0, 0), sf::Vector2f(200, WINDOW_HEIGHT), sf::Color(30, 30, 50), sf::Color(80, 80, 100));
     sidebar.draw(*window);
 
     // Titre
-    Text header("Mes équipes", font, 24, sf::Color::White, sf::Vector2f(20, 10));
+    Text header("My Teams", font, 24, sf::Color::White, sf::Vector2f(20, 10));
     header.draw(*window);
 
     // Récupérer les équipes depuis le client
@@ -516,7 +515,7 @@ void SFMLGame::displayRoomsMenu() {
 }
 void SFMLGame::manageTeamMenu() {
     // Afficher l'arrière-plan
-    displayBackground(textures->chat);
+    displayBackground(textures->teams);
 
     // Titre principal
     Text title("Gérer l'équipe", font, 30, sf::Color::White, sf::Vector2f(250, 30));

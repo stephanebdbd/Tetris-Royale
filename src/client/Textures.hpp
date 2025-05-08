@@ -12,7 +12,7 @@ struct Textures {
                 logoSettings, logoTeams, logoRanking,
                 logoChat, logoMain, logoExit, logoAddFriend,
                 logoFrindsRequest, mode, player, viewer, 
-                plus, esc, P_O, playerClicked, accept, rejoindre;
+                plus, esc, P_O, playerClicked, accept, rejoindre, teams;
 
     Textures() = default;
     ~Textures() = default;

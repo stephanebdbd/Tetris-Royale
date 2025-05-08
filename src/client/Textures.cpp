@@ -29,4 +29,5 @@ void Textures::loadTextures() {
     loadTexture(playerClicked, LogoThreePoint);
     loadTexture(accept, LogoAccept);
     loadTexture(rejoindre, backgroundRejoindre);
+    loadTexture(teams, backgroundTeams);
 }
