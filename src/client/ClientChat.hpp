@@ -8,14 +8,13 @@
 
 
 class ClientChat{
-    private:
-        int clientSocket;                    // Le socket du client
-        ClientNetwork network;               // Le network du client
-        std::string MyPseudo;               // Le pseudo du client
-        static bool messagesWaitForDisplay;  // Booléen pour savoir si le message attend d'être affiché
-        std::vector<json> chatMessages;   // Les messages
-        int y = 1;                            // Position du chat
-        WINDOW * inputWin, *displayWin;       // L'input et affichage de la fenêtre
+    int clientSocket;                    // Le socket du client
+    ClientNetwork network;               // Le network du client
+    std::string MyPseudo;               // Le pseudo du client
+    static bool messagesWaitForDisplay;  // Booléen pour savoir si le message attend d'être affiché
+    std::vector<json> chatMessages;   // Les messages
+    int y = 1;                            // Position du chat
+    WINDOW * inputWin, *displayWin;       // L'input et affichage de la fenêtre
 
     public:
         ClientChat() = default;

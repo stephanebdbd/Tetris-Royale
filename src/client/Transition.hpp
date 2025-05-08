@@ -15,7 +15,6 @@ class BaseTransition {
     
     // Transition par fondu
     class FadeTransition : public BaseTransition {
-    private:
         sf::RectangleShape overlay;
         float duration;
         float progress;

@@ -36,29 +36,34 @@ class MenuManager {
     std::string selectedFriend;
     std::vector<std::string> amis;
 
+    public:
+        MenuManager(sf::RenderWindow* window, sf::Font& font, Client& client, ClientNetwork& network, 
+                    Textures& textures, SFMLGame* sfmlGame, AvatarManager& avatarManager, std::map<ButtonKey, 
+                    std::unique_ptr<Button>>& buttons, std::map<TextFieldKey, std::unique_ptr<TextField>>& texts);
 
-public:
-    MenuManager(sf::RenderWindow* window, sf::Font& font, Client& client, ClientNetwork& network, 
-                Textures& textures, SFMLGame* sfmlGame, AvatarManager& avatarManager, std::map<ButtonKey, 
-                std::unique_ptr<Button>>& buttons, std::map<TextFieldKey, std::unique_ptr<TextField>>& texts);
+        void welcomeMenu();
 
-    void welcomeMenu();
-
-    void connexionMenu();
-    void registerMenu();
+        void connexionMenu();
+        void registerMenu();
     
-    void mainMenu();
+        void mainMenu();
 
-    void friendsMenu();
-    void addFriendMenu();
-    void friendListMenu();
-    void friendRequestListMenu();
+        void friendsMenu();
+        void addFriendMenu();
+        void friendListMenu();
+        void friendRequestListMenu();
 
-    void rankingMenu();
-    void teamsMenu();
+        void rankingMenu();
+        void teamsMenu();
 
-    void handleTextFieldEvents(sf::Event& event);
+        // Teams Menu
+        void createRoomMenu(); 
+        void joinTeamMenu();
+        
+        //chat
+        void chatMenu();
 
+        void handleTextFieldEvents(sf::Event& event);
 };
 
 #endif 

@@ -6,6 +6,7 @@
 #include <string>
 
 class Rectangle {
+    sf::RectangleShape shape;
 public:
     Rectangle(const sf::Vector2f& position, const sf::Vector2f& size, 
               const sf::Color& fillColor, const sf::Color& outlineColor);
@@ -13,24 +14,28 @@ public:
     void draw(sf::RenderWindow& window) const;
     void setTexture(const sf::Texture& texture);
     sf::Vector2f getPosition() const;
-
-private:
-    sf::RectangleShape shape;
 };
 
 class Circle {
+    sf::CircleShape shape;
 public:
     Circle(const sf::Vector2f& position, float radius, 
            const sf::Color& fillColor, const sf::Color& outlineColor);
 
     void draw(sf::RenderWindow& window) const;
     void setTexture(const sf::Texture& texture);
-
-private:
-    sf::CircleShape shape;
 };
 
 class Button {
+    sf::RectangleShape shape;
+    sf::Text text;
+    sf::Color originalColor;
+    sf::Color hoverColor;
+    sf::Color clickColor;
+    bool wasPressed = false;
+    sf::Clock clickTimer;
+    std::shared_ptr<sf::Texture> buttonTexture;
+    unsigned int baseCharSize = 30;
 public:
     // Pour le Texte
     Button(const std::string& text, const sf::Font& font, unsigned int characterSize,
@@ -51,15 +56,4 @@ public:
     void resize(float scaleX, float scaleY);
     void setTexture(const sf::Texture& texture);
     bool operator==(const Button& other) const;
-
-private:
-    sf::RectangleShape shape;
-    sf::Text text;
-    sf::Color originalColor;
-    sf::Color hoverColor;
-    sf::Color clickColor;
-    bool wasPressed = false;
-    sf::Clock clickTimer;
-    std::shared_ptr<sf::Texture> buttonTexture;
-    unsigned int baseCharSize = 30;
-};
+}; 

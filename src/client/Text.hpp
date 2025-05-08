@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 class Text{
+    sf::Text text;
     public:
         Text(const std::string& text, const sf::Font& font, unsigned int characterSize, 
              const sf::Color& textColor, const sf::Vector2f& position, sf::Uint32 style = sf::Text::Bold);
@@ -10,13 +11,22 @@ class Text{
         void draw(sf::RenderWindow& window) const;
         sf::FloatRect getLocalBounds() const;
         void setPosition(float x, float y);
-    
-    private:
-        sf::Text text;
 };
 
 // Classe pour les champs de texte
 class TextField {
+    sf::RectangleShape shape;
+    sf::Text text;
+    sf::Text placeholderText;
+    std::string textString;
+    std::string placeholder;
+    bool isActive;
+    unsigned int maxLength;
+    bool showCursor;
+    sf::Clock cursorClock;
+    sf::RectangleShape cursor;
+    float padding;
+    bool hiddenText = false;
     public:
         TextField(const sf::Font& font, unsigned int characterSize, 
                   const sf::Color& textColor, const sf::Color& backgroundColor, 
@@ -33,21 +43,5 @@ class TextField {
         void validateInput();
         void clear();
         void resize(float scaleX, float scaleY) ;
-        void setText(const std::string& newText);
-
-    
-    private:
-        sf::RectangleShape shape;
-        sf::Text text;
-        sf::Text placeholderText;
-        std::string textString;
-        std::string placeholder;
-        bool isActive;
-        unsigned int maxLength;
-        bool showCursor;
-        sf::Clock cursorClock;
-        sf::RectangleShape cursor;
-        float padding;
-        bool hiddenText = false;
-        
+        void setText(const std::string& newText);        
 };

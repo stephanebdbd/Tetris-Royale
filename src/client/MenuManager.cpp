@@ -809,6 +809,196 @@ void MenuManager::friendRequestListMenu() {
 }
 
 
+void MenuManager::createRoomMenu() {
+    // Afficher l'arrière-plan
+    sfmlGame->displayBackground(textures->teams);
+
+    // Titre principal
+    Text title("Create New Team", font, 30, sf::Color::White, sf::Vector2f(600, 150));
+    title.draw(*window);
+
+    // Slogan ou aide en dessous du titre
+    Text subtitle("Entre the Name of your Team", font, 18, sf::Color(200, 200, 220), sf::Vector2f(500, 200));
+    subtitle.draw(*window);
+
+    // Création du champ de texte si pas encore fait
+    if (texts->empty()) {
+        TextField teamNameField(font, 20, sf::Color::Black, sf::Color::White,
+                        sf::Vector2f(550, 450), sf::Vector2f(300, 40), "Team Name");
+        (*texts)[TextFieldKey::TeamNameField] = std::make_unique<TextField>(teamNameField);
+    }
+
+    // Création des boutons si pas encore fait
+    if (buttons->empty()) {
+        Button createButton("Create", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                                            sf::Vector2f(550, 500), sf::Vector2f(140, 45));
+
+        Button backButton("Back", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                                        sf::Vector2f(710, 500), sf::Vector2f(140, 45));
+
+        (*buttons)[ButtonKey::Create] = std::make_unique<Button>(createButton);
+        (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(backButton);
+    }
+
+    // Dessin des éléments
+    sfmlGame->drawTextFields();
+    sfmlGame->drawButtons();
+
+    json j;
+    // Traitement du bouton "Créer"
+    if ((*buttons)[ButtonKey::Create]->isClicked(*window) && !(*texts)[TextFieldKey::TeamNameField]->getText().empty()) {
+        std::string teamName = (*texts)[TextFieldKey::TeamNameField]->getText();
+        j[jsonKeys::ACTION] = jsonKeys::CREATE_TEAM;
+        j[jsonKeys::TEAM_NAME] = teamName;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        //afficherErreur("Équipe créée : " + teamName);
+        (*texts)[TextFieldKey::TeamNameField]->clear();
+        return;
+    }
+
+    // Traitement du bouton "Retour"
+    if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }
+}
+
+
+void MenuManager::joinTeamMenu() {
+    // Afficher l'arrière-plan
+    sfmlGame->displayBackground(textures->teams);
+
+    // Titre principal
+    Text title("Join Team", font, 40, sf::Color::White, sf::Vector2f(600, 150));
+    title.draw(*window);
+
+    Text subtitle("Enter the name of the team you want to join", font, 20, sf::Color(200, 200, 220), sf::Vector2f(500, 200));
+    subtitle.draw(*window);
+
+    // Création du champ de texte si pas encore fait
+    if (texts->empty()) {
+        TextField teamNameField(font, 20, sf::Color::Black, sf::Color::White,
+                                sf::Vector2f(550, 450), sf::Vector2f(300, 40), "Team Name");
+        (*texts)[TextFieldKey::TeamNameField] = std::make_unique<TextField>(teamNameField);
+    }
+
+    // Création des boutons si pas encore fait
+    if (buttons->empty()) {
+        Button joinButton("Join", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                          sf::Vector2f(550, 500), sf::Vector2f(140, 45));
+
+        Button backButton("Back", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                          sf::Vector2f(710, 500), sf::Vector2f(140, 45));
+
+        (*buttons)[ButtonKey::Join] = std::make_unique<Button>(joinButton);
+        (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(backButton);
+    }
+
+    // Dessin des éléments
+    sfmlGame->drawTextFields();
+    sfmlGame->drawButtons();
+
+    json j;
+    // Traitement du bouton "Rejoindre"
+    if ((*buttons)[ButtonKey::Join]->isClicked(*window) && !(*texts)[TextFieldKey::TeamNameField]->getText().empty()) {
+        std::string teamName = (*texts)[TextFieldKey::TeamNameField]->getText();
+        j[jsonKeys::ACTION] = jsonKeys::JOIN_TEAM;
+        j[jsonKeys::TEAM_NAME] = teamName;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        sfmlGame->afficherErreur("Demande envoyée pour rejoindre l'équipe : " + teamName);
+        (*texts)[TextFieldKey::TeamNameField]->clear();
+        return;
+    }
+
+    // Traitement du bouton "Retour"
+    if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::Team);
+        return;
+    }
+}
+
+void MenuManager::chatMenu() {
+    // Display the chat background
+    sfmlGame->displayBackground(textures->chat);
+
+    // Sidebar for contacts list
+    Rectangle sidebar(sf::Vector2f(0, 0), sf::Vector2f(200, WINDOW_HEIGHT), sf::Color(50, 50, 70), sf::Color(100, 100, 120));
+    sidebar.draw(*window);
+
+    // Header for contacts list
+    Text header("Contacts", font, 24, sf::Color::White, sf::Vector2f(20, 10));
+    header.draw(*window);
+
+    if (texts->empty()) {
+        // Création des champs de texte
+        TextField searchField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
+            sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Recherche");
+        // Champ de texte pour envoyer un message
+        TextField messageField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
+            sf::Vector2f(205, WINDOW_HEIGHT - 40), sf::Vector2f(WINDOW_WIDTH - 250, 35), "Enter un message");
+
+        // Ajout des champs de texte au vecteur
+        (*texts)[TextFieldKey::SearchField] = std::make_unique<TextField>(searchField);
+        (*texts)[TextFieldKey::MessageField] = std::make_unique<TextField>(messageField);
+    }
+
+    if (buttons->empty()) {
+        // Bouton pour revenir au menu principal
+        Button backButton(textures->logoMain,sf::Vector2f(7, 50), sf::Vector2f(25, 35));
+        // Bouton pour envoyer le message
+        Button sendButton(">", font, 20, sf::Color::White, sf::Color(70, 200, 70),
+                          sf::Vector2f(WINDOW_WIDTH - 40, WINDOW_HEIGHT - 40), sf::Vector2f(35, 35));
+        // Ajout des boutons au vecteur
+        (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(backButton);
+        (*buttons)[ButtonKey::Send] = std::make_unique<Button>(sendButton);
+    }
+
+    // Dessiner les champs de texte et les boutons
+    sfmlGame->drawTextFields();
+    sfmlGame->drawButtons();
+    
+    // Gérer les clics sur les contacts
+    sfmlGame->handleContacts();
+    //dessiner les contacts
+    sfmlGame->drawContacts();
+
+    // Vérifier d'abord le backButton
+    if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        if(sfmlGame->getPreviousState() == MenuState::Settings){
+            sfmlGame->resetAcceptInvite();
+        }
+        else{
+            j[jsonKeys::ACTION] = jsonKeys::MAIN;
+        }
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(sfmlGame->getPreviousState());
+        return; // Sortir immédiatement après avoir traité le clic
+    }
+
+    // Ensuite vérifier le sendButton
+    if (!sfmlGame->getClickedContact().empty() && (*buttons)[ButtonKey::Send]->isClicked(*window) && !(*texts)[TextFieldKey::MessageField]->getText().empty()) {
+        json j = {
+            {"message", (*texts)[TextFieldKey::MessageField]->getText()},
+            {"receiver", sfmlGame->getClickedContact()},
+            {"sender", "You"}
+
+        };
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        sfmlGame->getMessages().emplace_back(std::move(j));
+
+        (*texts)[TextFieldKey::MessageField]->clear(); // Effacer le champ de texte après l'envoi
+        return;
+    }
+    // recevoir les messages du serveur et les stocker
+    sfmlGame->getMessagesFromServer();
+    // Afficher les messages
+    sfmlGame->drawMessages();
+}
+
 // Gestion des champs de texte
 void MenuManager::handleTextFieldEvents(sf::Event& event) {
     for (const auto& [_, field] : *texts) {

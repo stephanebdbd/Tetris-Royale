@@ -17,8 +17,6 @@
 
 
 class Client {
-
-private:
     ClientDisplay display;  // Chaque client a son propre display
     Controller controller;  // Chaque client a son propre controller
     ClientNetwork network;  // Chaque client a son propre network
@@ -53,10 +51,7 @@ private:
     std::vector<std::string> PlayerInfo;
     std::vector<std::string> teams;
 
-
-
-
-public:
+    public:
         Client(const std::string& serverIP, int port);
         ~Client();
         void run(const std::string& mode);

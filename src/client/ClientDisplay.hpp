@@ -7,7 +7,6 @@
 
 class ClientDisplay {
     
-
     public:
         void displayMenu(const json& data, const std::string & inputBuffer);
         void displayTetramino(const json& data);
@@ -20,7 +19,6 @@ class ClientDisplay {
         void drawPlayerNumber(int playerNumber);
 
         void displayLargeText(const std::string& text, int startY, int startX, const std::string& colorSymbol);
-
 };
 
 #endif
