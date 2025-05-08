@@ -5,19 +5,17 @@
 #include <sys/socket.h>
 #include "jsonKeys.hpp"
 
-
-
-// Serialize
+// Sérialiser
 std::string MenuStateManager::serialize(const MenuState& state) {
     return std::to_string(static_cast<int>(state));
 }
 
-// Deserialize
+// Désérialiser
 MenuState MenuStateManager::deserialize(const std::string& data) {
     return static_cast<MenuState>(std::stoi(data));
 }
 
-// Send MenuState to Client
+// Envoyer l'état du menu au client
 void MenuStateManager::sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message, const std::vector<std::string>& data, const std::vector<std::pair<std::string, int>>& dataPair, const std::map<std::string, std::vector<std::string>>& secondData) {
     json jsonData;
     jsonData["state"] = serialize(state);
@@ -27,21 +25,21 @@ void MenuStateManager::sendMenuStateToClient(int clientSocket, const MenuState& 
     jsonData["secondData"] = secondData;
     std::string serializedState = jsonData.dump() + "\n";
     
-    // Add error handling for send
+    // Ajouter une gestion d'erreur pour l'envoi
     if (send(clientSocket, serializedState.c_str(), serializedState.size(), 0) == -1) {
-        std::cerr << "Failed to send menu state to client" << std::endl;
+        std::cerr << "Échec de l'envoi de l'état du menu au client" << std::endl;
     }
-    std::cout << "MenuState sent to client: " << serializedState;   
+    std::cout << "État du menu envoyé au client : " << serializedState;   
 }
-//send affichage temporaire
+
+// Envoyer un affichage temporaire
 void MenuStateManager::sendTemporaryDisplay(int clientSocket, const std::string& message) {
     json jsonData;
     jsonData[jsonKeys::TEMPORARY_DISPLAY] = message;
     std::string serializedState = jsonData.dump() + "\n";
     
-    // Add error handling for send
+    // Ajouter une gestion d'erreur pour l'envoi
     if (send(clientSocket, serializedState.c_str(), serializedState.size(), 0) == -1) {
-        std::cerr << "Failed to send temporary display to client" << std::endl;
+        std::cerr << "Échec de l'envoi de l'affichage temporaire au client" << std::endl;
     }
-
 }

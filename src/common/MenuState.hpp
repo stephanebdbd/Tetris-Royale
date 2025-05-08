@@ -65,15 +65,16 @@ public:
     MenuStateManager() = default;
     ~MenuStateManager() = default;
 
-    // Serialize the MenuState enum to a string
+    // Sérialiser l'énumération MenuState en une chaîne de caractères
     std::string serialize(const MenuState& state);
-    // Deserialize the string back to MenuState enum
-    MenuState deserialize(const std::string& data);
-    // Send the MenuState to the client
     
+    // Désérialiser la chaîne de caractères pour retrouver l'énumération MenuState
+    MenuState deserialize(const std::string& data);
+    
+    // Envoyer l'état du menu au client
     void sendMenuStateToClient(int clientSocket, const MenuState& state, const std::string& message = "", const std::vector<std::string>& data = {}, const std::vector<std::pair<std::string, int>>& dataPair = {}, const std::map<std::string, std::vector<std::string>>& secondData = {});
     void sendTemporaryDisplay(int clientSocket, const std::string& message) ;
 
 };
 
-#endif // MenuState_hpp
+#endif

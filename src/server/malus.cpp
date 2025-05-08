@@ -1,7 +1,7 @@
 #include "malus.hpp"
 #include <iostream>
-#include <cstdlib>  // Pour rand() et srand()
-#include <ctime> // pour time()
+#include <cstdlib>
+#include <ctime>
 #include <ncurses.h>
 
 Malus::Malus(int nbrLine): nbrLine(nbrLine) {

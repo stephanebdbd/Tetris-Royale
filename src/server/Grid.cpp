@@ -3,7 +3,7 @@
 
 #include <ncurses.h>
 
-Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {std::cout << "Grid created at : " << this << std::endl;}
+Grid::Grid(int w, int h) : width(w), height(h), cells(h, std::vector<Cell>(w + 1)) {}
 
 // Marquer une cellule comme occupée
 void Grid::markCell(int x, int y, const Color& color) {

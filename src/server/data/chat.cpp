@@ -13,8 +13,8 @@
 bool Chat::processClientChat(int senderSocket, const std::string& sender, const std::map<std::string, int>& receiver, json& msg) {
     (void)senderSocket;
     try {
-        // Always override the sender with the authenticated name
-        msg["sender"] = sender;  // This ensures "You" becomes "aa" or whatever the real username is
+        // Toujours remplacer l'expéditeur par le nom authentifié
+        msg["sender"] = sender; // Cela garantit que "You" devient "aa" ou le nom d'utilisateur réel
         
         if (msg["message"] != "/exit") {
             sendMessage(msg, receiver);
@@ -72,7 +72,7 @@ bool Chat::saveMessage(const std::string &sender, const std::string &receiver, c
     std::string senderId = senderReceiverId.first;
     std::string receiverId = senderReceiverId.second;
     
-    // Use parameterized queries if possible, or at least escape strings
+// Cela garantit que "You" devient "aa" ou le nom d'utilisateur réel
     std::string escapedMsg;
     for (char c : msg) {
         if (c == '\'') escapedMsg += '\'';

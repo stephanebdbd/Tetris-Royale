@@ -59,9 +59,14 @@ class MenuManager {
         // Teams Menu
         void createRoomMenu(); 
         void joinTeamMenu();
+        void manageTeamMenu();
         
         //chat
         void chatMenu();
+
+        void displayRoomsMenu();
+
+        void displayRoomsMenu();
 
         void handleTextFieldEvents(sf::Event& event);
 };

@@ -291,9 +291,9 @@ std::vector<std::string> DataManager::getRequestList(const std::string& user) {
 
 QueryResult DataManager::updateUserName(const std::string &id_user, const std::string &pwd, const std::string &new_username){
     QueryResult result;
-    // Check if the provided password is correct
+    // Check si le mot de passe est correct
     if (checkPwd(id_user, pwd)){
-        // Update the username for the specified user
+        // Mettre à le jour le pseudo pour l'utilisateur
         std::string set_clause = "username = '" + new_username + "'";
         std::string condition = "id_user = '" + id_user + "'";
         result = db->updateEntry("Users", set_clause, condition);
@@ -304,9 +304,9 @@ QueryResult DataManager::updateUserName(const std::string &id_user, const std::s
 
 QueryResult DataManager::updatePwd(const std::string &id_user, const std::string &pwd, const std::string &new_pwd) {
     QueryResult result;
-    // Check if the password is correct
+    // Check si le mot de passe est correct
     if (checkPwd(id_user, pwd)) {
-        // Update the password for the given user
+        // Mettre à jour le mdp pour l'utilisateur
 
         std::string set_clause = "passwrd = '" + new_pwd + "'";
         std::string condition = "id_user = '" + id_user + "'";
@@ -356,7 +356,7 @@ std::vector<std::vector<std::string>> DataManager::getListGameRequest(const std:
         "g.id_player = " + userId + " AND g.status = 'pending'"
     );
     for (const auto& row : result.getData()) {
-        if (!row.empty()) gamesInviation.push_back(row);  // username
+        if (!row.empty()) gamesInviation.push_back(row);  // pseudo
     }
     return gamesInviation;
 }
@@ -364,7 +364,7 @@ std::vector<std::vector<std::string>> DataManager::getListGameRequest(const std:
 
 QueryResult DataManager::updateHighScore(const std::string& username, const int& bestScore){
     QueryResult result;
-    // Update the bestScore
+    // Màj du meilleur score
     std::string set_clause = "best_score = '" + std::to_string(bestScore) + "'";
     std::string condition = "username = '" + username + "'";
     result = db->updateEntry("Users", set_clause, condition);

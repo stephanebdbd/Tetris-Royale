@@ -13,7 +13,7 @@
 class DataManager{
 private:
 
-    // Pointer to the database object
+    // Pointer -> instance databse
     std::shared_ptr<DataBase> db;
     std::vector<std::string> getUserListByStatus(const std::string& user, const std::string& status);
     QueryResult getDataFromTable(

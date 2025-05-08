@@ -25,4 +25,4 @@ struct GameState {
 };
 
 
-#endif // GAMESTATE_HPP
+#endif

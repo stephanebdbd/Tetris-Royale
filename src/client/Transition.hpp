@@ -65,4 +65,4 @@ class BaseTransition {
         bool isComplete() const override { return !active && !fadingOut; }
     };
 
-#endif // TRANSITION_HPP
+#endif

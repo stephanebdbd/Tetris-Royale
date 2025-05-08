@@ -268,10 +268,10 @@ void SFMLGame::refreshMenu() {
             menuManager->joinTeamMenu();
             break;
         case MenuState::ManageTeams:
-            displayRoomsMenu();
+            menuManager->displayRoomsMenu();
             break;
         case MenuState::ManageTeam:
-            manageTeamMenu();
+            menuManager->manageTeamMenu();
             break;
         case MenuState::JoinOrCreateGame:
             CreateOrJoinGame();
@@ -337,162 +337,6 @@ void SFMLGame::displayBackground(sf::Texture& texture) {
 
     // Afficher l'image de fond
     window->draw(sprite);
-}
-
-void SFMLGame::displayRoomsMenu() {
-    // Afficher l'arrière-plan
-    displayBackground(textures->teams);
-
-    // Barre latérale "Équipes"
-    Rectangle sidebar(sf::Vector2f(0, 0), sf::Vector2f(200, WINDOW_HEIGHT), sf::Color(30, 30, 50), sf::Color(80, 80, 100));
-    sidebar.draw(*window);
-
-    // Titre
-    Text header("My Teams", font, 24, sf::Color::White, sf::Vector2f(20, 10));
-    header.draw(*window);
-
-    // Récupérer les équipes depuis le client
-    auto teams = client.getTeams(); // Supposons que cette méthode retourne une liste d'équipes
-    static std::vector<sf::Texture> avatarTextures(20);
-    const float teamHeight = 50.0f;
-
-    // Affichage des équipes
-    for (std::size_t i = 0; i < std::min(teams.size(), avatarTextures.size()); ++i) {
-        float y = 100 + i * teamHeight;
-
-        if (!TEAMSbuttons.count(teams[i])) {
-            TEAMSbuttons[teams[i]] = std::make_unique<Button>(
-                teams[i], font, 20, sf::Color::White, sf::Color::Transparent,
-                sf::Vector2f(0, y), sf::Vector2f(200, teamHeight), sf::Color::Transparent);
-        }
-
-        TEAMSbuttons[teams[i]]->draw(*window);
-    }
-
-    // Gérer les clics sur une équipe
-    for (const auto& [teamName, button] : TEAMSbuttons) {
-        if (button->isClicked(*window)) {
-            selectedTeam = teamName;
-            break;
-        }
-    }
-
-    // Si une équipe est sélectionnée
-    if (!selectedTeam.empty()) {
-        json j;
-        j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAM;
-        j[jsonKeys::TEAM_NAME] = selectedTeam;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        //selectedTeam.clear();
-        return;
-    }
-
-    // Bouton retour
-    if (!buttons.count(ButtonKey::Retour)) {
-        buttons[ButtonKey::Retour] = std::make_unique<Button>(
-            textures->logoMain, sf::Vector2f(7, 50), sf::Vector2f(25, 35));
-    }
-    buttons[ButtonKey::Retour]->draw(*window);
-
-    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        json j;
-        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
-        return;
-    }
-}
-void SFMLGame::manageTeamMenu() {
-    // Afficher l'arrière-plan
-    displayBackground(textures->teams);
-
-    // Titre principal
-    Text title("Gérer l'équipe", font, 30, sf::Color::White, sf::Vector2f(250, 30));
-    title.draw(*window);
-
-    // Création des boutons si pas encore fait
-    if (buttons.empty()) {
-        float buttonWidth = 300;
-        float buttonHeight = 50;
-        float spacing = 20;
-        float centerX = WINDOW_WIDTH / 2.0f - buttonWidth / 2.0f;
-        float startY = 150;
-
-        // Bouton "Liste des membres"
-        buttons[ButtonKey::ListMembers] = std::make_unique<Button>("Members List", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                                                                   sf::Vector2f(centerX, startY), sf::Vector2f(buttonWidth, buttonHeight));
-
-        // Bouton "Ajouter un membre"
-        buttons[ButtonKey::AddMember] = std::make_unique<Button>("Add Member", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                                                                 sf::Vector2f(centerX, startY + (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
-
-        // Bouton "Ajouter un admin"
-        buttons[ButtonKey::AddAdmin] = std::make_unique<Button>("Add Admin", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                                                                sf::Vector2f(centerX, startY + 2 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
-
-        // Bouton "Les demandes de rejoindre"
-        buttons[ButtonKey::JoinRequests] = std::make_unique<Button>("Join Request", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                                                                    sf::Vector2f(centerX, startY + 3 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
-
-        // Bouton "Supprimer la room"
-        buttons[ButtonKey::DeleteRoom] = std::make_unique<Button>("Delete Team", font, 20, sf::Color::White, sf::Color(200, 70, 70),
-                                                                  sf::Vector2f(centerX, startY + 4 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
-
-        // Bouton "Retour"
-        buttons[ButtonKey::Retour] = std::make_unique<Button>("Back", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                                                              sf::Vector2f(centerX, startY + 5 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
-    }
-
-    // Dessiner les boutons
-    drawButtons();
-
-    json j;
-
-    // Gérer les clics sur les boutons
-    if (buttons[ButtonKey::ListMembers]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::LIST_MEMBERS;
-        j[jsonKeys::TEAM_NAME] = selectedTeam;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        return;
-    }
-
-    if (buttons[ButtonKey::AddMember]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::ADD_MEMBER;
-        j[jsonKeys::TEAM_NAME] = selectedTeam;
-    
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        return;
-    }
-
-    if (buttons[ButtonKey::AddAdmin]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::ADD_ADMIN;
-        j[jsonKeys::TEAM_NAME] = selectedTeam;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        return;
-    }
-
-    if (buttons[ButtonKey::JoinRequests]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::JOIN_REQUESTS;
-        j[jsonKeys::TEAM_NAME] = selectedTeam;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        return;
-    }
-
-    if (buttons[ButtonKey::DeleteRoom]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::DELETE_ROOM;
-        j[jsonKeys::TEAM_NAME] = selectedTeam;
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
-        return;
-    }
-
-    if (buttons[ButtonKey::Retour]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
-        selectedTeam.clear();
-        network->sendData(j.dump() + "\n", client.getClientSocket());
-        cleanup();
-        return;
-    }
 }
 
 
@@ -1160,7 +1004,7 @@ void SFMLGame::displayWaitingRoom() {
     window->clear(sf::Color(30, 30, 60));
     
 
-    Text title("WAITING IN THE LOBBY", font, 50, sf::Color::White, sf::Vector2f(WINDOW_WIDTH/2 - 250, 30));
+    Text title("ATTENTE DANS LE LOBBY", font, 50, sf::Color::White, sf::Vector2f(WINDOW_WIDTH/2 - 250, 30));
     
     title.draw(*window);
     Rectangle frameCommand(sf::Vector2f(20, 120), sf::Vector2f(500, 450), sf::Color::Transparent, sf::Color(135, 206, 250));
@@ -1203,9 +1047,9 @@ void SFMLGame::displayWaitingRoom() {
         }
         std::cout << "showCommand: " << showCommand << std::endl;
 
-        Text player("Players: " , font, 20, sf::Color::White, sf::Vector2f(1065, startY));
+        Text player("JOUEURS: " , font, 20, sf::Color::White, sf::Vector2f(1065, startY));
         player.draw(*window);
-        Text observer("Observers: " , font, 20, sf::Color::White, sf::Vector2f(1280, startY));
+        Text observer("OBSERVATEUR: " , font, 20, sf::Color::White, sf::Vector2f(1280, startY));
         observer.draw(*window);
         if(!pseudos.empty()){
             for(std::size_t i = 0; i < pseudos["player"].size(); ++i){
@@ -1382,7 +1226,7 @@ void SFMLGame::displayWaitingRoom() {
     if (!invite && buttons.count(ButtonKey::Valider) && buttons[ButtonKey::Valider]->isClicked(*window)) {
             std::string speed = texts[TextFieldKey::Speed]->getText();
             if(speed.empty()) {
-                std::cerr << "Rempliez le champs de Vitesse " << std::endl;
+                std::cerr << "Remplissez le champs de vitesse " << std::endl;
                 return;
             }
             std::cout << "Vitesse: " << "/speed/" + speed << std::endl;
@@ -1404,7 +1248,7 @@ void SFMLGame::displayWaitingRoom() {
     if (!invite && (classic || royale)  && buttons.count(ButtonKey::ValiderNb) && buttons[ButtonKey::ValiderNb]->isClicked(*window)) {
             std::string nbPlayers = texts[TextFieldKey::NbreJoueurs]->getText();
             if(nbPlayers.empty()) {
-                std::cerr << "Rempliez le champs de Nombre de joueurs " << std::endl;
+                std::cerr << "Remplissez le champs du nombre de joueurs " << std::endl;
                 return;
             }
             if (std::stoi(nbPlayers) > 0) {
@@ -1420,7 +1264,7 @@ void SFMLGame::displayWaitingRoom() {
     if (!invite && royale  && buttons.count(ButtonKey::ValiderEnergie) && buttons[ButtonKey::ValiderEnergie]->isClicked(*window)) {
             std::string energy = texts[TextFieldKey::Energie]->getText();
             if(energy.empty()) {
-                std::cerr << "Rempliez le champs d'énergie " << std::endl;
+                std::cerr << "Remplissez le champs d'énergie " << std::endl;
                 return;
             }
             if (std::stoi(energy) > 0) {
@@ -1602,7 +1446,7 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
         if (buttons.count(ButtonKey::Valider) && buttons[ButtonKey::Valider]->isClicked(*window)) {
             std::string id = texts[TextFieldKey::Victime]->getText();
             if(id.empty()) {
-                std::cerr << "Rempliez le champs de Victime " << std::endl;
+                std::cerr << "Remplissez le champs de victime " << std::endl;
                 return;
             }
             client.sendInputFromSFML(id);
@@ -1622,10 +1466,10 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
         std::string message = std::string("Joueur Cible") + " "+  std::to_string(id);
 
         if (buttons.empty()) {
-            buttons[ButtonKey::Yes] = std::make_unique<Button>("Yes", font, 24, sf::Color::White, sf::Color(70, 200, 70),
+            buttons[ButtonKey::Yes] = std::make_unique<Button>("Oui", font, 24, sf::Color::White, sf::Color(70, 200, 70),
                 sf::Vector2f(290, 670), sf::Vector2f(90, 30));
 
-            buttons[ButtonKey::No] = std::make_unique<Button>("No", font, 24, sf::Color::White, sf::Color::Red,
+            buttons[ButtonKey::No] = std::make_unique<Button>("Non", font, 24, sf::Color::White, sf::Color::Red,
                 sf::Vector2f(410, 670), sf::Vector2f(90, 30));
             
             
@@ -1760,4 +1604,20 @@ std::vector<json> SFMLGame::getMessages() const {
 
 std::string SFMLGame::getClickedContact() const {
     return clickedContact;
+}
+
+std::unordered_map<std::string, std::unique_ptr<Button>> SFMLGame::getTEAMSbuttons() const {
+    return TEAMSbuttons;
+}
+
+void SFMLGame::setSelectedTeam(const std::string& team) {
+    selectedTeam = team;
+}
+
+std::string SFMLGame::getSelectedTeam() const {
+    return selectedTeam;
+}
+
+void SFMLGame::clearSelectedTeam() {
+    selectedTeam.clear();
 }

@@ -106,7 +106,6 @@ class SFMLGame {
         void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
         // Teams Menu
-        void displayRoomsMenu();
         void manageTeamMenu();
 
 
@@ -144,6 +143,13 @@ class SFMLGame {
         MenuState getPreviousState() const;
         std::vector<json> getMessages() const;
         std::string getClickedContact() const;
+        std::unordered_map<std::string, std::unique_ptr<Button>> getTEAMSbuttons() const;
+
+        std::unordered_map<std::string, std::unique_ptr<Button>> getTEAMSbuttons() const;
+
+        void setSelectedTeam(const std::string& team); 
+        void clearSelectedTeam();
+        std::string getSelectedTeam() const;
 };
 
 #endif

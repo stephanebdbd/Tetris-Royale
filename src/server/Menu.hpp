@@ -6,7 +6,7 @@
 class Menu {
     public:
         //welcome & main menu
-        json getMainMenu0() const;  // welcome menu
+        json getMainMenu0() const;  // Bienvenue menu
         json getMainMenu1() const;  // Main menu
         //register & login  
         json getRegisterMenu1() const;
