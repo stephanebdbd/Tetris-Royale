@@ -530,7 +530,7 @@ void GameRoom::choiceVictimRandomly(int playerId) {
     while (true) {
         int possible = rand() % players.size();
         if ((possible != playerId) && (!getGameIsOver(possible))) {
-            this->victimRandom = possible + 1;
+            this->victimRandom = possible;
             break;
         }
     }
@@ -542,7 +542,7 @@ json GameRoom::messageToJson(int playerServerId) const {
     for (const auto& m : messageList[playerId]) {
         smessage[m.first] = m.second;
     }
-    smessage[jsonKeys::CIBLE_ID] = victimRandom;
+    smessage[jsonKeys::CIBLE_ID] = victimRandom + 1;
     if(keyClear[playerId]){
         smessage[jsonKeys::CLEAR] = true;
         keyClear[playerId] = false;
