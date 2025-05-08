@@ -52,7 +52,6 @@ class Menu {
         json getChooseContactMenu(const std::vector<std::string>& contacts, bool prive) const;
         
         //Ranking
-        //json getRankingMenu(std::map<std::string, std::vector<std::string>>& ranking) const;       
         json getRankingMenu(const std::map<std::string, std::vector<std::string>>& ranking) const;
         json displayMessage(const std::string& message) const;
         

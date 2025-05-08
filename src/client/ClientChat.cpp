@@ -14,7 +14,6 @@ void ClientChat::run() {
     curs_set(1); // Rendre le curseur visible
     keypad(stdscr, TRUE); // Activer les touches spéciales
     nodelay(stdscr, TRUE); // Ne pas bloquer l'entrée utilisateur
-    //start_color();
     init_pair(1, COLOR_GREEN, COLOR_BLACK);  // Vos messages
     init_pair(2, COLOR_WHITE, COLOR_BLACK); // Messages reçus
 

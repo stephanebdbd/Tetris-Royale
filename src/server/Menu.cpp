@@ -324,7 +324,6 @@ json Menu::getChooseContactMenu(const std::vector<std::string>& contacts, bool p
     const std::string input = prive ? "Tapez le pseudo de l'ami" : "Tapez le nom de la room";
     if (contacts.empty()) {
         json menu = {
-            //{jsonKeys::TITLE, room ? "Chatter avec une Room" : "Chatter avec un ami"},
             {jsonKeys::TITLE, title},
             {jsonKeys::OPTIONS, {
                 {"Vous n'avez aucune contact disponible pour chatter.", ""}
@@ -360,7 +359,7 @@ json Menu::getRankingMenu(const std::map<std::string, std::vector<std::string>>&
 
         // Construire la clé et la valeur
         std::string key = "    " + std::to_string(i + 1) + ". ";
-        std::string value = username + " - Score: " + details[0]; // details[0] contient le score
+        std::string value = username + " - Score: " + details[0]; // contient le score
 
         // Ajouter au JSON
         menu[jsonKeys::OPTIONS][key] = value;

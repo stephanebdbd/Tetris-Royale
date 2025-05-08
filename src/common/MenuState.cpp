@@ -4,6 +4,9 @@
 #include <iostream>
 #include <sys/socket.h>
 #include "jsonKeys.hpp"
+
+
+
 // Serialize
 std::string MenuStateManager::serialize(const MenuState& state) {
     return std::to_string(static_cast<int>(state));

@@ -165,7 +165,7 @@ void TextField::handleInput(sf::Event event) {
                 textString += enteredChar;
             }
 
-            // Update text and cursor position only when necessary
+            // Actualise la position du curseur et du texte
             text.setString(hiddenText ? std::string(textString.size(), '*') : textString);
             cursor.setPosition(text.findCharacterPos(textString.size()).x, text.getPosition().y);
         }

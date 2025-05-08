@@ -28,7 +28,7 @@ class Server {
     std::unordered_map<int, int> clientIdToSocket; 
     std::unordered_map<int, std::shared_ptr<GameRoom>> gameRooms;  
     std::shared_ptr<DataBase> database; // DataBase instance
-    DataManager userManager; //std::unordered_map<std::string, std::vector<std::string>> users_notifications;
+    DataManager userManager;
     ChatRoom chatRoomsManage; // ChatRoom instance
     Chat chat; // Chat instance
     Menu menu;

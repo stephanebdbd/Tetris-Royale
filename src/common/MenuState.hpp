@@ -76,4 +76,4 @@ public:
 
 };
 
-#endif /* MenuState_hpp */
+#endif // MenuState_hpp

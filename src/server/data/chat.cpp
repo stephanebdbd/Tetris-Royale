@@ -30,7 +30,6 @@ bool Chat::processClientChat(int senderSocket, const std::string& sender, const 
 }
 
 void Chat::sendMessage(json& msg, const std::map<std::string, int>& receiver) {
-    //save the message in the db
     if(receiver.size() == 1){
         auto receiverOfMessage = receiver.begin()->first;
         // Enregistrement du message dans la base de données

@@ -6,7 +6,6 @@
 #include "Game.hpp"
 
 class Bonus {
-    //TetraminoDisplacement displacement;
     std::shared_ptr<Game> game;
     public:
         Bonus(std::shared_ptr<Game> game);

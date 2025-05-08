@@ -23,9 +23,7 @@ class ChatRoom {
     public:
         // Constructeur avec un pointeur partagé sur la base de données
         ChatRoom(std::shared_ptr<DataBase> db){ this->db = db;}
-        //bool deleteRoom();
-        // Initialiser la chat room
-         // Créer une salle de discussion
+        // Créer une salle de discussion
         bool createTeam(const std::string &room_name, const std::string &admin_pseudo);
         // Vérifie si l'utilisateur est admin dans la salle spécifiée
         bool isAdmin(const std::string& pseudo, const std::string& room_name) const;
@@ -47,10 +45,8 @@ class ChatRoom {
         
         //verfication de la room
         bool checkroomExist(const std::string& room_name) const; // Vérifier si la salle existe
-        ////////////////////////////// c est deux méthodes a refaire ////////////////////////////
         std::vector<std::string> getChatRoomsForUser(const std::string& username) const ;
         std::vector<std::string> getTeamsInvitaionForUser(const std::string& username) const ;
-        /////////////////////////////////////////////////////////////////////////////////////////
         void joinTeam(const std::string& pseudo, const std::string& room_name) ;
         std::vector<std::string> getMembers(const std::string& room_name) const ;
         std::vector<std::string> getAdmins(const std::string& room_name) ;

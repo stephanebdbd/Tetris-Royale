@@ -643,8 +643,7 @@ void SFMLGame::displayCurrentPlayerInfo() {
                                                              sf::Vector2f(20, 20)); // Position en haut à droite de la fenêtre
     }
 
-    if (buttons[ButtonKey::Close]->isClicked(*window)) {
-        // pour fermer la boîte d'informations
+    if (buttons[ButtonKey::Close]->isClicked(*window)) {    // pour fermer la boîte d'informations
         client.setShow(false);
         buttons.erase(ButtonKey::Close);
         return;
@@ -685,7 +684,7 @@ void SFMLGame::chatMenu() {
 
     if (buttons.empty()) {
         // Bouton pour revenir au menu principal
-        Button backButton(textures->logoMain,sf::Vector2f(7, 50), sf::Vector2f(25, 35));       // Bouton pour envoyer le message
+        Button backButton(textures->logoMain,sf::Vector2f(7, 50), sf::Vector2f(25, 35));
         // Bouton pour envoyer le message
         Button sendButton(">", font, 20, sf::Color::White, sf::Color(70, 200, 70),
                           sf::Vector2f(WINDOW_WIDTH - 40, WINDOW_HEIGHT - 40), sf::Vector2f(35, 35));
@@ -707,7 +706,6 @@ void SFMLGame::chatMenu() {
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         if(previousState == MenuState::Settings){
-            //j[jsonKeys::ACTION] = "AcceptRejoindre";
             acceptInvite.clear();
         }
         else{
@@ -940,7 +938,6 @@ void SFMLGame::CreateOrJoinGame() {
 
         buttons[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
                                                                sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
-        // buttons[ButtonKey::Profile]->drawPhoto(avatarduClient);
     }
 
     // Dessiner les boutons
@@ -994,7 +991,6 @@ void SFMLGame::ChoiceGameMode(){
                                                               sf::Vector2f(980, 640), sf::Vector2f(150, 45), sf::Color(255, 255, 255, 0));
 
         buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
-        //buttons[ButtonKey::Quit] = std::make_unique<Button>(textures->logoExit,sf::Vector2f(10, 20),sf::Vector2f(40, 40));
     }
     
     //draw buttons
@@ -1564,7 +1560,6 @@ void SFMLGame::displayWaitingRoom() {
             invite = false;
             inviteScrollOffset = 0;
             inviteMaxScroll = 0;
-            //buttons.erase(ButtonKey::esc);
             cleanup();
             inviteFriends.clear();
             isInvite.clear();
@@ -1763,8 +1758,6 @@ void SFMLGame::displayJoinGame() {
 
                     // Envoyer la réponse au serveur
                     client.sendInputFromSFML("accept."+status+"." + gameRoomNumber);
-                    //j[jsonKeys::ACTION] = "AcceptRejoindre";
-                    //network->sendData(j.dump() + "\n", client.getClientSocket());
                     acceptInvite.clear();
                     break;
                 }

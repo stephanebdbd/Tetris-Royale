@@ -70,7 +70,7 @@ void MenuManager::connexionMenu() {
 
     // Gérer les clics sur les boutons
     if (buttons->count(ButtonKey::Retour) && (*buttons)[ButtonKey::Retour]->isClicked(*window)) {
-        //currentState = MenuState::Welcome; // Retourner au menu de bienvenue
+        // Retourner au menu de bienvenue
         sfmlGame->cleanup();
         json j;
         j[jsonKeys::ACTION] = jsonKeys::WELCOME;

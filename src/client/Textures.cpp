@@ -8,8 +8,6 @@ void Textures::loadTexture(sf::Texture& texture, const std::string& filePath) {
 
 void Textures::loadTextures() {
     loadTexture(connexion, ConnexionBackGround);
-    //loadTexture(grid, GridBackGround);
-    //loadTexture(game, GameMenuBackGround);
     loadTexture(chat, ChatBackGround);
     loadTexture(ranking, RankingBackGround);
     loadTexture(logoConnexion, LogoBackGround);

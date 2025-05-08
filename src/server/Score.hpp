@@ -6,7 +6,7 @@
 
 class Score {
     int score, combo;
-    int x, y; // Position oÃ¹ afficher le score
+    int x, y; // Position où afficher le score
 
     public:
         Score(int posX, int posY);

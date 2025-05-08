@@ -15,7 +15,7 @@ class Malus {
     
     public:
         Malus(int nbrLine);
-        void createMalus(); //creation de malus 
+        void createMalus();
         void sendMalus(Grid& grid);
   
 };

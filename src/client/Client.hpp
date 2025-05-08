@@ -36,7 +36,6 @@ private:
     GameState gameState;
     std::mutex gameStateMutex;
 
-    //DisplayCallback displayCallback;
     json serverData;                // Données reçues du serveur
     std::atomic<bool> stop_threads{false};
     std::thread inputThread;

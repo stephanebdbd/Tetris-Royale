@@ -69,16 +69,14 @@ class SFMLGame {
 
         };
         std::map<std::string, std::vector<std::unique_ptr<Button>>> inviteFriends;
-        //std::map<std::string, std::vector<std::unique_ptr<Button>>> acceptInvite;
         std::map<std::string, std::unique_ptr<Button>> acceptInvite;
         std::map<std::string,  std::vector<std::string>> pseudos = {};
         std::vector<std::string> friendsLobby = {};
         std::unique_ptr<Button> quitter = std::make_unique<Button>("Quitter", font, 24, sf::Color::White, sf::Color::Red, sf::Vector2f(50, 500), sf::Vector2f(150, 50));
-        //std::map<std::string, std::unique_ptr<Button>> inviteFriends;
         bool invite = false;
         bool cl = false;
-        //std::vector<std::string> pseudos;
         std::vector<std::vector<bool>> isInvite;
+
         // Variables globales ou membres de la classe
         sf::View inviteView; // Vue pour le rectangle défilable
         float inviteScrollOffset = 0.0f; // Décalage vertical pour le défilement
@@ -152,4 +150,4 @@ class SFMLGame {
 
 };
 
-#endif // 
+#endif

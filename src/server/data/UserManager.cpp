@@ -353,7 +353,7 @@ std::vector<std::vector<std::string>> DataManager::getListGameRequest(const std:
         "u.username, g.invitation_type, g.id_game",
         "Users u",
         "u.id_user = g.id_sender",
-        "g.id_player = " + userId + " AND g.status = 'pending'" // AND g.id_player = " + user
+        "g.id_player = " + userId + " AND g.status = 'pending'"
     );
     for (const auto& row : result.getData()) {
         if (!row.empty()) gamesInviation.push_back(row);  // username

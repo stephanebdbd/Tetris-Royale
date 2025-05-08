@@ -129,7 +129,6 @@ void TetraminoDisplacement::update() {
 }
 
 void TetraminoDisplacement::drawPiece() {
-    //if(lightisBlocked) return;
     currentPiece.draw();
 }
 
@@ -137,7 +136,6 @@ void TetraminoDisplacement::setBlockCommand(bool block) {
     commandIsBlocked = block;
 }
 void TetraminoDisplacement::setlightBlocked(bool block){
-    //isLight = block;
     bonusCounter1.setInterval(10000);
     bonusCounter1.reset();
     

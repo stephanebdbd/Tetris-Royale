@@ -46,7 +46,6 @@ public:
     json tetraminoToJson() const;
     void setSpeed(int newSpeed);
     void setSpeedBonusMalus(bool bonus) { SpeedBonusMalus = bonus; }
-    //void setEnter(int enter) { ch = enter; }
     void setBlockCommand(bool block);
     void setlightBlocked(bool block);
     void randomPosition();
