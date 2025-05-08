@@ -610,18 +610,8 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             
             auto friends = userManager.getFriendList(clientPseudo[clientId]);
 
-            std::map<std::string,  std::vector<std::string>> active;
-            std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
-            std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
-            for (int player : players){
-                std::string pseudo = clientPseudo[player];
-                active["player"].push_back(pseudo);
-            }
-
-            for (int observer : observers){
-                std::string pseudo = clientPseudo[observer];
-                active["observer"].push_back(pseudo);
-            }
+            std::map<std::string,  std::vector<std::string>> active = updateActivePlayerObserver(clientId);
+            
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "mode duel", friends, {}, active);
             return;
             
@@ -631,36 +621,17 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             clientStates[clientId] = MenuState::Settings;
             this->keyInputCreateGameRoom(clientId, GameModeName::Classic);
             auto friends = userManager.getFriendList(clientPseudo[clientId]);
-            std::map<std::string,  std::vector<std::string>> active;
-            std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
-            std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
-            for (int player : players){
-                std::string pseudo = clientPseudo[player];
-                active["player"].push_back(pseudo);
-            }
-
-            for (int observer : observers){
-                std::string pseudo = clientPseudo[observer];
-                active["observer"].push_back(pseudo);
-            }
+            std::map<std::string,  std::vector<std::string>> active = updateActivePlayerObserver(clientId);
+            
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "mode classic", friends, {}, active);
         }
         else if(actionType == "RoyaleMode") {
             clientStates[clientId] = MenuState::Settings;
             this->keyInputCreateGameRoom(clientId, GameModeName::Royal_Competition);
             auto friends = userManager.getFriendList(clientPseudo[clientId]);
-            std::map<std::string,  std::vector<std::string>> active;
-            std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
-            std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
-            for (int player : players){
-                std::string pseudo = clientPseudo[player];
-                active["player"].push_back(pseudo);
-            }
-
-            for (int observer : observers){
-                std::string pseudo = clientPseudo[observer];
-                active["observer"].push_back(pseudo);
-            }
+            std::map<std::string,  std::vector<std::string>> active = updateActivePlayerObserver(clientId);
+           
+            
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "mode royale", friends, {}, active);
         }
         else if(actionType == "Rejoindre"){
@@ -671,20 +642,12 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             return;
         }
 
-        else if(actionType == "AcceptRejoindre"){
+        /*else if(actionType == "AcceptRejoindre"){
             std::cout << "Client #" << clientId << " accepte a rejoindre une Gameroom ." << std::endl;
-            std::map<std::string,  std::vector<std::string>> active;
+            std::map<std::string,  std::vector<std::string>> active = updateActivePlayerObserver(clientId);
             std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
             std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
-            for (int player : players){
-                std::string pseudo = clientPseudo[player];
-                active["player"].push_back(pseudo);
-            }
-
-            for (int observer : observers){
-                std::string pseudo = clientPseudo[observer];
-                active["observer"].push_back(pseudo);
-            }
+    
             
             for (int player : players){
                 auto friends = userManager.getFriendList(clientPseudo[player]);
@@ -698,7 +661,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                 menuStateManager->sendMenuStateToClient(clientIdToSocket[observer], clientStates[observer], "observer", {}, {}, active);
             }
             return;
-        }
+        }*/
     }
 }
 
@@ -841,6 +804,23 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         default:
             break;
     }
+}
+
+std::map<std::string,  std::vector<std::string>> Server::updateActivePlayerObserver(int clientId){
+    std::map<std::string,  std::vector<std::string>> active;
+    std::vector<int> players = gameRooms[clientGameRoomId[clientId]]->getPlayers();
+    std::vector<int> observers = gameRooms[clientGameRoomId[clientId]]->getViewers();
+    for (int player : players){
+        std::string pseudo = clientPseudo[player];
+        active["player"].push_back(pseudo);
+    }
+
+    for (int observer : observers){
+        std::string pseudo = clientPseudo[observer];
+        active["observer"].push_back(pseudo);
+    }
+
+    return active;
 }
 
 
@@ -1829,14 +1809,33 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
         clientStates[clientId] = MenuState::JoinOrCreateGame;
         sendMenuToClient(clientSocket, menu.getJoinOrCreateGame());
         menuStateManager->sendMenuStateToClient(clientIdToSocket[clientId], clientStates[clientId], "Bienvenue dans menu rejoindre et creer .");
+
+        std::map<std::string,  std::vector<std::string>> active = updateActivePlayerObserver(clientId);
+        for (const auto& cId : gameRoom->getPlayers()){
+            sendMenuToClient(pseudoTosocket[clientPseudo[cId]], menu.getLobbyMenu(getMaxPlayers(cId), getMode(cId), getAmountOfPlayers(cId), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+            auto friends = userManager.getFriendList(clientPseudo[cId]);
+            if (gameRoom->getOwnerId() == cId){
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[cId], clientStates[cId], "owner", friends, {}, active);
+            }else{
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[cId], clientStates[cId], "player", friends, {}, active);
+            }
+                
+        }
+
+        for (const auto& observerId : gameRoom->getViewers()) {
+            sendMenuToClient(pseudoTosocket[clientPseudo[observerId]], menu.getLobbyMenu(getMaxPlayers(observerId ), getMode(observerId ), getAmountOfPlayers(observerId ), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+            menuStateManager->sendMenuStateToClient(clientIdToSocket[observerId], clientStates[observerId], "observer", {}, {}, active);
+        }
         return;
     }
     
     else if (gameRoom != nullptr)
         gameRoom->input(clientId, action, "player");
     
-    if ((gameRoom != nullptr) && (!gameRoom->getInProgress()) && (clientStates[clientId] == MenuState::Settings))   //refresh le Lobby
+    if ((gameRoom != nullptr) && (!gameRoom->getInProgress()) && (clientStates[clientId] == MenuState::Settings)){
+        //refresh le Lobby
         sendMenuToClient(clientSocket, menu.getLobbyMenu(getMaxPlayers(clientId), getMode(clientId), getAmountOfPlayers(clientId), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+    }   
 }
 
 void Server::extractDataBetweenSlashes(const std::string& toFind, const std::string& action, std::string& status, std::string& receiver){
@@ -1926,14 +1925,22 @@ void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::s
 
            
             if(!gameRoom->getInProgress()){
+                std::map<std::string,  std::vector<std::string>> active = updateActivePlayerObserver(clientId);
                 for (const auto& cId : gameRoom->getPlayers()){
                     sendMenuToClient(pseudoTosocket[clientPseudo[cId]], menu.getLobbyMenu(getMaxPlayers(cId), getMode(cId), getAmountOfPlayers(cId), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+                    auto friends = userManager.getFriendList(clientPseudo[cId]);
+                    if (gameRoom->getOwnerId() == cId){
+                        menuStateManager->sendMenuStateToClient(clientIdToSocket[cId], clientStates[cId], "owner", friends, {}, active);
+                    }else{
+                        menuStateManager->sendMenuStateToClient(clientIdToSocket[cId], clientStates[cId], "player", friends, {}, active);
+                    }
                 
                 }
 
                 for (const auto& observerId : gameRoom->getViewers()) {
                     sendMenuToClient(pseudoTosocket[clientPseudo[observerId]], menu.getLobbyMenu(getMaxPlayers(observerId ), getMode(observerId ), getAmountOfPlayers(observerId ), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
-            }
+                    menuStateManager->sendMenuStateToClient(clientIdToSocket[observerId], clientStates[observerId], "observer", {}, {}, active);
+                }
             }
         
             

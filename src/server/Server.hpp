@@ -130,6 +130,7 @@ public:
     void sendMiniGameToPlayer(int clientId, int clientSocket, std::shared_ptr<GameRoom> gameRoom);
     void sendInputToGameRoom2(int clientId, const std::string& action);
     void letObserversObserve(const std::vector<int>& observers);
+    std::map<std::string,  std::vector<std::string>> updateActivePlayerObserver(int clientId);
 
 
 };

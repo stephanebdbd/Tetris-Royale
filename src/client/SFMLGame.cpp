@@ -707,7 +707,7 @@ void SFMLGame::chatMenu() {
     if (buttons[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         if(previousState == MenuState::Settings){
-            j[jsonKeys::ACTION] = "AcceptRejoindre";
+            //j[jsonKeys::ACTION] = "AcceptRejoindre";
             acceptInvite.clear();
         }
         else{
@@ -1358,6 +1358,7 @@ void SFMLGame::displayWaitingRoom() {
         }
 
         if(!gameData.showCommand.empty()){
+            std::cout << "showCommand: " << gameData.showCommand << std::endl;
             if(gameData.showCommand == "player")
                 showCommand = false;
             else if(gameData.showCommand == "observer"){
@@ -1367,6 +1368,7 @@ void SFMLGame::displayWaitingRoom() {
                 
             
         }
+        std::cout << "showCommand: " << showCommand << std::endl;
 
         Text player("Players: " , font, 20, sf::Color::White, sf::Vector2f(1065, startY));
         player.draw(*window);
@@ -1735,8 +1737,8 @@ void SFMLGame::displayJoinGame() {
 
                     // Envoyer la réponse au serveur
                     client.sendInputFromSFML("accept."+status+"." + gameRoomNumber);
-                    j[jsonKeys::ACTION] = "AcceptRejoindre";
-                    network->sendData(j.dump() + "\n", client.getClientSocket());
+                    //j[jsonKeys::ACTION] = "AcceptRejoindre";
+                    //network->sendData(j.dump() + "\n", client.getClientSocket());
                     acceptInvite.clear();
                     break;
                 }
