@@ -373,14 +373,15 @@ void MenuManager::rankingMenu(){
 
     // Affichage de la liste d'amis (exemple visuel)
     float startY = 80;
-    float spacing = 70;
-    auto ranking1 = client.getRanking();
-        if(ranking1.empty() ) {
+    float spacing = 90;
+
+    auto ranking = client.getRanking();
+        if(ranking.empty() ) {
             std::cout << "Aucun classement trouvé." << std::endl;
             return;
         }
         int i = 0;
-        for (const auto& [username, details] : ranking1) {
+        for (const auto& [username, details] : ranking) {
             std::string bestScore = details[0];      // Score
             std::string avatarNumber = details[1];   // ID d'avatar
         
@@ -401,13 +402,21 @@ void MenuManager::rankingMenu(){
                 }
             }
         
-            // Nom du joueur (à droite de l’avatar)
-            Text name(username, font, 22, sf::Color::White, sf::Vector2f(190, yOffset + 10));
+            // Rectangle fictif pour la carte du joueur
+            Rectangle friendCard(sf::Vector2f(90, startY + i * spacing), sf::Vector2f(1000, 80), sf::Color::Transparent, sf::Color::Black);
+            friendCard.draw(*window);
+            
+            //Nom du joueur
+            Text name(username, font, 20, sf::Color::Black, sf::Vector2f(200, startY + i * spacing + 15));
             name.draw(*window);
-        
-            // Score du joueur (à droite complètement)
-            Text score(bestScore, font, 20, sf::Color::Black, sf::Vector2f(300, yOffset + 10));
+            
+            //Score du joueur
+            Text score(bestScore, font, 20, sf::Color::Black, sf::Vector2f(1000, startY + i * spacing + 15));
             score.draw(*window);
+
+
+
+
         
             i++;
         }
@@ -435,21 +444,27 @@ void MenuManager::teamsMenu() {
 
     // Ajouter les boutons s'ils n'existent pas
     if (buttons->empty()) {
-        (*buttons)[ButtonKey::CreateTeam] = std::make_unique<Button>("Créer une équipe", font, 28, text, background,
+        (*buttons)[ButtonKey::CreateTeam] = std::make_unique<Button>("Create Team", font, 28, text, background,
             sf::Vector2f(centerX, startY),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
 
-        (*buttons)[ButtonKey::JoinTeam] = std::make_unique<Button>("Rejoindre une équipe", font, 28, text, background,
+        (*buttons)[ButtonKey::JoinTeam] = std::make_unique<Button>("Join Team", font, 28, text, background,
             sf::Vector2f(centerX, startY + buttonHeight + spacing),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
 
-        (*buttons)[ButtonKey::TeamInvites] = std::make_unique<Button>("Invitations reçues", font, 28, text, background,
+        (*buttons)[ButtonKey::TeamInvites] = std::make_unique<Button>("Teams Invitation", font, 28, text, background,
             sf::Vector2f(centerX, startY + 2 * (buttonHeight + spacing)),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
 
-        (*buttons)[ButtonKey::ManageTeams] = std::make_unique<Button>("Gérer mes équipes", font, 28, text, background,
+        (*buttons)[ButtonKey::ManageTeams] = std::make_unique<Button>("Manage My Teams", font, 28, text, background,
             sf::Vector2f(centerX, startY + 3 * (buttonHeight + spacing)),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
+        (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(textures->logoExit, sf::Vector2f(10, 20), sf::Vector2f(40, 40));
+        (*buttons)[ButtonKey::Settings] = std::make_unique<Button>(textures->logoSettings,sf::Vector2f(WINDOW_WIDTH - 130, 20), sf::Vector2f(35, 35));
+        (*buttons)[ButtonKey::Notification] = std::make_unique<Button>(textures->logoNotification, sf::Vector2f(WINDOW_WIDTH - 190, 20), sf::Vector2f(45, 45));
+        (*buttons)[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
+                                    sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
+        
     }
 
     sfmlGame->drawButtons();
@@ -473,6 +488,10 @@ void MenuManager::teamsMenu() {
 
     } else if ((*buttons)[ButtonKey::ManageTeams]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAM_MENU;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        return;
+    }else if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::MAIN;
         network.sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }

@@ -361,10 +361,10 @@ void SFMLGame::createRoomMenu() {
 
     // Création des boutons si pas encore fait
     if (buttons.empty()) {
-        Button createButton("Créer", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+        Button createButton("Create", font, 20, sf::Color::White, sf::Color(70, 170, 250),
                             sf::Vector2f(250, 190), sf::Vector2f(140, 45));
 
-        Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+        Button backButton("Back", font, 20, sf::Color::White, sf::Color(180, 70, 70),
                           sf::Vector2f(410, 190), sf::Vector2f(140, 45));
 
         buttons[ButtonKey::Create] = std::make_unique<Button>(createButton);
@@ -531,27 +531,27 @@ void SFMLGame::manageTeamMenu() {
         float startY = 150;
 
         // Bouton "Liste des membres"
-        buttons[ButtonKey::ListMembers] = std::make_unique<Button>("Liste des membres", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+        buttons[ButtonKey::ListMembers] = std::make_unique<Button>("Members List", font, 20, sf::Color::White, sf::Color(70, 170, 250),
                                                                    sf::Vector2f(centerX, startY), sf::Vector2f(buttonWidth, buttonHeight));
 
         // Bouton "Ajouter un membre"
-        buttons[ButtonKey::AddMember] = std::make_unique<Button>("Ajouter un membre", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+        buttons[ButtonKey::AddMember] = std::make_unique<Button>("Add Member", font, 20, sf::Color::White, sf::Color(70, 170, 250),
                                                                  sf::Vector2f(centerX, startY + (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
 
         // Bouton "Ajouter un admin"
-        buttons[ButtonKey::AddAdmin] = std::make_unique<Button>("Ajouter un admin", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+        buttons[ButtonKey::AddAdmin] = std::make_unique<Button>("Add Admin", font, 20, sf::Color::White, sf::Color(70, 170, 250),
                                                                 sf::Vector2f(centerX, startY + 2 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
 
         // Bouton "Les demandes de rejoindre"
-        buttons[ButtonKey::JoinRequests] = std::make_unique<Button>("Les demandes de rejoindre", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+        buttons[ButtonKey::JoinRequests] = std::make_unique<Button>("Join Request", font, 20, sf::Color::White, sf::Color(70, 170, 250),
                                                                     sf::Vector2f(centerX, startY + 3 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
 
         // Bouton "Supprimer la room"
-        buttons[ButtonKey::DeleteRoom] = std::make_unique<Button>("Supprimer la room", font, 20, sf::Color::White, sf::Color(200, 70, 70),
+        buttons[ButtonKey::DeleteRoom] = std::make_unique<Button>("Delete Team", font, 20, sf::Color::White, sf::Color(200, 70, 70),
                                                                   sf::Vector2f(centerX, startY + 4 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
 
         // Bouton "Retour"
-        buttons[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+        buttons[ButtonKey::Retour] = std::make_unique<Button>("Back", font, 20, sf::Color::White, sf::Color(180, 70, 70),
                                                               sf::Vector2f(centerX, startY + 5 * (buttonHeight + spacing)), sf::Vector2f(buttonWidth, buttonHeight));
     }
 
