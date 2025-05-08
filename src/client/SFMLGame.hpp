@@ -147,6 +147,8 @@ class SFMLGame {
         void drawMiniGrid(const json& miniGrid, sf::Vector2f pos);
         void drawMiniTetra(const json& miniTetra, sf::Vector2f pos);
         void displayCurrentPlayerInfo();
+        void drawPlayerNumber(const json& playerNumber);
+        void drawminiPlayerId(const json& playerId, sf::Vector2f pos);
 
 };
 

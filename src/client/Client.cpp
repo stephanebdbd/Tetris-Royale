@@ -285,6 +285,7 @@ void Client::setGameStateFromServer(const json& data) {
         gameState.currentPieceData = data[jsonKeys::TETRA_PIECE];
         gameState.nextPieceData = data[jsonKeys::NEXT_PIECE];
         gameState.scoreData = data[jsonKeys::SCORE];
+        gameState.playerNumberData = data[jsonKeys::PLAYER_NUMBER];
         gameState.isGame = true;
         gameState.message = data[jsonKeys::MESSAGE_CIBLE];
 
@@ -327,6 +328,7 @@ void Client::reintiliseData(){
     gameState.currentPieceData.clear();
     gameState.nextPieceData.clear();
     gameState.scoreData.clear();
+    gameState.playerNumberData.clear();
     gameState.message.clear();
     gameState.miniGrid.clear();
     gameState.miniUpdate = false;
@@ -334,6 +336,7 @@ void Client::reintiliseData(){
     gameState.friendsLobby.clear();
     gameState.pseudos.clear();
     gameState.showCommand.clear();
+
 
 }
 

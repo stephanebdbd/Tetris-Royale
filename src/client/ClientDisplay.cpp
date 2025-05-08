@@ -49,6 +49,8 @@ void ClientDisplay::displayGame(const json& data) {
     
     drawMessage(data[jsonKeys::MESSAGE_CIBLE]);
 
+    drawPlayerNumber(data[jsonKeys::PLAYER_NUMBER]);
+
     if(data[jsonKeys::MESSAGE_CIBLE][jsonKeys::GAME_OVER])
         displayLargeText("GAME OVER", 10, 1, "Z");
 
@@ -167,4 +169,7 @@ void ClientDisplay::displayLargeText(const std::string& text, int startY, int st
     mvprintw(startY, startX, "%s", text.c_str());
     color.deactivate();
     
+}
+void ClientDisplay::drawPlayerNumber(int playerNumber) {
+    mvprintw(3, 13, "Player Number: %d", playerNumber);
 }

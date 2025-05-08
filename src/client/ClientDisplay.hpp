@@ -17,6 +17,7 @@ class ClientDisplay {
         void drawTetramino(const json& tetraPiece);
         void drawScore(const json& score);
         void drawMessage(const json& msg);
+        void drawPlayerNumber(int playerNumber);
 
         void displayLargeText(const std::string& text, int startY, int startX, const std::string& colorSymbol);
 

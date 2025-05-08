@@ -8,6 +8,7 @@ struct GameState {
     json scoreData;
     json nextPieceData;
     json currentPieceData;
+    json playerNumberData;
     bool updated = false;  // drapeau pour indiquer que de nouvelles données sont arrivées
 
     json menu;

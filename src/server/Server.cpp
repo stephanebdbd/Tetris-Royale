@@ -1149,9 +1149,9 @@ void Server::sendMiniGameToPlayer(int clientId, int clientSocket, std::shared_pt
             std::shared_ptr<Game> otherGame = gameRoom->getGame(otherPlayerId);
 
             json otherPlayerData;
-            otherPlayerData["playerId"] = otherPlayerId;
             otherPlayerData["grid"] = otherGame->gridToJson();
             otherPlayerData["tetra"] = otherGame->tetraminoToJson()[jsonKeys::TETRA_PIECE];
+            otherPlayerData["playerId"] = gameRoom->getPlayerId(otherPlayerId) + 1;
             otherPlayersGrids.push_back(otherPlayerData);
             
         }
@@ -1708,6 +1708,8 @@ void Server::sendGameToPlayer(int clientId, int clientSocket, std::shared_ptr<Ga
     message[jsonKeys::NEXT_PIECE] = tetraminos[jsonKeys::NEXT_PIECE];
 
     message[jsonKeys::MESSAGE_CIBLE] = gameRoom->messageToJson(clientId);
+    message[jsonKeys::PLAYER_NUMBER] = gameRoom->getPlayerId(clientId) + 1;
+    std::cout << "Player number: " << message[jsonKeys::PLAYER_NUMBER] << std::endl;
     std::string msg = message.dump() + "\n";
 
     send(clientSocket, msg.c_str(), msg.size(), 0); // Un seul envoi

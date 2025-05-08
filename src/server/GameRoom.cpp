@@ -530,7 +530,7 @@ void GameRoom::choiceVictimRandomly(int playerId) {
     while (true) {
         int possible = rand() % players.size();
         if ((possible != playerId) && (!getGameIsOver(possible))) {
-            this->victimRandom = possible;
+            this->victimRandom = possible + 1;
             break;
         }
     }

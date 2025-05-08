@@ -1042,17 +1042,31 @@ void SFMLGame::displayGame(){
             drawTetramino(gameData.currentPieceData);
             drawTetramino(gameData.nextPieceData);
             drawScore(gameData.scoreData);
+            drawPlayerNumber(gameData.playerNumberData);
             drawMessageMalusBonus(gameData.message);
             if(gameData.miniUpdate){
                 int i = 0;
                 for(const auto& miniGrid : gameData.miniGrid) {
                     drawMiniGrid(miniGrid["grid"], miniGridPositions[i]);
                     drawMiniTetra(miniGrid["tetra"], miniGridPositions[i]);
+                    drawminiPlayerId(miniGrid["playerId"], miniGridPositions[i]);
                     i++;
                 }
             }
         } 
     }
+}
+
+void SFMLGame::drawminiPlayerId(const json& playerId, sf::Vector2f pos) {
+    int playerNumber = playerId;
+    sf::Text playerText;
+    playerText.setFont(font);
+    playerText.setString(std::to_string(playerNumber));
+    playerText.setCharacterSize(15);
+    playerText.setFillColor(sf::Color::White);
+    playerText.setPosition(pos.x - 10, pos.y); 
+
+    window->draw(playerText);
 }
 
 void SFMLGame::drawMiniGrid(const json& miniGrid, sf::Vector2f pos) {
@@ -1321,6 +1335,18 @@ void SFMLGame::drawScore(const json& scoreData) {
         window->draw(errorText);
     }
 }
+void SFMLGame::drawPlayerNumber(const json& playerData) {
+    int playerNumber = playerData;
+    sf::Text playerText;
+    playerText.setFont(font);
+    playerText.setString("Player: " + std::to_string(playerNumber));
+    playerText.setCharacterSize(24);
+    playerText.setFillColor(sf::Color::White);
+    playerText.setPosition(cellSize * 12 + 10, 3 * cellSize +15); 
+
+    window->draw(playerText);
+}
+
 
 
 void SFMLGame::displayWaitingRoom() {

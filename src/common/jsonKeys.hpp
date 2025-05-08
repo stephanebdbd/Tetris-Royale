@@ -95,6 +95,7 @@ namespace jsonKeys {
     constexpr char MEMBER_NAME[] = "memberName";
     constexpr char REMOVE_MEMBER[] = "remove_member";
     constexpr char REMOVE_ADMIN[] = "remove_admin";
+    constexpr char PLAYER_NUMBER[] = "PlayerNumber";
 
 
     
