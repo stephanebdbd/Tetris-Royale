@@ -17,11 +17,11 @@ void MenuManager::welcomeMenu() {
     // Ajouter les boutons s'ils n'existent pas
     if (buttons->empty()) {
         (*buttons)[ButtonKey::Login] = std::make_unique<Button>("Connexion", font, 24, sf::Color::White, sf::Color(100, 149, 237),
-                                                            sf::Vector2f(WINDOW_WIDTH / 2 - 220, 600), sf::Vector2f(200, 35));
+                                                            sf::Vector2f(WINDOW_WIDTH / 2 - 220, 650), sf::Vector2f(200, 35));
         (*buttons)[ButtonKey::Registre] = std::make_unique<Button>("Inscription", font, 24, sf::Color::White, sf::Color(255, 165, 0),
-                                                            sf::Vector2f(WINDOW_WIDTH / 2 + 20, 600), sf::Vector2f(200, 35));
+                                                            sf::Vector2f(WINDOW_WIDTH / 2 + 20, 650), sf::Vector2f(200, 35));
         (*buttons)[ButtonKey::Quit] = std::make_unique<Button>("Quitter", font, 24, sf::Color::White, sf::Color(255, 99, 71),
-                                                            sf::Vector2f(WINDOW_WIDTH / 2 - 100, 660), sf::Vector2f(200, 35));
+                                                            sf::Vector2f(WINDOW_WIDTH / 2 - 100, 710), sf::Vector2f(200, 35));
     }
 
     // Utilise la méthode centrale de SFMLGame pour dessiner les boutons
@@ -52,16 +52,16 @@ void MenuManager::connexionMenu() {
     // Ajouter les champs de texte et les boutons s'ils n'existent pas
     if (texts->empty()) {
         (*texts)[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                    sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 560), sf::Vector2f(200, 35), "Pseudo");
+                                                                    sf::Vector2f(WINDOW_WIDTH/2 - 210, 650), sf::Vector2f(200, 35), "Pseudo");
         (*texts)[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                    sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 610), sf::Vector2f(200, 35), "Mot de passe", true);
+                                                                    sf::Vector2f(WINDOW_WIDTH/2 +10, 650), sf::Vector2f(200, 35), "Mot de passe", true);
     }
 
     if (buttons->empty()) {
         (*buttons)[ButtonKey::Login] = std::make_unique<Button>("Se connecter", font, 24, sf::Color::White, sf::Color(100, 149, 237),
-                                                             sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 660), sf::Vector2f(200, 35));
+                                                             sf::Vector2f(WINDOW_WIDTH/2 - 210, 700), sf::Vector2f(200, 35));
         (*buttons)[ButtonKey::Retour] = std::make_unique<Button>("Retour", font, 24, sf::Color::White, sf::Color(255, 99, 71),
-                                                              sf::Vector2f(WINDOW_WIDTH/2 - 200/2, 710), sf::Vector2f(200, 35));
+                                                              sf::Vector2f(WINDOW_WIDTH/2 + 10, 700), sf::Vector2f(200, 35));
     }
 
     // Dessiner les champs de texte et les boutons
@@ -219,7 +219,7 @@ void MenuManager::registerMenu() {
     sfmlGame->displayBackground(textures->connexion);
 
     // Titre principal
-    Text title("Rejoignez la communaute", font, 30, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 150, 20));
+    Text title("Rejoignez la communaute", font, 30, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 200, 20));
     title.draw(*window);
 
 
@@ -227,21 +227,21 @@ void MenuManager::registerMenu() {
     float fieldWidth = 250;
     float fieldHeight = 35;
     float centerX = WINDOW_WIDTH / 2 - fieldWidth / 2;
-    float startY = 500;
+    float startY = 550;
     float fieldSpacing = 60;
 
     // Ajouter les champs de texte s'ils n'existent pas
     if (texts->empty()) {
         (*texts)[TextFieldKey::Username] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                     sf::Vector2f(centerX - 300, startY), sf::Vector2f(fieldWidth, fieldHeight), "Username");
+                                                                    sf::Vector2f(centerX - 320, startY ), sf::Vector2f(fieldWidth, fieldHeight), "Username");
         (*texts)[TextFieldKey::Password] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                     sf::Vector2f(centerX + 270, startY), sf::Vector2f(fieldWidth, fieldHeight), "Password", true);
+                                                                    sf::Vector2f(centerX , startY), sf::Vector2f(fieldWidth, fieldHeight), "Password", true);
         (*texts)[TextFieldKey::ConfirmPassword] = std::make_unique<TextField>(font, 24, sf::Color::Black, sf::Color::White,
-                                                                            sf::Vector2f(centerX - 20, startY + fieldSpacing), sf::Vector2f(fieldWidth, fieldHeight), "Confirm Password", true);
+                                                                    sf::Vector2f(centerX + 320, startY),  sf::Vector2f(fieldWidth, fieldHeight), "Confirm Password", true);
     }
 
     // Section Sélection d'avatar
-    float avatarTitleY = startY + 2 * fieldSpacing + 10;
+    float avatarTitleY = startY + fieldSpacing + 10;
     Text avatarTitle("Choisissez votre avatar:", font, 20, sf::Color::White, sf::Vector2f(WINDOW_WIDTH / 2 - 130, avatarTitleY));
     avatarTitle.draw(*window);
 
