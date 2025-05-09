@@ -206,7 +206,6 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
                         {"username", action[jsonKeys::USERNAME]},
                         {"avatar", avatarIndex}
                     };
-                    std::cout << "JSON envoyé au client : " << response.dump() << std::endl;
                     send(clientSocket, response.dump().c_str(), response.dump().size(), 0);
                     
                 }else{
@@ -949,10 +948,14 @@ void Server::keyInputAddFriendMenu(int clientSocket, int clientId, const std::st
 void Server::handleChat(int clientSocket, int clientId, json& receivedData){
     // Handle chat messages
     auto receiver = receiverOfMessages[clientSocket];
+    std::cout << "Receiver " << receiver << std::endl;
+    std::cout << "Reciver Message " << receivedData["receiver"].get<std::string>() << std::endl;
     bool isRoom = chatRoomsManage.checkroomExist(receiver);
     std::map<std::string, int> receivers;
     bool sendMessage = true;
+    auto sender = clientPseudo[clientId];
     if (isRoom) {
+        sender = receiver;
         auto members = chatRoomsManage.getMembers(receiver);
         for (const auto& member : members) {
             if (pseudoTosocket.find(member) != pseudoTosocket.end() && member != clientPseudo[clientId] && receiverOfMessages[pseudoTosocket[member]] == receiver) {
@@ -965,8 +968,21 @@ void Server::handleChat(int clientSocket, int clientId, json& receivedData){
         receivers[receiver] = pseudoTosocket[receiver];
         sendMessage = (receiverOfMessages[pseudoTosocket[receiver]] == clientPseudo[clientId]);
     }
-
-    if(sendMessage && !chat.processClientChat(clientPseudo[clientId], receivers, receivedData)){
+     // enregistrer le message dans la base de données si le message est valide et que le sender n 'a pas quité le chat
+    if(isRoom) chatRoomsManage.saveMessageToRoom(clientPseudo[clientId], receiver, receivedData[jsonKeys::MESSAGE]);
+    else chat.saveMessage(clientPseudo[clientId], receiver, receivedData[jsonKeys::MESSAGE]);
+    
+    if(!sendMessage){
+        std::cout << "Not sending message to " << receiver << std::endl;
+        return;
+    }
+    if(sendMessage){
+        std::cout << "Sending message to " << receiver << std::endl;
+        for (const auto& receiver : receivers) {
+            std::cout << "Sending message to " << receiver.first << std::endl;
+        }
+    }
+    if(!chat.processClientChat(sender, receivers, receivedData)){
         if(isRoom){
             clientStates[clientId] = MenuState::Team;
         }else{
@@ -974,9 +990,7 @@ void Server::handleChat(int clientSocket, int clientId, json& receivedData){
         }
         return;
     }
-    // enregistrer le message dans la base de données si le message est valide et que le sender n 'a pas quité le chat
-    if(isRoom) chatRoomsManage.saveMessageToRoom(clientPseudo[clientId], receiver, receivedData[jsonKeys::MESSAGE]);
-    else chat.saveMessage(clientPseudo[clientId], receiver, receivedData[jsonKeys::MESSAGE]);
+   
 }
 
 void Server::keyInputPrivateChat(int clientSocket, int clientId, const std::string& action){
@@ -1664,7 +1678,6 @@ void Server::sendChatModeToClient(int clientSocket) {
 
 void Server::keyInputSendGameRequestMenu(int clientSocket, int clientId, std::string receiver, std::string status) {
     //### GÉRER L'INVITATION D'UN VIEWER
-    std::cout << "Sending game request to: " << receiver << " with status: " << status << std::endl;
     std::string currentUser = clientPseudo[clientId];
 
     if(receiver == currentUser){
@@ -1701,8 +1714,6 @@ void Server::keyInputHelpMenu(int clientSocket, int clientId, const std::string&
 
 void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std::string& action) {
     std::string status, receiver;
-    // Vérifier si l'action commence par \invite
-    std::cout << "action Lobby: " << action << std::endl;
     if (action.find("/invite") == 0) {
         // Extraire le statut et le receiver de l'action
         extractDataBetweenSlashes("/invite", action, status, receiver);

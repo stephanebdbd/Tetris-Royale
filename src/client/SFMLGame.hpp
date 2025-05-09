@@ -146,6 +146,7 @@ class SFMLGame {
 
         void setSelectedTeam(const std::string& team); 
         void clearSelectedTeam();
+        void clearClickedContact();
         std::string getSelectedTeam() const;
 };
 

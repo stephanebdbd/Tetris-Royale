@@ -974,6 +974,7 @@ void MenuManager::chatMenu() {
         }
         network.sendData(j.dump() + "\n", client.getClientSocket());
         client.setCurrentMenuState(sfmlGame->getPreviousState());
+        sfmlGame->clearClickedContact();
         return; // Sortir immédiatement après avoir traité le clic
     }
 

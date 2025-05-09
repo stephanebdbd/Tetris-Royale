@@ -1609,6 +1609,9 @@ std::vector<json> SFMLGame::getMessages() const {
 std::string SFMLGame::getClickedContact() const {
     return clickedContact;
 }
+void SFMLGame::clearClickedContact() {
+    clickedContact.clear();
+}
 
 std::unordered_map<std::string, std::unique_ptr<Button>>& SFMLGame::getTEAMSbuttons() {
     return TEAMSbuttons;
