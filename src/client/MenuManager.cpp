@@ -127,7 +127,7 @@ void MenuManager::mainMenu() {
 
         (*buttons)[ButtonKey::Ranking] = std::make_unique<Button>("Classement", font, 26, text, background,
             sf::Vector2f(centerX + 2 * spacing + 1.5f*buttonWidth , y- 2.0f *decallage),
-            sf::Vector2f(buttonWidth, buttonHeight), outline);
+            sf::Vector2f(buttonWidth + 5, buttonHeight), outline);
         
         (*buttons)[ButtonKey::Teams] = std::make_unique<Button>("Teams", font, 26, text, background,
             sf::Vector2f(centerX - (buttonWidth * 1.5f + spacing ), y - decallage),  // symétrique à Chat
@@ -368,7 +368,6 @@ void MenuManager::rankingMenu(){
         (*buttons)[ButtonKey::Profile] = std::make_unique<Button>("", font, 24, sf::Color::Transparent, sf::Color::White,
                                     sf::Vector2f(WINDOW_WIDTH - 70, 20), sf::Vector2f(35, 35), sf::Color::Transparent);
     }
-
     sfmlGame->drawButtons();
 
     // Affichage de la liste d'amis (exemple visuel)
@@ -403,7 +402,7 @@ void MenuManager::rankingMenu(){
             }
         
             // Rectangle fictif pour la carte du joueur
-            Rectangle friendCard(sf::Vector2f(150, startY + i * spacing), sf::Vector2f(1000, 80), sf::Color::Transparent, sf::Color::Black);
+            Rectangle friendCard(sf::Vector2f(150, startY + i * spacing), sf::Vector2f(1150, 80), sf::Color::Transparent, sf::Color::Black);
             friendCard.draw(*window);
             
             //Nom du joueur
@@ -413,9 +412,13 @@ void MenuManager::rankingMenu(){
             //Score du joueur
             Text score(bestScore, font, 20, sf::Color::Black, sf::Vector2f(1100, startY + i * spacing + 25));
             score.draw(*window);
-        
+            if(i>=0 && i <= 2){
+                const auto& button = std::make_unique<Button>(textures->medals[i], sf::Vector2f(1200, startY + i * spacing + 25), sf::Vector2f(30, 30));
+                button->draw(*window);
+            }
             i++;
         }
+
         
     if(buttons->count(ButtonKey::Retour) && (*buttons)[ButtonKey::Retour]->isClicked(*window)) {
         json j;
@@ -1167,7 +1170,7 @@ void MenuManager::manageTeamMenu(const std::string& teamName) {
     }
 
     if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAMS_MENU;
         sfmlGame->clearSelectedTeam();
         network.sendData(j.dump() + "\n", client.getClientSocket());
         return;

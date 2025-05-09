@@ -32,4 +32,7 @@ void Textures::loadTextures() {
     loadTexture(addFriend, backgroundAddFriend);
     loadTexture(manageTeam, backgroundManageTeam);
     loadTexture(team, backgroundTeam);
+    loadTexture(medals[0], medal1);
+    loadTexture(medals[1], medal2);
+    loadTexture(medals[2], medal3);
 }

@@ -74,9 +74,9 @@ enum class ButtonKey {
     JoinTeam,
     TeamInvites,
     ManageTeams, 
-
-
-
+    FirstPlace,
+    SecondPlace,
+    ThirdPlace,
 };
 
 // Enum pour les champs de texte
