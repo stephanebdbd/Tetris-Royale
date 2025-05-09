@@ -20,7 +20,7 @@ class Tetramino {
     void selectRandomShape();
 
     bool bonusOneBlock = false;
-    int counteurOneBlock = 0;
+    int counteurOneBlock = 1;
     bool lightBlocked = false;
 
     public:

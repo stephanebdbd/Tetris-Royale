@@ -310,5 +310,6 @@ void Tetramino::reset(int startX, int startY) {
 }
 
 void Tetramino::applyMiniTetraminoBonus(){
+    currentShape = shapes[7];
     bonusOneBlock = true;
 }
