@@ -20,49 +20,12 @@ class BaseTransition {
         float progress;
         bool fadingOut;
         bool active;
-    
     public:
-        FadeTransition(sf::Vector2f size, float dur = 0.5f) 
-            : overlay(size), duration(dur), progress(0), fadingOut(true), active(false) {
-            overlay.setFillColor(sf::Color::Black);
-            overlay.setPosition(0, 0);
-        }
-    
-        void start(sf::RenderWindow& window) override {
-            progress = 0;
-            fadingOut = true;
-            active = true;
-            overlay.setFillColor(sf::Color::Black);
-        }
-    
-        bool update(float deltaTime) override {
-            if (!active) return false;
-    
-            progress += deltaTime / duration;
-            if (progress >= 1.0f) {
-                progress = 1.0f;
-                if (fadingOut) {
-                    fadingOut = false;
-                    progress = 0;
-                    return false;
-                } else {
-                    active = false;
-                    return true;
-                }
-            }
-    
-            float alpha = fadingOut ? progress * 255 : (1 - progress) * 255;
-            overlay.setFillColor(sf::Color(0, 0, 0, static_cast<sf::Uint8>(alpha)));
-            return false;
-        }
-    
-        void draw(sf::RenderWindow& window) override {
-            if (active) {
-                window.draw(overlay);
-            }
-        }
-    
-        bool isComplete() const override { return !active && !fadingOut; }
+        FadeTransition(sf::Vector2f size, float dur = 0.5f);
+        void start(sf::RenderWindow& window) override;
+        bool update(float deltaTime) override;
+        void draw(sf::RenderWindow& window) override;
+        bool isComplete() const override;
     };
 
 #endif

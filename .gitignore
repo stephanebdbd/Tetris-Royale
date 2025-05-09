@@ -9,6 +9,8 @@ src/server/tetris
 src/client/client
 src/server/users.txt
 src/server/gameInvitations.txt
-
+.idea/
+CMakeLists.txt
+src/client/client.puml
 src/*/*/*.o
 *.json
