@@ -26,12 +26,6 @@ Avant de compiler et d'exécuter le projet, assurez-vous que les bibliothèques 
 - **SQLite3** pour la gestion de la base de données.
 - **pthread** pour la gestion des threads.
 
-### Commandes pour installer les bibliothèques nécessaires (Linux)
-```bash
-sudo apt update
-sudo apt install libsfml-dev libncurses5-dev libsqlite3-dev g++ make
-
-
 ## Utilisation
 1. Compilez le code source avec le Makefile situé dans le dossier `build` :
    ```bash
@@ -72,6 +66,27 @@ sudo apt install libsfml-dev libncurses5-dev libsqlite3-dev g++ make
    - **Teams** : Gérer ou rejoindre une équipe.
    - **Ranking** : Consulter le classement.
 
+### Menu **Amis**
+Dans le menu **Amis**, vous pouvez effectuer les actions suivantes :
+   - **Ajouter un ami** : Envoyer une demande d'ami à un autre joueur.
+   - **Consulter la liste d'amis** : Voir tous vos amis actuels.
+   - **Consulter la liste des demandes d'amis** : Voir les demandes d'amis reçues et les accepter ou les refuser.
+   - **Chat privé avec un ami** : Envoyer des messages privés à un ami.
+
+### Menu **Teams**
+Dans le menu **Teams**, vous pouvez :
+   - **Créer une équipe** : Créer une nouvelle équipe et devenir son propriétaire.
+   - **Rejoindre une équipe** : Rejoindre une équipe existante en acceptant une invitation.
+   - **Consulter la liste des invitations** : Voir les invitations reçues pour rejoindre une équipe.
+   - **Chat dans une room** : Discuter avec les membres de l'équipe dans une salle de discussion dédiée.
+   - **Gérer une équipe** : Si vous êtes membre, administrateur ou propriétaire d'une équipe, vous pouvez accéder à des options spécifiques :
+     - **Membre** : Voir les informations de l'équipe.
+     - **Administrateur** : Ajouter ou retirer des membres, gérer les invitations, etc.
+
+### Menu **Ranking**
+Dans le menu **Ranking**, vous pouvez consulter :
+   - **Classement global** : Voir le classement de tous les joueurs en fonction de leur score total.
+
 8. Dans le menu **Play**, vous pouvez :
    - Créer une nouvelle partie.
    - Rejoindre une partie existante.
@@ -84,17 +99,36 @@ sudo apt install libsfml-dev libncurses5-dev libsqlite3-dev g++ make
 
 10. Pour les modes **Duel**, **Classic**, et **Royal**, vous accédez à un lobby où vous pouvez :
     - Inviter vos amis.
-    - Ajuster les paramètres de la partie avant son début.
+    - Ajuster les paramètres de la partie avant son début (vitesse, nombre maximum de joueurs, etc.).
+
+### Modes de jeu
+
+#### **Duel**
+Dans le mode **Duel**, les joueurs s'affrontent directement. Un système de malus est mis en place :
+   - Les malus sont envoyés à l'adversaire en fonction d'une échelle de combos. Plus le joueur réalise de combos, plus les malus envoyés sont importants.
+   - Les malus peuvent inclure des lignes supplémentaires ajoutées au bas du plateau de l'adversaire.
+
+#### **Classic**
+Dans le mode **Classic**, les joueurs jouent de manière compétitive, mais avec une mécanique différente pour les malus :
+   - Les malus sont envoyés comme dans le mode **Duel**, mais leur destinataire est choisi aléatoirement par le serveur.
+   - Cependant, le joueur peut également sélectionner manuellement un destinataire pour envoyer un malus spécifique.
+
+#### **Royal**
+Le mode **Royal** introduit un système de malus et de bonus :
+   - **Malus** : Les malus affectent les autres joueurs et incluent des effets tels que :
+     - Accélérer la vitesse des tétriminos d'un autre joueur.
+     - Ajouter des lignes supplémentaires au plateau d'un autre joueur.
+   - **Bonus** : Les bonus sont des avantages pour le joueur, tels que :
+     - Recevoir un tétrimino composé d'un seul carré.
+     - Ralentir la vitesse de descente des tétriminos.
 
 11. Pendant la partie, utilisez les commandes clavier suivantes :
-    - `Flèche gauche` : Déplacer le tétromino vers la gauche.
-    - `Flèche droite` : Déplacer le tétromino vers la droite.
-    - `Maintenir la flèche bas` : Accélérer la descente du tétromino.
-    - `Flèche haut` : Tourner le tétromino de 90 degrés dans le sens des aiguilles d'une montre.
-    - `ESC` : Quitter le jeu.
+    - `Flèche gauche` : Déplacer le tétrimino vers la gauche.
+    - `Flèche droite` : Déplacer le tétrimino vers la droite.
+    - `Maintenir la flèche bas` : Accélérer la descente du tétrimino.
+    - `Flèche haut` : Tourner le tétrimino de 90 degrés dans le sens des aiguilles d'une montre.
 
 12. Amusez-vous bien !
-
 
 ## Membres de l'équipe
 
@@ -104,5 +138,4 @@ sudo apt install libsfml-dev libncurses5-dev libsqlite3-dev g++ make
 - **ikram BOUTALEB** : 536046
 - **Mohamed BOUTALEB** : 566181
 - **Oumaima Hamdach** : 568078
-- **Rayan Rabeh** : 576232
 - **Valentin Dias** : 593394
