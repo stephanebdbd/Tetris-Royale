@@ -122,10 +122,13 @@ Dans le mode **Classic**, les joueurs jouent de manière compétitive, mais avec
 Le mode **Royal** introduit un système de malus et de bonus :
    - **Malus** : Les malus affectent les autres joueurs et incluent des effets tels que :
      - Accélérer la vitesse des tétriminos d'un autre joueur.
-     - Ajouter des lignes supplémentaires au plateau d'un autre joueur.
+     - Inverser les commandes d'un autre joueur.
+     - Bloquer les commandes d'un autre joueur.
+     - Supprimer une zone de 2X2 blocs d'un autre joueur.
+     - Plonger l'écran d'un autre joueur dans le noir.
    - **Bonus** : Les bonus sont des avantages pour le joueur, tels que :
-     - Recevoir un tétrimino composé d'un seul carré.
-     - Ralentir la vitesse de descente des tétriminos.
+     - Transformer les prochaines pièces en blocs 1X1.
+     - Ralentir la chute des pièces temporairement.
 
 11. Pendant la partie, utilisez les commandes clavier suivantes :
     - `Flèche gauche` : Déplacer le tétrimino vers la gauche.
