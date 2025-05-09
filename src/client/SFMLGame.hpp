@@ -103,9 +103,6 @@ class SFMLGame {
         void displayBackground(sf::Texture& texture);
         void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
-        // Teams Menu
-        void manageTeamMenu();
-
         // Chat Menu
         std::vector<std::string> getContactsContainElement(const std::string& element);
         void handleContacts();
@@ -147,6 +144,7 @@ class SFMLGame {
         void setSelectedTeam(const std::string& team); 
         void clearSelectedTeam();
         void clearClickedContact();
+        void setTeamToManage(const std::string& teamName);
         std::string getSelectedTeam() const;
 };
 

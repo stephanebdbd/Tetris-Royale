@@ -79,7 +79,7 @@ namespace jsonKeys {
     constexpr char TEAM_MEMBER_LIST_MENU2[] = "teamMemberListMenu2";
     constexpr char JOIN_TEAM_MENU[] = "joinTeamMenu";
     constexpr char MANAGE_TEAM[] = "manageTeam";
-    constexpr char MANAGE_TEAMS_MENU[] = "manageTeamMenu";
+    constexpr char MANAGE_TEAMS_MENU[] = "manageTeamsMenu";
     constexpr char MANAGE_TEAM_MENU[] = "manageTeamMenu";
     constexpr char MANAGE_TEAM_MEMBER[] = "manageTeamMember";
     constexpr char MANAGE_TEAM_MEMBER_LIST[] = "manageTeamMemberList";

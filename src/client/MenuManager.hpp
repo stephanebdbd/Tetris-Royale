@@ -59,12 +59,11 @@ class MenuManager {
         // Teams Menu
         void createRoomMenu(); 
         void joinTeamMenu();
-        void manageTeamMenu();
+        void manageTeamMenu(const std::string& teamName);
+        void chooseTeamMenu();
         
         //chat
         void chatMenu();
-
-        void displayRoomsMenu();
 
         void handleTextFieldEvents(sf::Event& event);
 };

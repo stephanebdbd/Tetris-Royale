@@ -249,6 +249,20 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "createTeam");
             return;
         }
+        else if(actionType == jsonKeys::CHAT_TEAMS) {
+            //gerer le chat
+            clientStates[clientId] = MenuState::chat;
+            auto rooms = chatRoomsManage.getChatRoomsForUser(clientPseudo[clientId]);
+            std::vector<std::pair<std::string,int>> contactStrings;
+            for (const auto& room : rooms) {
+                int avatarIndex = -1;
+                auto contact = std::make_pair(room, avatarIndex); 
+                contactStrings.push_back(contact);
+            }
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts",{},contactStrings);
+            return;
+            
+        }
         else if(actionType == jsonKeys::CREATE_TEAM) {
             std::string teamName = action[jsonKeys::TEAM_NAME];
             if(chatRoomsManage.checkroomExist(teamName)){
@@ -287,17 +301,15 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
         }
         else if(actionType == jsonKeys::MANAGE_TEAMS_MENU) {
             //gerer la gestion d'equipe
-            clientStates[clientId] = MenuState::ManageTeam;
+            clientStates[clientId] = MenuState::ManageTeams;
             auto teams = chatRoomsManage.getChatRoomsForUser(clientPseudo[clientId]);
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "manageTeam",teams);
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], jsonKeys::TEAMS_LIST,teams);
             return;
         }
         else if(actionType == jsonKeys::MANAGE_TEAM) {
             //gerer les membres d'equipe
-            std::string teamName = action[jsonKeys::TEAM_NAME];
             clientStates[clientId] = MenuState::ManageTeam;
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "manageTeam");
-            menuStateManager->sendTemporaryDisplay(clientSocket, "Bienvenue dans le menu de gestion de l'équipe.");
             return;
         }
         else if(actionType == jsonKeys::DELETE_TEAM) {

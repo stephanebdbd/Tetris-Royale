@@ -267,10 +267,34 @@ void SFMLGame::refreshMenu() {
             menuManager->joinTeamMenu();
             break;
         case MenuState::ManageTeams:
-            menuManager->displayRoomsMenu();
+            menuManager->chooseTeamMenu();
             break;
         case MenuState::ManageTeam:
-            menuManager->manageTeamMenu();
+            menuManager->manageTeamMenu(selectedTeam);
+            break;
+        case MenuState::TeamChat:
+            menuManager->chatMenu();
+            break;
+        case MenuState::ListTeamMembres:
+            //menuManager->listTeamMembersMenu();
+            break;
+        case MenuState::AddMembre:
+            //addMemberMenu();
+            break;
+        case MenuState::AddAdmin:
+            //addAdminMenu();
+            break;
+        case MenuState::RoomRequestList:
+            //menuManager->roomRequestListMenu();
+            break;
+        case MenuState::QuitRoom:
+            //menuManager->quitRoomMenu();
+            break;
+        case MenuState::ConfirmDeleteRoom:
+            //confirmQuitDeleteRoomMenu(true);
+            break;
+        case MenuState::ConfirmQuitRoom:
+            //confirmQuitDeleteRoomMenu(false);
             break;
         case MenuState::JoinOrCreateGame:
             CreateOrJoinGame();
@@ -395,14 +419,14 @@ void SFMLGame::handleContacts() {
     if (contacts.empty()) return;
     static std::vector<sf::Texture> avatarTextures(20);
     const float contactHeight = 50.0f;
-    
+    const auto& circleRadius = 20.0f;
+
     // Gestion des contacts
     for (std::size_t i = 0; i < std::min(contacts.size(), avatarTextures.size()); ++i) {
         const auto& [contactName, avatarIndex] = contacts[i];
         float contactY = 100 + i * contactHeight;
-
-        const auto& circleSize = sf::Vector2f(7, contactY + 5);
-        const auto& circleRadius = 20.0f;
+        const auto& circlePos = sf::Vector2f(7, contactY + 5);
+        
 
         if (!chatContacts.count(contactName)) {
             chatContacts[contactName] = std::make_unique<Button>(
@@ -412,24 +436,24 @@ void SFMLGame::handleContacts() {
 
         if (avatarIndex >= 0 && avatarIndex < static_cast<int>(avatarManager->getAvatarPath().size())) {
             if (avatarTextures[avatarIndex].loadFromFile(avatarManager->getAvatarPath()[avatarIndex])) {
-                Circle circle(circleSize, circleRadius, sf::Color::White, sf::Color::Transparent);
+                Circle circle(circlePos, circleRadius, sf::Color::White, sf::Color::Transparent);
                 circle.setTexture(avatarTextures[avatarIndex]);
                 circle.draw(*window);
             }
         }
 
         else{
-            Circle circle(circleSize, circleRadius, sf::Color(100, 100, 200), sf::Color::Transparent);
+            Circle circle(circlePos, circleRadius, sf::Color(100, 100, 200), sf::Color::Transparent);
             circle.draw(*window);
 
             // Dessiner la première lettre du nom dans le cercle
-            Text initial(contactName.substr(0, 1), font, 20, sf::Color::White, circleSize);
+            Text initial(contactName.substr(0, 1), font, 20, sf::Color::White, circlePos);
 
             // Centrer la lettre dans le cercle
             sf::FloatRect textBounds = initial.getLocalBounds();
             initial.setPosition(
-                circleSize.x + circleRadius - textBounds.width / 2 - textBounds.left,
-                circleSize.y + circleRadius - textBounds.height / 2 - textBounds.top
+                circlePos.x + circleRadius - textBounds.width / 2 - textBounds.left,
+                circlePos.y + circleRadius - textBounds.height / 2 - textBounds.top
             );
             initial.draw(*window);
         }
@@ -446,14 +470,16 @@ void SFMLGame::handleContacts() {
 
     // Affichage du chat sélectionné
     if (!clickedContact.empty()) {
+        const auto& circlePos = sf::Vector2f(210, 8);
         Rectangle(sf::Vector2f(202, 0), sf::Vector2f(WINDOW_WIDTH - 200, 50),
         sf::Color(50, 50, 70), sf::Color(100, 100, 120)).draw(*window);
-
         Text(clickedContact, font, 24, sf::Color::White, sf::Vector2f(250, 10)).draw(*window);
-
-        Circle circle(sf::Vector2f(210, 8), 20.0f, sf::Color::White, sf::Color::Transparent);
-        circle.setTexture(avatarTextures[avatarManager->getAvatarClickedContact()]);
-        circle.draw(*window);
+        const auto& avatarIndex = avatarManager->getAvatarClickedContact();
+        if(avatarIndex>=0){
+            Circle circle(circlePos, 20.0f, sf::Color::White, sf::Color::Transparent);
+            circle.setTexture(avatarTextures[avatarManager->getAvatarClickedContact()]);
+            circle.draw(*window);
+        }  
     }
 
 }
@@ -1616,6 +1642,7 @@ std::unordered_map<std::string, std::unique_ptr<Button>>& SFMLGame::getTEAMSbutt
 void SFMLGame::setSelectedTeam(const std::string& team) {
     selectedTeam = team;
 }
+
 
 std::string SFMLGame::getSelectedTeam() const {
     return selectedTeam;

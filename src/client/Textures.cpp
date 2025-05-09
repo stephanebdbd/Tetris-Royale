@@ -30,4 +30,6 @@ void Textures::loadTextures() {
     loadTexture(teams, backgroundTeams);
     loadTexture(friends, backgroundFriends);
     loadTexture(addFriend, backgroundAddFriend);
+    loadTexture(manageTeam, backgroundManageTeam);
+    loadTexture(team, backgroundTeam);
 }

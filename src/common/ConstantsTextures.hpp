@@ -29,4 +29,6 @@ const std::string backgroundRejoindre = "../../res/background/rejoindre.png";
 const std::string backgroundTeams = "../../res/background/teams.png";
 const std::string backgroundFriends = "../../res/background/friends.png";
 const std::string backgroundAddFriend = "../../res/background/addFriend.png";
+const std::string backgroundManageTeam = "../../res/background/manageTeam.png";
+const std::string backgroundTeam = "../../res/background/team.png";
 
