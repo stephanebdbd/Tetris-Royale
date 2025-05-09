@@ -1503,7 +1503,15 @@ void Server::keyInputLobbySettingsMenu(int clientSocket, int clientId, const std
     
     if ((gameRoom != nullptr) && (!gameRoom->getInProgress()) && (clientStates[clientId] == MenuState::Settings)){
         //refresh le Lobby
-        sendMenuToClient(clientSocket, menu.getLobbyMenu(getMaxPlayers(clientId), getMode(clientId), getAmountOfPlayers(clientId), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+
+        for (const auto& cId : gameRoom->getPlayers()){
+            sendMenuToClient(pseudoTosocket[clientPseudo[cId]], menu.getLobbyMenu(getMaxPlayers(cId), getMode(cId), getAmountOfPlayers(cId), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));                
+        }
+
+        for (const auto& observerId : gameRoom->getViewers()) {
+            sendMenuToClient(pseudoTosocket[clientPseudo[observerId]], menu.getLobbyMenu(getMaxPlayers(observerId ), getMode(observerId ), getAmountOfPlayers(observerId ), gameRoom->getSpeed(), gameRoom->getEnergyLimit()));
+        }
+        
     }   
 }
 

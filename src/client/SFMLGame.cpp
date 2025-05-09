@@ -580,6 +580,9 @@ Game Menus
 
 void SFMLGame::CreateOrJoinGame() {
     displayBackground(textures->rejoindre);
+    duel = false;
+    classic = false;
+    royale = false;
 
     if (buttons.empty()) {
         std::cout << "Creating buttons" << std::endl;
@@ -862,6 +865,9 @@ void SFMLGame::drawTetramino(const json& tetraPiece) {
 void SFMLGame::drawEndGame() {
     GameState gameData = client.getGameState();
     client.reintiliseData();
+    duel = false;
+    classic = false;
+    royale = false;
     json endGameData = gameData.menu;
     std::string message = endGameData[jsonKeys::TITLE];
     sf::Color color;
@@ -1007,6 +1013,8 @@ void SFMLGame::drawPlayerNumber(const json& playerData) {
 
 void SFMLGame::displayWaitingRoom() {
     window->clear(sf::Color(30, 30, 60));
+    showCommand = true;
+    showInviteCommand = true;
     
 
     Text title("ATTENTE DANS LE LOBBY", font, 50, sf::Color::White, sf::Vector2f(WINDOW_WIDTH/2 - 250, 30));
@@ -1179,14 +1187,14 @@ void SFMLGame::displayWaitingRoom() {
                 sf::Vector2f(270, 150), sf::Vector2f(100, 50));
         }
         
-        if (classic || royale) {
+        if (showCommand && (classic || royale)) {
             texts[TextFieldKey::NbreJoueurs] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
                 sf::Vector2f(50, 220), sf::Vector2f(200, 50), "Nbre joueurs");
             buttons[ButtonKey::ValiderNb] = std::make_unique<Button>("Valider Nb", font, 24, sf::Color::White, sf::Color(70, 200, 70),
                 sf::Vector2f(270, 220), sf::Vector2f(100, 50));
         }
 
-        if (royale) {
+        if (showCommand && royale) {
             texts[TextFieldKey::Energie] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
                 sf::Vector2f(50, 290), sf::Vector2f(200, 50), "Energie");
             buttons[ButtonKey::ValiderEnergie] = std::make_unique<Button>("Valider Energie", font, 24, sf::Color::White, sf::Color(255, 165, 0),
