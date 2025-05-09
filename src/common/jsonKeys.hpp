@@ -96,9 +96,15 @@ namespace jsonKeys {
     constexpr char REMOVE_MEMBER[] = "remove_member";
     constexpr char REMOVE_ADMIN[] = "remove_admin";
     constexpr char PLAYER_NUMBER[] = "PlayerNumber";
-
-
-    
+    constexpr char CREATE_JOIN[] = "createjoin";
+    constexpr char CHOICE_MODE[] = "choiceMode";
+    constexpr char GAME[] = "game";
+    constexpr char ENDLESS[] = "EndlessMode";
+    constexpr char DUEL[] = "DuelMode";
+    constexpr char CLASSIC[] = "ClassicMode";
+    constexpr char ROYAL[] = "RoyaleMode";
+    constexpr char REJOINDRE[] = "Rejoindre";
+    constexpr char ACCEPT_REJOINDRE[] = "AcceptRejoindre";
 }
 
 #endif

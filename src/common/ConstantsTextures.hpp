@@ -28,4 +28,5 @@ const std::string LogoAccept = "../../res/logo/accept.png";
 const std::string backgroundRejoindre = "../../res/background/rejoindre.png";
 const std::string backgroundTeams = "../../res/background/teams.png";
 const std::string backgroundFriends = "../../res/background/friends.png";
+const std::string backgroundAddFriend = "../../res/background/addFriend.png";
 

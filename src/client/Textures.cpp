@@ -29,4 +29,5 @@ void Textures::loadTextures() {
     loadTexture(rejoindre, backgroundRejoindre);
     loadTexture(teams, backgroundTeams);
     loadTexture(friends, backgroundFriends);
+    loadTexture(addFriend, backgroundAddFriend);
 }

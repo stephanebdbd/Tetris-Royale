@@ -164,12 +164,12 @@ void MenuManager::mainMenu() {
     // Gérer les clics sur les boutons
     json j;
     if (buttons->count(ButtonKey::Play) && (*buttons)[ButtonKey::Play]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "createjoin";
+        j[jsonKeys::ACTION] = jsonKeys::CREATE_JOIN;
         network.sendData(j.dump() + "\n", client.getClientSocket());
         return;
 
     } else if (buttons->count(ButtonKey::Chat) && (*buttons)[ButtonKey::Chat]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "chat";
+        j[jsonKeys::ACTION] = jsonKeys::CHAT_PRIVATE;
         network.sendData(j.dump() + "\n", client.getClientSocket());
         return;
 
@@ -195,7 +195,7 @@ void MenuManager::mainMenu() {
 
     } else if (buttons->count(ButtonKey::Profile) && (*buttons)[ButtonKey::Profile]->isClicked(*window)) {
         // Action pour le bouton "Profile"
-        j[jsonKeys::ACTION] = "player_info";
+        j[jsonKeys::ACTION] = jsonKeys::PLAYER_INFO;
         network.sendData(j.dump() + "\n", client.getClientSocket());
 
     } else if (buttons->count(ButtonKey::Quit) && (*buttons)[ButtonKey::Quit]->isClicked(*window)) {
@@ -204,7 +204,7 @@ void MenuManager::mainMenu() {
         return;
     }
     auto data  = client.getServerData();
-    if (data["message"] == "player_info") {
+    if (data["message"] == jsonKeys::PLAYER_INFO) {
         client.setShow(true); // Active l'affichage des informations
     }
     
@@ -337,7 +337,7 @@ void MenuManager::registerMenu() {
 
         // Envoi des données au serveur
         json j = {
-            {jsonKeys::ACTION, "register"},
+            {jsonKeys::ACTION, jsonKeys::REGISTER},
             {jsonKeys::USERNAME, username},
             {jsonKeys::PASSWORD, password},
             {"avatar", selectedAvatar}
@@ -357,7 +357,7 @@ void MenuManager::rankingMenu(){
     //afficher la background
     sfmlGame->displayBackground(textures->ranking);
     // Header for ranking list
-    Text header("Classement", font, 24, sf::Color::White, sf::Vector2f(400, 20));
+    Text header("Classement", font, 30, sf::Color::White, sf::Vector2f(600, 20));
     header.draw(*window);
 
 
@@ -393,8 +393,8 @@ void MenuManager::rankingMenu(){
             if (avatarId >= 0 && avatarId < static_cast<int>(avatarManager->getAvatarPath().size())) {
                 sf::Texture avatarTexture;
                 if (avatarTexture.loadFromFile(avatarManager->getAvatarPath()[avatarId])) {
-                    sf::CircleShape avatarCircle(30);
-                    avatarCircle.setPosition(100, yOffset);  // Centré à gauche
+                    sf::CircleShape avatarCircle(25);
+                    avatarCircle.setPosition(190, yOffset + 15);  // Centré à gauche
                     avatarCircle.setTexture(&avatarTexture);
                     avatarCircle.setOutlineThickness(2);
                     avatarCircle.setOutlineColor(sf::Color::White);
@@ -403,20 +403,16 @@ void MenuManager::rankingMenu(){
             }
         
             // Rectangle fictif pour la carte du joueur
-            Rectangle friendCard(sf::Vector2f(90, startY + i * spacing), sf::Vector2f(1000, 80), sf::Color::Transparent, sf::Color::Black);
+            Rectangle friendCard(sf::Vector2f(150, startY + i * spacing), sf::Vector2f(1000, 80), sf::Color::Transparent, sf::Color::Black);
             friendCard.draw(*window);
             
             //Nom du joueur
-            Text name(username, font, 20, sf::Color::Black, sf::Vector2f(200, startY + i * spacing + 15));
+            Text name(username, font, 20, sf::Color::Black, sf::Vector2f(280, startY + i * spacing + 25));
             name.draw(*window);
             
             //Score du joueur
-            Text score(bestScore, font, 20, sf::Color::Black, sf::Vector2f(1000, startY + i * spacing + 15));
+            Text score(bestScore, font, 20, sf::Color::Black, sf::Vector2f(1100, startY + i * spacing + 25));
             score.draw(*window);
-
-
-
-
         
             i++;
         }
@@ -505,19 +501,19 @@ void MenuManager::friendsMenu() {
     if (buttons->empty()) {
         // Bouton "Ajouter un ami"
         Button addFriendButton("Ajouter un ami", font, 20, sf::Color::White, sf::Color(100, 200, 250),
-                               sf::Vector2f(600, 250), sf::Vector2f(200, 50));
+                               sf::Vector2f(550, 250), sf::Vector2f(400, 60));
         
         // Bouton "Liste des amis"
         Button listFriendsButton("Liste des amis", font, 20, sf::Color::White, sf::Color(70, 180, 100),
-                                 sf::Vector2f(600, 310), sf::Vector2f(200, 50));
+                                 sf::Vector2f(550, 320), sf::Vector2f(400, 60));
         
         // Bouton "Demandes d'amis"
         Button requestsButton("Demandes d'amis", font, 20, sf::Color::White, sf::Color(200, 180, 70),
-                              sf::Vector2f(600, 370), sf::Vector2f(200, 50));
+                              sf::Vector2f(550, 390), sf::Vector2f(400, 60));
 
         // Bouton retour
         Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                          sf::Vector2f(600, 430), sf::Vector2f(200, 50));
+                          sf::Vector2f(550, 460), sf::Vector2f(400, 60));
 
         (*buttons)[ButtonKey::AddFriend] = std::make_unique<Button>(addFriendButton);
         (*buttons)[ButtonKey::FriendList] = std::make_unique<Button>(listFriendsButton);
@@ -584,19 +580,15 @@ void MenuManager::friendListMenu() {
         }
 
         if (avatarTextures[i].loadFromFile("../../res/avatar/avatar" + std::to_string(i + 1) + ".png")) {
-            Circle circle(sf::Vector2f(7, y + 8), 30.0f, sf::Color::White, sf::Color::Transparent);
+            Circle circle(sf::Vector2f(7, y + 8), 20.0f, sf::Color::White, sf::Color::Transparent);
             circle.setTexture(avatarTextures[i]);
             circle.draw(*window);
         }
 
-
         friendButtons[amis[i]]->draw(*window);
-    }
-
-    // Clic sur un ami
-    for (const auto& [nom, bouton] : friendButtons) {
-        if (bouton->isClicked(*window)) {
-            selectedFriend = nom;
+        //verifier si le button est clique
+        if (friendButtons[amis[i]]->isClicked(*window)) {
+            selectedFriend = amis[i];
             break;
         }
     }
@@ -644,40 +636,43 @@ void MenuManager::friendListMenu() {
     }
     (*buttons)[ButtonKey::Retour]->draw(*window);
 
+    //barre de recherche
+    if(!texts->count(TextFieldKey::SearchField)){
+        TextField searchField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
+            sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Recherche");
+        (*texts)[TextFieldKey::SearchField] = std::make_unique<TextField>(searchField);
+    }
+    (*texts)[TextFieldKey::SearchField]->draw(*window);
+
     if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network.sendData(j.dump() + "\n", client.getClientSocket());
-        sleep(0.3);client.setCurrentMenuState(MenuState::Friends);
+        client.setCurrentMenuState(MenuState::Friends);
+        selectedFriend.clear();
         return;
     }
 }
 
 void MenuManager::addFriendMenu() {
     // Affichage de l'arrière-plan
-    sfmlGame->displayBackground(textures->chat);
+    sfmlGame->displayBackground(textures->addFriend);
 
-    // Titre principal
-    Text title("Ajouter un ami", font, 30, sf::Color::White, sf::Vector2f(250, 30));
-    title.draw(*window);
-
-    Text subtitle("Entre le pseudo de ton futur ami", font, 18, sf::Color(200, 200, 220), sf::Vector2f(250, 80));
-    subtitle.draw(*window);
 
     // Création du champ de texte si pas encore fait
     if (texts->empty()) {
-        TextField pseudoField(font, 20, sf::Color::Black, sf::Color::White,
-                              sf::Vector2f(250, 130), sf::Vector2f(300, 40), "Pseudo");
+        TextField pseudoField(font, 30, sf::Color::White, sf::Color::Transparent,
+                              sf::Vector2f(550, 400), sf::Vector2f(750, 50), "Pseudo");
         (*texts)[TextFieldKey::AddFriendField] = std::make_unique<TextField>(pseudoField);
     }
 
     // Création des boutons si pas encore fait
     if (buttons->empty()) {
-        Button sendButton("Envoyer", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                          sf::Vector2f(250, 190), sf::Vector2f(140, 45));
+        Button sendButton("", font, 20, sf::Color::Transparent, sf::Color::Transparent,
+                          sf::Vector2f(880, 620), sf::Vector2f(300, 60));
 
-        Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                          sf::Vector2f(410, 190), sf::Vector2f(140, 45));
+        Button backButton("", font, 20, sf::Color::Transparent, sf::Color::Transparent,
+                          sf::Vector2f(360, 620), sf::Vector2f(300, 60));
 
         (*buttons)[ButtonKey::Send] = std::make_unique<Button>(sendButton);
         (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(backButton);
@@ -702,7 +697,7 @@ void MenuManager::addFriendMenu() {
     if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network.sendData(j.dump() + "\n", client.getClientSocket());
-        sleep(0.3);client.setCurrentMenuState(MenuState::Friends);
+        client.setCurrentMenuState(MenuState::Friends);
         return;
     }
 }
@@ -739,18 +734,16 @@ void MenuManager::friendRequestListMenu() {
         }
 
         if (avatarTextures[i].loadFromFile("../../res/avatar/avatar" + std::to_string(i + 1) + ".png")) {
-            Circle circle(sf::Vector2f(7, y + 8), 30.0f, sf::Color::White, sf::Color::Transparent);
+            Circle circle(sf::Vector2f(7, y + 8), 20.0f, sf::Color::White, sf::Color::Transparent);
             circle.setTexture(avatarTextures[i]);
             circle.draw(*window);
         }
 
         friendButtons[amis[i]]->draw(*window);
-    }
-
-    // Clic sur un ami
-    for (const auto& [nom, bouton] : friendButtons) {
-        if (bouton->isClicked(*window)) {
-            selectedFriend = nom;
+        //verifier si le bouton est cliqué
+        const auto& button = friendButtons[amis[i]];
+        if (button->isClicked(*window)) {
+            selectedFriend = amis[i];
             break;
         }
     }
@@ -795,12 +788,21 @@ void MenuManager::friendRequestListMenu() {
             textures->logoMain, sf::Vector2f(7, 50), sf::Vector2f(25, 35));
     }
     (*buttons)[ButtonKey::Retour]->draw(*window);
+    //barre de recherche
+    if(!texts->count(TextFieldKey::SearchField)){
+        TextField searchField(font, 20, sf::Color::Black, sf::Color(250, 250, 250),
+            sf::Vector2f(40, 50), sf::Vector2f(155, 35), "Recherche");
+        (*texts)[TextFieldKey::SearchField] = std::make_unique<TextField>(searchField);
+    }
+    (*texts)[TextFieldKey::SearchField]->draw(*window);
 
+    // Action sur clic du bouton retour
     if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network.sendData(j.dump() + "\n", client.getClientSocket());
-        sleep(0.3);client.setCurrentMenuState(MenuState::Friends);
+        client.setCurrentMenuState(MenuState::Friends);
+        selectedFriend.clear();
         return;
     }
 }
@@ -811,27 +813,27 @@ void MenuManager::createRoomMenu() {
     sfmlGame->displayBackground(textures->teams);
 
     // Titre principal
-    Text title("Créer une nouvelle Team", font, 30, sf::Color::White, sf::Vector2f(600, 150));
+    Text title("Creer une nouvelle Team", font, 40, sf::Color::White, sf::Vector2f(550, 100));
     title.draw(*window);
 
     // Slogan ou aide en dessous du titre
-    Text subtitle("Entrer le nom de votre Team", font, 18, sf::Color(200, 200, 220), sf::Vector2f(500, 200));
+    Text subtitle("Entrer le nom de votre Team", font, 18, sf::Color::Black, sf::Vector2f(610, 150));
     subtitle.draw(*window);
 
     // Création du champ de texte si pas encore fait
     if (texts->empty()) {
         TextField teamNameField(font, 20, sf::Color::Black, sf::Color::White,
-                        sf::Vector2f(550, 450), sf::Vector2f(300, 40), "Nom de Team");
+                               sf::Vector2f(600, 450), sf::Vector2f(350, 40), "Nom de Team");
         (*texts)[TextFieldKey::TeamNameField] = std::make_unique<TextField>(teamNameField);
     }
 
     // Création des boutons si pas encore fait
     if (buttons->empty()) {
-        Button createButton("Créer", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                                            sf::Vector2f(550, 500), sf::Vector2f(140, 45));
+        Button createButton("Creer", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                                           sf::Vector2f(600, 510), sf::Vector2f(170, 45));
 
         Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                                        sf::Vector2f(710, 500), sf::Vector2f(140, 45));
+                                            sf::Vector2f(780, 510), sf::Vector2f(170, 45));
 
         (*buttons)[ButtonKey::Create] = std::make_unique<Button>(createButton);
         (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(backButton);
@@ -867,26 +869,26 @@ void MenuManager::joinTeamMenu() {
     sfmlGame->displayBackground(textures->teams);
 
     // Titre principal
-    Text title("Rejoindre Team", font, 40, sf::Color::White, sf::Vector2f(600, 150));
+    Text title("Rejoindre Team", font, 40, sf::Color::White, sf::Vector2f(600, 100));
     title.draw(*window);
 
-    Text subtitle("Entrer le nom de la Team a rejoindre", font, 20, sf::Color(200, 200, 220), sf::Vector2f(500, 200));
+    Text subtitle("Entrer le nom de la Team a rejoindre", font, 20, sf::Color::Black, sf::Vector2f(575, 150));
     subtitle.draw(*window);
 
     // Création du champ de texte si pas encore fait
     if (texts->empty()) {
         TextField teamNameField(font, 20, sf::Color::Black, sf::Color::White,
-                                sf::Vector2f(550, 450), sf::Vector2f(300, 40), "Nom de Team");
+                                sf::Vector2f(600, 450), sf::Vector2f(350, 40), "Nom de Team");
         (*texts)[TextFieldKey::TeamNameField] = std::make_unique<TextField>(teamNameField);
     }
 
     // Création des boutons si pas encore fait
     if (buttons->empty()) {
         Button joinButton("Rejoindre", font, 20, sf::Color::White, sf::Color(70, 170, 250),
-                          sf::Vector2f(550, 500), sf::Vector2f(140, 45));
+                                          sf::Vector2f(600, 510), sf::Vector2f(170, 45));
 
         Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                          sf::Vector2f(710, 500), sf::Vector2f(140, 45));
+                                           sf::Vector2f(780, 510), sf::Vector2f(170, 45));
 
         (*buttons)[ButtonKey::Join] = std::make_unique<Button>(joinButton);
         (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(backButton);

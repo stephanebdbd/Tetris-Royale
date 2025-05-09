@@ -25,7 +25,6 @@ SFMLGame::SFMLGame(Client& client) :
     menuManager(std::make_unique<MenuManager>(window.get(), font, client, *network, *textures, 
     this, *avatarManager, this->buttons, this->texts))
 {
-    std::cout << "SFMLGame constructor called" << std::endl;
 
     if (!font.loadFromFile(FONT_PATH)) {
         std::cerr << "Erreur: Impossible de charger la police." << std::endl;
@@ -580,9 +579,6 @@ Game Menus
 
 void SFMLGame::CreateOrJoinGame() {
     displayBackground(textures->rejoindre);
-    duel = false;
-    classic = false;
-    royale = false;
 
     if (buttons.empty()) {
         std::cout << "Creating buttons" << std::endl;
@@ -614,7 +610,7 @@ void SFMLGame::CreateOrJoinGame() {
         return;
     }
     else if (buttons.count(ButtonKey::Join) && buttons[ButtonKey::Join]->isClicked(*window)){
-        j[jsonKeys::ACTION] = "Rejoindre";
+        j[jsonKeys::ACTION] = jsonKeys::REJOINDRE;
         client.sendInputFromSFML("2");
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
@@ -661,28 +657,28 @@ void SFMLGame::ChoiceGameMode(){
     json j;
     
     if (buttons.count(ButtonKey::Endless) && buttons[ButtonKey::Endless]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "EndlessMode";
+        j[jsonKeys::ACTION] = jsonKeys::ENDLESS;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Duel) && buttons[ButtonKey::Duel]->isClicked(*window)) {
         duel = true;
-        j[jsonKeys::ACTION] = "DuelMode";
+        j[jsonKeys::ACTION] = jsonKeys::DUEL;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
 
     else if(buttons.count(ButtonKey::Classic) && buttons[ButtonKey::Classic]->isClicked(*window)){
         classic = true;
-        j[jsonKeys::ACTION] = "ClassicMode";
+        j[jsonKeys::ACTION] = jsonKeys::CLASSIC;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }else if(buttons.count(ButtonKey::Royale) && buttons[ButtonKey::Royale]->isClicked(*window)){
         royale = true;
-        j[jsonKeys::ACTION] = "RoyaleMode";
+        j[jsonKeys::ACTION] = jsonKeys::ROYAL;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }else if(buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)){
-        j[jsonKeys::ACTION] = "createjoin";
+        j[jsonKeys::ACTION] = jsonKeys::CREATE_JOIN;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
@@ -764,8 +760,6 @@ void SFMLGame::drawMiniTetra(const json& miniTetra, sf::Vector2f pos) {
     int y = miniTetra[jsonKeys::Y];
     std::vector<std::vector<std::string>> shape = miniTetra[jsonKeys::SHAPE];
     int shapeSymbol = miniTetra[jsonKeys::SHAPE_SYMBOL];
-
-    // Taille d’un bloc de tétrimino en pixels
 
     sf::Color color = SFMLGame::fromShapeSymbolSFML(std::string(1, shapeSymbol));
 
@@ -865,9 +859,6 @@ void SFMLGame::drawTetramino(const json& tetraPiece) {
 void SFMLGame::drawEndGame() {
     GameState gameData = client.getGameState();
     client.reintiliseData();
-    duel = false;
-    classic = false;
-    royale = false;
     json endGameData = gameData.menu;
     std::string message = endGameData[jsonKeys::TITLE];
     sf::Color color;
@@ -895,7 +886,7 @@ void SFMLGame::drawEndGame() {
     json j;
     
     if (buttons.count(ButtonKey::Rejouer) && buttons[ButtonKey::Rejouer]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "createjoin";
+        j[jsonKeys::ACTION] = jsonKeys::CREATE_JOIN;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     } else if (buttons.count(ButtonKey::Retour) && buttons[ButtonKey::Retour]->isClicked(*window)) {
@@ -1013,8 +1004,6 @@ void SFMLGame::drawPlayerNumber(const json& playerData) {
 
 void SFMLGame::displayWaitingRoom() {
     window->clear(sf::Color(30, 30, 60));
-    showCommand = true;
-    showInviteCommand = true;
     
 
     Text title("ATTENTE DANS LE LOBBY", font, 50, sf::Color::White, sf::Vector2f(WINDOW_WIDTH/2 - 250, 30));
@@ -1187,14 +1176,14 @@ void SFMLGame::displayWaitingRoom() {
                 sf::Vector2f(270, 150), sf::Vector2f(100, 50));
         }
         
-        if (showCommand && (classic || royale)) {
+        if (classic || royale) {
             texts[TextFieldKey::NbreJoueurs] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
                 sf::Vector2f(50, 220), sf::Vector2f(200, 50), "Nbre joueurs");
             buttons[ButtonKey::ValiderNb] = std::make_unique<Button>("Valider Nb", font, 24, sf::Color::White, sf::Color(70, 200, 70),
                 sf::Vector2f(270, 220), sf::Vector2f(100, 50));
         }
 
-        if (showCommand && royale) {
+        if (royale) {
             texts[TextFieldKey::Energie] = std::make_unique<TextField>(font, 30, sf::Color::Black, sf::Color::White,
                 sf::Vector2f(50, 290), sf::Vector2f(200, 50), "Energie");
             buttons[ButtonKey::ValiderEnergie] = std::make_unique<Button>("Valider Energie", font, 24, sf::Color::White, sf::Color(255, 165, 0),
@@ -1221,7 +1210,6 @@ void SFMLGame::displayWaitingRoom() {
 
     if (buttons.count(ButtonKey::esc) && invite) {
         if (buttons[ButtonKey::esc]->isClicked(*window)) {
-            std::cout << "Esc button clicked" << std::endl;
             invite = false;
             inviteScrollOffset = 0;
             inviteMaxScroll = 0;
@@ -1310,7 +1298,7 @@ void SFMLGame::displayJoinGame() {
     json j;
 
     if (buttons.count(ButtonKey::Quit) && buttons[ButtonKey::Quit]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "createjoin";
+        j[jsonKeys::ACTION] = jsonKeys::CREATE_JOIN;
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
