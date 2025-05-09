@@ -17,8 +17,6 @@ GameRoom::GameRoom(int roomId, int clientId, GameModeName gameModeName)
     }
 
     addPlayer(clientId);
-    std::cout << "Max players: " << maxPlayers << std::endl;
-    std::cout << "GameRoom #" << roomId << " created at " << this << std::endl;
 }
 
 void GameRoom::addPlayer(int playerId) {
@@ -310,8 +308,7 @@ void GameRoom::keyInputGame(int playerId, const std::string& unicodeAction) {
 }
 
 void GameRoom::input(int playerServerId, const std::string& unicodeAction,std::string status) {
-    std::cout << "GameRoom #" << roomId << " received input from player #" << playerServerId << ": " << unicodeAction << std::endl;
-    
+
     if (status == "observer") {
         if (std::find(viewersId.begin(), viewersId.end(), playerServerId) != viewersId.end()) {
             std::string action = convertUnicodeToText(unicodeAction);

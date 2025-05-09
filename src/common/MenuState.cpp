@@ -29,7 +29,6 @@ void MenuStateManager::sendMenuStateToClient(int clientSocket, const MenuState& 
     if (send(clientSocket, serializedState.c_str(), serializedState.size(), 0) == -1) {
         std::cerr << "Échec de l'envoi de l'état du menu au client" << std::endl;
     }
-    std::cout << "État du menu envoyé au client : " << serializedState;   
 }
 
 // Envoyer un affichage temporaire

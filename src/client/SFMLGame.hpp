@@ -101,13 +101,10 @@ class SFMLGame {
         void run();
         void refreshMenu();
         void displayBackground(sf::Texture& texture);
-
-        
         void handleResize(unsigned int newWidth, unsigned int newHeight) ;
 
         // Teams Menu
         void manageTeamMenu();
-
 
         // Chat Menu
         std::vector<std::string> getContactsContainElement(const std::string& element);
@@ -115,6 +112,7 @@ class SFMLGame {
         void getMessagesFromServer();
         void drawMessages();
         void drawContacts();
+        void addMessage(const json& msg);
         void displayMessage(const std::string&sender, const std::string& message);
         std::string wrapText(const std::string& text, const sf::Font& font, unsigned int characterSize, float maxWidth);
 

@@ -33,6 +33,7 @@ void Chat::sendMessage(json& msg, const std::map<std::string, int>& receiver) {
         // Envoi du message au socket du destinataire
         std::string jsonStr = msg.dump() + "\n"; // Convertir le message en chaîne JSON
         if(send(receiverSocket, jsonStr.c_str(), jsonStr.size(), 0) == -1) {
+            std::cout << jsonStr << std::endl;
             std::cerr << "Erreur d'envoi du message au socket " << receiverSocket << std::endl;
         }
     }

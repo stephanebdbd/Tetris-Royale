@@ -966,6 +966,7 @@ void MenuManager::chatMenu() {
     if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
         json j;
         if(sfmlGame->getPreviousState() == MenuState::Settings){
+            j[jsonKeys::ACTION] = "AcceptRejoindre";
             sfmlGame->resetAcceptInvite();
         }
         else{
@@ -977,7 +978,7 @@ void MenuManager::chatMenu() {
     }
 
     // Ensuite vérifier le sendButton
-    if (!sfmlGame->getClickedContact().empty() && (*buttons)[ButtonKey::Send]->isClicked(*window) && !(*texts)[TextFieldKey::MessageField]->getText().empty()) {
+    if (!sfmlGame->getClickedContact().empty()&& !(*texts)[TextFieldKey::MessageField]->getText().empty() && (*buttons)[ButtonKey::Send]->isClicked(*window) ) {
         json j = {
             {"message", (*texts)[TextFieldKey::MessageField]->getText()},
             {"receiver", sfmlGame->getClickedContact()},
@@ -985,7 +986,7 @@ void MenuManager::chatMenu() {
 
         };
         network.sendData(j.dump() + "\n", client.getClientSocket());
-        sfmlGame->getMessages().emplace_back(std::move(j));
+        sfmlGame->addMessage(j);
 
         (*texts)[TextFieldKey::MessageField]->clear(); // Effacer le champ de texte après l'envoi
         return;

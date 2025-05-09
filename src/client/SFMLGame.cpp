@@ -469,6 +469,8 @@ void SFMLGame::getMessagesFromServer() {
                 messages.erase(messages.begin());
             }
         }
+        if(!message.empty())
+            std::cout << "Messages : " << message << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error processing message: " << e.what() << std::endl;
 
@@ -485,9 +487,12 @@ void SFMLGame::drawContacts() {
 
 
 void SFMLGame::drawMessages() {
-    for (auto& msg : messages) {
-        auto sender = msg["sender"]; auto receiver = msg["receiver"];
-        if((sender == clickedContact) || (sender == "You" && receiver == clickedContact)) {
+    int startIdx = std::max(0, static_cast<int>(messages.size()) - 18);
+    for (int i = startIdx; i < static_cast<int>(messages.size()); ++i) {
+        auto& msg = messages[i];
+        auto sender = msg["sender"];
+        auto receiver = msg["receiver"];
+        if ((sender == clickedContact) || (sender == "You" && receiver == clickedContact)) {
             displayMessage(sender, msg["message"]);
         }
     }
@@ -1033,9 +1038,7 @@ void SFMLGame::displayWaitingRoom() {
         if(!gameData.friendsLobby.empty()){
             friendsLobby = gameData.friendsLobby;
         }
-
         if(!gameData.showCommand.empty()){
-            std::cout << "showCommand: " << gameData.showCommand << std::endl;
             if(gameData.showCommand == "player")
                 showCommand = false;
             else if(gameData.showCommand == "observer"){
@@ -1045,7 +1048,6 @@ void SFMLGame::displayWaitingRoom() {
                 
             
         }
-        std::cout << "showCommand: " << showCommand << std::endl;
 
         Text player("JOUEURS: " , font, 20, sf::Color::White, sf::Vector2f(1065, startY));
         player.draw(*window);
@@ -1229,7 +1231,6 @@ void SFMLGame::displayWaitingRoom() {
                 std::cerr << "Remplissez le champs de vitesse " << std::endl;
                 return;
             }
-            std::cout << "Vitesse: " << "/speed/" + speed << std::endl;
             client.sendInputFromSFML("/speed/" + speed);
             texts[TextFieldKey::Speed]->setText("");
             return;
@@ -1241,7 +1242,7 @@ void SFMLGame::displayWaitingRoom() {
     }
 
     if(!invite && buttons.count(ButtonKey::Chat) && buttons[ButtonKey::Chat]->isClicked(*window)) {
-        std::cout << "Chat button clicked" << std::endl;
+        client.sendInputFromSFML(jsonKeys::CHAT_LOBBY);
         return;
     }
 
@@ -1589,6 +1590,9 @@ void SFMLGame::drawMessageMalusBonus(const json& msg){
     }
 }
 
+void SFMLGame::addMessage(const json& message) {
+    messages.push_back(message);
+}
 
 void SFMLGame::resetAcceptInvite() {
     acceptInvite.clear();

@@ -444,7 +444,8 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             const auto& roomName = "GameRoom" + std::to_string(clientGameRoomId[clientId]);
             receiverOfMessages[clientSocket] = roomName;
             clientStates[clientId] = MenuState::chat;
-            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts", {roomName});
+            std::vector<std::pair<std::string,int>> contactStrings = {{roomName, 0}};
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts",{},contactStrings);
             return;
         }
         else if(actionType == jsonKeys::PLAYER_INFO){
@@ -578,6 +579,24 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             clientStates[clientId] = MenuState::JoinGame;
             handleMenu(clientSocket, clientId, "", true);
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "Bienvenue dans menu choisir GameRoom .");
+            return;
+        }
+        else if(actionType == "AcceptRejoindre"){
+            std::map<std::string,  std::vector<std::string>> active = updateActivePlayerObserver(clientId);
+            auto gameRoom = gameRooms[clientGameRoomId[clientId]];
+            clientStates[clientId] = MenuState::Settings;
+            for (const auto& cId : gameRoom->getPlayers()){
+                auto friends = userManager.getFriendList(clientPseudo[cId]);
+                if (gameRoom->getOwnerId() == cId){
+                    menuStateManager->sendMenuStateToClient(clientIdToSocket[cId], clientStates[cId], "owner", friends, {}, active);
+                }else{
+                    menuStateManager->sendMenuStateToClient(clientIdToSocket[cId], clientStates[cId], "player", friends, {}, active);
+                }
+            }
+
+            for (const auto& observerId : gameRoom->getViewers()) {
+                menuStateManager->sendMenuStateToClient(clientIdToSocket[observerId], clientStates[observerId], "observer", {}, {}, active);
+            }
             return;
         }
     }
@@ -944,7 +963,7 @@ void Server::handleChat(int clientSocket, int clientId, json& receivedData){
         }
     } else {
         receivers[receiver] = pseudoTosocket[receiver];
-        sendMessage = receiverOfMessages[pseudoTosocket[receiver]] == clientPseudo[clientId];
+        sendMessage = (receiverOfMessages[pseudoTosocket[receiver]] == clientPseudo[clientId]);
     }
 
     if(sendMessage && !chat.processClientChat(clientPseudo[clientId], receivers, receivedData)){
@@ -1780,7 +1799,6 @@ void Server::extractDataBetweenSlashes(const std::string& toFind, const std::str
 }
 
 void Server::keyInputChoiceGameRoom(int clientSocket, int clientId, const std::string& action){
-    std::cout << "action Room: " << action << std::endl;
     if (action.find("accept.") == 0){
         std::size_t firstDot = action.find(".");
         std::size_t secondDot = action.find(".", firstDot + 1);
