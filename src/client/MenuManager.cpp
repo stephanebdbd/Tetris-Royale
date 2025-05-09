@@ -500,30 +500,24 @@ void MenuManager::teamsMenu() {
 
 void MenuManager::friendsMenu() {
     // Affichage de l'arrière-plan
-    sfmlGame->displayBackground(textures->chat);
-    
-
-    // Titre du menu
-    Text header("Gestion des amis", font, 30, sf::Color::White, sf::Vector2f(250, 20));
-    header.draw(*window);
-        // Requête au serveur pour les amis si data reçu
+    sfmlGame->displayBackground(textures->friends);
 
     if (buttons->empty()) {
         // Bouton "Ajouter un ami"
         Button addFriendButton("Ajouter un ami", font, 20, sf::Color::White, sf::Color(100, 200, 250),
-                               sf::Vector2f(250, 100), sf::Vector2f(200, 50));
+                               sf::Vector2f(600, 250), sf::Vector2f(200, 50));
         
         // Bouton "Liste des amis"
         Button listFriendsButton("Liste des amis", font, 20, sf::Color::White, sf::Color(70, 180, 100),
-                                 sf::Vector2f(250, 170), sf::Vector2f(200, 50));
+                                 sf::Vector2f(600, 310), sf::Vector2f(200, 50));
         
         // Bouton "Demandes d'amis"
         Button requestsButton("Demandes d'amis", font, 20, sf::Color::White, sf::Color(200, 180, 70),
-                              sf::Vector2f(250, 240), sf::Vector2f(200, 50));
+                              sf::Vector2f(600, 370), sf::Vector2f(200, 50));
 
         // Bouton retour
         Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
-                          sf::Vector2f(250, 310), sf::Vector2f(200, 50));
+                          sf::Vector2f(600, 430), sf::Vector2f(200, 50));
 
         (*buttons)[ButtonKey::AddFriend] = std::make_unique<Button>(addFriendButton);
         (*buttons)[ButtonKey::FriendList] = std::make_unique<Button>(listFriendsButton);
@@ -654,6 +648,7 @@ void MenuManager::friendListMenu() {
         json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network.sendData(j.dump() + "\n", client.getClientSocket());
+        sleep(0.3);client.setCurrentMenuState(MenuState::Friends);
         return;
     }
 }
@@ -707,6 +702,7 @@ void MenuManager::addFriendMenu() {
     if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network.sendData(j.dump() + "\n", client.getClientSocket());
+        sleep(0.3);client.setCurrentMenuState(MenuState::Friends);
         return;
     }
 }
@@ -721,7 +717,7 @@ void MenuManager::friendRequestListMenu() {
     sidebar.draw(*window);
 
     // Titre
-    Text header("Liste d'amis", font, 24, sf::Color::White, sf::Vector2f(20, 10));
+    Text header("Demandes D'amis", font, 20, sf::Color::White, sf::Vector2f(20, 10));
     header.draw(*window);
 
     auto serverData = client.getServerData();
@@ -804,6 +800,7 @@ void MenuManager::friendRequestListMenu() {
         json j;
         j[jsonKeys::ACTION] = jsonKeys::FRIENDS;
         network.sendData(j.dump() + "\n", client.getClientSocket());
+        sleep(0.3);client.setCurrentMenuState(MenuState::Friends);
         return;
     }
 }

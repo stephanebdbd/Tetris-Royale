@@ -27,4 +27,5 @@ const std::string LogoThreePoint = "../../res/logo/dots.png";
 const std::string LogoAccept = "../../res/logo/accept.png";
 const std::string backgroundRejoindre = "../../res/background/rejoindre.png";
 const std::string backgroundTeams = "../../res/background/teams.png";
+const std::string backgroundFriends = "../../res/background/friends.png";
 

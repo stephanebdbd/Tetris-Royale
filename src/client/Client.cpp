@@ -227,36 +227,22 @@ void Client::handleStatefulData(const json& data) {
 
         if (message == jsonKeys::FRIEND_LIST) {
             setAmis(data["data"].get<std::vector<std::string>>());
-            std::cout << "Amis:\n";
-            for (const auto& ami : amis) {
-                std::cout << "Nom: " << ami << '\n';
-            }
         }
 
         if(data.contains("data") && message == jsonKeys::TEAMS_LIST){
             setTeams(data["data"].get<std::vector<std::string>>());
-            std::cout << "TEAMS: " << std::endl;
-            for (const auto& teamName : teams) {
-                std::cout << "Nom: " << teamName << std::endl;
-            }
         }
 
         if (message == "ranking") {
             setRanking(data["secondData"].get<std::map<std::string, std::vector<std::string>>>());
-            std::cout << "Classement mis à jour.\n";
         }
 
         if (message == "player_info") {
             setShow(true);
             setPlayerInfo(data["data"].get<std::vector<std::string>>());
-            std::cout << "Infos joueur :\n";
-            for (const auto& p : PlayerInfo) {
-                std::cout << "Nom: " << p << '\n';
-            }
         }
     }
 
-    std::cout << "MenuState: " << data["state"] << '\n';
     currentMenuState = menuStateManager.deserialize(data["state"]);
     serverData = data;
 }
