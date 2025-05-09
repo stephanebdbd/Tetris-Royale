@@ -66,8 +66,6 @@ class MenuManager {
 
         void displayRoomsMenu();
 
-        void displayRoomsMenu();
-
         void handleTextFieldEvents(sf::Event& event);
 };
 

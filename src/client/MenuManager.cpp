@@ -1093,6 +1093,72 @@ void MenuManager::manageTeamMenu() {
 }
 
 
+void MenuManager::displayRoomsMenu() {
+    // Afficher l'arrière-plan
+    sfmlGame->displayBackground(textures->teams);
+
+    // Barre latérale "Équipes"
+    Rectangle sidebar(sf::Vector2f(0, 0), sf::Vector2f(200, WINDOW_HEIGHT), sf::Color(30, 30, 50), sf::Color(80, 80, 100));
+    sidebar.draw(*window);
+
+    // Titre
+    Text header("My Teams", font, 24, sf::Color::White, sf::Vector2f(20, 10));
+    header.draw(*window);
+
+    // Récupérer les équipes depuis le client
+    auto teams = client.getTeams(); // Supposons que cette méthode retourne une liste d'équipes
+    static std::vector<sf::Texture> avatarTextures(20);
+    const float teamHeight = 50.0f;
+
+    // Affichage des équipes
+    for (std::size_t i = 0; i < std::min(teams.size(), avatarTextures.size()); ++i) {
+        float y = 100 + i * teamHeight;
+
+        if (!sfmlGame->getTEAMSbuttons().count(teams[i])) {
+            sfmlGame->getTEAMSbuttons()[teams[i]] = std::make_unique<Button>(
+                teams[i], font, 20, sf::Color::White, sf::Color::Transparent,
+                sf::Vector2f(0, y), sf::Vector2f(200, teamHeight), sf::Color::Transparent);
+        }
+
+        sfmlGame->getTEAMSbuttons()[teams[i]]->draw(*window);
+    }
+
+    // Gérer les clics sur une équipe
+    for (const auto& [teamName, button] : sfmlGame->getTEAMSbuttons()) {
+        if (button->isClicked(*window)) {
+            sfmlGame->setSelectedTeam(teamName);
+            break;
+        }
+    }
+
+    // Si une équipe est sélectionnée
+    if (!sfmlGame->getSelectedTeam().empty()) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAM;
+        std::string selectedTeam = sfmlGame->getSelectedTeam();
+        j[jsonKeys::TEAM_NAME] = selectedTeam;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        //selectedTeam.clear();
+        return;
+    }
+
+    // Bouton retour
+    if (!(*buttons).count(ButtonKey::Retour)) {
+        (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(
+            textures->logoMain, sf::Vector2f(7, 50), sf::Vector2f(25, 35));
+    }
+    (*buttons)[ButtonKey::Retour]->draw(*window);
+
+    if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
+        json j;
+        j[jsonKeys::ACTION] = jsonKeys::TEAMS;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        sfmlGame->cleanup();
+        return;
+    }
+}
+
+
 // Gestion des champs de texte
 void MenuManager::handleTextFieldEvents(sf::Event& event) {
     for (const auto& [_, field] : *texts) {

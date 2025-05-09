@@ -601,7 +601,7 @@ void SFMLGame::CreateOrJoinGame() {
     // Gérer les clics sur les boutons
     json j;
     if (buttons.count(ButtonKey::Create) && buttons[ButtonKey::Create]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = "choix de mode";
+        j[jsonKeys::ACTION] = "choiceMode";
         network->sendData(j.dump() + "\n", client.getClientSocket());
         return;
     }
@@ -1606,7 +1606,7 @@ std::string SFMLGame::getClickedContact() const {
     return clickedContact;
 }
 
-std::unordered_map<std::string, std::unique_ptr<Button>> SFMLGame::getTEAMSbuttons() const {
+std::unordered_map<std::string, std::unique_ptr<Button>>& SFMLGame::getTEAMSbuttons() {
     return TEAMSbuttons;
 }
 

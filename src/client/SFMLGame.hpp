@@ -143,9 +143,8 @@ class SFMLGame {
         MenuState getPreviousState() const;
         std::vector<json> getMessages() const;
         std::string getClickedContact() const;
-        std::unordered_map<std::string, std::unique_ptr<Button>> getTEAMSbuttons() const;
+        std::unordered_map<std::string, std::unique_ptr<Button>>& getTEAMSbuttons();
 
-        std::unordered_map<std::string, std::unique_ptr<Button>> getTEAMSbuttons() const;
 
         void setSelectedTeam(const std::string& team); 
         void clearSelectedTeam();
