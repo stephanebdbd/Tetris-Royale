@@ -6,7 +6,7 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -fsanitize=address
 
 # Bibliothèques à lier
-LIBS = -lncurses -pthread -fsanitize=address -lsqlite3 -lsodium
+LIBS = -lncurses -pthread -fsanitize=address -lsqlite3
 
 # Fichiers source
 DATA_SRC =    $(wildcard data/*.cpp)

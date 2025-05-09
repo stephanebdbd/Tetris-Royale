@@ -3,12 +3,9 @@
 ClassicMode::ClassicMode(){}
 
 void ClassicMode::featureMode(std::shared_ptr<Game> game, int malusOrBonus){
-
-    std::cout << "Malus or Bonus : " << malusOrBonus << std::endl;
     
     int nbrMalus = getNbrMalus(malusOrBonus); // nombre du malus à envoyer
-    std::cout << "Nbr malus : " << nbrMalus << std::endl;
-
+    
     if(nbrMalus > 0){
         Malus malus(nbrMalus);
         malus.sendMalus(game->getGrid());

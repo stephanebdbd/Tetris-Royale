@@ -10,8 +10,7 @@
 #include <sodium.h>
 
 
-bool Chat::processClientChat(int senderSocket, const std::string& sender, const std::map<std::string, int>& receiver, json& msg) {
-    (void)senderSocket;
+bool Chat::processClientChat(const std::string& sender, const std::map<std::string, int>& receiver, json& msg) {
     try {
         // Toujours remplacer l'expéditeur par le nom authentifié
         msg["sender"] = sender; // Cela garantit que "You" devient "aa" ou le nom d'utilisateur réel
@@ -30,13 +29,6 @@ bool Chat::processClientChat(int senderSocket, const std::string& sender, const 
 }
 
 void Chat::sendMessage(json& msg, const std::map<std::string, int>& receiver) {
-    if(receiver.size() == 1){
-        auto receiverOfMessage = receiver.begin()->first;
-        // Enregistrement du message dans la base de données
-        if (!saveMessage(msg["sender"], receiverOfMessage, msg["message"]))
-            std::cerr << "Failed to save message: " << msg["sender"] << "  : " << msg["message"] << std::endl;
-    }
-
     for (const auto& [receiverName, receiverSocket] : receiver) {
         // Envoi du message au socket du destinataire
         std::string jsonStr = msg.dump() + "\n"; // Convertir le message en chaîne JSON

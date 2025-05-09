@@ -28,10 +28,10 @@ class Chat{
         QueryResult getAllUserMsg(const std::string &id_user);
             
         // thread pour gérer un chat d'un client
-        bool processClientChat(int senderSocket, const std::string& sender, const std::map<std::string, int>& receiver, json& msg) ;
+        bool processClientChat(const std::string& sender, const std::map<std::string, int>& receiver, json& msg);
 
         // envoi d'un message à un client
-        void sendMessage(json& msg, const std::map<std::string, int>& receiver) ;
+        void sendMessage(json& msg, const std::map<std::string, int>& receiver); ;
 
         // envoi des anciennes conversations
         void sendOldMessages(int senderSocket, const std::string& sender, const std::string& receiver);

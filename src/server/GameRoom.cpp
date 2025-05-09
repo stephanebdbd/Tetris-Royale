@@ -81,7 +81,6 @@ bool GameRoom::getSettingsDone() const {
 void GameRoom::createGames(){
     for (int idx = 0; idx < getMaxPlayers(); idx++){
         games.emplace_back(std::make_shared<Game>(10, 20, speed));
-        std::cout << "Game #" << idx << " created at " << games[idx] << std::endl;
     }
 }
 
