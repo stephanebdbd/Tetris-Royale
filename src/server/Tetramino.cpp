@@ -283,7 +283,7 @@ json Tetramino::tetraminoToJson(bool isNext) const {
     }
     else {
         tetraminoJson[jsonKeys::X] = 13;
-        tetraminoJson[jsonKeys::Y] = 4;
+        tetraminoJson[jsonKeys::Y] = 5;
     }
 
     json shapeJson = json::array();

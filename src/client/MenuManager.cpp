@@ -276,7 +276,7 @@ void MenuManager::registerMenu() {
                 std::sqrt(std::pow(mousePos.x - (avatarX + avatarSize / 2), 2) +
                           std::pow(mousePos.y - (currentY + avatarSize / 2), 2)) <= avatarSize / 2) {
                 avatarManager->setSelectedAvatar(static_cast<int>(i)); 
-                std::cout << "Avatar sélectionné : " << avatarManager->getSelectedAvatar() << std::endl;
+                std::cout << "Avatar selectionne : " << avatarManager->getSelectedAvatar() << std::endl;
             }
         }
     }
@@ -330,7 +330,7 @@ void MenuManager::registerMenu() {
 
         int selectedAvatar = avatarManager->getSelectedAvatar();
         if (selectedAvatar < 0 || selectedAvatar >= static_cast<int>(avatarPaths.size())) {
-            sfmlGame->afficherErreur("Veuillez sélectionner un avatar.");
+            sfmlGame->afficherErreur("Veuillez selectionner un avatar.");
             return;
         }
         client.setAvatarIndex(selectedAvatar);
@@ -377,7 +377,7 @@ void MenuManager::rankingMenu(){
 
     auto ranking = client.getRanking();
         if(ranking.empty() ) {
-            std::cout << "Aucun classement trouvé." << std::endl;
+            std::cout << "Aucun classement trouve." << std::endl;
             return;
         }
         int i = 0;
