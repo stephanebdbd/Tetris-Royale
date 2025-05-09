@@ -26,6 +26,11 @@ Avant de compiler et d'exécuter le projet, assurez-vous que les bibliothèques 
 - **SQLite3** pour la gestion de la base de données.
 - **pthread** pour la gestion des threads.
 
+### Commandes pour installer les bibliothèques nécessaires (Linux)
+```bash
+sudo apt update
+sudo apt install libsfml-dev libncurses5-dev libsqlite3-dev g++ make
+
 ## Utilisation
 1. Compilez le code source avec le Makefile situé dans le dossier `build` :
    ```bash
