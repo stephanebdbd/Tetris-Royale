@@ -44,8 +44,6 @@ void Chat::sendOldMessages(int senderSocket, const std::string& sender, const st
     if (!previousMessages.empty() && previousMessages != "[]") {
         send(senderSocket, previousMessages.c_str(), previousMessages.size(), 0);
 
-    } else {
-        std::cout << "Aucun message précédent à envoyer." << std::endl;
     }
 }
 
