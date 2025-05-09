@@ -40,8 +40,6 @@ Mohamed Boutaleb (nº566181)\\
 \and
 Ikram Boutaleb (nº536046)\\
 \and
-Rayan Rabeh (nº576232)\\
-\and
 Oumaima Hamdach (nº568078)\\
 }
 
@@ -56,7 +54,7 @@ December 2024
 
 \section{Introduction}
 
-Le but de ce projet de groupe est de créer une application client-serveur permettant à un utilisateur de jouer au jeu \textit{Tetris Royal}. L'utilisateur aura le choix de jouer en ligne en multi-joueurs ou en solo. Le concept de base du jeu est assez simple à comprendre. En effet, \textit{Tetris} se joue sur une grille de 10x20 cases; des tétriminos apparaissent un par un dans la grille. Le but du joueur est de ne jamais remplir complètement la grille. Pour ce faire, il doit compléter une ou plusieurs lignes horizontales, qui disparaîtront grâce aux tétriminos qui arrivent. Le joueur peut les déplacer horizontalement et les faire pivoter. Une fois qu'une ou plusieurs lignes sont détruites, tous les tétriminos restants descendent d'un ou plusieurs rangs, selon le nombre de lignes détruites. L'utilisateur pourra également marquer des points pour chaque ligne complétée. Des combos apparaîtront lorsqu'au moins deux lignes sont complétées simultanément. (Quatre lignes terminées en un seul coup sont appelées un \textit{Tetris})
+Le but de ce projet de groupe est de créer une application client-serveur permettant à un utilisateur de jouer au jeu \textit{Tetris Royal}. L'utilisateur aura le choix de jouer en local en multi-joueurs ou en solo. Le concept de base du jeu est assez simple à comprendre. En effet, \textit{Tetris} se joue sur une grille de 10x20 cases; des tétriminos apparaissent un par un dans la grille. Le but du joueur est de ne jamais remplir complètement la grille. Pour ce faire, il doit compléter une ou plusieurs lignes horizontales, qui disparaîtront grâce aux tétriminos qui arrivent. Le joueur peut les déplacer horizontalement et les faire pivoter. Une fois qu'une ou plusieurs lignes sont détruites, tous les tétriminos restants descendent d'un ou plusieurs rangs, selon le nombre de lignes détruites. L'utilisateur pourra également marquer des points pour chaque ligne complétée. Des combos apparaîtront lorsqu'au moins deux lignes sont complétées simultanément. (Quatre lignes terminées en un seul coup sont appelées un \textit{Tetris})
 \newline
 \newline 
 Cette application propose de nombreuses autres fonctionnalités en plus du jeu classique de \textit{Tetris}. L'utilisateur pourra non seulement affronter d'autres joueurs ou jouer en solo dans différents modes de jeu plus palpitants les uns que les autres, mais il pourra également discuter avec ses amis ou observer leurs parties et consulter le classement des meilleurs joueurs !
@@ -88,7 +86,7 @@ L'utilisateur peut, s'il le souhaite, quitter le programme, qui se fermera sans 
 
 
 \subsection{Menu Principal}
-Comme représenté par la figure 2, une fois que l'utilisateur s'est connecté ou a créé un compte, il accède à la page du menu principal. Cette page constitue le point central de l'application. En effet, l'utilisateur pourra créer, rejoindre ou observer une partie. Il pourra également consulter sa liste d'amis, visualiser le classement général des meilleurs joueurs, et, enfin, se déconnecter de son compte actif.
+Comme représenté par la figure 2, une fois que l'utilisateur s'est connecté ou a créé un compte, il accède à la page du menu principal. Cette page constitue le point central de l'application. En effet, l'utilisateur pourra jouer (soit créer ou rejoindre une partie). Il pourra également aller dans le menu d'amis, visualiser le classement général des meilleurs joueurs, avoir accès au chat avec ses différents amis, et, enfin, se déconnecter de son compte actif.
 
 
 \begin{figure}[H]
@@ -101,7 +99,7 @@ Comme représenté par la figure 2, une fois que l'utilisateur s'est connecté o
 %Pour Toto, n'oublie de link la section pour le nombre de joueurs par mode.
 
 \subsubsection{Créer une partie}
-L'utilisateur, s'il le souhaite, peut créer une partie. Pour ce faire, il devra configurer les paramètres de la partie. Il aura le choix du mode de jeu et du nombre maximum de joueurs. Il existe quatre modes de jeu différents : Endless, Classic, Duel et Royal Competition. Le nombre maximum de joueurs dépendra du mode de jeu sélectionné. Une fois ces choix effectués, il sera dirigé vers la page du lobby. (voir section...)
+L'utilisateur, s'il le souhaite, peut créer une partie. Pour ce faire, il devra configurer les paramètres de la partie. Il aura le choix du mode de jeu et du nombre maximum de joueurs. Il existe quatre modes de jeu différents : Endless, Classic, Duel et Royal Competition. Le nombre maximum de joueurs dépendra du mode de jeu sélectionné. Tous ces choix effectués se passent dans le lobby. 
 
 \begin{figure}[H]
     \centering
@@ -111,7 +109,7 @@ L'utilisateur, s'il le souhaite, peut créer une partie. Pour ce faire, il devra
 \end{figure}
 
 \subsubsection{Accéder à sa liste d'amis}
-Dans le menu des amis, l'utilisateur aura la possibilité de gérer sa liste d'amis. Il pourra ajouter ou supprimer un ami, discuter via un chat privé et, bien entendu, retourner au menu principal.
+Dans le menu des amis, l'utilisateur aura la possibilité de gérer sa liste d'amis. Il pourra ajouter ou supprimer un ami et bien entendu, retourner au menu principal.
 
 
 \begin{figure}[H]
@@ -129,8 +127,8 @@ Le joueur pourra consulter le classement général des meilleurs joueurs du mode
 
 Si l'utilisateur a reçu une invitation, il pourra rejoindre ou non la partie en tant que joueur ou spectateur, tout dépend du type d'invitation reçu.
 
-\subsubsection{Quitter le programme}
-Quitter ou Se déconnecter.
+\subsubsection{Déconnexion}
+Se déconnecter.
 
 \subsection{Partie de Tetris Royal}
 
@@ -176,7 +174,7 @@ Le jeu Tetris doit offrir une interface utilisateur intuitive et agréable, perm
 \section{Besoins système : Fonctionnels}
 
 \subsection{Gestion des comptes}
-Les comptes créés seront enregistrés dans la base de données avec leurs informations correspondantes par le système. Chaque utilisateur disposera d’un fichier texte contenant son nom d'utilisateur, son mot de passe, sa liste d'amis, ainsi que les discussions avec ces derniers.
+Les comptes créés seront enregistrés dans la base de données avec leurs informations correspondantes par le système. Chaque utilisateur se trouvera dans la base de données SQL possédant: un ID, un pseudonyme, un mot de passe, un meilleur score et un ID d'avatar.
 
 \subsubsection{Connexion à un compte}
 Lorsqu'un utilisateur souhaite se connecter, le système vérifie si le pseudonyme et le mot de passe correspondent grâce aux informations enregistrées dans la base de données.
@@ -195,6 +193,7 @@ Le programme doit également permettre à l'utilisateur de gérer sa liste d'ami
 Si un utilisateur envoie une demande d'amitié à un autre utilisateur et que ce dernier l'accepte, le programme les ajoutera mutuellement en tant qu'amis. Si l'un des deux décide de supprimer l'autre de sa liste d'amis, le serveur cessera de les considérer comme amis.
 \newline
 Toutes les actions d'ajout ou de suppression d'amis sont gérées par le serveur, qui communiquera avec la base de données.
+Chaque amis d'un utilisateur se trouvent dans la base de données.
 
 \subsubsection{Rejoindre une partie}
 Le serveur permettra aux utilisateurs ayant reçu une invitation de rejoindre une partie, soit en tant que joueurs, soit en tant qu'observateurs. Il sera également chargé de déterminer le type d'invitation reçue.
@@ -203,13 +202,13 @@ Le serveur permettra aux utilisateurs ayant reçu une invitation de rejoindre un
 Le programme se ferme lorsque l'utilisateur quitte l'application.
 
 \subsection{Gestion d'une partie}
-Le programme fait en sorte qu'un utilisateur ne voit que son plan de jeu, les pseudos et le score des autres joueurs.
+Le programme fait en sorte qu'un utilisateur ne voit que son plan de jeu, son score, son prochain tetramino et la grille des autres joueurs.
 
 \subsubsection{Apparition des tétraminos}
-Le système fera apparaître des tétraminos de manière aléatoire pour l'utilisateur. Le tétramino actuel se trouvera dans la grille, tandis que les prochains tétraminos seront affichés à côté de l'espace de jeu. Ils apparaîtront en haut de la grille et tomberont progressivement un à un.
+Le système fera apparaître des tétraminos de manière aléatoire pour l'utilisateur. Le tétramino actuel se trouvera dans la grille, tandis que le prochain tétramino sera affiché à côté de l'espace de jeu. Ils apparaîtront en haut de la grille et tomberont progressivement un à un.
 
 \subsubsection{Fin de la partie}
-Lorsque le programme détecte une fin de partie, tous les joueurs recevront un message indiquant le vainqueur ainsi que leurs scores respectifs.
+Lorsque le programme détecte une fin de partie, tous les joueurs recevront un message indiquant s'ils ont gangé ou perdu ainsi que leurs scores respectifs.
 
 
 \section{Besoins système : Non Fonctionnels}
@@ -238,22 +237,59 @@ Pour pouvoir lancer une partie, un joueur devra soit créer un compte soit se co
 \newpage
 \section{Design et fonctionnement du Système}
 
-\subsection{Diagrammes de Classe}
-Cette section représente le diagramme de classe de fonctionnement système
+\subsection{Diagrammes de Classe du serveur}
 
 \begin{figure}[H]
     \centering
-    \caption{Diagramme de classe}
-    \includegraphics[width=0.8\textwidth]{ClassDiagram/classdiag.pdf}
-    \label{Figure 8}
+    \includegraphics[width=0.8\textwidth]{serveur1.png}
 \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{serveur2.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{serveur3.png}
+\end{figure}
+
+\subsection{Diagrammes de Classe du serveur/database}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{data1.png}
+\end{figure}
+
+\subsection{Diagrammes de Classe du client}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{client1.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{client2.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{client3.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{client4.png}
+\end{figure}
+
 
 \subsection{Fonctionnement du système}
 Dans cette partie nous allons présenter les diagrammes des séquences et d'activités qui illustrent le fonctionnement du système et comment ses composants interagissent entre eux.
 
 
 \subsubsection{Création d'un compte}
-Lorsque le joueur veut créer un compte, il va remplir les champs obligatoires (nom d'utilisateur, mot de passe) qui sont montrés par la fenêtre (window). après que le joueur saisit les informations, le controlleur va vérifier si tous les champs sont remplis et si le joueur a bien saisi le nom d'utilisateurs et le mot de passe qui respectent le format général imposé par le système. Ensuite si les données sont valides, le serveur va faire une deuxième vérification qui concerne l'existence du compte ou le nom d'utilisateur, si le compte ou le nom d'utilisateur ne sont pas déjà disponibles sur la base de donnée (Data), les données vont être enregistrées.
+Lorsque le joueur veut créer un compte, il va remplir les champs obligatoires (nom d'utilisateur, mot de passe) qui sont montrés par la fenêtre (window). Après que le joueur saisit les informations, le controlleur va vérifier si tous les champs sont remplis et si le joueur a bien saisi le nom d'utilisateurs et le mot de passe qui respectent le format général imposé par le système. Ensuite si les données sont valides, le serveur va faire une deuxième vérification qui concerne l'existence du compte ou le nom d'utilisateur, si le compte ou le nom d'utilisateur ne sont pas déjà disponibles sur la base de donnée (Data), les données vont être enregistrées.
 au cas où les données ne sont pas valides ou l'inscription est échouée, une message d'erreur va être affichée sur la fenêtre. 
 \begin{figure}[H]
     \centering
@@ -274,7 +310,7 @@ Pour faire une connexion le système va suivre le même sénario de l'inscriptio
 
 \newpage
 \subsubsection{Cycle de jeu - mode Endless}
-Si le joueur décide de créer une partie et il choisit le mode Endless, le GameServer va démarrer le jeu. D'abord le GameServer récupère le meilleur score réalisé par le joueur au cours de toutes ses parties depuis la base de donnée, et puis la fenêtre affiche la grille du jeu avec le meilleur score et avec un tetramino qui apparaît en haut de la grille et qui tombe progressivement. Avant que le tetramino arrive à la base de la grille, le joueur peut le déplacer et le tourner. Après chaque placement du tetramino le GameServer vérifie chaque fois s'il y a une ou plusieurs lignes complètes, si c'est le cas, le score va être augmenter et également la vitesse des tetraminos qui vont arriver après. le même scénario se répète jusqu'à un tetramino touche le haut de la grille et le jeu se termine par l'affichage de le score obtenu dans ce partie et s'il est supérieur au meilleur score, le GameServer l'enregistre dans la base de donnée comme le nouveau meilleur score.
+Si le joueur décide de créer une partie et il choisit le mode Endless, et puis la fenêtre affiche la grille du jeu avec un score à zéro et avec un tetramino qui apparaît en haut de la grille et qui tombe progressivement. Avant que le tetramino arrive à la base de la grille, le joueur peut le déplacer et le tourner. Après chaque placement du tetramino le GameServer vérifie chaque fois s'il y a une ou plusieurs lignes complètes, si c'est le cas, le score va être augmenter et également la vitesse des tetraminos qui vont arriver après. le même scénario se répète jusqu'à un tetramino touche le haut de la grille et le jeu se termine par l'affichage de le score obtenu dans ce partie et s'il est supérieur au meilleur score, le GameServer l'enregistre dans la base de donnée comme le nouveau meilleur score.
 \begin{figure}[H]
     \centering
     \caption{Diagramme de séquence - mode Endless}
@@ -285,7 +321,7 @@ Si le joueur décide de créer une partie et il choisit le mode Endless, le Game
 \newpage
 \subsubsection{Cycle de jeu - mode Classic et Duel}
 
-Le lancement et l'affichage de jeu en mode Classic ou Duel suive les mêmes étapes que mode Endless sauf que le GameServer ne récupère pas le meilleur score parce qu'il n'existe pas dans ces modes. Alors il y a plusieurs joueurs qui jouent en concurrence, chaque joueurs possède sa propre grille avec ses propres tetraminos, lorsque un joueur place un tetramino, le GameServer vérifie s'il y a plus qu'une ligne est complète, si c'est le cas il va augmenter le score de joueur et si en plus il y a un combo le GameServer va envoyer des malus à un des adversaires. à la fin de jeu la fenêtre affiche le gagnant avec les scores, et le Gameserver enregistre ces données en la base de données.
+Le lancement et l'affichage de jeu en mode Classic ou Duel suive les mêmes étapes que mode Endless sauf que le GameServer ne récupère pas le meilleur score parce qu'il n'existe pas dans ces modes. Alors il y a plusieurs joueurs qui jouent en concurrence, chaque joueur possède sa propre grille avec ses propres tetraminos, lorsqu'un joueur place un tetramino, le GameServer vérifie s'il y a plus d'une ligne qui est complète, si c'est le cas il va augmenter le score de joueur et si en plus il y a un combo le GameServer va envoyer des malus à un des adversaires. A la fin du jeu, la fenêtre affiche le gagnant avec les scores et le Gameserver enregistre ces données dans la base de données.
 \begin{figure}[H]
     \centering
     \caption{Diagramme de séquence - mode Classic et Duel}
@@ -296,7 +332,7 @@ Le lancement et l'affichage de jeu en mode Classic ou Duel suive les mêmes éta
 \newpage
 \subsubsection{Cycle de jeu - mode Royal competition}
 
-Ce diagramme est presque le même que du mode classic et duel, La seul différence c'est au niveau d'effectuer des malus. Chaque fois le joueur complète des lignes le GameServer met-à-jour le score et l'énergie de joueur. si il a recueille assez d'énergie, la fenêtre demande à lui de choisir entre malus ou bonus, si le joueur choisit de béneficier d'un bonus le GameServer va l'appliquer, au cas contraire le GameServer va envoyer les malus au adversaire choisi par le joueur. 
+Ce diagramme est presque le même que du mode classic et duel, La seul différence c'est le moyen d'obtenir des malus. Chaque fois le joueur complète des lignes le GameServer met-à-jour le score et l'énergie de joueur. S'il a recueille assez d'énergie, la fenêtre demande à lui de choisir entre malus ou bonus, si le joueur choisit de béneficier d'un bonus le GameServer va l'appliquer, au cas contraire le GameServer va envoyer les malus à l'adversaire choisi par le joueur. 
 \begin{figure}[H]
     \centering
     \caption{Diagramme de séquence - mode Royal competition}
@@ -325,7 +361,7 @@ Ce diagramme décrit le processus de création d’une partie dans Tetris Royale
 \end{figure}
 \newpage
 \subsubsection{L'envoi des malus - mode Classic et Duel}
-Ce diagramme montre le mécanisme de malus dans le mode Classique et le modde Duel du Tetris Royale : lorsque le joueur complète des lignes, le système vérifie leur nombre. Si au moins 2 lignes sont complétées, des malus sont envoyés aux joueur choisis par le système (1 ligne de malus pour 2 lignes complétées, 2 pour 3, et 4 pour 4).Le joueur valide le choix de joueur cible.Si le choix n’est pas validé, le joueur peut sélectionner une autre cible avant l’envoi du malus par le système. 
+Ce diagramme montre le mécanisme de malus dans le mode Classique et le mode Duel du Tetris Royale : lorsque le joueur complète des lignes, le système vérifie leur nombre. Si au moins 2 lignes sont complétées, des malus sont envoyés aux joueurs choisis par le système (1 ligne de malus pour 2 lignes complétées, 2 pour 3, et 4 pour 4).Le joueur valide le choix de joueur cible.Si le choix n’est pas validé, le joueur peut sélectionner une autre cible avant l’envoi du malus par le système. 
 \begin{figure}[H]
     \centering
     \caption{Diagramme d'activité - malus mode Classic et Duel}
@@ -335,7 +371,7 @@ Ce diagramme montre le mécanisme de malus dans le mode Classique et le modde Du
 \newpage
 \subsubsection{L'envoi des malus - mode Royale}
 
-Ce diagramme décrit le mécanisme de malus dans le mode royale de Tetris Royale. Le joueur détruit des blocs pour accumuler de l'énergie. Si l'énergie requise est atteinte ,il choisit une action : octroyer un bonus ou envoyer un malus.
+Ce diagramme décrit le mécanisme de malus dans le mode royale de Tetris Royale. Le joueur détruit des blocs pour accumuler de l'énergie. Si l'énergie requise est atteinte, il choisit une action : octroyer un bonus ou envoyer un malus.
 
 \begin{figure}[H]
     \centering
@@ -377,3 +413,4 @@ Ce diagramme décrit le mécanisme de malus dans le mode royale de Tetris Royale
 
 
 \end{document}
+
