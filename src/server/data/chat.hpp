@@ -14,10 +14,8 @@
 #include "Database.hpp"
 
 class Chat{
-
-    private:
-        std::shared_ptr<DataBase> db;  // Instance de la classe Chat pour interagir avec la base de données
-        bool messagesWaitForDisplay = false;
+    std::shared_ptr<DataBase> db;  // Instance de la classe Chat pour interagir avec la base de données
+    bool messagesWaitForDisplay = false;
 
     public:
         Chat(std::shared_ptr<DataBase> db){ this->db = db;}
