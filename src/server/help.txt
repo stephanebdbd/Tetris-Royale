@@ -30,5 +30,7 @@
         Durant la partie, le viewer utilisera ses touches de gauches et droites pour passer d'un
         plateau de jeu à un autre, jusqu'à ce que celle-ci se termine.
         
+        /back                      Pour quitter le lobby
+        
         
         
