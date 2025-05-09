@@ -268,6 +268,7 @@ void SFMLGame::refreshMenu() {
             break;
         case MenuState::ManageTeams:
             menuManager->chooseTeamMenu();
+            menuManager->chooseTeamMenu();
             break;
         case MenuState::ManageTeam:
             menuManager->manageTeamMenu(selectedTeam);
@@ -279,13 +280,13 @@ void SFMLGame::refreshMenu() {
             //menuManager->listTeamMembersMenu();
             break;
         case MenuState::AddMembre:
-            //addMemberMenu();
+            menuManager->addMemberMenu(selectedTeam);
             break;
         case MenuState::AddAdmin:
-            //addAdminMenu();
+            menuManager->addAdminMenu(selectedTeam);
             break;
-        case MenuState::RoomRequestList:
-            //menuManager->roomRequestListMenu();
+        case MenuState::TeamRequestList:
+            //menuManager->teamRequestListMenu(selectedTeam);
             break;
         case MenuState::QuitRoom:
             //menuManager->quitRoomMenu();

@@ -47,7 +47,7 @@ enum class MenuState {
                     ListTeamMembres,
                     AddMembre,
                     AddAdmin,
-                    RoomRequestList,
+                    TeamRequestList,
                     QuitRoom,
                     ConfirmDeleteRoom,
                     ConfirmQuitRoom,

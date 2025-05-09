@@ -350,6 +350,18 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], jsonKeys::LIST_MEMBERS, members);
             return;
         }
+        else if(actionType == jsonKeys::ADD_MEMBER_MENU) {
+            //gerer l'ajout de membre d'equipe
+            clientStates[clientId] = MenuState::AddMembre;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "addMember");
+            return;
+        }
+        else if(actionType == jsonKeys::ADD_ADMIN_MENU) {
+            //gerer l'ajout d'admin d'equipe
+            clientStates[clientId] = MenuState::AddAdmin;
+            menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "addAdmin");
+            return;
+        }
         else if (actionType == jsonKeys::ADD_MEMBER) {
             //gerer l'ajout de membre d'equipe
             std::string teamName = action[jsonKeys::TEAM_NAME];
@@ -678,7 +690,7 @@ void Server::handleMenu(int clientSocket, int clientId, const std::string& actio
         case MenuState::AddAdmin:
             if(!refreshMenu) keyInputAddAdmin(clientSocket, clientId, action);
             break;
-        case MenuState::RoomRequestList:
+        case MenuState::TeamRequestList:
             if(refreshMenu) sendMenuToClient(clientSocket, menu.getListeRequests(chatRoomsManage.getClientPending(roomName)));
             else keyInputRequestList(clientSocket, clientId, action);
             break;
@@ -1790,7 +1802,7 @@ void Server::keyInputManageTeam(int clientSocket, int clientId, const std::strin
             }
             else if(action == "4") {
                 //les demandes d'ajout
-                clientStates[clientId] = MenuState::RoomRequestList;
+                clientStates[clientId] = MenuState::TeamRequestList;
             }
             //Supression de la room
             else if(action == "5") {

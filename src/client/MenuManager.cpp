@@ -1137,7 +1137,7 @@ void MenuManager::manageTeamMenu(const std::string& teamName) {
     }
 
     if ((*buttons)[ButtonKey::AddMember]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::ADD_MEMBER;
+        j[jsonKeys::ACTION] = jsonKeys::ADD_MEMBER_MENU;
         j[jsonKeys::TEAM_NAME] = sfmlGame->getSelectedTeam();
     
         network.sendData(j.dump() + "\n", client.getClientSocket());
@@ -1145,7 +1145,7 @@ void MenuManager::manageTeamMenu(const std::string& teamName) {
     }
 
     if ((*buttons)[ButtonKey::AddAdmin]->isClicked(*window)) {
-        j[jsonKeys::ACTION] = jsonKeys::ADD_ADMIN;
+        j[jsonKeys::ACTION] = jsonKeys::ADD_ADMIN_MENU;
         j[jsonKeys::TEAM_NAME] = sfmlGame->getSelectedTeam();
         network.sendData(j.dump() + "\n", client.getClientSocket());
         return;
@@ -1178,5 +1178,118 @@ void MenuManager::manageTeamMenu(const std::string& teamName) {
 void MenuManager::handleTextFieldEvents(sf::Event& event) {
     for (const auto& [_, field] : *texts) {
         field->handleInput(event);
+    }
+}
+
+
+void MenuManager::addMemberMenu(const std::string& teamName) {
+        // Afficher l'arrière-plan
+        sfmlGame->displayBackground(textures->teams);
+
+        // Titre principal
+        Text title("Ajouter un membre à la Team", font, 40, sf::Color::White, sf::Vector2f(550, 100));
+        title.draw(*window);
+    
+        // Slogan ou aide en dessous du titre
+        Text subtitle("Entrer le nom du Membre", font, 18, sf::Color::Black, sf::Vector2f(610, 150));
+        subtitle.draw(*window);
+    
+        // Création du champ de texte si pas encore fait
+        if (texts->empty()) {
+            TextField teamNameField(font, 20, sf::Color::Black, sf::Color::White,
+                                   sf::Vector2f(600, 450), sf::Vector2f(350, 40), "Nom de Team");
+            (*texts)[TextFieldKey::TeamNameField] = std::make_unique<TextField>(teamNameField);
+        }
+    
+        // Création des boutons si pas encore fait
+        if (buttons->empty()) {
+            Button createButton("Ajouter", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                                               sf::Vector2f(600, 510), sf::Vector2f(170, 45));
+    
+            Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                                                sf::Vector2f(780, 510), sf::Vector2f(170, 45));
+    
+            (*buttons)[ButtonKey::AddMember] = std::make_unique<Button>(createButton);
+            (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(backButton);
+        }
+    
+        // Dessin des éléments
+        sfmlGame->drawTextFields();
+        sfmlGame->drawButtons();
+    
+        json j;
+        // Traitement du bouton "Créer"
+        if ((*buttons)[ButtonKey::AddMember]->isClicked(*window) && !(*texts)[TextFieldKey::TeamNameField]->getText().empty()) {
+            std::string member = (*texts)[TextFieldKey::TeamNameField]->getText();
+            j[jsonKeys::ACTION] = jsonKeys::ADD_MEMBER;
+            j[jsonKeys::TEAM_NAME] = teamName;
+            j[jsonKeys::MEMBER] = member;
+            network.sendData(j.dump() + "\n", client.getClientSocket());
+            //afficherErreur("Équipe créée : " + teamName);
+            (*texts)[TextFieldKey::TeamNameField]->clear();
+            return;
+        }
+    
+        // Traitement du bouton "Retour"
+        if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
+            j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAM;
+            network.sendData(j.dump() + "\n", client.getClientSocket());
+            client.setCurrentMenuState(MenuState::ManageTeam);
+            return;
+        }
+}
+
+void MenuManager::addAdminMenu(const std::string& teamName) {
+    // Afficher l'arrière-plan
+    sfmlGame->displayBackground(textures->teams);
+
+    // Titre principal
+    Text title("Ajouter un admin à la Team", font, 40, sf::Color::White, sf::Vector2f(550, 100));
+    title.draw(*window);
+
+    // Slogan ou aide en dessous du titre
+    Text subtitle("Entrer le nom de l'admin", font, 18, sf::Color::Black, sf::Vector2f(610, 150));
+    subtitle.draw(*window);
+
+    // Création du champ de texte si pas encore fait
+    if (texts->empty()) {
+        TextField teamNameField(font, 20, sf::Color::Black, sf::Color::White,
+                               sf::Vector2f(600, 450), sf::Vector2f(350, 40), "Nom de Team");
+        (*texts)[TextFieldKey::TeamNameField] = std::make_unique<TextField>(teamNameField);
+    }
+
+    // Création des boutons si pas encore fait
+    if (buttons->empty()) {
+        Button createButton("Ajouter", font, 20, sf::Color::White, sf::Color(70, 170, 250),
+                                           sf::Vector2f(600, 510), sf::Vector2f(170, 45));
+
+        Button backButton("Retour", font, 20, sf::Color::White, sf::Color(180, 70, 70),
+                                            sf::Vector2f(780, 510), sf::Vector2f(170, 45));
+
+        (*buttons)[ButtonKey::AddAdmin] = std::make_unique<Button>(createButton);
+        (*buttons)[ButtonKey::Retour] = std::make_unique<Button>(backButton);
+    }
+
+    // Dessin des éléments
+    sfmlGame->drawTextFields();
+    sfmlGame->drawButtons();
+
+    json j;
+    // Traitement du bouton "Créer"
+    if ((*buttons)[ButtonKey::AddAdmin]->isClicked(*window) && !(*texts)[TextFieldKey::TeamNameField]->getText().empty()) {
+        std::string admin = (*texts)[TextFieldKey::TeamNameField]->getText();
+        j[jsonKeys::ACTION] = jsonKeys::ADD_ADMIN;
+        j[jsonKeys::TEAM_NAME] = teamName;
+        j[jsonKeys::ADMIN] = admin;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        (*texts)[TextFieldKey::TeamNameField]->clear();
+        return;
+    }
+    // Traitement du bouton "Retour"
+    if ((*buttons)[ButtonKey::Retour]->isClicked(*window)) {
+        j[jsonKeys::ACTION] = jsonKeys::MANAGE_TEAM;
+        network.sendData(j.dump() + "\n", client.getClientSocket());
+        client.setCurrentMenuState(MenuState::ManageTeam);
+        return;
     }
 }

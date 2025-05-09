@@ -88,6 +88,8 @@ namespace jsonKeys {
     constexpr char LIST_MEMBERS[] = "list_members";
     constexpr char ADD_MEMBER[]= "add_member";
     constexpr char ADD_ADMIN[] = "add_admin";
+    constexpr char ADD_MEMBER_MENU[] = "addMemberMenu";
+    constexpr char ADD_ADMIN_MENU[] = "addAdminMenu";
     constexpr char JOIN_REQUESTS[] = "join_requests";
     constexpr char DELETE_ROOM[] = "delete_room";
     constexpr char TEAMS_LIST[] = "teamsList";
@@ -105,6 +107,8 @@ namespace jsonKeys {
     constexpr char ROYAL[] = "RoyaleMode";
     constexpr char REJOINDRE[] = "Rejoindre";
     constexpr char ACCEPT_REJOINDRE[] = "AcceptRejoindre";
+    constexpr char MEMBER[] = "member";
+    constexpr char ADMIN[] = "admin";
 }
 
 #endif

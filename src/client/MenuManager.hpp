@@ -61,6 +61,9 @@ class MenuManager {
         void joinTeamMenu();
         void manageTeamMenu(const std::string& teamName);
         void chooseTeamMenu();
+        void addMemberMenu(const std::string& teamName);
+        void addAdminMenu(const std::string& teamName);
+        void teamRequestListMenu(const std::string& teamName);
         
         //chat
         void chatMenu();
