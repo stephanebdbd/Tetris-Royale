@@ -16,9 +16,10 @@
 #include <regex>
 #include <sodium.h>
 #include"Database.hpp"
+
+
 class ChatRoom {
-    private:
-        std::shared_ptr<DataBase> db; // Base de données partagée pour interagir avec le serveur
+    std::shared_ptr<DataBase> db; // Base de données partagée pour interagir avec le serveur
     
     public:
         // Constructeur avec un pointeur partagé sur la base de données
