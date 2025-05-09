@@ -118,14 +118,14 @@ void MenuManager::mainMenu() {
     // Ajouter les boutons s'ils n'existent pas
     if (buttons->empty()) {
         // Boutons principaux
-        (*buttons)[ButtonKey::Play] = std::make_unique<Button>("Play", font, 26, text, background,
+        (*buttons)[ButtonKey::Play] = std::make_unique<Button>("Jouer", font, 26, text, background,
             sf::Vector2f(centerX - buttonWidth / 2.0f, y),  // un peu plus bas
             sf::Vector2f(buttonWidth, buttonHeight), outline);
         (*buttons)[ButtonKey::Chat] = std::make_unique<Button>("Chat", font, 26, text, background,
             sf::Vector2f(centerX + (buttonWidth/2.0f + spacing) , y-decallage),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
 
-        (*buttons)[ButtonKey::Ranking] = std::make_unique<Button>("Ranking", font, 26, text, background,
+        (*buttons)[ButtonKey::Ranking] = std::make_unique<Button>("Classement", font, 26, text, background,
             sf::Vector2f(centerX + 2 * spacing + 1.5f*buttonWidth , y- 2.0f *decallage),
             sf::Vector2f(buttonWidth, buttonHeight), outline);
         
@@ -133,7 +133,7 @@ void MenuManager::mainMenu() {
             sf::Vector2f(centerX - (buttonWidth * 1.5f + spacing ), y - decallage),  // symétrique à Chat
             sf::Vector2f(buttonWidth, buttonHeight), outline);
         
-        (*buttons)[ButtonKey::Friends] = std::make_unique<Button>("Friends", font, 26, text, background,
+        (*buttons)[ButtonKey::Friends] = std::make_unique<Button>("Amis", font, 26, text, background,
             sf::Vector2f(centerX - (2.5f * buttonWidth + 2 * spacing), y - 2.0f * decallage),  // symétrique à Ranking
             sf::Vector2f(buttonWidth, buttonHeight), outline);
             
