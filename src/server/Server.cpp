@@ -443,7 +443,7 @@ void Server::handleGUIActions(int clientSocket, int clientId, const json& action
             const auto& roomName = "GameRoom" + std::to_string(clientGameRoomId[clientId]);
             receiverOfMessages[clientSocket] = roomName;
             clientStates[clientId] = MenuState::chat;
-            std::vector<std::pair<std::string,int>> contactStrings = {{roomName, 0}};
+            std::vector<std::pair<std::string,int>> contactStrings = {{roomName, -1}};
             menuStateManager->sendMenuStateToClient(clientSocket, clientStates[clientId], "contacts",{},contactStrings);
             return;
         }
