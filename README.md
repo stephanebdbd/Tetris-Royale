@@ -12,7 +12,7 @@
 
 ## Introduction
 
-This project is a Tetris game developed by our team for the **INFO-F209** course. We are proud to announce that this project received a grade of **17/20**.
+This project is a Tetris game developed by our team for the INFO-F209 course, part of the 2nd year of the Bachelor in Computer Science at the Free University of Brussels (ULB) during the 2024-2025 academic year. We are proud to announce that this project received a grade of 17/20.
 
 The game is designed to replicate the classic Tetris experience, featuring interactive gameplay, a scoring system, and various difficulty levels. It is developed in C++ following Object-Oriented Programming (OOP) practices.
 
