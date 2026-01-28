@@ -196,3 +196,5 @@ In **Classic** mode, players play competitively but with a different penalty mec
 * **Valentin Dias**
 
 ## License
+
+MIT License
